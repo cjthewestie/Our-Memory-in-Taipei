@@ -172,6 +172,29 @@
   // 3x phone does not render 9x the pixels of a laptop
   const IS_PHONE = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth < 768;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, IS_PHONE ? 1.5 : 2));
+  // Canvas textures at half size on a phone (CJ, 2026-09-25: 「載很久」, then the Dihua and Xinyi
+  // roads black with the lantern shadows on them). The three sign atlases alone were 2048 x 4096,
+  // 2048 x 4096 and 2048 x 2048: 230 MB of 2D canvas and 57.6 million texels for the GPU at load.
+  // iOS Safari caps a page's canvas memory well under that, and a texture uploaded after the cap
+  // (the road's Dihua and Xinyi maps go up at the era flip, not at load) came out blank, so those
+  // roads rendered black but for their sheen. On a phone the atlases are painted at TEX_SCALE
+  // through a scale transform (scene-*.js SIGNS: layout and UVs unchanged) and the library's
+  // text signs are shrunk here, the full-size canvas released at once.
+  const TEX_SCALE = IS_PHONE ? 0.5 : 1;
+  function shrink(cv) {
+    if (TEX_SCALE >= 1 || !cv || !cv.width || cv.width * cv.height < 256 * 256) return cv;
+    const out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(cv.width * TEX_SCALE)); out.height = Math.max(1, Math.round(cv.height * TEX_SCALE));
+    const g = out.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.drawImage(cv, 0, 0, out.width, out.height);
+    cv.width = cv.height = 0;                                        // give its canvas memory back now, not at the next GC
+    return out;
+  }
+  if (window.NostalgiaCore) window.NostalgiaCore.shrink = shrink;   // the library's text signs (assets-core.js textTexture)
+  // Shader error checks off unless ?debug=1: with them on, three reads every program's info log
+  // the moment it is created, which makes the browser finish compiling and linking it right there,
+  // one program after another. Forty-odd programs made the first frame the slowest part of loading.
+  renderer.debug.checkShaderErrors = new URLSearchParams(location.search).get('debug') === '1';
   renderer.outputEncoding = THREE.LinearEncoding; // gamma is applied at the end of the post pass
   // tone mapping (issue #3 step 1): the ACES filmic curve on the renderer. In this r149 build the
   // renderer's tone mapping runs on the offscreen draw as well (only outputEncoding is gated on
@@ -279,6 +302,26 @@
   pmrem.compileEquirectangularShader();
   scene.environment = pmrem.fromEquirectangular(skyEnv).texture;
   pmrem.dispose(); skyEnv.dispose();
+
+  // stripGeo(make, n, step): n copies of make()'s geometry laid end to end down -z, `step` apart and
+  // centred on 0, merged into one indexed geometry (one draw call). Each copy keeps its own UVs.
+  function stripGeo(make, n, step) {
+    const parts = [], attrs = {}, index = [];
+    let base = 0;
+    for (let i = 0; i < n; i++) {
+      const g = make(); g.translate(0, 0, (n * step) / 2 - step / 2 - i * step); parts.push(g);
+    }
+    Object.keys(parts[0].attributes).forEach(k => { attrs[k] = []; });
+    parts.forEach(g => {
+      Object.keys(attrs).forEach(k => { const a = g.attributes[k].array; for (let j = 0; j < a.length; j++) attrs[k].push(a[j]); });
+      const ix = g.index.array; for (let j = 0; j < ix.length; j++) index.push(ix[j] + base);
+      base += g.attributes.position.count; g.dispose();
+    });
+    const out = new THREE.BufferGeometry();
+    Object.keys(attrs).forEach(k => out.setAttribute(k, new THREE.Float32BufferAttribute(attrs[k], parts[0].attributes[k].itemSize)));
+    out.setIndex(index);
+    return out;
+  }
 
   // ── ground, road, river ──────────────────────────────────────────────────────
   const flat = (w, d, col, x, y, z) => {
@@ -485,13 +528,17 @@
   // ── STREET DETAIL ────────────────────────────────────────────────────────────
   // sidewalks and curbs
   const walkX = GRID.roadWidth / 2 + 1.6;
+  // In 12-unit pieces merged into one mesh, four concrete tiles each, for the same reason as the
+  // road: one 620-unit box put v at 207 at the Xinyi end, past what a phone's texture unit resolves.
+  const WALK_SEG = 12, WALK_N = 52;                                    // 624 units, 2 past the road at each end
+  const walkGeo = aoBake(stripGeo(() => new THREE.BoxGeometry(3.2, 0.22, WALK_SEG), WALK_N, WALK_SEG));
   [-1, 1].forEach(s => {
-    const m = new THREE.Mesh(boxGeo, withFog(lit({ color: C('walk'), surface: 'concrete' })));
-    m.position.set(s * walkX, 0, -200); m.scale.set(3.2, 0.22, 620); scene.add(m);
-    fitTile(m.material, 3.2, 620);                                     // the top face is the one seen: u along x, v along z
+    const m = new THREE.Mesh(walkGeo, withFog(lit({ color: C('walk'), surface: 'concrete' })));
+    m.position.set(s * walkX, 0, -200); scene.add(m);
+    fitTile(m.material, 3.2, WALK_SEG);                                // the top face is the one seen: u along x, v along z
   });
   // road surface pattern: dirt at first, then a painted centre line — drawn to a canvas, repeated
-  // The canvas is one 12 x 10 unit stretch of road (repeat 1 x 62), so the asphalt family's tile
+  // The canvas is one 12 x 10 unit stretch of road (one tile of the road mesh), so the asphalt family's tile
   // (TILE units square) is drawn 32 x 77 px here, multiplied over the base colour. Seeded, like the
   // library's own surfaces, so the speckle is the same every load.
   const texRnd = (() => { let a = 3; return () => { a = (a + 0x6D2B79F5) | 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t = (t + Math.imul(t ^ (t >>> 7), t | 61)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
@@ -509,7 +556,7 @@
     if (kind === 'dirt') { for (let i = 0; i < 260; i++) { g.fillStyle = 'rgba(10,12,16,0.35)'; g.fillRect(texRnd() * 128, texRnd() * 256, 2, 2); } }
     if (kind === 'tram') { g.fillStyle = PALETTE.ink; g.fillRect(40, 0, 3, 256); g.fillRect(85, 0, 3, 256); }
     if (kind === 'lines') { g.fillStyle = PALETTE.bone; g.fillRect(62, 20, 4, 90); g.fillRect(6, 0, 3, 256); g.fillRect(119, 0, 3, 256); }
-    const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 62); t.anisotropy = 8;
+    const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;   // repeat 1 x 1: the road mesh is one tile per 10 units (below)
     return t;
   }
   const roadMaps = { red: roadTexture('dirt'), dadao: roadTexture('plain'), tower: roadTexture('lines') }; // Dihua Street: plain asphalt, no tram, no centre line
@@ -517,8 +564,11 @@
   roadMesh.material.map = roadMaps.red; roadMesh.material.needsUpdate = true;
   // (issue #3 step 4) the road is eight strips across so its vertex colours can darken the outer
   // 2.5 units toward the kerbs, where the walls and the sidewalks meet it
+  // It is also 62 separate 10-unit tiles, each with its own 0..1 texture coordinates, not one
+  // plane with the map repeated 62 times: at the Xinyi end v ran to 40-62, more than a phone GPU's
+  // texture coordinates resolve cleanly. A desktop GPU hides it; a phone may not.
   roadMesh.geometry.dispose();
-  roadMesh.geometry = new THREE.PlaneGeometry(GRID.roadWidth, 620, 8, 1); roadMesh.geometry.rotateX(-Math.PI / 2);
+  roadMesh.geometry = stripGeo(() => new THREE.PlaneGeometry(GRID.roadWidth, 10, 8, 1).rotateX(-Math.PI / 2), 62, 10);
   (() => {
     const pos = roadMesh.geometry.attributes.position, col = new Float32Array(pos.count * 3);
     for (let i = 0; i < pos.count; i++) {
@@ -791,7 +841,7 @@
   // lam(col, extra?)                            lit() by palette key, surface family chosen from the key
   // aoBake(geo)                                 bakes the height-rule occlusion into a geometry's vertex colours (part and instSet do it)
   // people(items)                               pedestrians through instSet: { x, z, y?, r?, v?, h:{red,dadao,tower} }, h = figure height
-  window.SCENE = { part, instSet, only, C, boxGeo, withFog, lit, lam, aoBake, scene, GRID, ERAS, anchors, PALETTE, rnd, TOWER, walkX, libGroup, asset, findAsset, people, rise };
+  window.SCENE = { part, instSet, only, C, boxGeo, withFog, lit, lam, aoBake, scene, GRID, ERAS, anchors, PALETTE, rnd, TOWER, walkX, libGroup, asset, findAsset, people, rise, shrink, TEX_SCALE };
   window.SCENE.camera = camera;   // issue #17: photos.js projects its street markers with the scroll camera; it only reads it
 
 
@@ -1331,6 +1381,23 @@
   // (index.html, style.css .hud-guide) is a swipe-up arrow over the opening screen, no dim, display: none except under 480px.
   // Its opacity follows the fog, so it clears in the same window and is gone by OPENING.fogTo.
   const guideEl = document.getElementById('guide');
+  // Where it stands: centred in the gap between the sub line and the music bar, measured, because
+  // the title is centred on the screen and the bar is pinned to the bottom, so the gap moves with
+  // every phone's height. Too small for arrow and word → .tight, the arrow alone.
+  function placeGuide() {
+    if (!guideEl || getComputedStyle(guideEl).display === 'none') return;
+    const sub = openEl && openEl.querySelector('.op-sub'), mus = document.getElementById('music');
+    if (!sub || !mus) return;
+    const a = sub.getBoundingClientRect().bottom, b = mus.getBoundingClientRect().top, gap = b - a;
+    const tight = gap < 64, h = tight ? 44 : 60;
+    guideEl.classList.toggle('tight', tight);
+    guideEl.style.setProperty('--guide-top', Math.round(a + Math.max(0, (gap - h) / 2)) + 'px');
+  }
+  placeGuide();
+  window.addEventListener('resize', placeGuide);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeGuide);
+  window.addEventListener('load', placeGuide);
+  if (window.ResizeObserver && document.getElementById('music')) new ResizeObserver(placeGuide).observe(document.getElementById('music'));   // a long song title wraps the bar taller
   const fogCol = new THREE.Color(), boneCol = C('bone'), inkCol = C('ink'), titleCol = new THREE.Color();
   // CJ, 2026-09-24: 「不然先給opening 一個復古色調的背景」. The opening fog carries a warm faded-print
   // tone instead of plain bone, strongest at scroll 0 and gone with the fog by OPENING.fogTo, so
@@ -1463,6 +1530,9 @@
     renderer.compile(scene, camera);
     renderer.setRenderTarget(rt); renderer.render(scene, camera); renderer.setRenderTarget(null);
     vis.forEach(([o, v]) => { o.visible = v; });
+    // the road carries one map per era and only the current one is drawn above: upload the other
+    // two now, at load, rather than at the era flip deep in the page when memory is tightest
+    if (renderer.initTexture) Object.values(roadMaps).forEach(t => renderer.initTexture(t));
     warm = { ms: Math.round(performance.now() - t0), programs: renderer.info.programs.length, textures: renderer.info.memory.textures };
   }
   const NOWARM = new URLSearchParams(location.search).get('nowarm') === '1';
@@ -1508,10 +1578,11 @@
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
     renderer.render(postScene, postCam);
+    if (booting) { booting = false; document.body.classList.remove('booting'); }   // the canvas has a frame: the boot screen can go
     frameMs += (performance.now() - rafNow - frameMs) * 0.05;       // the frame's own CPU time (update + draw submission), smoothed; a cost the display cap cannot hide (issue #19)
     requestAnimationFrame(frame);
   }
-  let frameMs = 0;
+  let frameMs = 0, booting = document.body.classList.contains('booting');
 
   // ── demo insurance: ?year=1930 jumps straight there, no damping, fog already cleared ──
   function jumpToYear(y) {
@@ -1539,6 +1610,10 @@
   // The first frame does the one-time work (shadow flags, warm-up), so it must not run before the
   // scene files have built: the parser may yield to a frame between two script tags, and it did
   // once the environment map was generated at load. DOMContentLoaded fires after the last script.
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(frame));
-  else requestAnimationFrame(frame);
+  // Two animation frames, not one: a rAF callback runs before the paint of its own frame, so the
+  // first frame's compile would otherwise block the boot screen (style.css body.booting) from
+  // ever being painted. The first one lets the title reach the screen; the second starts the loop.
+  const start = () => requestAnimationFrame(() => requestAnimationFrame(frame));
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();
