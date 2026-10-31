@@ -30,6 +30,7 @@ Open it: `python3 -m http.server 8000` in the repo, then http://localhost:8000/i
 
 ## CJ's decisions (quoted, so nobody re-litigates them)
 
+- 2026-10-31: "Yes, merge it in" — to "Make your lantern square the main Taipei page?". The page opens on the walkable square with three gates and visitor lanterns; the scroll film is the Guided tour. This replaces "one verb: scroll" for the entry, and the girl may now be steered on the road in walk mode; the no-traffic rule still holds.
 - 2026-09-20: "first 1 to ximen red house, second be dadaocheng, third taipei 101, all in english" — three chapters, English copy, Chinese only as the small secondary name.
 - 2026-09-20: "FIRST THE MEMORY OF OUR CHILDHOOD, WE FEEL HAPPINESS, WE FEEL NOSTALGIA … SECOND PART, DAODACHENG SPRING FESTIVAL, WE GROW OLDER, WE HAVE RESPONSIBILITY, WE BUILD THING, THIRD PART THE FUTURE, WHERE WE GO" — the word list in `data.js` `WORDS` follows this.
 - 2026-09-20: "ALSO NEED A GIRL RUNNING IN THE CENTER WHEN I SCROLLING" — the girl runs when you scroll and slows to a walk when you stop.
