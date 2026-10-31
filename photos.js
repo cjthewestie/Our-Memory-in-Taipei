@@ -106,7 +106,7 @@
   SPOTS.forEach(s => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'spot'; b.dataset.id = s.id;
-    b.setAttribute('aria-label', 'Photograph of ' + s.en + ' ' + s.zh);
+    b.setAttribute('aria-label', 'Photograph of ' + s.en + ' ' + s.zh + ', ' + s.tag);   // a11y: the label ends with the visible year tag
     b.innerHTML = '<span class="spot-ring"></span><span class="spot-dot"></span><span class="spot-tag">' + esc(s.tag) + '</span>';
     b.hidden = true;
     b.addEventListener('click', e => { e.preventDefault(); open(s, b); });

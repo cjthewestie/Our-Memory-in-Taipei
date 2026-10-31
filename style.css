@@ -316,7 +316,7 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
    instead of drifting apart, and the transparency taken out of the small lines (a dim colour beats
    a faded one — it keeps its edge). No shadows, no outlines, no panels. The big words are not
    chrome; they are the page's voice, and keep their own bone-and-shadow treatment. */
-:root { --hud-fg: #241d18; --hud-dim: #5a4a3e; --hud-faint: rgba(36,29,24,0.28); }
+:root { --hud-fg: #241d18; --hud-dim: #3b3028; --hud-faint: rgba(36,29,24,0.28); }   /* a11y 2026-11-01: dim was #5a4a3e, 3.0:1 over mid-tone streets; #3b3028 keeps it a step below the ink */
 .hud-chapter, .hud-year, .hud-title, .hud-music,
 .hud-chapter *, .hud-year *, .hud-title *, .hud-music * { color: var(--hud-fg); text-shadow: none; }
 .chap-years, .chap-of, .hud-year-k, .mus-k, .hud-title span { color: var(--hud-dim); opacity: 1; }
@@ -370,7 +370,7 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
 .mus-play svg { width: 9px; height: 9px; fill: currentColor; display: block; }
 .mus-play .ic-pause, .hud-music.playing .mus-play .ic-play { display: none; }
 .hud-music.playing .mus-play .ic-pause { display: block; }
-.mus-time { flex: none; min-width: 2.6em; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: none; font-variant-numeric: tabular-nums; color: var(--hud-dim); }
+.mus-time { flex: none; min-width: 2.6em; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: none; font-variant-numeric: tabular-nums; color: var(--hud-fg); }   /* a11y: the dim tone fell to 4.47:1 under the times */
 #musNow { text-align: right; }
 .mus-scrub { position: relative; flex: 1; height: 22px; cursor: pointer; touch-action: none; outline: none; }
 .mus-scrub::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--hud-faint); }
@@ -378,6 +378,7 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
 .mus-knob { position: absolute; left: 0; top: 50%; width: 2px; height: 9px; margin: -4.5px 0 0 -1px; background: var(--hud-fg); border-radius: 1px; transition: height 120ms ease, margin 120ms ease; }
 .mus-scrub:hover .mus-knob, .hud-music.scrubbing .mus-knob { height: 13px; margin-top: -6.5px; }
 .mus-scrub:focus-visible::before { background: var(--hud-fg); }
+.mus-scrub:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; border-radius: 3px; }   /* a11y: the slider shows a ring like the buttons */
 .hud-music.scrubbing { user-select: none; -webkit-user-select: none; }
 @media (max-width: 480px) { .mus-bar { gap: 8px; } .mus-track { font-size: 12px; } }
 
@@ -390,3 +391,13 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
   .hud-music .mus-mute { min-height: 44px; padding-top: 0; padding-bottom: 0; }
   .hud-music button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 }
+
+/* a11y: prefers-reduced-motion. The letter reveals, slides and fades land at once; app.js holds the camera
+   still and drops the particles, memories.js hangs the lanterns still. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; transition-delay: 0s !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
+/* a11y: the lamp ring alone is faint on the pale daylight street, so every chrome control's ring is two-tone,
+   an ink band inside the lamp outline */
+.hud-music button:focus-visible, .mus-scrub:focus-visible, .wk-btn:focus-visible, #photoCreditsBtn:focus-visible,
+.mem-bubble:focus-visible { box-shadow: 0 0 0 4px var(--ink); }

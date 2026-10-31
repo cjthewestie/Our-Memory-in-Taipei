@@ -178,6 +178,11 @@
   bubble.type = 'button'; bubble.hidden = true;
   bubble.innerHTML = '<span class="mem-b-k">A memory</span><span class="mem-b-key">E</span>';
   let nearest = null;
+  // a11y: the element that had focus when a card or the form opened gets it back when it closes
+  let opener = null;
+  const remember = () => { const a = document.activeElement; if (a && a !== document.body && !panel.contains(a) && !form.contains(a)) opener = a; };
+  const giveBack = () => { const o = opener; opener = null; if (o && o.isConnected && !o.hidden && o.offsetParent !== null) o.focus({ preventScroll: true }); };
+  const REDUCED = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   bubble.addEventListener('click', () => { if (nearest) openRead(nearest.m); });
 
   const panel = el('aside', 'mem-panel', document.body); panel.hidden = true;
@@ -191,7 +196,7 @@
   const pNote = el('div', 'mem-note', pBody);
   pClose.addEventListener('click', closeRead);
   function openRead(m) {
-    closeForm();
+    remember(); if (!form.hidden) { form.hidden = true; }
     pK.textContent = (m.year ? m.year + ' · ' : '') + (PLACE[m.section] || '');
     pText.textContent = m.body;
     pBy.textContent = '— ' + (m.name && m.name.trim() ? m.name.trim() : 'someone who was there');
@@ -200,7 +205,7 @@
     pFig.hidden = !u; if (u) pImg.src = u; else pImg.removeAttribute('src');
     panel.hidden = false; pClose.focus({ preventScroll: true });
   }
-  function closeRead() { panel.hidden = true; }
+  function closeRead() { if (panel.hidden) return; panel.hidden = true; giveBack(); }
 
   // the form
   const form = el('form', 'mem-form', document.body); form.hidden = true; form.noValidate = true;
@@ -220,7 +225,7 @@
       '</div>' +
       '<label class="mem-hp" aria-hidden="true">Leave this empty <input name="website" type="text" tabindex="-1" autocomplete="off"></label>' +
       '<label class="mem-consent"><input name="ok" type="checkbox" required> <span>I’m happy for this to be shown publicly on this page. It names no one who hasn’t agreed and shares nobody’s private details.</span></label>' +
-      '<p class="mem-status" role="status" aria-live="polite"></p>' +
+      '<p class="mem-status" id="memStatus" role="status" aria-live="polite"></p>' +
       '<div class="mem-actions"><button type="submit" class="wk-btn primary">Hang my lantern</button></div>' +
       '<p class="mem-fine"></p>' +
     '</div>';
@@ -237,7 +242,7 @@
   let spot = null, openedAt = 0, lastSent = 0;
   function openForm() {
     if (!WALK.on) return;
-    closeRead();
+    remember(); panel.hidden = true;
     const p = WALK.pos, where = WALK.where;
     // just in front of her, so the lantern hangs where she is looking
     let x = p.x - Math.sin(p.h) * 1.6, z = p.z - Math.cos(p.h) * 1.6;
@@ -246,26 +251,30 @@
     const yr = YEARS[where];
     F.where.textContent = PLACE[where];
     F.year.min = 1900; F.year.placeholder = yr[0] + '–' + Math.min(yr[1], THIS_YEAR);
-    F.status.textContent = ''; F.status.classList.remove('ok'); F.send.disabled = false;
+    F.status.textContent = ''; F.status.classList.remove('ok'); F.send.disabled = false; clearBad();
     form.hidden = false; openedAt = performance.now();
     setTimeout(() => F.photo.focus(), 30);   // the photo field comes first (gallery.js)
   }
-  function closeForm() { form.hidden = true; }
+  function closeForm() { if (form.hidden) return; form.hidden = true; giveBack(); }
+  // a11y: the field an error is about is marked invalid, points at the message, and takes focus
+  const clearBad = () => [F.body, F.year, F.ok, F.photo].forEach(f => { f.removeAttribute('aria-invalid'); f.removeAttribute('aria-describedby'); });
+  const bad = f => { clearBad(); f.setAttribute('aria-invalid', 'true'); f.setAttribute('aria-describedby', 'memStatus'); f.focus({ preventScroll: true }); };
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     const body = F.body.value.trim(), name = F.name.value.trim(), yearS = F.year.value.trim();
     const year = yearS ? parseInt(yearS, 10) : null;
     const say = (t, ok) => { F.status.textContent = t; F.status.classList.toggle('ok', !!ok); };
     if (F.hp.value) return say('Thank you.');                                  // a bot filled the hidden field
-    if (!body) return say('Write a line or two first.');
-    if (body.length > MAX_TEXT) return say('Keep it under ' + MAX_TEXT + ' characters.');
-    if (year !== null && (isNaN(year) || year < 1900 || year > THIS_YEAR)) return say('The year should be between 1900 and ' + THIS_YEAR + '.');
-    if (!F.ok.checked) return say('Please tick the box to say it can be shown.');
+    clearBad();
+    if (!body) { bad(F.body); return say('Write a line or two first.'); }
+    if (body.length > MAX_TEXT) { bad(F.body); return say('Keep it under ' + MAX_TEXT + ' characters.'); }
+    if (year !== null && (isNaN(year) || year < 1900 || year > THIS_YEAR)) { bad(F.year); return say('The year should be between 1900 and ' + THIS_YEAR + '.'); }
+    if (!F.ok.checked) { bad(F.ok); return say('Please tick the box to say it can be shown.'); }
     if (performance.now() - openedAt < 2500) return say('One moment…');
     if (Date.now() - lastSent < 30000) return say('Thank you, one lantern at a time. Try again in half a minute.');
     const file = F.photo.files && F.photo.files[0];
-    if (file && !/^image\//.test(file.type)) return say('That file is not a photo.');
-    if (file && file.size > 25e6) return say('That photo is too large.');
+    if (file && !/^image\//.test(file.type)) { bad(F.photo); return say('That file is not a photo.'); }
+    if (file && file.size > 25e6) { bad(F.photo); return say('That photo is too large.'); }
     F.send.disabled = true; say(file ? 'Making the photo small…' : 'Hanging it…');
     try {
       const rec = { section: spot.section, x: spot.x, z: spot.z, year, body, name: name || null };
@@ -296,6 +305,16 @@
   window.addEventListener('keydown', ev => {
     const t = ev.target;
     if (ev.key === 'Escape') { if (!form.hidden) closeForm(); else if (!panel.hidden) closeRead(); return; }
+    if (ev.key === 'Tab') {                                                     // a11y: Tab cycles inside an open card or form
+      const box = !form.hidden ? form : !panel.hidden ? panel : null;
+      if (box) {
+        const f = [...box.querySelectorAll('button, input, textarea, select, a[href]')].filter(e => !e.disabled && e.tabIndex >= 0 && e.offsetParent !== null);
+        if (f.length && (ev.shiftKey ? document.activeElement === f[0] || !box.contains(document.activeElement) : document.activeElement === f[f.length - 1])) {
+          ev.preventDefault(); (ev.shiftKey ? f[f.length - 1] : f[0]).focus();
+        }
+      }
+      return;
+    }
     if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
     if ((ev.key === 'e' || ev.key === 'E') && WALK.on && nearest && panel.hidden && form.hidden) { ev.preventDefault(); openRead(nearest.m); }
   });
@@ -323,8 +342,9 @@
       const on = e.m.section === sec && !(window.__gallery && photoURL(e.m));   // a photo memory hangs on the wall instead (gallery.js)
       e.obj.visible = on;
       if (!on) return;
-      e.obj.position.y = 2.9 + Math.sin(t * 1.3 + e.obj.userData.phase) * 0.12;
-      e.obj.rotation.y = Math.sin(t * 0.7 + e.obj.userData.phase) * 0.25;
+      const sw = REDUCED.matches ? 0 : 1;                                       // a11y: reduced motion hangs them still
+      e.obj.position.y = 2.9 + Math.sin(t * 1.3 + e.obj.userData.phase) * 0.12 * sw;
+      e.obj.rotation.y = Math.sin(t * 0.7 + e.obj.userData.phase) * 0.25 * sw;
       if (p) { const d = Math.hypot(e.m.x - p.x, e.m.z - p.z); if (d < bestD) { bestD = d; best = e; } }
     });
     nearest = best;
