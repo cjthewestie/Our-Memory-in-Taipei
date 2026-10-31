@@ -182,6 +182,10 @@ ol.decide li::before{content:attr(data-n);position:absolute;left:0;top:10px;widt
 @media (prefers-reduced-motion: reduce){
   .panel .frame,.panel .cap,.panel .bg{transition:none}
 }
+
+/* visible without JS: the app's static snapshot does not run scripts, so panels only hide once the script is running */
+html:not(.js) .page{display:block!important}
+html:not(.js) .panel .frame{opacity:1;transform:none;clip-path:none}
 </style>
 </head>
 <body>
@@ -449,7 +453,7 @@ ol.decide li::before{content:attr(data-n);position:absolute;left:0;top:10px;widt
 </section>
 </main>
 
-<script>
+<script>document.documentElement.classList.add("js");
 (function(){
   var KEYS=["cover","story","live","branches","issues","money","options","decide"];
   var cur="cover";
