@@ -73,7 +73,9 @@
   }
 
   // ── storage ─────────────────────────────────────────────────────────────────
-  const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch (_) { return []; } };
+  // only well-formed records: a stored value that is not a list (an old version, a hand edit) would stop the lanterns
+  const okRec = m => m && typeof m === 'object' && PLACE[m.section] && isFinite(m.x) && isFinite(m.z) && typeof m.body === 'string';
+  const loadLocal = () => { try { const l = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); return Array.isArray(l) ? l.filter(okRec) : []; } catch (_) { return []; } };
   const saveLocal = list => { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); return true; } catch (_) { return false; } };
   const headers = extra => Object.assign({ apikey: CFG.supabaseAnonKey, Authorization: 'Bearer ' + CFG.supabaseAnonKey }, extra || {});
   // The photo bucket is private. A photo is shown only through a signed URL, and the storage rules sign one
@@ -126,7 +128,14 @@
   async function shrink(file, maxSide) {
     let src;
     try { src = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
-    catch (_) { src = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = URL.createObjectURL(file); }); }
+    catch (_) {
+      src = await new Promise((ok, no) => {
+        const i = new Image(), u = URL.createObjectURL(file);
+        i.onload = () => { URL.revokeObjectURL(u); ok(i); };
+        i.onerror = () => { URL.revokeObjectURL(u); no(new Error('This photo could not be read. Try a JPEG or PNG.')); };
+        i.src = u;
+      });
+    }
     const k = Math.min(1, maxSide / Math.max(src.width, src.height));
     const cv = document.createElement('canvas'); cv.width = Math.round(src.width * k); cv.height = Math.round(src.height * k);
     cv.getContext('2d').drawImage(src, 0, 0, cv.width, cv.height);
