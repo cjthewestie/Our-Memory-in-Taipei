@@ -29,8 +29,15 @@
 
   // ── tunables ────────────────────────────────────────────────────────────────
   const SPEED = 7.5, RUN = 13;          // world units a second, walking and with Shift held
-  const CAM_D = 7.5, CAM_LOOK_Y = 1.9;  // camera distance behind her, and the height it looks at
-  const PITCH0 = 0.28, PITCH_MIN = -0.45, PITCH_MAX = 1.0;
+  // CJ, 2026-10-31: "make character samler and smoother". In walk mode she is drawn at GIRL_K of her
+  // tour size (about a fifth of the screen's height at 1440x900) and the camera sits further back and
+  // higher, so the street is the subject and she is the visitor in it.
+  const GIRL_K = 0.7;                   // her size in walk mode, as a share of her size on the tour
+  const CAM_D = 11, CAM_LOOK_Y = 1.3;   // camera distance behind her, and the height it looks at
+  const PITCH0 = 0.36, PITCH_MIN = -0.45, PITCH_MAX = 1.0;
+  const ACC_T = 0.25;                   // seconds: her speed eases toward the stick's over this time constant (start and stop)
+  const CAM_T = 0.16;                   // seconds: the camera's place and aim ease toward their targets over this
+  const TOUR_SCALE = girl.scale.x;      // what app.js gave her for the scroll film; put back on the tour
   const FOV = 55;
   const HUB_U = D.OPENING.fogTo + 0.002;   // the progress the square stands for: past the opening fog, chapter 1's light
   const SIDE = 8.4;                     // how far from the centre line she can walk in a section (the pavement's edge)
@@ -57,6 +64,7 @@
     vx: 0, vz: 0,
     yaw: 0, pitch: PITCH0,         // the camera's orbit round her (yaw 0 = behind her when she faces -z)
     lastLook: -1e9, moved: false, busy: false, t: 0,
+    cam: new THREE.Vector3(), aim: new THREE.Vector3(), snap: true,   // the eased camera, and "jump, don't ease" after a move
   };
   const WALK = window.WALK = {
     on: false, u: HUB_U,
@@ -166,7 +174,7 @@
     ring.rotation.x = -Math.PI / 2; ring.position.set(SQ.x, 0.06, SQ.z); square.add(ring);
     const plinth = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.9, 1.1, 32), mat('bone'));
     plinth.position.set(SQ.x, 0.55, SQ.z); plinth.castShadow = plinth.receiveShadow = true; square.add(plinth);
-    box(0.5, 3.2, 0.5, mat('ink'), SQ.x, 1.1, SQ.z, square);
+    box(0.5, 2.0, 0.5, mat('ink'), SQ.x, 1.1, SQ.z, square);   // the post stops under the board: at 3.2 it stood through the title's middle
     const title = (g, W, H) => {
       g.fillStyle = P.bone; g.fillRect(0, 0, W, H);
       g.fillStyle = P.ink; g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -227,20 +235,25 @@
     square.add(wim);
 
     // lamp posts, and lanterns strung across the plaza between them
+    // high enough that, from the follow camera, the strings sit above the frame (and above the gate signs):
+    // at 5.5 the near lanterns filled the top of the arrival frame as big flat discs over the signboard
+    // and the page title (QA 2026-11-01)
+    const LAMP_H = 12.5;
     const lampPosts = [[-16, -16], [16, -16], [-16, 16], [16, 16]];
     lampPosts.forEach(([dx, dz]) => {
-      box(0.35, 5.5, 0.35, mat('ink'), SQ.x + dx, 0, SQ.z + dz, square);
+      box(0.35, LAMP_H, 0.35, mat('ink'), SQ.x + dx, 0, SQ.z + dz, square);
       const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 8), new THREE.MeshBasicMaterial({ color: C('lamp') }));
-      bulb.position.set(SQ.x + dx, 5.8, SQ.z + dz); square.add(bulb);
+      bulb.position.set(SQ.x + dx, LAMP_H + 0.3, SQ.z + dz); square.add(bulb);
     });
     const lantGeo = new THREE.SphereGeometry(0.42, 10, 8); lantGeo.scale(1, 1.25, 1);
     const lantMat = new THREE.MeshBasicMaterial({ color: C('verm') });
-    // two diagonals of lanterns over the centre
-    [[[-16, -16], [16, 16]], [[16, -16], [-16, 16]]].forEach(([a, b]) => {
+    // strings of lanterns along the north edge and down both sides, none over the south half's middle:
+    // the arrival camera stands there, and diagonals across it filled a phone's top third with flat discs
+    [[[-16, -16], [16, -16]], [[-16, -16], [-16, 16]], [[16, -16], [16, 16]]].forEach(([a, b]) => {
       for (let i = 1; i < 11; i++) {
         const t = i / 11, sag = Math.sin(t * Math.PI) * 1.4;
         const l = new THREE.Mesh(lantGeo, lantMat);
-        l.position.set(SQ.x + a[0] + (b[0] - a[0]) * t, 5.6 - sag, SQ.z + a[1] + (b[1] - a[1]) * t);
+        l.position.set(SQ.x + a[0] + (b[0] - a[0]) * t, LAMP_H + 0.1 - sag, SQ.z + a[1] + (b[1] - a[1]) * t);
         square.add(l);
       }
     });
@@ -354,7 +367,7 @@
     setTimeout(() => { fn(); setTimeout(() => { fade.classList.remove('on'); st.busy = false; }, 120); }, 320);
   }
   function place(where, x, z, h) {
-    st.where = where; st.x = x; st.z = z; st.h = h; st.yaw = h; st.pitch = PITCH0; st.vx = st.vz = 0;
+    st.where = where; st.x = x; st.z = z; st.h = h; st.yaw = h; st.pitch = PITCH0; st.vx = st.vz = 0; st.snap = true;
     document.body.classList.toggle('in-square', where === 'square');
     showFor(where);
     if (where !== 'square') document.documentElement.dataset.section = where; else delete document.documentElement.dataset.section;
@@ -367,7 +380,7 @@
   function goSquare(from, instant) {
     const go = () => {
       const G = GATES[from];
-      if (!G) return place('square', SQ.x, SQ.z + SQ.h - 6, 0);
+      if (!G) return place('square', SQ.x, SQ.z + SQ.h - 12, 0);   // far enough in that the camera, 11 back, is not pressed against the south wall
       if (G.side === 'west')  place('square', SQ.x - SQ.h + 10, SQ.z, -Math.PI / 2);
       if (G.side === 'east')  place('square', SQ.x + SQ.h - 10, SQ.z, Math.PI / 2);
       if (G.side === 'north') place('square', SQ.x, SQ.z - SQ.h + 10, Math.PI);
@@ -388,7 +401,7 @@
     delete document.documentElement.dataset.section;
     showFor('tour');
     square.visible = false;
-    girl.rotation.y = 0;
+    girl.rotation.y = 0; girl.scale.setScalar(TOUR_SCALE);
     R.jumpToU(0);
     setURL(true);
   }
@@ -403,7 +416,7 @@
 
   // ── per frame ───────────────────────────────────────────────────────────────
   const angDiff = (a, b) => { let d = a - b; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; };
-  const look3 = new THREE.Vector3();
+  const look3 = new THREE.Vector3(), camT = new THREE.Vector3();
   function update(dt, now) {
     st.t = now / 1000;
     portalMats.forEach(m => { m.uniforms.uTime.value = st.t; });
@@ -429,7 +442,7 @@
       st.h += angDiff(want, st.h) * (1 - Math.exp(-12 * dt));
       if (!st.moved) { st.moved = true; setTimeout(() => hint.classList.add('gone'), 4000); }
     }
-    const acc = 1 - Math.exp(-10 * dt);
+    const acc = 1 - Math.exp(-dt / ACC_T);
     st.vx += (tx - st.vx) * acc; st.vz += (tz - st.vz) * acc;
     st.x += st.vx * dt; st.z += st.vz * dt;
 
@@ -465,7 +478,8 @@
     }
 
     // her run, her place
-    const bob = R.poseGirl(Math.min(1, Math.hypot(st.vx, st.vz) / RUN * 1.3), dt);
+    const bob = R.poseGirl(Math.min(1, Math.hypot(st.vx, st.vz) / RUN * 1.3), dt) * GIRL_K;   // the walk-cycle bob, at her walk-mode size
+    girl.scale.setScalar(TOUR_SCALE * GIRL_K);
     girl.position.set(st.x, bob, st.z);
     girl.rotation.y = st.h;
 
@@ -482,10 +496,15 @@
       const s = SECT[st.where];
       cx = Math.min(SIDE + 0.8, Math.max(-SIDE - 0.8, cx)); cz = Math.min(s.top + 0.9, Math.max(s.end - 0.9, cz));
     }
-    camera.position.set(cx, cy, cz);
     // looking up (pitch below zero) lifts the aim, so the tower and the man on it come into frame
     look3.set(st.x, CAM_LOOK_Y + Math.max(0, -st.pitch) * 30, st.z);
-    camera.lookAt(look3);
+    // a damped follow: place and aim ease toward their targets, so a start, a stop or a turn never jerks
+    // the frame; after a teleport (st.snap) they jump. Both targets are already inside the walls, and an
+    // ease between two points inside the box stays inside it.
+    if (st.snap) { st.cam.set(cx, cy, cz); st.aim.copy(look3); st.snap = false; }
+    else { const k = 1 - Math.exp(-dt / CAM_T); st.cam.lerp(camT.set(cx, cy, cz), k); st.aim.lerp(look3, k); }
+    camera.position.copy(st.cam);
+    camera.lookAt(st.aim);
     let fov = FOV;
     const a = camera.aspect;
     if (a < 1) {
