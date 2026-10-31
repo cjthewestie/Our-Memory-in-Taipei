@@ -168,25 +168,31 @@
   })();
 
   // ── 信義空橋: the elevated skywalks ──────────────────────────────────────────
-  // One bridge crosses the road at z -392 (deck y 6.5, clear of the camera which is
-  // at y 5 → 3 here), with railings, a light canopy on slender posts, and a stair ramp down to
-  // each sidewalk; one more segment runs along the mall fronts from A11 to the next mall.
-  const rampGeo = (() => { const g = new THREE.BoxGeometry(1.6, 0.25, 7.6); g.rotateX(Math.atan2(6.35, 7)); g.translate(0, 3.3, -3.5); return g; })();
-  const pale = p => { p.mesh.material = withFog(new THREE.MeshBasicMaterial({ color: C('haze') })); return p; }; // unlit haze: the underside stays soft when the camera passes below
-  function skywalk(z) {
-    const W = 18, D = 3.6, Y = 6.5;
-    pale(part(0, Y, z, W, D, TW(0.2, 'haze')));                                               // deck
-    [-1, 1].forEach(s => part(0, Y + 0.25, z + s * (D / 2 - 0.05), W, 0.06, TW(1.1, 'haze'))); // glass railings
-    [-1, 1].forEach(s => part(0, Y + 1.3, z + s * (D / 2 - 0.05), W, 0.1, TW(0.08, 'bone')));  // handrails
-    [-1, 1].forEach(s => { [-1, 1].forEach(sz => part(s * 8, 0, z + sz * 1.2, 0.6, 0.6, TW(Y, 'haze'))); }); // pillars on the sidewalks
-    [-1, 1].forEach(s => pale(part(s * 8.2, 0.2, z + D / 2, 1, 1, TW(1, 'bone'), 0, rampGeo)));  // stair ramps down toward the camera
-  }
-  skywalk(-392);   // one crossing: at -352 the deck filled the top of the frame as the camera passed under it
-  (() => {  // along the mall fronts, A11 → the next mall (z -409), plaza side
+  // asset/blender/skywalk.py: one bridge crosses the road at z -392 (paving top y 6.72, clear of the
+  // camera which is at y 5 → 3 here) on round piers, glass balustrades, a glass canopy on ribs, an
+  // open stair down to each sidewalk toward the camera; six 1-long deck segments run along the mall
+  // fronts from A11 to the next mall (z -409). The girder, piers and stair cheeks share 'haze' and
+  // stay unlit, so the underside stays soft when the camera passes below (the old pale()).
+  (() => {
     const x = A11.x0 + 1.6, z0 = A11.z0, z1 = -409, Y = 6.5;
-    pale(part(x, Y, (z0 + z1) / 2, 3, z0 - z1, TW(0.2, 'haze')));
-    part(x - 1.45, Y + 0.25, (z0 + z1) / 2, 0.06, z0 - z1, TW(1.1, 'haze'));
-    [z0 - 0.5, z1 + 0.5].forEach(z => part(x - 1.2, 0, z, 0.5, 0.5, TW(Y, 'haze')));
+    const skyGroup = libGroup(['tower']);
+    MODELS.load('skywalk', gltf => {
+      const hazeMeshes = [];
+      gltf.scene.traverse(o => { if (o.isMesh && o.material.name === 'haze') hazeMeshes.push(o); });
+      const root = MODELS.lambertize(gltf.scene);
+      const unlit = withFog(new THREE.MeshBasicMaterial({ color: C('haze') }));
+      hazeMeshes.forEach(o => { o.material = unlit; o.castShadow = false; });
+      MODELS.node(root, 'crossing').position.set(0, 0, -392);
+      const seg = MODELS.node(root, 'segment');
+      for (let i = 0; i < 6; i++) {
+        const s = i ? seg.clone() : seg;
+        s.position.set(x, 0, z0 - 0.5 - i);   // -403.5 … -408.5, length onto z
+        s.rotation.set(0, Math.PI / 2, 0);
+        if (i) seg.parent.add(s);
+      }
+      skyGroup.add(root);
+    });
+    [z0 - 0.5, z1 + 0.5].forEach(z => part(x - 1.2, 0, z, 0.5, 0.5, TW(Y, 'haze')));   // the mall-front run's ground pillars (the segment has none)
   })();
 
   // ── 台北市政府 on the horizon: a wide symmetrical stepped silhouette, unlit, in haze ──
