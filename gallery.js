@@ -185,7 +185,7 @@
     [-w / 2 + 0.4, w / 2 - 0.4].forEach(x => {
       const f = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 1.4), footMat); f.position.set(x, 0.1, -0.2); g.add(f);
     });
-    const hp = plate(Math.min(w - 0.4, 7.4), head[0], head[1], head[2], head[3]); hp.position.set(0, h - 0.45 + 0.1, -0.04); g.add(hp);
+    const hp = plate(Math.min(w - 0.4, 4.8), head[0], head[1], head[2], head[3]); hp.position.set(0, h - 0.45 + 0.1, -0.04); g.add(hp);
     const frames = items.map((it, i) => {
       const f = makeFrame(it); f.position.set(-w / 2 + 0.2 + STEP * (i + 0.5), 1.75, 0); g.add(f); return f;
     });

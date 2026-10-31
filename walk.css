@@ -20,13 +20,13 @@ body.walk #walkHud { display: block; }
 }
 body.in-square .wk-square { display: block; }
 .wk-sq-en { font-family: var(--font-big), var(--font-hud), var(--font-sys); font-size: 34px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
-.wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 13px; letter-spacing: 0.3em; margin-top: 4px; opacity: 0.8; }
-.wk-sq-line { font-size: 13px; line-height: 1.6; margin-top: 10px; opacity: 0.92; }
+.wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 13px; letter-spacing: 0.3em; margin-top: 4px; }
+.wk-sq-line { font-size: 13px; line-height: 1.45; margin-top: 8px; }   /* full ink, no fade: at 0.75-0.92 opacity the names fell under 4.5:1 where they cross the square's grey rails */
 .wk-sq-line b { color: var(--hud-fg); font-weight: 700; display: inline-block; min-width: 3.4em; }
-.wk-sq-line i { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-style: normal; font-size: 11px; letter-spacing: 0.2em; opacity: 0.75; margin-left: 4px; }
+.wk-sq-line i { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-style: normal; font-size: 11px; letter-spacing: 0.2em; margin-left: 4px; }
 
 .wk-hint {
-  position: absolute; left: 50%; top: 24%; transform: translateX(-50%);
+  position: absolute; left: 50%; top: 64%; transform: translateX(-50%);   /* on the pavement under her: at 24% it sat on the "Add your photo" frame */
   background: color-mix(in srgb, var(--ink) 72%, transparent); color: var(--bone);
   padding: 8px 14px; border-radius: 999px; font-size: 13px; letter-spacing: 0.04em; white-space: nowrap;
   transition: opacity 900ms ease;
