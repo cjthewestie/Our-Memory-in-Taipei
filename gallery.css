@@ -1,0 +1,26 @@
+/* gallery.css — the photo walls (gallery.js): the bubble over the nearest frame, and the photo field
+   that now leads the memory form. Same bone-and-ink cards as memories.css. */
+
+.gal-bubble {
+  position: fixed; left: 0; top: 0; z-index: 4; pointer-events: auto; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; padding: 8px 9px 8px 14px; border-radius: 999px;
+  background: var(--bone); color: var(--ink); border: 0; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  font: 700 13px/1 var(--font-hud), var(--font-sys); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.gal-bubble.add { background: var(--verm); color: var(--bone); }
+.gal-bubble[hidden] { display: none; }
+.gal-key { display: inline-block; min-width: 20px; padding: 3px 5px; border-radius: 5px; background: var(--ink); color: var(--bone); text-align: center; letter-spacing: 0; }
+.gal-bubble:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
+@media (pointer: coarse) { .gal-key { display: none; } .gal-bubble { padding: 11px 16px; } }
+/* near a frame, the lantern bubble steps aside so only one asks for E */
+body.gal-near .mem-bubble { display: none; }
+
+/* the photo field, first in the form: a big dashed drop zone */
+.mem-form .mem-field.mem-photo {
+  border: 2px dashed var(--verm); border-radius: 12px; padding: 14px 14px 12px;
+  background: color-mix(in srgb, var(--verm) 6%, #fff);
+}
+.mem-form .mem-field.mem-photo > span:first-child { font-size: 14px; color: var(--verm); }
+.mem-form .mem-field.mem-photo > span:first-child::before { content: '+ '; font-weight: 700; }
+.mem-form .mem-field.mem-photo input[type=file] { font-size: 14px; }
+.mem-form .mem-field.mem-photo input[type=file]:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
