@@ -35,40 +35,77 @@
   ];
 
   // ── the lanterns ────────────────────────────────────────────────────────────
+  // Round paper lanterns, all drawn as three instanced meshes (paper, trim, glow) however many there are.
+  // The paper is unlit and shaded in its vertex colours (bright at the belly, ribbed, darker at the ends),
+  // so it reads as lit from inside in daylight. Each one sways from its cord; the nearest one brightens.
   const group = new THREE.Group(); scene.add(group);
-  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.6, 14);
-  const capGeo = new THREE.CylinderGeometry(0.2, 0.24, 0.08, 12);
-  const tasselGeo = new THREE.BoxGeometry(0.04, 0.32, 0.04);
-  const cordGeo = new THREE.BoxGeometry(0.02, 1, 0.02);
-  const inkMat = new THREE.MeshBasicMaterial({ color: C('ink') });
-  const paper = { visitor: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd27f') }),
-                  seed: new THREE.MeshBasicMaterial({ color: C('verm') }),
-                  local: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffe9b8') }) };
+  const LATHE_SEG = 48, RIBS = 12, HANG = 2.9, CORD = 1.37;   // CORD: from the lantern's middle up to where it hangs
+  // the paper: a lathe through a rounded profile, ribs and a belly glow baked into vertex colours
+  const bodyGeo = (() => {
+    const pts = [], N = 22;
+    for (let j = 0; j <= N; j++) {
+      const a = -Math.PI / 2 + Math.PI * j / N, y = Math.sin(a) * 0.31;
+      pts.push(new THREE.Vector2(Math.max(0.15, Math.cos(a) * 0.36), y));
+    }
+    const g = new THREE.LatheGeometry(pts, LATHE_SEG), pos = g.attributes.position, col = new Float32Array(pos.count * 3);
+    for (let k = 0; k < pos.count; k++) {
+      const i = Math.floor(k / (N + 1)), y = pos.getY(k) / 0.31;
+      const rib = (i % (LATHE_SEG / RIBS)) === 0 ? 0.8 : 1;
+      const v = (0.62 + 0.38 * (1 - y * y)) * rib;
+      col[k * 3] = v; col[k * 3 + 1] = v; col[k * 3 + 2] = v;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return g;
+  })();
+  // the trim: ink caps, the cord, a vermilion tassel, merged into one geometry with its colours baked in
+  const trimGeo = (() => {
+    const ink = C('ink'), red = C('verm'), parts = [];
+    const put = (g, y, c) => { g = g.toNonIndexed(); g.translate(0, y, 0); parts.push([g, c]); };
+    put(new THREE.CylinderGeometry(0.17, 0.2, 0.06, 20), 0.31, ink);
+    put(new THREE.CylinderGeometry(0.2, 0.17, 0.06, 20), -0.31, ink);
+    put(new THREE.CylinderGeometry(0.012, 0.012, 1, 6), 0.84, ink);
+    put(new THREE.SphereGeometry(0.045, 10, 8), -0.38, red);
+    put(new THREE.CylinderGeometry(0.035, 0.06, 0.26, 10), -0.54, red);
+    const n = parts.reduce((s, [g]) => s + g.attributes.position.count, 0);
+    const P = new Float32Array(n * 3), Cc = new Float32Array(n * 3); let o = 0;
+    parts.forEach(([g, c]) => { const a = g.attributes.position.array; P.set(a, o * 3);
+      for (let k = 0; k < a.length / 3; k++) { Cc[(o + k) * 3] = c.r; Cc[(o + k) * 3 + 1] = c.g; Cc[(o + k) * 3 + 2] = c.b; }
+      o += a.length / 3; });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('color', new THREE.BufferAttribute(Cc, 3));
+    return g;
+  })();
   const glowTex = (() => {
     const cv = document.createElement('canvas'); cv.width = cv.height = 64;
     const g = cv.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    r.addColorStop(0, 'rgba(255,214,140,0.9)'); r.addColorStop(0.35, 'rgba(255,190,110,0.35)'); r.addColorStop(1, 'rgba(255,170,90,0)');
+    r.addColorStop(0, 'rgba(255,255,255,0.9)'); r.addColorStop(0.25, 'rgba(255,255,255,0.6)'); r.addColorStop(0.55, 'rgba(255,255,255,0.2)'); r.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = r; g.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(cv);
   })();
-  const glowMat = new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+  const PAPER = { visitor: new THREE.Color('#ff7a1c'), seed: C('verm').clone().lerp(new THREE.Color('#ff9a5a'), 0.25), local: new THREE.Color('#ff9a32') };
+  const GLOW = new THREE.Color('#ff9a3a');
+  const paperMat = new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, toneMapped: false });   // lit from inside: no haze, no highlight roll-off
+  const trimMat = new THREE.MeshBasicMaterial({ vertexColors: true });
+  const glowMat = new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, fog: false, toneMapped: false });
+  let cap = 0, paperIM = null, trimIM = null, glowIM = null;
+  function grow(n) {                      // (re)make the instanced meshes when there are more lanterns than room
+    if (n <= cap) return;
+    cap = Math.max(32, cap * 2); while (cap < n) cap *= 2;
+    [paperIM, trimIM, glowIM].forEach(m => { if (m) { group.remove(m); m.dispose(); } });
+    paperIM = new THREE.InstancedMesh(bodyGeo, paperMat, cap);
+    trimIM = new THREE.InstancedMesh(trimGeo, trimMat, cap);
+    glowIM = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), glowMat, cap);
+    paperIM.setColorAt(0, PAPER.visitor); glowIM.setColorAt(0, GLOW);   // makes instanceColor exist before the first draw
+    glowIM.renderOrder = 2;
+    [paperIM, trimIM, glowIM].forEach(m => { m.count = 0; m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); group.add(m); });
+  }
 
-  const memories = [];   // { m: the record, obj: its lantern }
-  function addLantern(m) {
+  const memories = [];   // { m: the record, kind, phase, born: when it was left (it rises into place), hot: 0..1 near her }
+  function addLantern(m, rising) {
     if (memories.some(e => e.m.id === m.id)) return;
-    const o = new THREE.Group();
     const kind = m.seed ? 'seed' : m.local ? 'local' : 'visitor';
-    const body = new THREE.Mesh(bodyGeo, paper[kind]); o.add(body);
-    const top = new THREE.Mesh(capGeo, inkMat); top.position.y = 0.33; o.add(top);
-    const bot = new THREE.Mesh(capGeo, inkMat); bot.position.y = -0.33; o.add(bot);
-    const tas = new THREE.Mesh(tasselGeo, paper.seed); tas.position.y = -0.55; o.add(tas);
-    const cord = new THREE.Mesh(cordGeo, inkMat); cord.position.y = 0.87; o.add(cord);
-    const glow = new THREE.Sprite(glowMat); glow.scale.setScalar(2.2); o.add(glow);
-    o.position.set(m.x, 2.9, m.z);
-    o.userData.memory = m; o.userData.phase = (m.x * 3.1 + m.z * 1.7) % 6.28;
-    o.traverse(c => { c.userData.memory = m; });
-    group.add(o);
-    memories.push({ m, obj: o });
+    memories.push({ m, kind, phase: (m.x * 3.1 + m.z * 1.7) % 6.28, born: rising ? performance.now() : -1e9, hot: 0 });
+    grow(memories.length);
     window.dispatchEvent(new CustomEvent('memory:added', { detail: m }));   // gallery.js hangs the photo ones
   }
 
@@ -100,7 +137,7 @@
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
       const rows = await res.json();
       await signPhotos(rows);
-      rows.forEach(addLantern);
+      rows.forEach(m => addLantern(m));
     } catch (e) {
       console.warn('[memories] could not load the shared memories:', e.message);
       F.fine.textContent = 'Other visitors’ lanterns couldn’t be loaded just now, so saving may fail too. If it does, your words stay in the form to try again.';
@@ -144,7 +181,7 @@
       rec.id = 'local-' + uuid(); rec.local = true; rec.created_at = new Date().toISOString();
       const list = loadLocal(); list.push(rec);
       if (!saveLocal(list)) { delete rec.photoData; list[list.length - 1] = rec; if (!saveLocal(list)) throw new Error('This browser would not save it (private mode?).'); }
-      addLantern(rec);
+      addLantern(rec, true);
       return 'local';
     }
     let photo_path = null;
@@ -300,27 +337,58 @@
     down = null;
     ndc.set(ev.clientX / innerWidth * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1);
     ray.setFromCamera(ndc, R.camera);
-    const hit = ray.intersectObjects(memories.filter(e => e.obj.visible).map(e => e.obj), true)[0];
-    if (hit && hit.object.userData.memory) openRead(hit.object.userData.memory);
+    const hit = paperIM && ray.intersectObjects([paperIM, trimIM], false)[0];
+    if (hit && shown[hit.instanceId]) openRead(shown[hit.instanceId].m);
   });
 
-  // ── per frame: show the lanterns of the place you are in, bob them, find the nearest ──
-  const v = new THREE.Vector3();
+  // ── per frame: show the lanterns of the place you are in, sway them, light the nearest ──
+  const v = new THREE.Vector3(), M = new THREE.Matrix4(), Mg = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler();
+  const one = new THREE.Vector3(), piv = new THREE.Vector3(), col = new THREE.Color(), WARM = new THREE.Color('#fff4dc');
+  const shown = [];   // instance index -> entry, for the raycast
+  const ease = k => 1 - Math.pow(1 - k, 3);
   function tick(now) {
     const sec = WALK.section(), t = now / 1000;
     let best = null, bestD = NEAR;
     const p = WALK.on ? WALK.pos : null;
-    memories.forEach(e => {
-      const on = e.m.section === sec && !(window.__gallery && photoURL(e.m));   // a photo memory hangs on the wall instead (gallery.js)
-      e.obj.visible = on;
-      if (!on) return;
-      e.obj.position.y = 2.9 + Math.sin(t * 1.3 + e.obj.userData.phase) * 0.12;
-      e.obj.rotation.y = Math.sin(t * 0.7 + e.obj.userData.phase) * 0.25;
-      if (p) { const d = Math.hypot(e.m.x - p.x, e.m.z - p.z); if (d < bestD) { bestD = d; best = e; } }
-    });
+    // a photo memory hangs on the wall instead (gallery.js)
+    const here = e => e.m.section === sec && !(window.__gallery && photoURL(e.m));
+    if (p) memories.forEach(e => { if (!here(e)) return; const d = Math.hypot(e.m.x - p.x, e.m.z - p.z); if (d < bestD) { bestD = d; best = e; } });
     nearest = best;
+    shown.length = 0;
+    if (paperIM) {
+      const camQ = R.camera.quaternion;
+      memories.forEach(e => {
+        if (!here(e)) return;
+        const i = shown.length; shown.push(e);
+        e.hot += ((e === best ? 1 : 0) - e.hot) * 0.12;
+        // a new lantern rises from her hands to its place over 1.8 s, swinging a little as it settles
+        const age = (now - e.born) / 1800, k = age < 1 ? ease(Math.max(0, age)) : 1;
+        const rise = (1 - k) * -1.9, swingBoost = 1 + (1 - k) * 3, ph = e.phase;
+        // a gentle pendulum about the point it hangs from, and a slow turn on its cord
+        E.set(Math.sin(t * 0.9 + ph) * 0.05 * swingBoost, Math.sin(t * 0.35 + ph) * 0.5, Math.sin(t * 1.1 + ph * 1.3) * 0.06 * swingBoost, 'YXZ');
+        Q.setFromEuler(E);
+        piv.set(e.m.x, HANG + CORD + rise + Math.sin(t * 1.3 + ph) * 0.04, e.m.z);
+        const s = (0.55 + 0.45 * k) * (1 + e.hot * 0.08);
+        one.set(s, s, s);
+        M.compose(piv, Q, one); Mg.makeTranslation(0, -CORD, 0); M.multiply(Mg);
+        paperIM.setMatrixAt(i, M); trimIM.setMatrixAt(i, M);
+        // the light inside: a slow breath, a faint flicker, brighter when she is near or it is new
+        const flick = 0.94 + Math.sin(t * 2.1 + ph * 5) * 0.03 + Math.sin(t * 7.3 + ph * 11) * 0.015;
+        col.copy(PAPER[e.kind]).lerp(WARM, e.hot * 0.2 + (1 - k) * 0.2).multiplyScalar(flick + e.hot * 0.06);
+        paperIM.setColorAt(i, col);
+        // the glow faces the camera, centred on the paper
+        v.set(0, 0, 0).applyMatrix4(M);
+        const gs = (2.7 + e.hot * 0.9 + (1 - k) * 1.0) * s;
+        one.set(gs, gs, gs); Mg.compose(v, camQ, one);
+        glowIM.setMatrixAt(i, Mg);
+        col.copy(GLOW).multiplyScalar(0.85 + e.hot * 0.15 + (flick - 0.94) * 2);
+        glowIM.setColorAt(i, col);
+      });
+      [paperIM, trimIM, glowIM].forEach(m => { m.count = shown.length; m.instanceMatrix.needsUpdate = true; });
+      paperIM.instanceColor.needsUpdate = true; glowIM.instanceColor.needsUpdate = true;
+    }
     if (best && panel.hidden && form.hidden) {
-      v.copy(best.obj.position); v.y += 0.9; v.project(R.camera);
+      v.set(best.m.x, HANG + 0.9, best.m.z); v.project(R.camera);
       if (v.z < 1) {
         bubble.hidden = false;
         bubble.style.transform = `translate(${((v.x + 1) / 2 * innerWidth).toFixed(0)}px, ${((1 - v.y) / 2 * innerHeight).toFixed(0)}px) translate(-50%, -100%)`;
@@ -329,7 +397,7 @@
     requestAnimationFrame(tick);
   }
 
-  SEEDS.forEach(addLantern);
+  SEEDS.forEach(m => addLantern(m));
   loadLocal().forEach(m => { m.local = true; addLantern(m); });
   fetchApproved();
   requestAnimationFrame(tick);

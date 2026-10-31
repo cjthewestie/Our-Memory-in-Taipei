@@ -4,10 +4,15 @@
 .mem-bubble {
   position: fixed; left: 0; top: 0; z-index: 4; pointer-events: auto; cursor: pointer;
   display: flex; align-items: center; gap: 8px; padding: 7px 8px 7px 12px; border-radius: 999px;
-  background: var(--bone); color: var(--ink); border: 0; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  background: var(--bone); color: var(--ink); border: 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22), 0 0 0 2px rgba(255, 196, 107, 0.55), 0 0 22px rgba(255, 184, 92, 0.45);
   font: 600 12px/1 var(--font-hud), var(--font-sys); letter-spacing: 0.14em; text-transform: uppercase;
 }
 .mem-bubble[hidden] { display: none; }
+/* it comes up out of the lantern's light each time she reaches one (the transform is set per frame, so animate the inner parts) */
+.mem-bubble > span { animation: mem-pop 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+@keyframes mem-pop { from { opacity: 0; transform: translateY(6px) scale(0.85); } }
+@media (prefers-reduced-motion: reduce) { .mem-bubble > span { animation: none; } }
 .mem-b-key { display: inline-block; min-width: 20px; padding: 3px 5px; border-radius: 5px; background: var(--ink); color: var(--bone); text-align: center; letter-spacing: 0; }
 @media (pointer: coarse) { .mem-b-key { display: none; } .mem-bubble { padding: 0 16px; min-height: 44px; touch-action: manipulation; } }
 
