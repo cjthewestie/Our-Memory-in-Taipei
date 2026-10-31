@@ -75,7 +75,9 @@
   const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch (_) { return []; } };
   const saveLocal = list => { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); return true; } catch (_) { return false; } };
   const headers = extra => Object.assign({ apikey: CFG.supabaseAnonKey, Authorization: 'Bearer ' + CFG.supabaseAnonKey }, extra || {});
-  const photoURL = m => m.photoData ? m.photoData : (m.photo_path && ONLINE ? `${API}/storage/v1/object/public/${BUCKET}/${encodeURIComponent(m.photo_path)}` : null);
+  // The photo bucket is private. A photo is shown only through a signed URL, and the storage rules sign one
+  // only when the memory naming it is approved (supabase/schema.sql), so pending and rejected photos never show.
+  const photoURL = m => m.photoData || m.photoSigned || null;
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; return (c === 'x' ? r : (r & 3) | 8).toString(16); }));
 
@@ -85,8 +87,25 @@
       const q = 'select=id,created_at,section,x,z,year,body,name,photo_path&status=eq.approved&order=created_at.desc&limit=500';
       const res = await fetch(`${API}/rest/v1/memories?${q}`, { headers: headers() });
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-      (await res.json()).forEach(addLantern);
+      const rows = await res.json();
+      await signPhotos(rows);
+      rows.forEach(addLantern);
     } catch (e) { console.warn('[memories] could not load the shared memories:', e.message); }
+  }
+
+  // one request signs every approved photo for 12 hours; a photo that fails to sign is simply left off its card
+  async function signPhotos(rows) {
+    const paths = rows.filter(r => r.photo_path).map(r => r.photo_path);
+    if (!paths.length) return;
+    try {
+      const res = await fetch(`${API}/storage/v1/object/sign/${BUCKET}`, {
+        method: 'POST', headers: headers({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ expiresIn: 43200, paths }) });
+      if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+      const byPath = {};
+      (await res.json()).forEach(s => { if (s && s.signedURL && !s.error) byPath[s.path] = `${API}/storage/v1${s.signedURL}`; });
+      rows.forEach(r => { if (r.photo_path && byPath[r.photo_path]) r.photoSigned = byPath[r.photo_path]; });
+    } catch (e) { console.warn('[memories] could not load the shared photos:', e.message); }
   }
 
   // a photo, made small: at most 1280 px on the long side, webp (jpeg where the browser cannot), under 1.9 MB
