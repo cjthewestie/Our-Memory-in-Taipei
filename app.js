@@ -1334,8 +1334,16 @@
   const chapterEl = document.querySelector('.hud-chapter');
   function measureLabelMin() { labelMinY = innerWidth < innerHeight && chapterEl ? Math.max(110, chapterEl.getBoundingClientRect().bottom + 14) : 110; }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureLabelMin);   // and the web font, which wraps it differently
+  // a label never draws over a big word: while a word is up, a label whose box meets the word's box fades out, and
+  // fades back once it is clear (the word, its timing and the label text stay as they are)
+  function wordBox() {
+    if (!(parseFloat(wordEl.style.opacity) > 0.02)) return null;
+    const r = wordEl.getBoundingClientRect();
+    return r.width && r.height ? r : null;
+  }
   function updateLabels() {
     const key = ERAS[eraIdx].key;
+    const wb = wordBox();
     labels.forEach(L => {
       const s = L.A.tile.byEra[key];
       wp.set(L.A.x, L.A.top + 1.5, L.A.z).project(camera);
@@ -1354,8 +1362,6 @@
         L.cap.innerHTML = (s.caption || '').split('').map((ch, i) => `<span style="transition-delay:${i * 18}ms">${ch}</span>`).join('');
       }
       el = L.el;
-      el.style.opacity = vis.toFixed(2);
-      el.classList.toggle('on', vis > 0.6);
       const lx = Math.min(innerWidth - Math.min(380, innerWidth * 0.7 + 20), (wp.x + 1) / 2 * innerWidth);
       let ly = (1 - wp.y) / 2 * innerHeight;
       if (innerWidth < innerHeight) {                                    // fault 5: the left-column clamp put the label beside the roofline, over sky; centre it on the building's face instead
@@ -1363,6 +1369,11 @@
         ly = (ly + (1 - base.y) / 2 * innerHeight) / 2 - L.el.offsetHeight / 2;
       }
       ly = Math.max(labelMinY, ly);
+      const hit = wb && vis > 0 && lx < wb.right && lx + el.offsetWidth > wb.left && ly < wb.bottom && ly + el.offsetHeight > wb.top;
+      L.clear = Math.min(1, Math.max(0, (L.clear === undefined ? 1 : L.clear) + (hit ? -0.12 : 0.06)));   // out in ~8 frames, back in ~16
+      const shown = vis * L.clear;
+      el.style.opacity = shown.toFixed(2);
+      el.classList.toggle('on', shown > 0.6);
       el.style.transform = `translate(${lx.toFixed(0)}px, ${ly.toFixed(0)}px)`;
     });
   }
