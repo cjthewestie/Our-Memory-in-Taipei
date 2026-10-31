@@ -389,7 +389,17 @@
   if (storedDecade && decadeIndex(storedDecade) >= 0) manual = { decade: decadeIndex(storedDecade) };
   cur = manual ? manual.decade : decadeOfYear(currentYear());
   render();
-  loadYouTube();
+  // YouTube waits until the square is up (perf, area 04): its iframe is ~2.8 MB in ~25 requests and it held the
+  // page's load event back by about a second. Sound on (desktop): fetch it once the page has loaded and gone idle,
+  // so the player is ready before the first click. Sound off (every phone, fault 4): fetch it on the first touch,
+  // click or key, the visit's first sign of wanting anything, so a visitor who never asks for music never pays for it.
+  let ytAsked = false;
+  const wantYouTube = () => { if (!ytAsked) { ytAsked = true; loadYouTube(); } };
+  if (muted) ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, wantYouTube, { passive: true, capture: true, once: true }));
+  else {
+    const idle = () => (window.requestIdleCallback || (f => setTimeout(f, 200)))(wantYouTube, { timeout: 2000 });
+    if (document.readyState === 'complete') idle(); else window.addEventListener('load', idle, { once: true });
+  }
   requestAnimationFrame(frame);
 
   // ── private drop-in ─────────────────────────────────────────────────────────
