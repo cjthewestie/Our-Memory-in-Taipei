@@ -39,7 +39,7 @@
 /* ── the panel: a bright card on the right, the model still visible beside it ── */
 #photoPanel, #photoCredits {
   position: fixed;
-  z-index: 3;
+  z-index: 10;   /* over the walk HUD (walk.css #walkHud 3) and the lanterns (memories.css 4), under the memory form (20) */
   top: clamp(72px, 10vh, 110px);
   right: clamp(20px, 4vw, 56px);
   width: min(460px, calc(100vw - 40px));
@@ -104,6 +104,8 @@
 }
 #photoCreditsBtn:hover { background: rgba(36,29,24,0.06); border-color: var(--hud-fg); }
 .pc-body { padding: 20px 20px 22px; }
+.pc-h { margin: 22px 0 0; font-size: 11px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.6; border-top: 1px solid var(--ink); padding-top: 8px; }
+.pc-h:first-of-type { margin-top: 14px; }
 .pc-intro { margin: 12px 0 0; font-size: 13px; line-height: 1.6; }
 .pc-list { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .pc-list li { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
