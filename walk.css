@@ -79,3 +79,6 @@ body.walk #wkWalk { display: none; }
 
 #walkFade { position: fixed; inset: 0; z-index: 50; background: var(--ink); opacity: 0; pointer-events: none; transition: opacity 300ms ease; }
 #walkFade.on { opacity: 1; }
+
+/* a portrait phone: the hint sits under her, not over the square's signboard (it fades once she moves) */
+@media (max-aspect-ratio: 1/1) { .wk-hint { top: auto; bottom: 34%; } }
