@@ -348,10 +348,27 @@
   stick.addEventListener('pointerup', stickEnd); stick.addEventListener('pointercancel', stickEnd);
 
   // ── moving between spaces ───────────────────────────────────────────────────
-  function teleport(fn) {
+  // a gate is a chapter cut: the tour's flash (a bright ellipse from the centre, never a black frame) with
+  // the chapter's title in it. The move happens under the flash's peak; the whole cut is 1 s (walk.css)
+  const CUT_MS = 1000, SWAP_MS = 220;
+  const titleCase = s => s.charAt(0) + s.slice(1).toLowerCase();
+  function cutCard(k) {
+    const G = GATES[k];
+    if (!G) return '<div class="wk-cut-col"><div class="wk-cut-n">THE SQUARE</div>' +
+      '<div class="wk-cut-name">Three gates · forty years</div></div><div class="wk-cut-zh">廣場</div>';
+    return '<div class="wk-cut-col"><div class="wk-cut-n">0' + (SECT[k].era + 1) + '<span>/03</span></div>' +
+      '<div class="wk-cut-name">' + G.line + '</div>' +
+      '<div class="wk-cut-years">' + G.years.replace(/ /g, '') + ' · ' + titleCase(G.en) + '</div></div>' +
+      '<div class="wk-cut-zh">' + G.zh + '</div>';
+  }
+  let cutTimer = 0;
+  function teleport(fn, k) {
     if (st.busy) return;
-    st.busy = true; fade.classList.add('on');
-    setTimeout(() => { fn(); setTimeout(() => { fade.classList.remove('on'); st.busy = false; }, 120); }, 320);
+    st.busy = true;
+    fade.innerHTML = '<div class="wk-cut">' + cutCard(k) + '</div>';
+    fade.classList.remove('on'); void fade.offsetWidth; fade.classList.add('on');   // restart the animation
+    setTimeout(() => { fn(); setTimeout(() => { st.busy = false; }, 160); }, SWAP_MS);
+    clearTimeout(cutTimer); cutTimer = setTimeout(() => fade.classList.remove('on'), CUT_MS + 40);
   }
   function place(where, x, z, h) {
     st.where = where; st.x = x; st.z = z; st.h = h; st.yaw = h; st.pitch = PITCH0; st.vx = st.vz = 0;
@@ -361,7 +378,7 @@
   }
   function enter(k, instant) {
     const go = () => place(k, 0, SECT[k].top - 9, 0);
-    instant ? go() : teleport(go);
+    instant ? go() : teleport(go, k);
   }
   // back to the square: in front of the gate you came through, facing in (or the arrival spot from the button)
   function goSquare(from, instant) {
@@ -372,7 +389,7 @@
       if (G.side === 'east')  place('square', SQ.x + SQ.h - 10, SQ.z, Math.PI / 2);
       if (G.side === 'north') place('square', SQ.x, SQ.z - SQ.h + 10, Math.PI);
     };
-    instant ? go() : teleport(go);
+    instant ? go() : teleport(go, 'square');
   }
 
   function startWalk(instant) {
