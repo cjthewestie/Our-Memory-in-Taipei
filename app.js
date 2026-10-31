@@ -32,7 +32,7 @@
   // 中華商場 and a 2012 永樂市場 façade); CJ wants warm and crowded frames instead (「溫馨熱鬧」) and
   // sonnet-photos is sourcing them: they replace the two `src` lines below, nothing else changes.
   const PHOTO_SRC = {
-    dadao: { src: 'asset/photos/chunghwa-1961.webp', caption: '中華商場 · 1961, the year it opened · newspaper photograph', credit: 'photo 涂柏辰 / 國立臺灣歷史博物館 · CC BY 3.0 TW' },
+    dadao: { src: 'asset/photos/chunghwa-1961.webp', caption: '中華商場 · 1961, the year it opened · newspaper photograph', credit: 'photo 凃柏辰 / 內容力有限公司 @ 國家文化記憶庫 · CC BY 3.0 TW' },
     tower: { src: 'asset/photos/yongle-2012.webp',   caption: '永樂市場 · 迪化街 Dihua Street · 2012',                 credit: 'photo 玄史生, Wikimedia Commons · CC BY-SA 3.0' },
   };
   const ERA_MS = 500;         // the world re-renders into the next era over this long

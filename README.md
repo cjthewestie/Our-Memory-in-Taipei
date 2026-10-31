@@ -60,7 +60,7 @@ Until the page is connected to Supabase, a memory you leave is kept in your own 
 
 Eight of the buildings carry a marker you can click. It opens a real photograph of the real place — 中華商場 on its opening day in 1961, Taipei 101 with the cranes still on its crown. In the Guided tour, at each change of era one photograph fades across the street, faint and brief.
 
-Every photograph is licensed, and every one is credited on the page. Some carry share-alike terms. The credits panel names each photographer, holder and licence.
+Every photograph is licensed, and every one is credited on the page. Some carry share-alike terms. The Credits panel names each photographer, holder and licence, and every song, typeface and code library too. The same list in plain words is [`CREDITS.md`](CREDITS.md).
 
 ## Sound
 
