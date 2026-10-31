@@ -20,7 +20,8 @@ body.gal-near .mem-bubble { display: none; }
   border: 2px dashed var(--verm); border-radius: 12px; padding: 14px 14px 12px;
   background: color-mix(in srgb, var(--verm) 6%, #fff);
 }
-.mem-form .mem-field.mem-photo > span:first-child { font-size: 14px; color: var(--verm); }
+.mem-form .mem-field.mem-photo > span:first-child { font-size: 14px; color: #b53a2f; }   /* a11y: verm read 3.9:1 here */
+.mem-form .mem-field.mem-photo em { opacity: 1; color: var(--ink); }   /* a11y: the faded red aside fell under 4.5:1 */
 .mem-form .mem-field.mem-photo > span:first-child::before { content: '+ '; font-weight: 700; }
 .mem-form .mem-field.mem-photo input[type=file] { font-size: 14px; }
 .mem-form .mem-field.mem-photo input[type=file]:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
