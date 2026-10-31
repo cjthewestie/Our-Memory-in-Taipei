@@ -270,6 +270,8 @@
     square.add(a);
     gateArch[k] = a;
   });
+  // square.js: the real-place look (騎樓 walls, Taipei gates, 榕樹, paving, light) over the blocks above
+  if (window.SQUARE) window.SQUARE.build({ square, SQ, GATES, gateArch, sign, P, FONT_ZH, FONT_EN });
 
   // ── the arches at each end of a section ─────────────────────────────────────
   // near end: back to the square; far end: on to the next section. Only the current section's show.

@@ -43,6 +43,7 @@
     'bundle-core':  { group: 0, names: ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree','wannian','ximen-gate'] },
     'bundle-dadao': { group: 1, names: ['dihua-min','dihua-yang','dihua-baroque','dihua-zone2','dadao-entrance','stall','temple','yongle'] },
     'bundle-tower': { group: 2, names: ['tower101','skywalk','a11','cityhall'] },
+    'bundle-square': { group: 0, names: ['sq-arcade','sq-gate','sq-banyan','sq-scooter','sq-planter'] },   // square.js: the walk-mode square
   };
   const BUNDLE_OF = {};                                   // model name → bundle file name
   Object.keys(BUNDLES).forEach(b => BUNDLES[b].names.forEach(n => BUNDLE_OF[n] = b));

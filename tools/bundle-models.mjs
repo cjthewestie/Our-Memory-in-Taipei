@@ -17,6 +17,8 @@ const GROUPS = {
   'bundle-core':     ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree','wannian','ximen-gate'],
   'bundle-dadao':    ['dihua-min','dihua-yang','dihua-baroque','dihua-zone2','dadao-entrance','stall','temple','yongle'],
   'bundle-tower':    ['tower101','skywalk','a11','cityhall'],
+  // the walk-mode square (square.js): group 0, loaded with chapter 1
+  'bundle-square':   ['sq-arcade','sq-gate','sq-banyan','sq-scooter','sq-planter'],
 };
 
 const fh = process.argv.indexOf('--from-head');

@@ -1,0 +1,112 @@
+{
+  "before": {
+    "label": "before",
+    "when": "2026-10-31T18:48:11.059Z",
+    "viewport": "1440x900",
+    "console": [
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400442600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400452800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400452800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400452800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+      },
+      {
+        "type": "warning",
+        "text": "Unrecognized feature: 'web-share'."
+      }
+    ],
+    "errors": [],
+    "httpErrors": [
+      {
+        "status": 404,
+        "url": "http://127.0.0.1:8933/asset/music/private/manifest.js"
+      }
+    ],
+    "views": {
+      "1": "arrival",
+      "2": "west-gate",
+      "3": "north-gate"
+    },
+    "squareReady": true,
+    "frame": {
+      "frames": 2,
+      "meanMs": 6133.05,
+      "p95Ms": 12249.4
+    },
+    "render": {
+      "calls": 1,
+      "triangles": 2,
+      "geometries": 1326,
+      "textures": 217
+    }
+  },
+  "after": {
+    "label": "after",
+    "when": "2026-10-31T19:02:24.934Z",
+    "viewport": "1440x900",
+    "console": [
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x11c00542600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x11c0053fc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x11c0053fc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x11c0053fc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+      },
+      {
+        "type": "warning",
+        "text": "Unrecognized feature: 'web-share'."
+      }
+    ],
+    "errors": [],
+    "httpErrors": [
+      {
+        "status": 404,
+        "url": "http://127.0.0.1:8933/asset/music/private/manifest.js"
+      }
+    ],
+    "views": {
+      "1": "arrival",
+      "2": "west-gate",
+      "3": "north-gate"
+    },
+    "squareReady": true,
+    "frame": {
+      "frames": 1,
+      "meanMs": 13932.8,
+      "p95Ms": 13932.8
+    },
+    "render": {
+      "calls": 1,
+      "triangles": 2,
+      "geometries": 1295,
+      "textures": 235
+    }
+  }
+}
