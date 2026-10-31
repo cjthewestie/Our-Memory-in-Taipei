@@ -1,24 +1,24 @@
 {
   "before": {
     "label": "before",
-    "when": "2026-10-31T18:48:11.059Z",
+    "when": "2026-10-31T19:11:31.311Z",
     "viewport": "1440x900",
     "console": [
       {
         "type": "warning",
-        "text": "[.WebGL-0x12400442600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        "text": "[.WebGL-0x10c00484a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
       },
       {
         "type": "warning",
-        "text": "[.WebGL-0x12400452800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
       },
       {
         "type": "warning",
-        "text": "[.WebGL-0x12400452800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
       },
       {
         "type": "warning",
-        "text": "[.WebGL-0x12400452800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+        "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
       },
       {
         "type": "error",
@@ -44,36 +44,36 @@
     "squareReady": true,
     "frame": {
       "frames": 2,
-      "meanMs": 6133.05,
-      "p95Ms": 12249.4
+      "meanMs": 2724.9,
+      "p95Ms": 5433.2
     },
     "render": {
       "calls": 1,
       "triangles": 2,
-      "geometries": 1326,
-      "textures": 217
+      "geometries": 1356,
+      "textures": 218
     }
   },
   "after": {
     "label": "after",
-    "when": "2026-10-31T19:02:24.934Z",
+    "when": "2026-10-31T19:43:04.957Z",
     "viewport": "1440x900",
     "console": [
       {
         "type": "warning",
-        "text": "[.WebGL-0x11c00542600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        "text": "[.WebGL-0x1340043f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
       },
       {
         "type": "warning",
-        "text": "[.WebGL-0x11c0053fc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
       },
       {
         "type": "warning",
-        "text": "[.WebGL-0x11c0053fc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
       },
       {
         "type": "warning",
-        "text": "[.WebGL-0x11c0053fc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+        "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
       },
       {
         "type": "error",
@@ -98,15 +98,35 @@
     },
     "squareReady": true,
     "frame": {
-      "frames": 1,
-      "meanMs": 13932.8,
-      "p95Ms": 13932.8
+      "frames": 3,
+      "meanMs": 1583.27,
+      "p95Ms": 2333.3
     },
     "render": {
       "calls": 1,
       "triangles": 2,
-      "geometries": 1295,
-      "textures": 235
+      "geometries": 1267,
+      "textures": 236
     }
+  },
+  "renderTiming": {
+    "how": "scratchpad rtime.cjs: 12 synchronous renderer.render(scene, camera) from the arrival view (SQ.z+SQ.h-12) at 1440x900, each closed by a 1-px readPixels, first 2 dropped; headless SwiftShader, same machine, back to back (load average ~35-60, 20 agents running)",
+    "before": {
+      "page": "index.html without the three square script tags",
+      "medianMs": 389.7,
+      "meanMs": 745.2,
+      "minMs": 286.4,
+      "drawCalls": 1399,
+      "triangles": 1045374
+    },
+    "after": {
+      "page": "index.html",
+      "medianMs": 347.8,
+      "meanMs": 370.4,
+      "minMs": 323.6,
+      "drawCalls": 1401,
+      "triangles": 1216620
+    },
+    "note": "rAF frame time under this load is 1-3 frames per 3 s on both pages, so it is noise; the forced-render minimum (+13%) and the triangle count (+16.4%) are the comparable numbers."
   }
 }

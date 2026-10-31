@@ -196,6 +196,22 @@
     return hidden;
   }
 
+  // On a phone held upright the follow camera's lifted FOV puts the lantern strings (LAMP_H 12.5, walk.js) across
+  // the top fifth of the frame, right behind the HUD's "THE SQUARE" block (lead, 2026-11-01; first try hid only
+  // the west and east strings and after-phone.png still showed the north string behind the HUD lines). In
+  // portrait every string steps aside; the four posts and their bulbs stay. Landscape keeps them all.
+  function portraitLanterns(ctx) {
+    const { square } = ctx, verm = S.C('verm').getHex(), strings = [];
+    square.children.forEach(o => {
+      if (o.isMesh && o.material && o.material.isMeshBasicMaterial && o.material.color.getHex() === verm && o.geometry.type === 'SphereGeometry') strings.push(o);
+    });
+    const mq = window.matchMedia ? window.matchMedia('(orientation: portrait)') : null;
+    const apply = () => { const p = mq ? mq.matches : innerHeight > innerWidth; strings.forEach(o => { o.visible = !p; }); };
+    apply();
+    if (mq && mq.addEventListener) mq.addEventListener('change', apply); else window.addEventListener('resize', apply);
+    SQUARE.stats.lanterns = strings.length;
+  }
+
   // ── build ────────────────────────────────────────────────────────────────────────────────────
   function build(ctx) {
     const { square, SQ, GATES, gateArch } = ctx;
@@ -209,11 +225,12 @@
       catch (e) { console.error('square-paving failed; keeping the old floor', e); }
     }
     // light
-    if (window.SQUARE_LIGHT && window.RIG) {
+    if (window.SQUARE_LIGHT && window.RIG && new URLSearchParams(location.search).get('sqlight') !== '0') {   // ?sqlight=0 turns it off for A/B
       try { window.SQUARE_LIGHT.build(S, SQ, window.RIG); SQUARE.light = true; }
       catch (e) { console.error('square-light failed', e); }
     }
     SQUARE.hidden = retire(ctx, paved);
+    portraitLanterns(ctx);
 
     let pending = 2;
     const done = () => { if (--pending === 0) { SQUARE.ready = true; SQUARE.stats.buildMs = +(performance.now() - t0).toFixed(1); } };
@@ -257,6 +274,7 @@
       const sMat = new THREE.MeshLambertMaterial({ map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.18, side: THREE.DoubleSide });
       const bm = new THREE.Mesh(quads(boards.concat(vquads)), S.withFog(sMat));
       bm.receiveShadow = true; bm.userData.sq = true; root.add(bm);
+      bm.raycast = () => {};                      // the boards lie on the bays, which already stop the rays
       SQUARE.stats.bays = bays.length; SQUARE.stats.storeys = storeys.length; SQUARE.stats.vsigns = vs.length;
       done();
     });
@@ -298,10 +316,11 @@
     M.load('sq-scooter', gltf => {
       M.lambertize(gltf.scene);
       const rows = [
-        { a0: SQ.gate + 3.2, a1: SQ.h - 3, at: a => [SQ.x + a, SQ.z - SQ.h + 1.15], r: Math.PI },
-        { a0: -(SQ.h - 3), a1: -(SQ.gate + 3.2), at: a => [SQ.x + a, SQ.z - SQ.h + 1.15], r: Math.PI },
-        { a0: SQ.gate + 3.2, a1: SQ.h - 4, at: a => [SQ.x - SQ.h + 1.15, SQ.z + a], r: -Math.PI / 2 },
-        { a0: SQ.gate + 3.2, a1: SQ.h - 4, at: a => [SQ.x + SQ.h - 1.15, SQ.z + a], r: Math.PI / 2 },
+        { a0: SQ.gate + 3.2, a1: SQ.h - 6, at: a => [SQ.x + a, SQ.z - SQ.h + 1.15], r: Math.PI },
+        { a0: -(SQ.h - 6), a1: -(SQ.gate + 3.2), at: a => [SQ.x + a, SQ.z - SQ.h + 1.15], r: Math.PI },
+        // short rows on the west and east walls (each scooter is 1.4k triangles a copy: the frame budget)
+        { a0: SQ.gate + 3.2, a1: SQ.gate + 9, at: a => [SQ.x - SQ.h + 1.15, SQ.z + a], r: -Math.PI / 2 },
+        { a0: SQ.gate + 3.2, a1: SQ.gate + 9, at: a => [SQ.x + SQ.h - 1.15, SQ.z + a], r: Math.PI / 2 },
       ];
       const sets = { scooterA: [], scooterB: [], scooterC: [] };
       rows.forEach(rw => { for (let a = rw.a0; a <= rw.a1; a += 0.78) {
@@ -357,6 +376,7 @@
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1));
       const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.userData.sq = true; root.add(m);
+      m.raycast = () => {};                       // a wire hides nothing and stops nobody (walk.js rays every solid)
       SQUARE.stats.cableTris = nIdx / 3;
     })();
 
@@ -365,7 +385,7 @@
       let last = performance.now();
       const tick = now => {
         const dt = Math.min(0.1, (now - last) / 1000); last = now;
-        const on = !!(window.WALK && window.WALK.on && window.WALK.where === 'square');
+        const on = !!(window.WALK && window.WALK.on && window.WALK.where === 'square' && square.visible);
         try { window.SQUARE_LIGHT.update(dt, on); } catch (e) { console.error(e); SQUARE.light = false; return; }
         requestAnimationFrame(tick);
       };
@@ -373,32 +393,34 @@
     }
   }
 
-  // the gate's name board, per style
+  // the gate's name board, per style. English is the headline and the Chinese name the smaller secondary line
+  // (CJ's rule, as in walk.js gateSign: "English copy, Chinese small").
   function gateBoard(ctx, G, style) {
     const P = ctx.P || S.PALETTE, ZH = ctx.FONT_ZH, EN = ctx.FONT_EN;
     return (g, W, H) => {
-      if (style === 'ximen') {                    // the pedestrian-zone light box: bright, colourful, WELCOME
+      if (style === 'ximen') {                    // the pedestrian-zone light box: bright, colourful
         const gr = g.createLinearGradient(0, 0, W, 0);
         gr.addColorStop(0, '#ffd76a'); gr.addColorStop(0.5, '#ff8fa3'); gr.addColorStop(1, '#8ecbff');
         g.fillStyle = gr; g.fillRect(0, 0, W, H);
         g.fillStyle = P.verm; g.fillRect(0, H * 0.82, W, H * 0.18);
         g.fillStyle = P.ink; g.textBaseline = 'middle';
-        g.textAlign = 'left'; g.font = `700 ${Math.round(H * 0.62)}px ${ZH}`; g.fillText(G.zh, W * 0.04, H * 0.42);
-        g.textAlign = 'right'; g.font = `700 ${Math.round(H * 0.3)}px ${EN}`; g.fillText('WELCOME · ' + G.en, W * 0.96, H * 0.3);
-        g.font = `400 ${Math.round(H * 0.2)}px ${EN}`; g.fillText(G.years + ' · ' + G.line, W * 0.96, H * 0.6);
-        g.fillStyle = P.bone; g.font = `700 ${Math.round(H * 0.12)}px ${EN}`; g.textAlign = 'center'; g.fillText('PEDESTRIAN ZONE  徒步區', W / 2, H * 0.91);
+        g.textAlign = 'left'; g.font = `700 ${Math.round(H * 0.5)}px ${EN}`; g.fillText('WELCOME TO ' + G.en, W * 0.04, H * 0.36);
+        g.font = `400 ${Math.round(H * 0.17)}px ${EN}`; g.fillText(G.years + ' · ' + G.line, W * 0.04, H * 0.7);
+        g.textAlign = 'right'; g.font = `700 ${Math.round(H * 0.32)}px ${ZH}`; g.fillText(G.zh, W * 0.96, H * 0.42);
+        g.fillStyle = P.bone; g.font = `700 ${Math.round(H * 0.12)}px ${EN}`; g.textAlign = 'center'; g.fillText('PEDESTRIAN ZONE · 徒步區', W / 2, H * 0.91);
       } else if (style === 'dadao') {             // a carved stone name panel
         g.fillStyle = P.bone; g.fillRect(0, 0, W, H);
         g.strokeStyle = P.brick; g.lineWidth = H * 0.06; g.strokeRect(H * 0.06, H * 0.06, W - H * 0.12, H - H * 0.12);
         g.fillStyle = P.brick; g.textBaseline = 'middle'; g.textAlign = 'center';
-        g.font = `700 ${Math.round(H * 0.5)}px ${ZH}`; g.fillText(G.zh, W / 2, H * 0.42);
-        g.font = `700 ${Math.round(H * 0.17)}px ${EN}`; g.fillText(G.en + ' · ' + G.years, W / 2, H * 0.78);
+        g.font = `700 ${Math.round(H * 0.4)}px ${EN}`; g.fillText(G.en, W / 2, H * 0.38);
+        g.font = `700 ${Math.round(H * 0.2)}px ${ZH}`; g.fillText(G.zh + ' · ' + G.years, W / 2, H * 0.74);
       } else {                                    // 信義: a dark band with light lettering
         g.fillStyle = P.ink; g.fillRect(0, 0, W, H);
         g.fillStyle = P.glass; g.fillRect(0, H * 0.9, W, H * 0.1);
         g.fillStyle = P.bone; g.textBaseline = 'middle';
-        g.textAlign = 'left'; g.font = `700 ${Math.round(H * 0.6)}px ${ZH}`; g.fillText(G.zh, W * 0.04, H * 0.47);
-        g.textAlign = 'right'; g.font = `700 ${Math.round(H * 0.34)}px ${EN}`; g.fillText(G.en + '  ' + G.years, W * 0.96, H * 0.47);
+        g.textAlign = 'left'; g.font = `700 ${Math.round(H * 0.56)}px ${EN}`; g.fillText(G.en, W * 0.04, H * 0.47);
+        g.textAlign = 'right'; g.font = `400 ${Math.round(H * 0.3)}px ${EN}`; g.fillText(G.years + ' · ' + G.line, W * 0.7, H * 0.47);
+        g.font = `700 ${Math.round(H * 0.4)}px ${ZH}`; g.fillText(G.zh, W * 0.96, H * 0.47);
       }
     };
   }

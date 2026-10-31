@@ -79,6 +79,29 @@
     return m;
   }
 
+  // one draw call per material instead of one per quad (38 quads → 5 meshes): bake each quad's transform
+  // into its vertices and concatenate. No BufferGeometryUtils (no build step), so by hand.
+  function mergeByMaterial() {
+    const byMat = new Map();
+    group.children.slice().forEach(m => { if (!byMat.has(m.material)) byMat.set(m.material, []); byMat.get(m.material).push(m); });
+    byMat.forEach((list, mat) => {
+      const pos = [], uv = [], idx = []; let base = 0, order = list[0].renderOrder;
+      list.forEach(m => {
+        m.updateMatrix();
+        const g = m.geometry.clone().applyMatrix4(m.matrix), P = g.attributes.position, U = g.attributes.uv, I = g.index;
+        for (let i = 0; i < P.count; i++) { pos.push(P.getX(i), P.getY(i), P.getZ(i)); uv.push(U.getX(i), U.getY(i)); }
+        for (let i = 0; i < I.count; i++) idx.push(I.getX(i) + base);
+        base += P.count; group.remove(m); m.geometry.dispose(); g.dispose();
+      });
+      const geo = new T.BufferGeometry();
+      geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+      geo.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+      geo.setIndex(idx); geo.computeBoundingSphere();
+      const mesh = new T.Mesh(geo, mat); mesh.renderOrder = order; group.add(mesh);
+    });
+    stats.drawCalls = group.children.length;
+  }
+
   function build(S, SQ, R) {
     if (group) return group;
     const scene = S.scene, C = S.C;
@@ -126,6 +149,8 @@
     [[-16, -16], [16, -16], [-16, 16], [16, 16]].forEach(([dx, dz]) => {
       quad(postMat, SQ.x + dx, SQ.z + dz, 1.6, 1.6, 0, 1, Y_AO + 0.003, 1); stats.aoDecals++;
     });
+
+    mergeByMaterial();
 
     // the engine's sun: the one shadow-casting DirectionalLight in the scene (app.js `key`)
     scene.traverse(o => { if (!sun && o.isDirectionalLight && o.castShadow) sun = o; });

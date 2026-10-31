@@ -1,5 +1,7 @@
 // Headless captures of the walk-mode square from three fixed views, plus rAF frame time.
 // Usage: node scripts/capture-square.cjs <label> <port> [page]
+//   before-shots: make a page without the square scripts first, e.g.
+//   grep -v 'square-paving.js\|square-light.js\|src="square.js"' index.html > _before-index.html  (delete it after)
 //   writes research/blender-detail/square/<label>-1..3.png and merges { <label>: {...} } into
 //   research/blender-detail/square/metrics.json (mean / p95 frame ms over 3 s, console errors).
 // Views (the girl is placed through window.__walk.st, the same state walk.js steps every frame):
@@ -20,7 +22,7 @@ const out = path.resolve(__dirname, '..', 'research/blender-detail/square');
 const VIEWS = [
   { n: 1, name: 'arrival',    dx: 0,   dz: 14, h: 0,           pitch: 0.18 },
   { n: 2, name: 'west-gate',  dx: 12,  dz: 3,  h: Math.PI / 2, pitch: 0.16 },
-  { n: 3, name: 'north-gate', dx: 4,   dz: 12, h: 0,           pitch: 0.16 },
+  { n: 3, name: 'north-gate', dx: -2,  dz: 4,  h: 0,           pitch: 0.16 },   // between the gallery walls
 ];
 const frames = (p, n) => p.evaluate(n => new Promise(r => { let k = 0; const f = () => ++k >= n ? r() : requestAnimationFrame(f); requestAnimationFrame(f); setTimeout(r, 20000); }), n);
 
@@ -50,6 +52,13 @@ const frames = (p, n) => p.evaluate(n => new Promise(r => { let k = 0; const f =
       await p.screenshot({ path: path.join(out, `${label}-${v.n}.png`), timeout: 240000 });
       res.views[v.n] = v.name;
     }
+    // phone: 390×844 at the arrival spot, HUD shown (the lanterns-behind-the-HUD check)
+    await p.setViewportSize({ width: 390, height: 844 });
+    await p.evaluate(() => { const st = document.querySelector('style:last-of-type'); if (st && /walkHud/.test(st.textContent)) st.remove(); });
+    await p.evaluate(() => { const W = window.__walk, st = W.st, SQ = W.SQ; st.x = SQ.x; st.z = SQ.z + SQ.h - 12; st.h = st.yaw = 0; st.pitch = 0.28; });
+    await frames(p, 8);
+    await p.screenshot({ path: path.join(out, `${label}-phone.png`), timeout: 240000 });
+    await p.setViewportSize({ width: 1440, height: 900 });
     // frame time: view 1, 3 s of rAF
     await p.evaluate(() => { const W = window.__walk, st = W.st, SQ = W.SQ; st.x = SQ.x; st.z = SQ.z + 20; st.h = st.yaw = 0; });
     await frames(p, 8);
