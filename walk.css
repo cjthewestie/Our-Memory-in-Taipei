@@ -19,10 +19,11 @@ body.walk #walkHud { display: block; }
   display: none;
 }
 body.in-square .wk-square { display: block; }
-.wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 30px; font-weight: 700; letter-spacing: 0.3em; }
-.wk-sq-en { font-size: 12px; letter-spacing: 0.3em; margin-top: 2px; }
+.wk-sq-en { font-family: var(--font-big), var(--font-hud), var(--font-sys); font-size: 34px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
+.wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 13px; letter-spacing: 0.3em; margin-top: 4px; opacity: 0.8; }
 .wk-sq-line { font-size: 13px; line-height: 1.6; margin-top: 10px; opacity: 0.92; }
-.wk-sq-line b { color: var(--lamp); font-weight: 600; }
+.wk-sq-line b { color: var(--lamp); font-weight: 600; display: inline-block; min-width: 3.4em; }
+.wk-sq-line i { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-style: normal; font-size: 11px; letter-spacing: 0.2em; opacity: 0.75; margin-left: 4px; }
 
 .wk-hint {
   position: absolute; left: 50%; top: 24%; transform: translateX(-50%);
@@ -74,7 +75,7 @@ body.walk #wkWalk { display: none; }
   .wk-btn { padding: 9px 13px; font-size: 11px; }
   body.walk .hud-music { width: calc(100vw - 190px); }
   .wk-square { max-width: 240px; }
-  .wk-sq-zh { font-size: 24px; }
+  .wk-sq-en { font-size: 28px; }
 }
 
 /* a phone held upright: one thumb column down the right edge, everything at least 44px.
