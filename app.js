@@ -54,6 +54,23 @@
   // `night` term that used to pull the dome, the mountains and a moon toward dusk by chapter 3.
   const ERA_MIX = { red: { lamp: KEY, hemi: HEMI, env: 1.0 }, dadao: { lamp: KEY * 1.09, hemi: HEMI * 0.91, env: 0.95 },
                     tower: { lamp: KEY, hemi: HEMI * 0.68, env: 0.7 } };
+  // walk mode (walk.js) lights by where the girl is. Every place keeps chapter 1's light budget, so no
+  // district is darker than the square; what changes is the sun's colour (held at the square's
+  // luminance) and the sky below. The square is a neutral warm-white daylight; Ximending a rose
+  // morning, Dadaocheng the full gold lamp, Xinyi a cool clear white-blue, as on the tour.
+  // A tinted sun pulls the green channel, which carries most of the luminance, so the districts take
+  // a touch more sky light (hemi) to land at or above the square on the same pavement.
+  const WALK_MIX = { square: { lamp: KEY, hemi: HEMI, env: 1.0 }, red: { lamp: KEY, hemi: HEMI * 1.1, env: 1.0 } };
+  WALK_MIX.dadao = WALK_MIX.tower = WALK_MIX.red;
+  const WALK_SUN = (() => {
+    const c = k => new THREE.Color(PALETTE[k]), y = c => 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+    const square = c('lamp').lerp(c('bone'), 0.55), Y = y(square);
+    const hold = col => col.multiplyScalar(1.04 * Y / y(col));
+    return { square, red: hold(c('lamp').lerp(c('bone'), 0.3).lerp(c('verm'), 0.3)), dadao: hold(c('lamp')),
+             tower: hold(c('bone').lerp(c('sky'), 0.45)), tour: c('lamp') };
+  })();
+  // walk mode eases the light over this long when she passes a gate (the tour keeps ERA_MS)
+  const LIGHT_MS_WALK = 1000;
   // per-era sky (issue #9): the gradient dome is shown, and its horizon takes a bright tint from
   // the chapter's accent, keyed to the scroll year through the era. All three are daylight:
   // childhood a rose morning (verm at the horizon), Spring Festival gold (lamp), the future a
@@ -69,7 +86,8 @@
     return {
       red:   { horizon: base().lerp(verm, 0.16), top: top().lerp(verm, 0.06), mount: mount().lerp(verm, 0.10) },
       dadao: { horizon: base().lerp(lamp, 0.26), top: top().lerp(lamp, 0.08), mount: mount().lerp(lamp, 0.14) },
-      tower: { horizon: base().lerp(sky, 0.18),  top: top().lerp(sky, 0.25),  mount: mount().lerp(sky, 0.20) }
+      tower: { horizon: base().lerp(sky, 0.18),  top: top().lerp(sky, 0.25),  mount: mount().lerp(sky, 0.20) },
+      square: { horizon: base(), top: top(), mount: mount() }          // walk mode's square: the untinted daylight base
     };
   })();
 
@@ -263,6 +281,7 @@
   scene.add(hemi);
   const key = new THREE.DirectionalLight(C('lamp'), 0.9);
   key.position.set(18, 26, 12);
+  const sunLight = key;   // updateWorld's local `key` is the era's name and shadows this light there
   scene.add(key);
   // ── the sun casts shadows (issue #3 step 3) ──────────────────────────────────
   // One shadow map for the whole street: an orthographic box SUN_BOX units square, re-centred every
@@ -1059,8 +1078,8 @@
     parts.forEach(p => { p.fromH = p.mesh.scale.y; p.fromC = p.mesh.material.color.clone(); });
     instSnapshot();
     roadMesh.material.map = roadMaps[ERAS[i].key]; roadMesh.material.needsUpdate = true;
-    mixFrom = { lamp: mixCur.lamp, hemi: mixCur.hemi, env: mixCur.env, print: mixCur.print };
-    skyFrom.horizon.copy(skyCur.horizon); skyFrom.top.copy(skyCur.top); skyFrom.mount.copy(skyCur.mount);
+    mixFrom.print = mixCur.print;
+    if (!(window.WALK && window.WALK.on)) setLight(ERAS[i].key, ERA_MS, instant);
     eraFrom = eraIdx; eraIdx = i;
     libGroups.forEach(g => { g.visible = g.userData.eras.indexOf(ERAS[i].key) >= 0; });
     eraT0 = instant ? now - ERA_MS : now;
@@ -1070,6 +1089,18 @@
   let mixCur = { lamp: KEY * 0.5, hemi: HEMI * 0.65, env: 0.7, print: 1 }, mixFrom = { ...mixCur };
   const skyCur = { horizon: SKY.red.horizon.clone(), top: SKY.red.top.clone(), mount: SKY.red.mount.clone() };
   const skyFrom = { horizon: skyCur.horizon.clone(), top: skyCur.top.clone(), mount: skyCur.mount.clone() };
+  // the light (sun, hemisphere, environment, sky dome, fog colour) has its own key and tween: on the
+  // tour it is the era's and moves with the era in ERA_MS; in walk mode it is where the girl is
+  // (square, red, dadao, tower) and eases over LIGHT_MS_WALK when she passes a gate.
+  let lightKey = 'red', lightWalk = false, lightT0 = -1e9, lightMs = ERA_MS, lightForce = null;
+  const sunCur = WALK_SUN.tour.clone(), sunFrom = sunCur.clone();
+  function setLight(k, ms, instant, walk) {
+    if (k === lightKey && !!walk === lightWalk && !instant) return;
+    mixFrom.lamp = mixCur.lamp; mixFrom.hemi = mixCur.hemi; mixFrom.env = mixCur.env; sunFrom.copy(sunCur);
+    lightWalk = !!walk;
+    skyFrom.horizon.copy(skyCur.horizon); skyFrom.top.copy(skyCur.top); skyFrom.mount.copy(skyCur.mount);
+    lightKey = k; lightMs = ms; lightT0 = instant ? clockNow - ms : clockNow;
+  }
   let envCur = -1;
   function updateWorld(now) {
     const k = Math.min(1, (now - eraT0) / ERA_MS);
@@ -1084,17 +1115,22 @@
       p.mesh.material.color.copy(tmpC.copy(p.fromC).lerp(to.c, e));
       if (p.tileMap && p.mesh.material.map === p.tileMap) fitTile(p.mesh.material, Math.max(p.mesh.scale.x, p.mesh.scale.z), h);
     });
-    // sky, fog, light and print level: held flat inside an era, moved in the same 500ms
-    const M = ERA_MIX[key];
-    mixCur.lamp = mixFrom.lamp + (M.lamp - mixFrom.lamp) * e;
-    mixCur.hemi = mixFrom.hemi + (M.hemi - mixFrom.hemi) * e;
-    mixCur.env = mixFrom.env + (M.env - mixFrom.env) * e;
+    // print level: held flat inside an era, moved in the same 500ms
     mixCur.print = mixFrom.print + (era.uPrint - mixFrom.print) * e;
-    // daylight sky, tinted per chapter (SKY above), moved in the same 500 ms as everything else.
-    const S = SKY[key];
-    skyCur.horizon.copy(skyFrom.horizon).lerp(S.horizon, e);
-    skyCur.top.copy(skyFrom.top).lerp(S.top, e);
-    skyCur.mount.copy(skyFrom.mount).lerp(S.mount, e);
+    // sky, fog and light: held flat inside a light key, moved over its own tween (setLight above)
+    if (window.WALK && window.WALK.on) setLight(lightForce || window.WALK.where, LIGHT_MS_WALK, false, true);
+    const el = ease3(Math.min(1, (now - lightT0) / lightMs));
+    const M = (lightWalk ? WALK_MIX : ERA_MIX)[lightKey];
+    sunCur.copy(sunFrom).lerp(lightWalk ? WALK_SUN[lightKey] : WALK_SUN.tour, el);
+    sunLight.color.copy(sunCur);
+    mixCur.lamp = mixFrom.lamp + (M.lamp - mixFrom.lamp) * el;
+    mixCur.hemi = mixFrom.hemi + (M.hemi - mixFrom.hemi) * el;
+    mixCur.env = mixFrom.env + (M.env - mixFrom.env) * el;
+    // daylight sky, tinted per chapter (SKY above)
+    const S = SKY[lightKey];
+    skyCur.horizon.copy(skyFrom.horizon).lerp(S.horizon, el);
+    skyCur.top.copy(skyFrom.top).lerp(S.top, el);
+    skyCur.mount.copy(skyFrom.mount).lerp(S.mount, el);
     scene.fog.color.copy(skyCur.horizon);
     skyMat.uniforms.horizon.value.copy(skyCur.horizon);
     skyMat.uniforms.top.value.copy(skyCur.top);
@@ -1682,6 +1718,7 @@
                    slow: SLOW, PHOTO, PHOTO_SRC, get frameMs() { return +frameMs.toFixed(2); },
                    get photo() { return { key: photoKey, a: +post.uniforms.uPhotoA.value.toFixed(3), note: +photoNote.style.opacity, window: PHOTO.window, peak: PHOTO.peak, at: photoAt().map(s => ({ key: s.key, at: +s.at.toFixed(4), d: +(progress - s.at).toFixed(4) })), loaded: Object.keys(photoTex).filter(k => photoTex[k].image && photoTex[k].image.width), fit: post.uniforms.uPhotoFit.value.toArray().map(v => +v.toFixed(3)), caption: photoNote.children[0].textContent, credit: photoNote.children[1].textContent }; },
                    get camZ() { return camera.position.z; }, get drift() { return [driftX, driftY, parallaxFade(progress)]; }, get warm() { return warm; }, hitch, get scrollY() { return window.scrollY; }, get man() { return Object.assign({ x: +man.position.x.toFixed(2), y: +man.position.y.toFixed(2), z: +man.position.z.toFixed(2), soles: +man.position.y.toFixed(2), hands: +(man.position.y + MAN_HANDS).toFixed(2), faceX: TOWER.faceX ? +TOWER.faceX(man.position.y).toFixed(2) : null, screen: (() => { const v = man.position.clone().project(camera); return [Math.round((v.x + 1) / 2 * innerWidth), Math.round((1 - v.y) / 2 * innerHeight)]; })() }, manState); }, get print() { return mixCur.print; }, BOUNDS, jumpToYear,
+                   get light() { return { key: lightKey, k: Math.min(1, (clockNow - lightT0) / lightMs), ms: lightMs }; }, set lightAs(k) { lightForce = k; },
                    get opening() { return openState; }, get portrait() { return portraitState; }, PORTRAIT, get labelMinY() { return labelMinY; }, get camera() { return camera; }, get labels() { return labels; },
                    get shadow() { let c = 0, r = 0, t = 0, black = 0; scene.traverse(o => { if (o.isMesh) { t++; if (o.castShadow) c++; if (o.receiveShadow) r++; const m = Array.isArray(o.material) ? o.material[0] : o.material; if (m && m.vertexColors && o.geometry && !o.geometry.attributes.color) black++; } });
                      return { enabled: renderer.shadowMap.enabled, lightCasts: key.castShadow, meshes: t, casters: c, receivers: r, uncoloured: black, map: !!key.shadow.map, size: key.shadow.mapSize.x,
