@@ -1012,8 +1012,9 @@
     for (let i = 0; i < STREAM_N; i++) stream.p.push({ t: rnd(), rate: 0.045 + rnd() * 0.05, jx: (rnd() - 0.5) * 1.2, jy: (rnd() - 0.5) * 1.2, jz: (rnd() - 0.5) * 1.2, bright: rnd() });
   }
   function updateParticles(dt, now, key) {
-    sparks.mesh.visible = key === 'dadao';
-    stream.mesh.visible = key === 'tower' && !!streamCurve;
+    const still = REDUCED_MOTION.matches;                             // a11y: no drifting sparks for reduced motion
+    sparks.mesh.visible = key === 'dadao' && !still;
+    stream.mesh.visible = key === 'tower' && !!streamCurve && !still;
     if (sparks.mesh.visible) {
       const P = sparks.p, t = now / 1000;
       for (let i = 0; i < SPARK_N; i++) {
@@ -1158,6 +1159,8 @@
   // PARALLAX_FADE of each chapter cut and of the end, so the cuts and the closing shot stay fixed.
   const PARALLAX_FADE = 0.04, PARALLAX_X = 0.6, PARALLAX_Y = 0.3;
   let mouseX = 0, mouseY = 0, driftX = 0, driftY = 0;
+  // a11y: prefers-reduced-motion holds the camera still (no mouse sway) and drops the drifting particles
+  const REDUCED_MOTION = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const camRight = new THREE.Vector3(), camUp = new THREE.Vector3();
   function parallaxFade(u) {
     let f = 1;
@@ -1659,8 +1662,9 @@
       const target = Math.min(1, Math.max(0, window.scrollY / maxScroll()));
       progress += (target - progress) * (1 - Math.exp(-DAMP * dt));
       if (Math.abs(target - progress) < 0.00005) progress = target;
-      driftX += (mouseX * PARALLAX_X - driftX) * (1 - Math.exp(-2 * dt));
-      driftY += (-mouseY * PARALLAX_Y - driftY) * (1 - Math.exp(-2 * dt));
+      const sway = REDUCED_MOTION.matches ? 0 : 1;                       // a11y: reduced motion, no camera sway
+      driftX += (mouseX * PARALLAX_X * sway - driftX) * (1 - Math.exp(-2 * dt));
+      driftY += (-mouseY * PARALLAX_Y * sway - driftY) * (1 - Math.exp(-2 * dt));
       camZ = placeCamera(progress);
     }
     sunFollow(camZ);
