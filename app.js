@@ -1457,12 +1457,24 @@
   // has to take the veil, so once, before the warm-up compiles the programs, fog is switched on for
   // all of them and the veil's two uniforms attached (the sky dome, the mountains and the particle
   // points stay out).
+  // Materials made outside withFog() (memories.js's lantern paper, a plain MeshBasicMaterial) keep
+  // fog on but never got the veil's uniforms, so uFrontier read 0 and a lantern glowed through the
+  // title. They get the uniforms here too. A sprite cannot take the veil (our fog_vertex reads
+  // `transformed`, which the sprite shader lacks), so the lantern glow fades with the fog instead.
   let openFogged = false;
+  const veilSprites = new Set();
+  const hooksVeil = m => m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile;
   function openingFogAll() {
     if (openFogged) return; openFogged = true;
     scene.traverse(o => {
+      if (o.isSprite && o.material && o.material.fog === false) veilSprites.add(o.material);
       if (!o.material || o.isPoints || o.isSprite || o.material === skyMat || o.material === mountainMat) return;
       (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => {
+        if (m.fog !== false && !m.isShaderMaterial && !hooksVeil(m)) {
+          m.onBeforeCompile = shader => { shader.uniforms.uFrontier = FOG_U.frontier; shader.uniforms.uSoft = FOG_U.soft; };
+          m.needsUpdate = true;
+          return;
+        }
         if (m.fog !== false || m.isShaderMaterial) return;           // a ShaderMaterial has no fog uniforms to take it (walk.js's gate glow)
         m.fog = true;
         const prev = m.onBeforeCompile;
@@ -1493,6 +1505,7 @@
     document.body.classList.toggle('loading-street', veilHeld);   // style.css shows "Loading the street…" under the title
     const fog = Math.max(floor, 1 - sm(u / OPENING.fogTo)), title = Math.max(floor, 1 - sm((u - OPENING.titleFrom) / (OPENING.titleTo - OPENING.titleFrom)));
     openState = { fog: +fog.toFixed(3), title: +title.toFixed(3) };
+    veilSprites.forEach(m => { m.opacity = 1 - fog; });
     if (fog > 0.001) {
       FOG_U.frontier.value = camZ + 40 - (1 - fog) * 800; FOG_U.soft.value = 30; scene.fog.density = HAZE_DENSITY + fog * fog * 0.02;
       fogCol.copy(skyCur.horizon).lerp(boneCol, 0.55).lerp(SEPIA, fog * OPEN_SEPIA);
