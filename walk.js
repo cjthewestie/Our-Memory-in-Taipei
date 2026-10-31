@@ -356,7 +356,7 @@
     stickV.x = dx; stickV.y = dy;
     knob.style.transform = `translate(${(dx * rad * 0.55).toFixed(1)}px, ${(dy * rad * 0.55).toFixed(1)}px)`;
   }
-  stick.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); stickV.id = ev.pointerId; stick.setPointerCapture(ev.pointerId); stickAt(ev); });
+  stick.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); stickV.id = ev.pointerId; try { stick.setPointerCapture(ev.pointerId); } catch (e) {} stickAt(ev); });
   stick.addEventListener('pointermove', ev => { if (ev.pointerId === stickV.id) stickAt(ev); });
   const stickEnd = ev => { if (ev.pointerId !== stickV.id) return; stickV.id = null; stickV.x = stickV.y = 0; knob.style.transform = ''; };
   stick.addEventListener('pointerup', stickEnd); stick.addEventListener('pointercancel', stickEnd);
