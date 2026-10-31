@@ -2,7 +2,7 @@
 
 Live example: https://cjthewestie.github.io/Our-Memory-in-Taipei/
 
-"Our Memory in Taipei" is a 3D Taipei street that runs in any web browser. You scroll, and you walk through forty years: Ximending in the 1980s and 1990s, Dadaocheng at Lunar New Year, then Taipei 101. Every building is modelled on a real one, such as the Red House, Dihua Street and Xiahai City God Temple, and the real places carry licensed photographs. Nothing to install. We can build the same kind of online space for your place, so people who cannot visit can still walk through it.
+"Our Memory in Taipei" is a 3D Taipei street that runs in any web browser. You scroll, and you walk through forty years: Ximending in the 1980s and 1990s, Dadaocheng at Lunar New Year, then Taipei 101. Every building is modelled on a real one, such as the Red House, Dihua Street and Xiahai City God Temple, and the real places carry licensed photographs. Visitors can also walk the streets themselves and leave their own memories there as paper lanterns for others to read. Nothing to install. We can build the same kind of online space for your place, so people who cannot visit can still walk through it.
 
 **What we could build for your place**
 
