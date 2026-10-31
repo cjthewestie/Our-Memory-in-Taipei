@@ -242,19 +242,24 @@
   // Reference: 萬年商業大樓 on 西寧南路: a ten-storey concrete slab with a tight window grid,
   // a maze of small shops inside, an ice rink on top, a wall of vertical shop signs on the
   // street face and its name in big characters on the roof.
+  // blender-detail: the slab, fins, chamfered corner, mansard, arcade, blade signs, the roof rink hall
+  // and the board's steel frame are the glb from asset/blender/wannian.py; the name boards and the
+  // shop signs stay canvas on it.
   (() => {
     const z = -124, W = 16, D = 14, ST = 10, FH = 3.3, XF = -9.3;
-    const t = facadeTex(6, 10, 'haze');
-    const p = part(XF - D / 2, 0, z, D, W, only(ALL, ST * FH, 'bone'));
-    p.mesh.material.map = t; p.mesh.material.needsUpdate = true;
-    part(XF - D / 2, ST * FH, z, D + 0.3, W + 0.3, only(ALL, 0.6, 'haze'));
-    part(XF - D / 2 - 2, ST * FH + 0.6, z, D - 6, W - 6, only(ALL, 2.2, 'haze'));  // the rooftop rink hall
-    board(XF - 1, ST * FH + 0.6, z, 12, 3.4, boardTex(1536, 440, 'bone', [{ text: '萬年商業大樓', size: 250, y: 220, col: 'verm' }], 'verm'), ALL, 'x', 0.4);
-    const v = vertTex('萬年', 'verm', 'bone');
-    board(XF + 0.1, 12, z + W / 2 - 1.5, 9 * v.aspect, 9, v.t, ALL, 'x', 0.5);
-    for (let k = 0; k < 7; k++) { const vv = vertTex(['電玩', '冰宮', '唱片', '服飾', '漫畫', '模型', '小吃'][k], k % 2 ? 'bone' : 'lamp', 'ink'); board(XF + 0.1, 4 + (k % 3) * 2.6, z - 6.5 + k * 1.9, 5 * vv.aspect, 5, vv.t, ALL, 'x'); }
-    part(XF - 0.7, 0, z, 1.4, W - 2, only(ALL, 3.6, 'ink'));                       // the dark ground-floor entrance
-    part(XF + 0.02, 3.6, z, 0.1, W - 2, only(ALL, 0.6, 'verm'));
+    const wn = libGroup(ALL);
+    MODELS.load('wannian', gltf => {
+      const root = MODELS.lambertize(gltf.scene);
+      root.position.set(XF - D / 2, 0, z);     // footprint centre
+      root.rotation.y = Math.PI / 2;           // front faces +x, the road; the chamfer at the +z end
+      wn.add(root);
+    });
+    board(XF - 1, ST * FH + 0.35, z, 12, 3.4, boardTex(1536, 440, 'bone', [{ text: '萬年商業大樓', size: 250, y: 220, col: 'verm' }], 'verm'), ALL, 'x', 0.4);
+    // the vertical name sign on the chamfered corner's spine, facing the junction (every photo has it there)
+    const v = vertTex('萬年商業大樓', 'verm', 'bone');
+    const cs = board(XF - 1.159, 12, z + 6.841, 10 * v.aspect, 10, v.t, ALL, 'x', 0.5);
+    cs.mesh.rotation.y = -Math.PI / 4;
+    for (let k = 0; k < 7; k++) { const vv = vertTex(['電玩', '冰宮', '唱片', '服飾', '漫畫', '模型', '小吃'][k], k % 2 ? 'bone' : 'lamp', 'ink'); board(XF + 0.1, 4 + (k % 3) * 2.6, z - 7.1 + k * 1.9, 5 * vv.aspect, 5, vv.t, ALL, 'x'); }
   })();
 
   // ═══ 5. the 1999 pedestrian zone — pavers on the road, bollards, the 西門町 gateway ═══════
