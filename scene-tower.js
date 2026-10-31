@@ -139,22 +139,19 @@
   [-1, 1].forEach(s => part(s * 17.8, 8, -394, 2.4, 2, TW(0.5, 'bone')));
 
   // ── 新光三越 A11 ────────────────────────────────────────────────────────────
-  // The department store across from the 101 podium: a 12-storey block with the big rounded
-  // corner toward the road, an LED wall on the road face, the red square logo near the top.
-  const A11 = { x0: 14, x1: 30, z0: -403, z1: -385, h: 34, r: 6 };
+  // The department store across from the 101 podium: asset/blender/a11.py, built from the photos
+  // (granite piers with stone bands, a glazed corner behind a free-standing steel frame, the 2F
+  // terrace, the cantilever roof, entrance canopies, skywalk doors, the LED wall's backing). The
+  // corner is square: no A11 photo shows a drum. The red logo board, the LED screens and the shop
+  // signs stay canvas, on the faces the model leaves plain. Tower era only.
+  const A11 = { x0: 14, x1: 30, z0: -403, z1: -385, h: 34 };
   (() => {
-    const cx = A11.x0 + A11.r, cz = A11.z1 - A11.r;                      // the rounded corner's axis
-    const fm = () => { const m = lit({ color: C('haze') }); return m; };
-    const body = part((A11.x0 + A11.r + A11.x1) / 2, 0, (A11.z0 + A11.z1) / 2, A11.x1 - A11.x0 - A11.r, A11.z1 - A11.z0, TW(A11.h, 'bone'));
-    const wing = part((A11.x0 + cx) / 2, 0, (A11.z0 + cz) / 2, cx - A11.x0, cz - A11.z0, TW(A11.h, 'bone'));
-    const cyl = new THREE.CylinderGeometry(0.5, 0.5, 1, 24); cyl.translate(0, 0.5, 0);
-    const corner = part(cx, 0, cz, A11.r * 2, A11.r * 2, TW(A11.h, 'bone'), 0, cyl);
-    [[body, 4, 12], [wing, 2, 12], [corner, 10, 12]].forEach(([p, cols, rows]) => {
-      const m = p.mesh.material;
-      m.map = winTex(cols, rows, false, 4); m.map.wrapS = m.map.wrapT = THREE.RepeatWrapping; m.map.repeat.set(1, 1);
-      m.emissive = C('lamp'); m.emissiveMap = winTex(cols, rows, true, 4); m.emissiveIntensity = 0.5; m.needsUpdate = true;
+    const a11Group = libGroup(['tower']);
+    MODELS.load('a11', gltf => {
+      const root = MODELS.lambertize(gltf.scene);
+      root.position.set((A11.x0 + A11.x1) / 2, 0, (A11.z0 + A11.z1) / 2);   // (22, 0, -394), footprint centre
+      a11Group.add(root);
     });
-    part(cx + 1, A11.h, cz - 5, 16, 8, TW(1.2, 'haze'));                   // roof plant
     // the red square logo, road face, near the top
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 256;
     const g = cv.getContext('2d');
@@ -163,8 +160,6 @@
     g.fillText('新光', 128, 78); g.fillText('三越', 128, 178);
     const logo = part(A11.x0 - 0.2, A11.h - 6.5, A11.z0 + 4.5, 0.4, 4.4, TW(4.4, 'verm'));
     logo.mesh.material.map = new THREE.CanvasTexture(cv); logo.mesh.material.emissive = C('verm'); logo.mesh.material.emissiveMap = logo.mesh.material.map; logo.mesh.material.emissiveIntensity = 0.35; logo.mesh.material.needsUpdate = true;
-    // the entrance canopy under the rounded corner, toward the road
-    part(A11.x0 - 1.4, 4.2, (A11.z0 + cz) / 2, 3, cz - A11.z0 - 1, TW(0.3, 'haze'));
   })();
 
   // ── 信義空橋: the elevated skywalks ──────────────────────────────────────────
