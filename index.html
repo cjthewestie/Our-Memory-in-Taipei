@@ -6,6 +6,8 @@
 <title>Our Memory in Taipei</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="photos.css">   <!-- issue #17: the street markers and the photograph panel (photos.js) -->
+<link rel="stylesheet" href="walk.css">     <!-- the square and free walking (walk.js) -->
+<link rel="stylesheet" href="memories.css"> <!-- the visitors' memories (memories.js) -->
 </head>
 <body class="booting in-fog">   <!-- booting: the title screen, painted by style.css before any script runs; app.js lifts it after the first frame -->
   <canvas id="scene"></canvas>
@@ -86,5 +88,8 @@
   <script src="scene-tower.js"></script>
   <script src="music.js"></script>
   <script src="photos.js"></script>   <!-- issue #17: clickable points that show the real place -->
+  <script src="walk.js"></script>                <!-- the square, the gates, free walking; ?tour=1 for the scroll film -->
+  <script src="memories-config.js"></script>     <!-- where memories are stored (Supabase); empty = this browser only -->
+  <script src="memories.js"></script>            <!-- lanterns people leave on the street, and the form to leave one -->
 </body>
 </html>

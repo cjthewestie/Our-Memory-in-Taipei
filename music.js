@@ -268,7 +268,7 @@
     if (mode === 'local' && !unlocked) { if (muted) setMuted(false); unlock(); }   // Click for sound means sound: a phone starts muted (fault 4), and this press must not leave it silent
     else setMuted(!muted);
   }
-  window.addEventListener('keydown', ev => { if ((ev.key === 'm' || ev.key === 'M') && !ev.repeat && !ev.metaKey && !ev.ctrlKey && !ev.altKey && !justGestured) toggle(); });
+  window.addEventListener('keydown', ev => { if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return; if ((ev.key === 'm' || ev.key === 'M') && !ev.repeat && !ev.metaKey && !ev.ctrlKey && !ev.altKey && !justGestured) toggle(); });
   if (el.toggle) el.toggle.addEventListener('click', ev => { ev.stopPropagation(); if (justGestured) { justGestured = false; if (muted) setMuted(false); return; } toggle(); });
   el.buttons.forEach(b => b.addEventListener('click', ev => { ev.stopPropagation(); setDecade(b.dataset.decade); }));
 
