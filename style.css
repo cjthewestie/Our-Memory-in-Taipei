@@ -80,7 +80,7 @@ body.no-webgl .hud-opening { opacity: 1; visibility: visible; color: var(--ink);
 /* the overlay: oversized, left-aligned, generous space, small technical labels, fine rules */
 .hud {
   position: fixed;
-  inset: 0;
+  inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);   /* the corners sit inside the notch and the home bar; 0 on a desktop */
   z-index: 2;
   pointer-events: none;
   padding: clamp(20px, 4vw, 56px);
@@ -380,3 +380,13 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
 .mus-scrub:focus-visible::before { background: var(--hud-fg); }
 .hud-music.scrubbing { user-select: none; -webkit-user-select: none; }
 @media (max-width: 480px) { .mus-bar { gap: 8px; } .mus-track { font-size: 12px; } }
+
+/* a thumb, not a cursor: every music control is at least 44px to touch, the bar's look unchanged (the scrub line and
+   the play square stay where they were drawn, the hit area grows round them) */
+@media (pointer: coarse), (max-width: 480px) {
+  .hud-music .mus-play { width: 44px; height: 44px; }
+  .mus-bar { min-height: 44px; }
+  .mus-scrub { height: 44px; }
+  .hud-music .mus-mute { min-height: 44px; padding-top: 0; padding-bottom: 0; }
+  .hud-music button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+}
