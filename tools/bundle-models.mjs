@@ -14,7 +14,7 @@ import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer';
 import { mergeDocuments, unpartition, dedup, prune } from '@gltf-transform/functions';
 
 const GROUPS = {
-  'bundle-core':     ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree','wannian'],
+  'bundle-core':     ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree','wannian','ximen-gate'],
   'bundle-dadao':    ['dihua-min','dihua-yang','dihua-baroque','dihua-zone2','dadao-entrance','stall','temple','yongle'],
   'bundle-tower':    ['tower101','skywalk','a11','cityhall'],
 };

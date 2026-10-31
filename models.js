@@ -40,7 +40,7 @@
   // gets near (LATE_AT) or LATE_IDLE_MS after the load event, whichever comes first; its models
   // rise out of the ground over the era tween instead of popping in.
   const BUNDLES = {
-    'bundle-core':  { group: 0, names: ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree','wannian'] },
+    'bundle-core':  { group: 0, names: ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree','wannian','ximen-gate'] },
     'bundle-dadao': { group: 1, names: ['dihua-min','dihua-yang','dihua-baroque','dihua-zone2','dadao-entrance','stall','temple','yongle'] },
     'bundle-tower': { group: 2, names: ['tower101','skywalk','a11','cityhall'] },
   };

@@ -278,13 +278,17 @@
     const t = tex(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 16);
     const pv = part(0, 0, (z0 + z1) / 2, 12.4, z0 - z1, only(ALL, 0.08, 'haze'));
     pv.mesh.material.map = t; pv.mesh.material.needsUpdate = true;
-    [-5.4, -3.2, 3.2, 5.4].forEach(x => [z0 + 0.6, z1 - 0.6].forEach(z => bollards.push({ x, z, w: 1, d: 1, h: hOf(1, ALL) })));   // bollards (bollard.glb), the centre kept clear for the girl
-    // the gateway: two posts, a flat arch, the sign
-    [-6.4, 6.4].forEach(x => part(x, 0, z0, 0.5, 0.5, only(ALL, 6.2, 'verm')));
-    const sh = new THREE.Shape(); sh.absarc(0, 0, 1, 0, Math.PI, false); sh.absarc(0, 0, 0.82, Math.PI, 0, true);
-    const arcGeo = new THREE.ExtrudeGeometry(sh, { depth: 1, bevelEnabled: false }); arcGeo.translate(0, 0, -0.5);
-    part(0, 5.4, z0, 6.65, 0.5, only(ALL, 2.2, 'verm'), 0, arcGeo);
-    board(0, 6.3, z0 + 0.3, 5.2, 1.7, boardTex(1024, 336, 'bone', [{ text: '西門町', size: 200, y: 140, col: 'verm' }, { text: '行人徒步區 · SINCE 1999', size: 64, y: 280, col: 'ink' }], 'verm'), ALL, 'z', 0.4);
+    [-4.9, -3.2, 3.2, 4.9].forEach(x => [z0 + 0.6, z1 - 0.6].forEach(z => bollards.push({ x, z, w: 1, d: 1, h: hOf(1, ALL) })));   // bollards (bollard.glb), the centre kept clear for the girl
+    // the gateway: asset/blender/ximen-gate.py, the real 漢中街 gate — two poster-wrapped pillars at x ±6.4,
+    // a deep steel sign frame over a 5.4 clear opening, a planting trough and two floodlight masts on top.
+    // The canvas sign sits on the frame's front panel (front face z0 + 0.50, centred y 7.0).
+    const gate = libGroup(ALL);
+    MODELS.load('ximen-gate', gltf => {
+      const root = MODELS.lambertize(gltf.scene);
+      root.position.set(0, 0, z0);             // front (+z) faces the arriving camera: no rotation
+      gate.add(root);
+    });
+    board(0, 6.15, z0 + 0.57, 5.2, 1.7, boardTex(1024, 336, 'bone', [{ text: '西門町', size: 200, y: 140, col: 'verm' }, { text: '行人徒步區 · SINCE 1999', size: 64, y: 280, col: 'ink' }], 'verm'), ALL, 'z', 0.4);
   })();
 
   // ═══ the shopfronts between: the teammate's Ximending library, with building bodies behind ═
