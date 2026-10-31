@@ -289,7 +289,8 @@
     if (mode === 'local') { const p = players[active]; const d = isFinite(p.duration) ? p.duration : 0; return { t: p.currentTime || 0, d }; }
     return { t: 0, d: 0 };
   }
-  const isPlaying = () => mode === 'youtube' ? (ytState === 1 || ytState === 3) : mode === 'local' && unlocked && !players[active].paused;
+  // a phone primes the local player silently on its first tap (iOS needs that); silent is not playing, so the button still reads Play
+  const isPlaying = () => mode === 'youtube' ? (ytState === 1 || ytState === 3) : mode === 'local' && unlocked && !players[active].paused && !(muted && isPhone());
   const fmt = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   function seek(t) {
     if (ytLive()) yt.seekTo(t, true);                                     // a paused player stays paused, a playing one plays on from there
@@ -303,6 +304,7 @@
     } else if (mode === 'local') {
       if (!unlocked) { if (muted && isPhone()) setMuted(false); unlock(); return; }   // as on the YouTube branch: play on a muted phone means sound on
       const p = players[active];
+      if (muted && isPhone()) { setMuted(false); if (p.paused) { userPaused = false; tryPlay(p); } render(); return; }   // primed but silent: play means sound on, not pause
       if (p.paused) { userPaused = false; if (p.ended) cue(p, cur); tryPlay(p); } else { userPaused = true; p.pause(); }
     }
     render();

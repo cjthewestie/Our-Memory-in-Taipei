@@ -50,6 +50,11 @@
   background: #fff; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); border-radius: 8px; padding: 9px 10px; width: 100%; box-sizing: border-box;
 }
 .mem-field textarea { resize: vertical; min-height: 96px; }
+/* Safari and Chrome draw spin arrows inside a number field and they cover the "1950–2026" hint; Firefox does too */
+.mem-field input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.mem-field input[type=number]::-webkit-inner-spin-button, .mem-field input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+/* iPhone Safari zooms the whole page into any field under 16px when it takes focus, and stays zoomed after */
+@media (pointer: coarse) { .mem-field textarea, .mem-field input[type=text], .mem-field input[type=number] { font-size: 16px; } }
 .mem-field input[type=file] { font-size: 13px; }
 .mem-count { position: absolute; right: 6px; bottom: 6px; font-size: 11px; opacity: 0.8; }
 .mem-row { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
