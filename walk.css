@@ -77,7 +77,52 @@ body.walk #wkWalk { display: none; }
   .wk-sq-zh { font-size: 24px; }
 }
 
-#walkFade { position: fixed; inset: 0; z-index: 50; background: var(--ink); opacity: 0; pointer-events: none; transition: opacity 300ms ease; }
+/* the gate cut (walk.js teleport): the tour's chapter-cut flash, a bright ellipse from the centre whose rim
+   stays thin enough to see the street through, so no frame is ever blank or black. It peaks at 22% (220 ms),
+   when the move happens underneath, holds, then fades out by 1 s. The chapter's title rides in it. */
+#walkFade {
+  position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: 0; visibility: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 75% 70% at 50% 50%,
+    color-mix(in srgb, var(--bone) 97%, transparent) 0%,
+    color-mix(in srgb, var(--bone) 90%, transparent) 42%,
+    color-mix(in srgb, var(--lamp) 55%, transparent) 78%,
+    color-mix(in srgb, var(--lamp) 30%, transparent) 100%);
+}
+#walkFade.on { visibility: visible; animation: wk-flash 1000ms ease-out both; }
+@keyframes wk-flash {
+  0%   { opacity: 0; transform: scale(0.6); }
+  22%  { opacity: 1; transform: scale(1.05); }
+  42%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+.wk-cut { display: flex; align-items: flex-start; gap: 18px; color: var(--ink); font-family: var(--font-hud), var(--font-sys); }
+#walkFade.on .wk-cut { animation: wk-cut 1000ms ease-out both; }
+@keyframes wk-cut {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.92); }
+  14%  { opacity: 1; transform: none; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.wk-cut-col { display: flex; flex-direction: column; gap: 10px; border-top: 1.5px solid var(--ink); padding-top: 10px; min-width: 200px; }
+.wk-cut-n { font-size: 40px; font-weight: 700; letter-spacing: 0.06em; line-height: 1; font-variant-numeric: tabular-nums; }
+.wk-cut-n span { font-size: 15px; font-weight: 400; letter-spacing: 0.3em; margin-left: 0.3em; vertical-align: 0.9em; opacity: 0.6; }
+.wk-cut-name { font-size: 15px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; }
+.wk-cut-years { font-size: 13px; letter-spacing: 0.24em; opacity: 0.7; }
+.wk-cut-zh {
+  font-family: var(--font-zh), var(--font-hud), var(--font-sys); writing-mode: vertical-rl; font-size: 30px; font-weight: 700;
+  letter-spacing: 0.3em; line-height: 1; padding-top: 10px; border-top: 1.5px solid var(--ink);
+}
+@media (max-width: 760px) {
+  .wk-cut { gap: 12px; }
+  .wk-cut-col { min-width: 0; }
+  .wk-cut-n { font-size: 30px; }
+  .wk-cut-name { font-size: 12px; letter-spacing: 0.22em; }
+  .wk-cut-zh { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes wk-flash { 0% { opacity: 0; } 22%, 42% { opacity: 1; } 100% { opacity: 0; } }
+}
 #walkFade.on { opacity: 1; }
 
 /* a portrait phone: the hint sits under her, not over the square's signboard (it fades once she moves) */
