@@ -415,7 +415,7 @@
     const z0 = -263, z1 = -285, zc = (z0 + z1) / 2, xf = -9.3;
     // Issue #5 step 2: the open hall on its columns, floors 2–5 with cut window bands, the
     // stepped floors 6–7, roof slabs, sign frame, plant room, tank and stair tower are the glb
-    // from asset/blender/yongle.py (9.1k triangles); the three text signs stay canvas boards.
+    // from asset/blender/yongle.py (18.9k triangles: brick podium + stair tower); the three text signs stay canvas boards.
     const market = libGroup(ALL);
     MODELS.load('yongle', gltf => {
       const root = MODELS.lambertize(gltf.scene);
