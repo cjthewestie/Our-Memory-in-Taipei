@@ -32,7 +32,7 @@
   // 中華商場 and a 2012 永樂市場 façade); CJ wants warm and crowded frames instead (「溫馨熱鬧」) and
   // sonnet-photos is sourcing them: they replace the two `src` lines below, nothing else changes.
   const PHOTO_SRC = {
-    dadao: { src: 'asset/photos/chunghwa-1961.webp', caption: '中華商場 · 1961, the year it opened · newspaper photograph', credit: 'photo 涂柏辰 / 國立臺灣歷史博物館 · CC BY 3.0 TW' },
+    dadao: { src: 'asset/photos/chunghwa-1961.webp', caption: '中華商場 · 1961, the year it opened · newspaper photograph', credit: 'photo 凃柏辰 / 內容力有限公司 @ 國家文化記憶庫 · CC BY 3.0 TW' },
     tower: { src: 'asset/photos/yongle-2012.webp',   caption: '永樂市場 · 迪化街 Dihua Street · 2012',                 credit: 'photo 玄史生, Wikimedia Commons · CC BY-SA 3.0' },
   };
   const ERA_MS = 500;         // the world re-renders into the next era over this long
@@ -54,6 +54,23 @@
   // `night` term that used to pull the dome, the mountains and a moon toward dusk by chapter 3.
   const ERA_MIX = { red: { lamp: KEY, hemi: HEMI, env: 1.0 }, dadao: { lamp: KEY * 1.09, hemi: HEMI * 0.91, env: 0.95 },
                     tower: { lamp: KEY, hemi: HEMI * 0.68, env: 0.7 } };
+  // walk mode (walk.js) lights by where the girl is. Every place keeps chapter 1's light budget, so no
+  // district is darker than the square; what changes is the sun's colour (held at the square's
+  // luminance) and the sky below. The square is a neutral warm-white daylight; Ximending a rose
+  // morning, Dadaocheng the full gold lamp, Xinyi a cool clear white-blue, as on the tour.
+  // A tinted sun pulls the green channel, which carries most of the luminance, so the districts take
+  // a touch more sky light (hemi) to land at or above the square on the same pavement.
+  const WALK_MIX = { square: { lamp: KEY, hemi: HEMI, env: 1.0 }, red: { lamp: KEY, hemi: HEMI * 1.1, env: 1.0 } };
+  WALK_MIX.dadao = WALK_MIX.tower = WALK_MIX.red;
+  const WALK_SUN = (() => {
+    const c = k => new THREE.Color(PALETTE[k]), y = c => 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+    const square = c('lamp').lerp(c('bone'), 0.55), Y = y(square);
+    const hold = col => col.multiplyScalar(1.04 * Y / y(col));
+    return { square, red: hold(c('lamp').lerp(c('bone'), 0.3).lerp(c('verm'), 0.3)), dadao: hold(c('lamp')),
+             tower: hold(c('bone').lerp(c('sky'), 0.45)), tour: c('lamp') };
+  })();
+  // walk mode eases the light over this long when she passes a gate (the tour keeps ERA_MS)
+  const LIGHT_MS_WALK = 1000;
   // per-era sky (issue #9): the gradient dome is shown, and its horizon takes a bright tint from
   // the chapter's accent, keyed to the scroll year through the era. All three are daylight:
   // childhood a rose morning (verm at the horizon), Spring Festival gold (lamp), the future a
@@ -69,7 +86,8 @@
     return {
       red:   { horizon: base().lerp(verm, 0.16), top: top().lerp(verm, 0.06), mount: mount().lerp(verm, 0.10) },
       dadao: { horizon: base().lerp(lamp, 0.26), top: top().lerp(lamp, 0.08), mount: mount().lerp(lamp, 0.14) },
-      tower: { horizon: base().lerp(sky, 0.18),  top: top().lerp(sky, 0.25),  mount: mount().lerp(sky, 0.20) }
+      tower: { horizon: base().lerp(sky, 0.18),  top: top().lerp(sky, 0.25),  mount: mount().lerp(sky, 0.20) },
+      square: { horizon: base(), top: top(), mount: mount() }          // walk mode's square: the untinted daylight base
     };
   })();
 
@@ -263,6 +281,7 @@
   scene.add(hemi);
   const key = new THREE.DirectionalLight(C('lamp'), 0.9);
   key.position.set(18, 26, 12);
+  const sunLight = key;   // updateWorld's local `key` is the era's name and shadows this light there
   scene.add(key);
   // ── the sun casts shadows (issue #3 step 3) ──────────────────────────────────
   // One shadow map for the whole street: an orthographic box SUN_BOX units square, re-centred every
@@ -993,8 +1012,9 @@
     for (let i = 0; i < STREAM_N; i++) stream.p.push({ t: rnd(), rate: 0.045 + rnd() * 0.05, jx: (rnd() - 0.5) * 1.2, jy: (rnd() - 0.5) * 1.2, jz: (rnd() - 0.5) * 1.2, bright: rnd() });
   }
   function updateParticles(dt, now, key) {
-    sparks.mesh.visible = key === 'dadao';
-    stream.mesh.visible = key === 'tower' && !!streamCurve;
+    const still = REDUCED_MOTION.matches;                             // a11y: no drifting sparks for reduced motion
+    sparks.mesh.visible = key === 'dadao' && !still;
+    stream.mesh.visible = key === 'tower' && !!streamCurve && !still;
     if (sparks.mesh.visible) {
       const P = sparks.p, t = now / 1000;
       for (let i = 0; i < SPARK_N; i++) {
@@ -1059,8 +1079,8 @@
     parts.forEach(p => { p.fromH = p.mesh.scale.y; p.fromC = p.mesh.material.color.clone(); });
     instSnapshot();
     roadMesh.material.map = roadMaps[ERAS[i].key]; roadMesh.material.needsUpdate = true;
-    mixFrom = { lamp: mixCur.lamp, hemi: mixCur.hemi, env: mixCur.env, print: mixCur.print };
-    skyFrom.horizon.copy(skyCur.horizon); skyFrom.top.copy(skyCur.top); skyFrom.mount.copy(skyCur.mount);
+    mixFrom.print = mixCur.print;
+    if (!(window.WALK && window.WALK.on)) setLight(ERAS[i].key, ERA_MS, instant);
     eraFrom = eraIdx; eraIdx = i;
     libGroups.forEach(g => { g.visible = g.userData.eras.indexOf(ERAS[i].key) >= 0; });
     eraT0 = instant ? now - ERA_MS : now;
@@ -1070,6 +1090,18 @@
   let mixCur = { lamp: KEY * 0.5, hemi: HEMI * 0.65, env: 0.7, print: 1 }, mixFrom = { ...mixCur };
   const skyCur = { horizon: SKY.red.horizon.clone(), top: SKY.red.top.clone(), mount: SKY.red.mount.clone() };
   const skyFrom = { horizon: skyCur.horizon.clone(), top: skyCur.top.clone(), mount: skyCur.mount.clone() };
+  // the light (sun, hemisphere, environment, sky dome, fog colour) has its own key and tween: on the
+  // tour it is the era's and moves with the era in ERA_MS; in walk mode it is where the girl is
+  // (square, red, dadao, tower) and eases over LIGHT_MS_WALK when she passes a gate.
+  let lightKey = 'red', lightWalk = false, lightT0 = -1e9, lightMs = ERA_MS, lightForce = null;
+  const sunCur = WALK_SUN.tour.clone(), sunFrom = sunCur.clone();
+  function setLight(k, ms, instant, walk) {
+    if (k === lightKey && !!walk === lightWalk && !instant) return;
+    mixFrom.lamp = mixCur.lamp; mixFrom.hemi = mixCur.hemi; mixFrom.env = mixCur.env; sunFrom.copy(sunCur);
+    lightWalk = !!walk;
+    skyFrom.horizon.copy(skyCur.horizon); skyFrom.top.copy(skyCur.top); skyFrom.mount.copy(skyCur.mount);
+    lightKey = k; lightMs = ms; lightT0 = instant ? clockNow - ms : clockNow;
+  }
   let envCur = -1;
   function updateWorld(now) {
     const k = Math.min(1, (now - eraT0) / ERA_MS);
@@ -1084,17 +1116,22 @@
       p.mesh.material.color.copy(tmpC.copy(p.fromC).lerp(to.c, e));
       if (p.tileMap && p.mesh.material.map === p.tileMap) fitTile(p.mesh.material, Math.max(p.mesh.scale.x, p.mesh.scale.z), h);
     });
-    // sky, fog, light and print level: held flat inside an era, moved in the same 500ms
-    const M = ERA_MIX[key];
-    mixCur.lamp = mixFrom.lamp + (M.lamp - mixFrom.lamp) * e;
-    mixCur.hemi = mixFrom.hemi + (M.hemi - mixFrom.hemi) * e;
-    mixCur.env = mixFrom.env + (M.env - mixFrom.env) * e;
+    // print level: held flat inside an era, moved in the same 500ms
     mixCur.print = mixFrom.print + (era.uPrint - mixFrom.print) * e;
-    // daylight sky, tinted per chapter (SKY above), moved in the same 500 ms as everything else.
-    const S = SKY[key];
-    skyCur.horizon.copy(skyFrom.horizon).lerp(S.horizon, e);
-    skyCur.top.copy(skyFrom.top).lerp(S.top, e);
-    skyCur.mount.copy(skyFrom.mount).lerp(S.mount, e);
+    // sky, fog and light: held flat inside a light key, moved over its own tween (setLight above)
+    if (window.WALK && window.WALK.on) setLight(lightForce || window.WALK.where, LIGHT_MS_WALK, false, true);
+    const el = ease3(Math.min(1, (now - lightT0) / lightMs));
+    const M = (lightWalk ? WALK_MIX : ERA_MIX)[lightKey];
+    sunCur.copy(sunFrom).lerp(lightWalk ? WALK_SUN[lightKey] : WALK_SUN.tour, el);
+    sunLight.color.copy(sunCur);
+    mixCur.lamp = mixFrom.lamp + (M.lamp - mixFrom.lamp) * el;
+    mixCur.hemi = mixFrom.hemi + (M.hemi - mixFrom.hemi) * el;
+    mixCur.env = mixFrom.env + (M.env - mixFrom.env) * el;
+    // daylight sky, tinted per chapter (SKY above)
+    const S = SKY[lightKey];
+    skyCur.horizon.copy(skyFrom.horizon).lerp(S.horizon, el);
+    skyCur.top.copy(skyFrom.top).lerp(S.top, el);
+    skyCur.mount.copy(skyFrom.mount).lerp(S.mount, el);
     scene.fog.color.copy(skyCur.horizon);
     skyMat.uniforms.horizon.value.copy(skyCur.horizon);
     skyMat.uniforms.top.value.copy(skyCur.top);
@@ -1122,6 +1159,8 @@
   // PARALLAX_FADE of each chapter cut and of the end, so the cuts and the closing shot stay fixed.
   const PARALLAX_FADE = 0.04, PARALLAX_X = 0.6, PARALLAX_Y = 0.3;
   let mouseX = 0, mouseY = 0, driftX = 0, driftY = 0;
+  // a11y: prefers-reduced-motion holds the camera still (no mouse sway) and drops the drifting particles
+  const REDUCED_MOTION = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   const camRight = new THREE.Vector3(), camUp = new THREE.Vector3();
   function parallaxFade(u) {
     let f = 1;
@@ -1457,12 +1496,24 @@
   // has to take the veil, so once, before the warm-up compiles the programs, fog is switched on for
   // all of them and the veil's two uniforms attached (the sky dome, the mountains and the particle
   // points stay out).
+  // Materials made outside withFog() (memories.js's lantern paper, a plain MeshBasicMaterial) keep
+  // fog on but never got the veil's uniforms, so uFrontier read 0 and a lantern glowed through the
+  // title. They get the uniforms here too. A sprite cannot take the veil (our fog_vertex reads
+  // `transformed`, which the sprite shader lacks), so the lantern glow fades with the fog instead.
   let openFogged = false;
+  const veilSprites = new Set();
+  const hooksVeil = m => m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile;
   function openingFogAll() {
     if (openFogged) return; openFogged = true;
     scene.traverse(o => {
+      if (o.isSprite && o.material && o.material.fog === false) veilSprites.add(o.material);
       if (!o.material || o.isPoints || o.isSprite || o.material === skyMat || o.material === mountainMat) return;
       (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => {
+        if (m.fog !== false && !m.isShaderMaterial && !hooksVeil(m)) {
+          m.onBeforeCompile = shader => { shader.uniforms.uFrontier = FOG_U.frontier; shader.uniforms.uSoft = FOG_U.soft; };
+          m.needsUpdate = true;
+          return;
+        }
         if (m.fog !== false || m.isShaderMaterial) return;           // a ShaderMaterial has no fog uniforms to take it (walk.js's gate glow)
         m.fog = true;
         const prev = m.onBeforeCompile;
@@ -1493,6 +1544,7 @@
     document.body.classList.toggle('loading-street', veilHeld);   // style.css shows "Loading the street…" under the title
     const fog = Math.max(floor, 1 - sm(u / OPENING.fogTo)), title = Math.max(floor, 1 - sm((u - OPENING.titleFrom) / (OPENING.titleTo - OPENING.titleFrom)));
     openState = { fog: +fog.toFixed(3), title: +title.toFixed(3) };
+    veilSprites.forEach(m => { m.opacity = 1 - fog; });
     if (fog > 0.001) {
       FOG_U.frontier.value = camZ + 40 - (1 - fog) * 800; FOG_U.soft.value = 30; scene.fog.density = HAZE_DENSITY + fog * fog * 0.02;
       fogCol.copy(skyCur.horizon).lerp(boneCol, 0.55).lerp(SEPIA, fog * OPEN_SEPIA);
@@ -1610,8 +1662,9 @@
       const target = Math.min(1, Math.max(0, window.scrollY / maxScroll()));
       progress += (target - progress) * (1 - Math.exp(-DAMP * dt));
       if (Math.abs(target - progress) < 0.00005) progress = target;
-      driftX += (mouseX * PARALLAX_X - driftX) * (1 - Math.exp(-2 * dt));
-      driftY += (-mouseY * PARALLAX_Y - driftY) * (1 - Math.exp(-2 * dt));
+      const sway = REDUCED_MOTION.matches ? 0 : 1;                       // a11y: reduced motion, no camera sway
+      driftX += (mouseX * PARALLAX_X * sway - driftX) * (1 - Math.exp(-2 * dt));
+      driftY += (-mouseY * PARALLAX_Y * sway - driftY) * (1 - Math.exp(-2 * dt));
       camZ = placeCamera(progress);
     }
     sunFollow(camZ);
@@ -1669,6 +1722,7 @@
                    slow: SLOW, PHOTO, PHOTO_SRC, get frameMs() { return +frameMs.toFixed(2); },
                    get photo() { return { key: photoKey, a: +post.uniforms.uPhotoA.value.toFixed(3), note: +photoNote.style.opacity, window: PHOTO.window, peak: PHOTO.peak, at: photoAt().map(s => ({ key: s.key, at: +s.at.toFixed(4), d: +(progress - s.at).toFixed(4) })), loaded: Object.keys(photoTex).filter(k => photoTex[k].image && photoTex[k].image.width), fit: post.uniforms.uPhotoFit.value.toArray().map(v => +v.toFixed(3)), caption: photoNote.children[0].textContent, credit: photoNote.children[1].textContent }; },
                    get camZ() { return camera.position.z; }, get drift() { return [driftX, driftY, parallaxFade(progress)]; }, get warm() { return warm; }, hitch, get scrollY() { return window.scrollY; }, get man() { return Object.assign({ x: +man.position.x.toFixed(2), y: +man.position.y.toFixed(2), z: +man.position.z.toFixed(2), soles: +man.position.y.toFixed(2), hands: +(man.position.y + MAN_HANDS).toFixed(2), faceX: TOWER.faceX ? +TOWER.faceX(man.position.y).toFixed(2) : null, screen: (() => { const v = man.position.clone().project(camera); return [Math.round((v.x + 1) / 2 * innerWidth), Math.round((1 - v.y) / 2 * innerHeight)]; })() }, manState); }, get print() { return mixCur.print; }, BOUNDS, jumpToYear,
+                   get light() { return { key: lightKey, k: Math.min(1, (clockNow - lightT0) / lightMs), ms: lightMs }; }, set lightAs(k) { lightForce = k; },
                    get opening() { return openState; }, get portrait() { return portraitState; }, PORTRAIT, get labelMinY() { return labelMinY; }, get camera() { return camera; }, get labels() { return labels; },
                    get shadow() { let c = 0, r = 0, t = 0, black = 0; scene.traverse(o => { if (o.isMesh) { t++; if (o.castShadow) c++; if (o.receiveShadow) r++; const m = Array.isArray(o.material) ? o.material[0] : o.material; if (m && m.vertexColors && o.geometry && !o.geometry.attributes.color) black++; } });
                      return { enabled: renderer.shadowMap.enabled, lightCasts: key.castShadow, meshes: t, casters: c, receivers: r, uncoloured: black, map: !!key.shadow.map, size: key.shadow.mapSize.x,

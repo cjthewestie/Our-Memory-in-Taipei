@@ -289,7 +289,8 @@
     if (mode === 'local') { const p = players[active]; const d = isFinite(p.duration) ? p.duration : 0; return { t: p.currentTime || 0, d }; }
     return { t: 0, d: 0 };
   }
-  const isPlaying = () => mode === 'youtube' ? (ytState === 1 || ytState === 3) : mode === 'local' && unlocked && !players[active].paused;
+  // a phone primes the local player silently on its first tap (iOS needs that); silent is not playing, so the button still reads Play
+  const isPlaying = () => mode === 'youtube' ? (ytState === 1 || ytState === 3) : mode === 'local' && unlocked && !players[active].paused && !(muted && isPhone());
   const fmt = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   function seek(t) {
     if (ytLive()) yt.seekTo(t, true);                                     // a paused player stays paused, a playing one plays on from there
@@ -303,6 +304,7 @@
     } else if (mode === 'local') {
       if (!unlocked) { if (muted && isPhone()) setMuted(false); unlock(); return; }   // as on the YouTube branch: play on a muted phone means sound on
       const p = players[active];
+      if (muted && isPhone()) { setMuted(false); if (p.paused) { userPaused = false; tryPlay(p); } render(); return; }   // primed but silent: play means sound on, not pause
       if (p.paused) { userPaused = false; if (p.ended) cue(p, cur); tryPlay(p); } else { userPaused = true; p.pause(); }
     }
     render();
@@ -389,7 +391,17 @@
   if (storedDecade && decadeIndex(storedDecade) >= 0) manual = { decade: decadeIndex(storedDecade) };
   cur = manual ? manual.decade : decadeOfYear(currentYear());
   render();
-  loadYouTube();
+  // YouTube waits until the square is up (perf, area 04): its iframe is ~2.8 MB in ~25 requests and it held the
+  // page's load event back by about a second. Sound on (desktop): fetch it once the page has loaded and gone idle,
+  // so the player is ready before the first click. Sound off (every phone, fault 4): fetch it on the first touch,
+  // click or key, the visit's first sign of wanting anything, so a visitor who never asks for music never pays for it.
+  let ytAsked = false;
+  const wantYouTube = () => { if (!ytAsked) { ytAsked = true; loadYouTube(); } };
+  if (muted) ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, wantYouTube, { passive: true, capture: true, once: true }));
+  else {
+    const idle = () => (window.requestIdleCallback || (f => setTimeout(f, 200)))(wantYouTube, { timeout: 2000 });
+    if (document.readyState === 'complete') idle(); else window.addEventListener('load', idle, { once: true });
+  }
   requestAnimationFrame(frame);
 
   // ── private drop-in ─────────────────────────────────────────────────────────

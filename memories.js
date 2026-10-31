@@ -22,7 +22,7 @@
   const LOCAL_KEY = 'our-memory-in-taipei:memories';
   const MAX_TEXT = 280, MAX_NAME = 40, NEAR = 4.5;
 
-  const PLACE = { square: '廣場 · The Square', red: '西門町 · Ximending', dadao: '大稻埕 · Dadaocheng', tower: '信義 · Xinyi' };
+  const PLACE = { square: 'The Square · 廣場', red: 'Ximending · 西門町', dadao: 'Dadaocheng · 大稻埕', tower: 'Xinyi · 信義' };
   const YEARS = { square: [1950, 2026], red: [1985, 1999], dadao: [2000, 2019], tower: [2020, 2027] };
   const THIS_YEAR = new Date().getFullYear();
 
@@ -35,45 +35,84 @@
   ];
 
   // ── the lanterns ────────────────────────────────────────────────────────────
+  // Round paper lanterns, all drawn as three instanced meshes (paper, trim, glow) however many there are.
+  // The paper is unlit and shaded in its vertex colours (bright at the belly, ribbed, darker at the ends),
+  // so it reads as lit from inside in daylight. Each one sways from its cord; the nearest one brightens.
   const group = new THREE.Group(); scene.add(group);
-  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.6, 14);
-  const capGeo = new THREE.CylinderGeometry(0.2, 0.24, 0.08, 12);
-  const tasselGeo = new THREE.BoxGeometry(0.04, 0.32, 0.04);
-  const cordGeo = new THREE.BoxGeometry(0.02, 1, 0.02);
-  const inkMat = new THREE.MeshBasicMaterial({ color: C('ink') });
-  const paper = { visitor: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd27f') }),
-                  seed: new THREE.MeshBasicMaterial({ color: C('verm') }),
-                  local: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffe9b8') }) };
+  const LATHE_SEG = 48, RIBS = 12, HANG = 2.9, CORD = 1.37;   // CORD: from the lantern's middle up to where it hangs
+  // the paper: a lathe through a rounded profile, ribs and a belly glow baked into vertex colours
+  const bodyGeo = (() => {
+    const pts = [], N = 22;
+    for (let j = 0; j <= N; j++) {
+      const a = -Math.PI / 2 + Math.PI * j / N, y = Math.sin(a) * 0.31;
+      pts.push(new THREE.Vector2(Math.max(0.15, Math.cos(a) * 0.36), y));
+    }
+    const g = new THREE.LatheGeometry(pts, LATHE_SEG), pos = g.attributes.position, col = new Float32Array(pos.count * 3);
+    for (let k = 0; k < pos.count; k++) {
+      const i = Math.floor(k / (N + 1)), y = pos.getY(k) / 0.31;
+      const rib = (i % (LATHE_SEG / RIBS)) === 0 ? 0.8 : 1;
+      const v = (0.62 + 0.38 * (1 - y * y)) * rib;
+      col[k * 3] = v; col[k * 3 + 1] = v; col[k * 3 + 2] = v;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return g;
+  })();
+  // the trim: ink caps, the cord, a vermilion tassel, merged into one geometry with its colours baked in
+  const trimGeo = (() => {
+    const ink = C('ink'), red = C('verm'), parts = [];
+    const put = (g, y, c) => { g = g.toNonIndexed(); g.translate(0, y, 0); parts.push([g, c]); };
+    put(new THREE.CylinderGeometry(0.17, 0.2, 0.06, 20), 0.31, ink);
+    put(new THREE.CylinderGeometry(0.2, 0.17, 0.06, 20), -0.31, ink);
+    put(new THREE.CylinderGeometry(0.012, 0.012, 1, 6), 0.84, ink);
+    put(new THREE.SphereGeometry(0.045, 10, 8), -0.38, red);
+    put(new THREE.CylinderGeometry(0.035, 0.06, 0.26, 10), -0.54, red);
+    const n = parts.reduce((s, [g]) => s + g.attributes.position.count, 0);
+    const P = new Float32Array(n * 3), Cc = new Float32Array(n * 3); let o = 0;
+    parts.forEach(([g, c]) => { const a = g.attributes.position.array; P.set(a, o * 3);
+      for (let k = 0; k < a.length / 3; k++) { Cc[(o + k) * 3] = c.r; Cc[(o + k) * 3 + 1] = c.g; Cc[(o + k) * 3 + 2] = c.b; }
+      o += a.length / 3; });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('color', new THREE.BufferAttribute(Cc, 3));
+    return g;
+  })();
   const glowTex = (() => {
     const cv = document.createElement('canvas'); cv.width = cv.height = 64;
     const g = cv.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    r.addColorStop(0, 'rgba(255,214,140,0.9)'); r.addColorStop(0.35, 'rgba(255,190,110,0.35)'); r.addColorStop(1, 'rgba(255,170,90,0)');
+    r.addColorStop(0, 'rgba(255,255,255,0.9)'); r.addColorStop(0.25, 'rgba(255,255,255,0.6)'); r.addColorStop(0.55, 'rgba(255,255,255,0.2)'); r.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = r; g.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(cv);
   })();
-  const glowMat = new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+  const PAPER = { visitor: new THREE.Color('#ff7a1c'), seed: C('verm').clone().lerp(new THREE.Color('#ff9a5a'), 0.25), local: new THREE.Color('#ff9a32') };
+  const GLOW = new THREE.Color('#ff9a3a');
+  const paperMat = new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, toneMapped: false });   // lit from inside: no haze, no highlight roll-off
+  const trimMat = new THREE.MeshBasicMaterial({ vertexColors: true });
+  const glowMat = new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, fog: false, toneMapped: false });
+  let cap = 0, paperIM = null, trimIM = null, glowIM = null;
+  function grow(n) {                      // (re)make the instanced meshes when there are more lanterns than room
+    if (n <= cap) return;
+    cap = Math.max(32, cap * 2); while (cap < n) cap *= 2;
+    [paperIM, trimIM, glowIM].forEach(m => { if (m) { group.remove(m); m.dispose(); } });
+    paperIM = new THREE.InstancedMesh(bodyGeo, paperMat, cap);
+    trimIM = new THREE.InstancedMesh(trimGeo, trimMat, cap);
+    glowIM = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), glowMat, cap);
+    paperIM.setColorAt(0, PAPER.visitor); glowIM.setColorAt(0, GLOW);   // makes instanceColor exist before the first draw
+    glowIM.renderOrder = 2;
+    [paperIM, trimIM, glowIM].forEach(m => { m.count = 0; m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); group.add(m); });
+  }
 
-  const memories = [];   // { m: the record, obj: its lantern }
-  function addLantern(m) {
+  const memories = [];   // { m: the record, kind, phase, born: when it was left (it rises into place), hot: 0..1 near her }
+  function addLantern(m, rising) {
     if (memories.some(e => e.m.id === m.id)) return;
-    const o = new THREE.Group();
     const kind = m.seed ? 'seed' : m.local ? 'local' : 'visitor';
-    const body = new THREE.Mesh(bodyGeo, paper[kind]); o.add(body);
-    const top = new THREE.Mesh(capGeo, inkMat); top.position.y = 0.33; o.add(top);
-    const bot = new THREE.Mesh(capGeo, inkMat); bot.position.y = -0.33; o.add(bot);
-    const tas = new THREE.Mesh(tasselGeo, paper.seed); tas.position.y = -0.55; o.add(tas);
-    const cord = new THREE.Mesh(cordGeo, inkMat); cord.position.y = 0.87; o.add(cord);
-    const glow = new THREE.Sprite(glowMat); glow.scale.setScalar(2.2); o.add(glow);
-    o.position.set(m.x, 2.9, m.z);
-    o.userData.memory = m; o.userData.phase = (m.x * 3.1 + m.z * 1.7) % 6.28;
-    o.traverse(c => { c.userData.memory = m; });
-    group.add(o);
-    memories.push({ m, obj: o });
+    memories.push({ m, kind, phase: (m.x * 3.1 + m.z * 1.7) % 6.28, born: rising ? performance.now() : -1e9, hot: 0 });
+    grow(memories.length);
     window.dispatchEvent(new CustomEvent('memory:added', { detail: m }));   // gallery.js hangs the photo ones
   }
 
   // ── storage ─────────────────────────────────────────────────────────────────
-  const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch (_) { return []; } };
+  // only well-formed records: a stored value that is not a list (an old version, a hand edit) would stop the lanterns
+  const okRec = m => m && typeof m === 'object' && PLACE[m.section] && isFinite(m.x) && isFinite(m.z) && typeof m.body === 'string';
+  const loadLocal = () => { try { const l = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); return Array.isArray(l) ? l.filter(okRec) : []; } catch (_) { return []; } };
   const saveLocal = list => { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); return true; } catch (_) { return false; } };
   const headers = extra => Object.assign({ apikey: CFG.supabaseAnonKey, Authorization: 'Bearer ' + CFG.supabaseAnonKey }, extra || {});
   // The photo bucket is private. A photo is shown only through a signed URL, and the storage rules sign one
@@ -100,7 +139,7 @@
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
       const rows = await res.json();
       await signPhotos(rows);
-      rows.forEach(addLantern);
+      rows.forEach(m => addLantern(m));
     } catch (e) {
       console.warn('[memories] could not load the shared memories:', e.message);
       F.fine.textContent = 'Other visitors’ lanterns couldn’t be loaded just now, so saving may fail too. If it does, your words stay in the form to try again.';
@@ -126,7 +165,14 @@
   async function shrink(file, maxSide) {
     let src;
     try { src = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
-    catch (_) { src = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = URL.createObjectURL(file); }); }
+    catch (_) {
+      src = await new Promise((ok, no) => {
+        const i = new Image(), u = URL.createObjectURL(file);
+        i.onload = () => { URL.revokeObjectURL(u); ok(i); };
+        i.onerror = () => { URL.revokeObjectURL(u); no(new Error('This photo could not be read. Try a JPEG or PNG.')); };
+        i.src = u;
+      });
+    }
     const k = Math.min(1, maxSide / Math.max(src.width, src.height));
     const cv = document.createElement('canvas'); cv.width = Math.round(src.width * k); cv.height = Math.round(src.height * k);
     cv.getContext('2d').drawImage(src, 0, 0, cv.width, cv.height);
@@ -143,8 +189,8 @@
       if (file) { const p = await shrink(file, 640); rec.photoData = p.canvas.toDataURL(p.type, 0.7); }
       rec.id = 'local-' + uuid(); rec.local = true; rec.created_at = new Date().toISOString();
       const list = loadLocal(); list.push(rec);
-      if (!saveLocal(list)) { delete rec.photoData; list[list.length - 1] = rec; if (!saveLocal(list)) throw new Error('This browser would not save it (private mode?).'); }
-      addLantern(rec);
+      if (!saveLocal(list)) { delete rec.photoData; list[list.length - 1] = rec; if (!saveLocal(list)) throw new Error('This browser couldn’t save it. Private browsing may be blocking it.'); }
+      addLantern(rec, true);
       return 'local';
     }
     let photo_path = null;
@@ -153,12 +199,12 @@
       photo_path = uuid() + '.' + p.ext;
       const up = await net(`${API}/storage/v1/object/${BUCKET}/${photo_path}`, {
         method: 'POST', headers: headers({ 'Content-Type': p.type, 'x-upsert': 'false' }), body: p.blob }, 60000);
-      if (!up.ok) throw new Error('Saving failed: the photo did not upload (error ' + up.status + '). Your words are still here; try again, or send it without the photo.');
+      if (!up.ok) { console.warn('[memories] photo upload failed:', up.status); throw new Error('Saving failed: your photo didn’t upload. Your words are still here; try again, or send it without the photo.'); }
     }
     const res = await net(`${API}/rest/v1/memories`, {
       method: 'POST', headers: headers({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
       body: JSON.stringify({ section: rec.section, x: rec.x, z: rec.z, year: rec.year, body: rec.body, name: rec.name, photo_path }) });
-    if (!res.ok) throw new Error('Saving failed (error ' + res.status + '). Your words are still here; please try again in a moment.');
+    if (!res.ok) { console.warn('[memories] save failed:', res.status); throw new Error('Saving failed. Your words are still here; please try again in a moment.'); }
     return 'pending';
   }
 
@@ -167,8 +213,13 @@
 
   const bubble = el('button', 'mem-bubble', document.body);
   bubble.type = 'button'; bubble.hidden = true;
-  bubble.innerHTML = '<span class="mem-b-k">A memory</span><span class="mem-b-key">E</span>';
+  bubble.innerHTML = '<span class="mem-b-k">Read this memory</span><span class="mem-b-key">E</span>';
   let nearest = null;
+  // a11y: the element that had focus when a card or the form opened gets it back when it closes
+  let opener = null;
+  const remember = () => { const a = document.activeElement; if (a && a !== document.body && !panel.contains(a) && !form.contains(a)) opener = a; };
+  const giveBack = () => { const o = opener; opener = null; if (o && o.isConnected && !o.hidden && o.offsetParent !== null) o.focus({ preventScroll: true }); };
+  const REDUCED = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   bubble.addEventListener('click', () => { if (nearest) openRead(nearest.m); });
 
   const panel = el('aside', 'mem-panel', document.body); panel.hidden = true;
@@ -182,16 +233,16 @@
   const pNote = el('div', 'mem-note', pBody);
   pClose.addEventListener('click', closeRead);
   function openRead(m) {
-    closeForm();
+    remember(); if (!form.hidden) { form.hidden = true; }
     pK.textContent = (m.year ? m.year + ' · ' : '') + (PLACE[m.section] || '');
     pText.textContent = m.body;
     pBy.textContent = '— ' + (m.name && m.name.trim() ? m.name.trim() : 'someone who was there');
-    pNote.textContent = m.local ? 'Kept in this browser only.' : '';
+    pNote.textContent = m.local ? 'Saved in this browser only. Only you can see it.' : '';
     const u = photoURL(m);
     pFig.hidden = !u; if (u) pImg.src = u; else pImg.removeAttribute('src');
     panel.hidden = false; pClose.focus({ preventScroll: true });
   }
-  function closeRead() { panel.hidden = true; }
+  function closeRead() { if (panel.hidden) return; panel.hidden = true; giveBack(); }
 
   // the form
   const form = el('form', 'mem-form', document.body); form.hidden = true; form.noValidate = true;
@@ -201,7 +252,7 @@
     '<div class="mem-body">' +
       '<div class="mem-k" id="memFormWhere"></div>' +
       '<h2 class="mem-title" id="memFormTitle">Add your photo or a memory</h2>' +
-      '<label class="mem-field mem-photo"><span>Your photo <em>(optional, one you took or may share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
+      '<label class="mem-field mem-photo"><span>Your photo <em>(optional: yours, or one you may share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
       '<label class="mem-field"><span>What happened here?</span>' +
         '<textarea name="body" rows="4" maxlength="' + MAX_TEXT + '" required placeholder="The ten dollars my mother gave me, the film we saw, the stall that isn’t there any more…"></textarea>' +
         '<span class="mem-count"><span id="memCount">0</span>/' + MAX_TEXT + '</span></label>' +
@@ -210,8 +261,8 @@
         '<label class="mem-field"><span>Your name <em>(optional)</em></span><input name="name" type="text" maxlength="' + MAX_NAME + '" autocomplete="nickname"></label>' +
       '</div>' +
       '<label class="mem-hp" aria-hidden="true">Leave this empty <input name="website" type="text" tabindex="-1" autocomplete="off"></label>' +
-      '<label class="mem-consent"><input name="ok" type="checkbox" required> <span>I’m happy for this to be shown publicly on this page. It names no one who hasn’t agreed and shares nobody’s private details.</span></label>' +
-      '<p class="mem-status" role="status" aria-live="polite"></p>' +
+      '<label class="mem-consent"><input name="ok" type="checkbox" required> <span>I’m happy for this to be shown publicly on this page. It doesn’t name anyone without their agreement or share anyone’s private details.</span></label>' +
+      '<p class="mem-status" id="memStatus" role="status" aria-live="polite"></p>' +
       '<div class="mem-actions"><button type="submit" class="wk-btn primary">Hang my lantern</button></div>' +
       '<p class="mem-fine"></p>' +
     '</div>';
@@ -222,13 +273,13 @@
   };
   F.fine.textContent = ONLINE
     ? 'Every memory is read by the makers before it appears, usually within a few days.'
-    : 'This copy of the page isn’t connected to a shared store yet, so your lantern is kept in this browser and only you will see it.';
+    : 'Memories aren’t shared online yet, so your lantern is saved in this browser and only you will see it.';
   F.body.addEventListener('input', () => { F.count.textContent = F.body.value.length; });
   F.close.addEventListener('click', closeForm);
   let spot = null, openedAt = 0, lastSent = 0;
   function openForm() {
     if (!WALK.on) return;
-    closeRead();
+    remember(); panel.hidden = true;
     const p = WALK.pos, where = WALK.where;
     // just in front of her, so the lantern hangs where she is looking
     let x = p.x - Math.sin(p.h) * 1.6, z = p.z - Math.cos(p.h) * 1.6;
@@ -237,27 +288,31 @@
     const yr = YEARS[where];
     F.where.textContent = PLACE[where];
     F.year.min = 1900; F.year.placeholder = yr[0] + '–' + Math.min(yr[1], THIS_YEAR);
-    F.status.textContent = ''; F.status.classList.remove('ok'); F.send.disabled = false;
+    F.status.textContent = ''; F.status.classList.remove('ok'); F.send.disabled = false; clearBad();
     form.hidden = false; openedAt = performance.now();
     setTimeout(() => F.photo.focus(), 30);   // the photo field comes first (gallery.js)
   }
-  function closeForm() { form.hidden = true; }
+  function closeForm() { if (form.hidden) return; form.hidden = true; giveBack(); }
+  // a11y: the field an error is about is marked invalid, points at the message, and takes focus
+  const clearBad = () => [F.body, F.year, F.ok, F.photo].forEach(f => { f.removeAttribute('aria-invalid'); f.removeAttribute('aria-describedby'); });
+  const bad = f => { clearBad(); f.setAttribute('aria-invalid', 'true'); f.setAttribute('aria-describedby', 'memStatus'); f.focus({ preventScroll: true }); };
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     const body = F.body.value.trim(), name = F.name.value.trim(), yearS = F.year.value.trim();
     const year = yearS ? parseInt(yearS, 10) : null;
     const say = (t, ok) => { F.status.textContent = t; F.status.classList.toggle('ok', !!ok); };
     if (F.hp.value) return say('Thank you.');                                  // a bot filled the hidden field
-    if (!body) return say('Write a line or two first.');
-    if (body.length > MAX_TEXT) return say('Keep it under ' + MAX_TEXT + ' characters.');
-    if (year !== null && (isNaN(year) || year < 1900 || year > THIS_YEAR)) return say('The year should be between 1900 and ' + THIS_YEAR + '.');
-    if (!F.ok.checked) return say('Please tick the box to say it can be shown.');
+    clearBad();
+    if (!body) { bad(F.body); return say('Write a line or two first.'); }
+    if (body.length > MAX_TEXT) { bad(F.body); return say('Keep it under ' + MAX_TEXT + ' characters.'); }
+    if (year !== null && (isNaN(year) || year < 1900 || year > THIS_YEAR)) { bad(F.year); return say('The year should be between 1900 and ' + THIS_YEAR + '.'); }
+    if (!F.ok.checked) { bad(F.ok); return say('Please tick the box so your memory can be shown.'); }
     if (performance.now() - openedAt < 2500) return say('One moment…');
     if (Date.now() - lastSent < 30000) return say('Thank you, one lantern at a time. Try again in half a minute.');
     const file = F.photo.files && F.photo.files[0];
-    if (file && !/^image\//.test(file.type)) return say('That file is not a photo.');
-    if (file && file.size > 25e6) return say('That photo is too large.');
-    F.send.disabled = true; say(file ? 'Making the photo small…' : 'Hanging it…');
+    if (file && !/^image\//.test(file.type)) { bad(F.photo); return say('That file isn’t a photo.'); }
+    if (file && file.size > 25e6) { bad(F.photo); return say('That photo is too large. Please choose one under 25 MB.'); }
+    F.send.disabled = true; say(file ? 'Resizing your photo…' : 'Hanging your lantern…');
     try {
       const rec = { section: spot.section, x: spot.x, z: spot.z, year, body, name: name || null };
       const how = await submit(rec, file);
@@ -265,13 +320,13 @@
       window.dispatchEvent(new CustomEvent('memory:saved', { detail: { rec, file, how } }));   // gallery.js
       F.body.value = ''; F.name.value = ''; F.year.value = ''; F.photo.value = ''; F.ok.checked = false; F.count.textContent = '0';
       say(how === 'local'
-        ? 'Your lantern is hanging here, kept in this browser.'
-        : 'Thank you. Your lantern will light up here once it has been read.', true);
+        ? 'Your lantern is hanging here, saved in this browser.'
+        : 'Thank you. Your lantern will light up here once the makers have read it.', true);
       setTimeout(closeForm, 2600);
     } catch (e) {
       // a network failure is said plainly: nothing was saved, and the words are still in the form
       const m = e && e.message;
-      say(m === 'unreachable' ? 'Saving failed: the memory store can’t be reached right now. Your words are still here; please try again in a moment.'
+      say(m === 'unreachable' ? 'Saving failed: the page can’t reach the internet right now. Your words are still here; please try again in a moment.'
         : m === 'timeout' ? 'Saving failed: the connection is too slow and it timed out. Your words are still here; please try again.'
         : m || 'Saving failed. Your words are still here; please try again.');
     } finally { F.send.disabled = false; }
@@ -287,6 +342,16 @@
   window.addEventListener('keydown', ev => {
     const t = ev.target;
     if (ev.key === 'Escape') { if (!form.hidden) closeForm(); else if (!panel.hidden) closeRead(); return; }
+    if (ev.key === 'Tab') {                                                     // a11y: Tab cycles inside an open card or form
+      const box = !form.hidden ? form : !panel.hidden ? panel : null;
+      if (box) {
+        const f = [...box.querySelectorAll('button, input, textarea, select, a[href]')].filter(e => !e.disabled && e.tabIndex >= 0 && e.offsetParent !== null);
+        if (f.length && (ev.shiftKey ? document.activeElement === f[0] || !box.contains(document.activeElement) : document.activeElement === f[f.length - 1])) {
+          ev.preventDefault(); (ev.shiftKey ? f[f.length - 1] : f[0]).focus();
+        }
+      }
+      return;
+    }
     if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
     if ((ev.key === 'e' || ev.key === 'E') && WALK.on && nearest && panel.hidden && form.hidden) { ev.preventDefault(); openRead(nearest.m); }
   });
@@ -300,27 +365,59 @@
     down = null;
     ndc.set(ev.clientX / innerWidth * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1);
     ray.setFromCamera(ndc, R.camera);
-    const hit = ray.intersectObjects(memories.filter(e => e.obj.visible).map(e => e.obj), true)[0];
-    if (hit && hit.object.userData.memory) openRead(hit.object.userData.memory);
+    const hit = paperIM && ray.intersectObjects([paperIM, trimIM], false)[0];
+    if (hit && shown[hit.instanceId]) openRead(shown[hit.instanceId].m);
   });
 
-  // ── per frame: show the lanterns of the place you are in, bob them, find the nearest ──
-  const v = new THREE.Vector3();
+  // ── per frame: show the lanterns of the place you are in, sway them, light the nearest ──
+  const v = new THREE.Vector3(), M = new THREE.Matrix4(), Mg = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler();
+  const one = new THREE.Vector3(), piv = new THREE.Vector3(), col = new THREE.Color(), WARM = new THREE.Color('#fff4dc');
+  const shown = [];   // instance index -> entry, for the raycast
+  const ease = k => 1 - Math.pow(1 - k, 3);
   function tick(now) {
     const sec = WALK.section(), t = now / 1000;
     let best = null, bestD = NEAR;
     const p = WALK.on ? WALK.pos : null;
-    memories.forEach(e => {
-      const on = e.m.section === sec && !(window.__gallery && photoURL(e.m));   // a photo memory hangs on the wall instead (gallery.js)
-      e.obj.visible = on;
-      if (!on) return;
-      e.obj.position.y = 2.9 + Math.sin(t * 1.3 + e.obj.userData.phase) * 0.12;
-      e.obj.rotation.y = Math.sin(t * 0.7 + e.obj.userData.phase) * 0.25;
-      if (p) { const d = Math.hypot(e.m.x - p.x, e.m.z - p.z); if (d < bestD) { bestD = d; best = e; } }
-    });
+    // a photo memory hangs on the wall instead (gallery.js)
+    const here = e => e.m.section === sec && !(window.__gallery && photoURL(e.m));
+    if (p) memories.forEach(e => { if (!here(e)) return; const d = Math.hypot(e.m.x - p.x, e.m.z - p.z); if (d < bestD) { bestD = d; best = e; } });
     nearest = best;
+    shown.length = 0;
+    if (paperIM) {
+      const camQ = R.camera.quaternion;
+      memories.forEach(e => {
+        if (!here(e)) return;
+        const i = shown.length; shown.push(e);
+        e.hot += ((e === best ? 1 : 0) - e.hot) * 0.12;
+        // a new lantern rises from her hands to its place over 1.8 s, swinging a little as it settles
+        const sw = REDUCED.matches ? 0 : 1;                                     // a11y: reduced motion, no rise, sway or flicker
+        const age = sw ? (now - e.born) / 1800 : 1, k = age < 1 ? ease(Math.max(0, age)) : 1;
+        const rise = (1 - k) * -1.9, swingBoost = 1 + (1 - k) * 3, ph = e.phase;
+        // a gentle pendulum about the point it hangs from, and a slow turn on its cord
+        E.set(Math.sin(t * 0.9 + ph) * 0.05 * swingBoost * sw, Math.sin(t * 0.35 + ph) * 0.5 * sw, Math.sin(t * 1.1 + ph * 1.3) * 0.06 * swingBoost * sw, 'YXZ');
+        Q.setFromEuler(E);
+        piv.set(e.m.x, HANG + CORD + rise + Math.sin(t * 1.3 + ph) * 0.04 * sw, e.m.z);
+        const s = (0.55 + 0.45 * k) * (1 + e.hot * 0.08);
+        one.set(s, s, s);
+        M.compose(piv, Q, one); Mg.makeTranslation(0, -CORD, 0); M.multiply(Mg);
+        paperIM.setMatrixAt(i, M); trimIM.setMatrixAt(i, M);
+        // the light inside: a slow breath, a faint flicker, brighter when she is near or it is new
+        const flick = 0.94 + (Math.sin(t * 2.1 + ph * 5) * 0.03 + Math.sin(t * 7.3 + ph * 11) * 0.015) * sw;
+        col.copy(PAPER[e.kind]).lerp(WARM, e.hot * 0.2 + (1 - k) * 0.2).multiplyScalar(flick + e.hot * 0.06);
+        paperIM.setColorAt(i, col);
+        // the glow faces the camera, centred on the paper
+        v.set(0, 0, 0).applyMatrix4(M);
+        const gs = (2.7 + e.hot * 0.9 + (1 - k) * 1.0) * s;
+        one.set(gs, gs, gs); Mg.compose(v, camQ, one);
+        glowIM.setMatrixAt(i, Mg);
+        col.copy(GLOW).multiplyScalar(0.85 + e.hot * 0.15 + (flick - 0.94) * 2);
+        glowIM.setColorAt(i, col);
+      });
+      [paperIM, trimIM, glowIM].forEach(m => { m.count = shown.length; m.instanceMatrix.needsUpdate = true; });
+      paperIM.instanceColor.needsUpdate = true; glowIM.instanceColor.needsUpdate = true;
+    }
     if (best && panel.hidden && form.hidden) {
-      v.copy(best.obj.position); v.y += 0.9; v.project(R.camera);
+      v.set(best.m.x, HANG + 0.9, best.m.z); v.project(R.camera);
       if (v.z < 1) {
         bubble.hidden = false;
         bubble.style.transform = `translate(${((v.x + 1) / 2 * innerWidth).toFixed(0)}px, ${((1 - v.y) / 2 * innerHeight).toFixed(0)}px) translate(-50%, -100%)`;
@@ -329,7 +426,7 @@
     requestAnimationFrame(tick);
   }
 
-  SEEDS.forEach(addLantern);
+  SEEDS.forEach(m => addLantern(m));
   loadLocal().forEach(m => { m.local = true; addLantern(m); });
   fetchApproved();
   requestAnimationFrame(tick);

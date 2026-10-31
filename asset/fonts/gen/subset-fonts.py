@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Rebuild asset/fonts/*.woff2: each face subset to exactly the glyphs the page's own strings use (issue #10, pairing 04 since issue #16).
 
-Run it whenever a string that reaches the DOM changes (data.js WORDS / CLOSING / ERAS / ANCHORS, index.html, music.js copy):
+Run it whenever a string that reaches the DOM changes (data.js WORDS / CLOSING / ERAS / ANCHORS, index.html, music.js copy,
+walk.js, memories.js and gallery.js copy, including what they paint on canvas):
 
     python3 asset/fonts/gen/subset-fonts.py            # needs fontTools with brotli: pip install fonttools brotli
 
@@ -44,17 +45,31 @@ def glyph_sets():
             'Click to play', 'Click for sound', 'Sound off', 'Sound on', 'Next video', 'Next song', 'your copy']
     html_txt = re.sub(r'<[^>]+>', ' ', re.sub(r'<script[\s\S]*?</script>|<!--[\s\S]*?-->', ' ', html))
     hud = ['YEAR', '/03', '01', '02', '03', '0123456789', html_txt]   # the year counter runs through every digit
+    # walk.js, memories.js and gallery.js: every quoted string in the code (comments stripped: they quote CJ in Chinese), plus
+    # printable ASCII and typographic punctuation for the memories visitors type, which are set in the HUD face.
+    code = lambda f: re.sub(r'(^|\s)//.*$', ' ', rd(f), flags=re.M)
+    walk_strs = [re.sub(r'<[^>]+>', ' ', t) for f in ('walk.js', 'memories.js', 'gallery.js') if os.path.exists(os.path.join(ROOT, f)) for t in re.findall(r"'([^'\n]*)'", code(f))]
+    hud += walk_strs + [''.join(chr(c) for c in range(0x20, 0x7F)), '‘’“”…—–·×']
+    gates = re.findall(r"zh:\s*'([^']*)',\s*en:\s*'([^']*)',\s*years:\s*'([^']*)',\s*line:\s*'([^']*)'", rd('walk.js'))
     hanzi = lambda s: {ch for ch in s if ord(ch) > 0x2FFF}
     latin = lambda s: {ch for ch in s if ord(ch) <= 0x2FFF and not ch.isspace()}
     big = set().union(*[set(w) for w in words_big], set(parts[0]) if parts else set(), *[set(re.sub(r'<[^>]+>', '', o)) for o in opening]) - {' '}
+    # walk.js's gate signs (display face 700: the names, BACK TO THE SQUARE, ON TO …) and the square's title (uppercase in CSS)
+    big |= set(''.join(g[1] + g[2] for g in gates) + 'BACK TO THE SQUARE ON TO · 0123456789–') - {' '}
     light = set().union(*[set(w) for w in words_sub]) - {' '}   # the sub line under each big word, the display face at 300
+    light |= set(''.join(g[2] + ' · ' + g[3] for g in gates)) - {' '}   # the gate sign's years line, drawn at 400 (matched to the 300 face)
+    painted = ''.join(re.findall(r"fillText\('([^']*)'", rd('walk.js') + (rd('gallery.js') if os.path.exists(os.path.join(ROOT, 'gallery.js')) else '')))   # canvas text (the square's centre stone, gallery labels), painted in both weights
+    big |= latin(painted); light |= latin(painted)
+    caps_any = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ’')   # canvas labels set in capitals (gallery wall titles) whose text is built at runtime
+    big |= caps_any; light |= caps_any
     hud_set = set()
     for s in words_sub + closing + years + caps + mus + hud + [e[0] for e in eras] + [e[1] for e in eras] + [n[0] for n in names] + [n[1] for n in names]:
         hud_set |= latin(s)
-    # the Chinese face carries only the chapter names and the anchors' Chinese names. The song titles in music.js are
-    # content CJ swaps, so their hanzi are left to the system CJK fallback on purpose.
+    # the Chinese face carries the chapter names, the anchors' Chinese names and walk.js / memories.js's place names
+    # (廣場, 信義, the gates). The song titles in music.js are content CJ swaps, so their hanzi are left to the system
+    # CJK fallback on purpose, as is anything a visitor types.
     zh = set()
-    for s in [e[1].split(' · ')[0] for e in eras] + [n[1] for n in names]:
+    for s in [e[1].split(' · ')[0] for e in eras] + [n[1] for n in names] + walk_strs:
         zh |= hanzi(s)
     return {'big': big, 'light': light, 'hud': hud_set, 'zh': zh}
 

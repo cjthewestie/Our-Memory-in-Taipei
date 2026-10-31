@@ -9,23 +9,24 @@ body.walk .hud-word, body.walk #guide { display: none; }
 /* the square is outside time: no chapter, no year, no street labels */
 body.in-square .hud-chapter, body.in-square .hud-year, body.in-square #labels, body.in-square #photoSpots { visibility: hidden; }
 
-#walkHud { position: fixed; inset: 0; z-index: 3; pointer-events: none; font-family: var(--font-hud), var(--font-sys); color: var(--bone); display: none; }
+#walkHud { position: fixed; inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); z-index: 3; pointer-events: none; font-family: var(--font-hud), var(--font-sys); color: var(--bone); display: none; }
 body.walk #walkHud { display: block; }
 
 .wk-square {
   position: absolute; left: clamp(20px, 4vw, 56px); top: clamp(20px, 4vw, 56px);
-  border-top: 1px solid var(--bone); padding-top: 8px; max-width: 280px;
-  text-shadow: 0 2px 16px var(--ink), 0 0 3px var(--ink), 0 1px 2px var(--ink);
+  border-top: 1px solid var(--hud-fg); padding-top: 8px; max-width: 280px;
+  color: var(--hud-fg); text-shadow: none;   /* a11y: bone on the pale square measured 1.1:1; the corner chrome's dark ink instead */
   display: none;
 }
 body.in-square .wk-square { display: block; }
-.wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 30px; font-weight: 700; letter-spacing: 0.3em; }
-.wk-sq-en { font-size: 12px; letter-spacing: 0.3em; margin-top: 2px; }
-.wk-sq-line { font-size: 13px; line-height: 1.6; margin-top: 10px; opacity: 0.92; }
-.wk-sq-line b { color: var(--lamp); font-weight: 600; }
+.wk-sq-en { font-family: var(--font-big), var(--font-hud), var(--font-sys); font-size: 34px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
+.wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 13px; letter-spacing: 0.3em; margin-top: 4px; }
+.wk-sq-line { font-size: 13px; line-height: 1.45; margin-top: 8px; }   /* full ink, no fade: at 0.75-0.92 opacity the names fell under 4.5:1 where they cross the square's grey rails */
+.wk-sq-line b { color: var(--hud-fg); font-weight: 700; display: inline-block; min-width: 3.4em; }
+.wk-sq-line i { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-style: normal; font-size: 11px; letter-spacing: 0.2em; margin-left: 4px; }
 
 .wk-hint {
-  position: absolute; left: 50%; top: 24%; transform: translateX(-50%);
+  position: absolute; left: 50%; top: 64%; transform: translateX(-50%);   /* on the pavement under her: at 24% it sat on the "Add your photo" frame */
   background: color-mix(in srgb, var(--ink) 72%, transparent); color: var(--bone);
   padding: 8px 14px; border-radius: 999px; font-size: 13px; letter-spacing: 0.04em; white-space: nowrap;
   transition: opacity 900ms ease;
@@ -44,7 +45,7 @@ body.in-square .wk-square { display: block; }
 }
 .wk-btn:hover { background: var(--bone); color: var(--ink); }
 .wk-btn:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
-.wk-btn.primary { background: var(--verm); border-color: var(--verm); color: var(--bone); }
+.wk-btn.primary { background: #b53a2f; border-color: #b53a2f; color: var(--bone); }   /* a11y: verm deepened so bone text reads at 4.5:1+ */
 .wk-btn.primary:hover { background: var(--bone); color: var(--verm); }
 
 .wk-bar { position: absolute; right: clamp(20px, 4vw, 56px); bottom: calc(clamp(20px, 4vw, 56px) + 64px); display: flex; gap: 10px; justify-content: flex-end; }
@@ -74,7 +75,28 @@ body.walk #wkWalk { display: none; }
   .wk-btn { padding: 9px 13px; font-size: 11px; }
   body.walk .hud-music { width: calc(100vw - 190px); }
   .wk-square { max-width: 240px; }
-  .wk-sq-zh { font-size: 24px; }
+  .wk-sq-en { font-size: 28px; }
+}
+
+/* a phone held upright: one thumb column down the right edge, everything at least 44px.
+   Bottom up: the title (style.css, 28px), the photo credits and the music's sound button (72px, 44 tall), the stick
+   (128px), then the buttons, stacked, the most used lowest. The music bar on the left stops short of the stick. */
+@media (max-width: 760px), (pointer: coarse) and (min-height: 600px) {
+  .wk-stick { bottom: 128px; right: 20px; }
+  .wk-bar, body.in-square .wk-bar { top: auto; bottom: 258px; right: 20px; flex-direction: column-reverse; align-items: flex-end; gap: 10px; }
+  #wkWalk { top: auto; bottom: calc(206px + env(safe-area-inset-bottom, 0px));   /* the tour: no stick, so the way out sits on the music block, where the thumb already is */
+    right: calc(20px + env(safe-area-inset-right, 0px)); }
+  .wk-btn { min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+  body.walk .hud-music { width: calc(100vw - 40px - 118px - 14px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); }
+}
+@media (pointer: coarse) {
+  #walkHud, #wkWalk { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .wk-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+}
+/* no hover on glass: a tapped button does not stay lit */
+@media (hover: none) {
+  .wk-btn:hover { background: color-mix(in srgb, var(--ink) 70%, transparent); color: var(--bone); }
+  .wk-btn.primary:hover { background: var(--verm); color: var(--bone); }
 }
 
 /* the gate cut (walk.js teleport): the tour's chapter-cut flash, a bright ellipse from the centre whose rim
@@ -127,3 +149,7 @@ body.walk #wkWalk { display: none; }
 
 /* a portrait phone: the hint sits under her, not over the square's signboard (it fades once she moves) */
 @media (max-aspect-ratio: 1/1) { .wk-hint { top: auto; bottom: 34%; } }
+/* ...and on a phone, to the left of the thumb column, so it never sits under a button */
+@media (max-width: 760px) and (max-aspect-ratio: 1/1) {
+  .wk-hint { left: 20px; transform: none; max-width: calc(100vw - 40px - 158px - 12px); text-align: left; border-radius: 14px; }
+}
