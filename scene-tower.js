@@ -120,6 +120,8 @@
     if (s < 0 && z <= -360) h = 12 + rnd() * 5;                        // low on the west beyond the skywalk: the City Hall silhouette shows over them
     if (z < -386 && z > -446) x = 36;
     if (s < 0 && Math.abs(z + 386) < 14) { x = 40; w = 8; d = 8; } // clear of the closing camera
+    // no ring box inside 新光三越 A11's footprint (x 14…30, z -403…-385): one stood in front of it at z -384
+    if (s > 0 && x - w / 2 < 30 && z - d / 2 < -385 && z + d / 2 > -403) return;
     addB(s * x, z, w, d, h, false);
   });
   // behind the tower, beyond z = -440; kept lower right behind the tower so its silhouette stands
