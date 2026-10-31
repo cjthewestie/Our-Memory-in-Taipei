@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision brief · Our Memory in Taipei</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2ebdc; --paper-2:#e8dfcb; --ink:#1a1714; --ink-soft:#4a443c; --ink-faint:#8a8174;
+  --wash-1:#2b2724; --wash-2:#6d655b; --wash-3:#b9b0a1;
+  --seal:#b3261e; --seal-ink:#fff6ee; --line:#cfc4ae;
+  --m:#2f5d3a; --i:#7a5a12; --g:#8a2d22;
+  --hero-ink:#f2ebdc;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#151311; --paper-2:#1f1c19; --ink:#ece4d4; --ink-soft:#c3b9a7; --ink-faint:#8f8677;
+    --wash-1:#050404; --wash-2:#2c2824; --wash-3:#4d463e;
+    --seal:#d2453a; --seal-ink:#1a0b09; --line:#3a342d;
+    --m:#8fc49b; --i:#e2bf6a; --g:#f0907f;
+    --hero-ink:#ece4d4; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#151311; --paper-2:#1f1c19; --ink:#ece4d4; --ink-soft:#c3b9a7; --ink-faint:#8f8677;
+  --wash-1:#050404; --wash-2:#2c2824; --wash-3:#4d463e;
+  --seal:#d2453a; --seal-ink:#1a0b09; --line:#3a342d;
+  --m:#8fc49b; --i:#e2bf6a; --g:#f0907f;
+  --hero-ink:#ece4d4; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 20px/1.7 "EB Garamond",Georgia,serif;
+  background-image:radial-gradient(circle at 20% 10%,rgba(0,0,0,.035),transparent 40%),radial-gradient(circle at 80% 70%,rgba(0,0,0,.04),transparent 45%);
+  overflow-x:hidden}
+a{color:inherit;text-decoration-color:var(--seal);text-underline-offset:3px}
+h1,h2,h3{font-family:"Caveat Brush","Ma Shan Zheng",cursive;font-weight:400;line-height:1.15;margin:0 0 .4em}
+h2{font-size:clamp(40px,6vw,64px)}
+h3{font-size:30px}
+p{margin:0 0 1em}
+.wrap{max-width:70ch;margin:0 auto;padding:0 16px}
+.wide{max-width:1100px;margin:0 auto;padding:0 16px}
+
+/* ---- The Boat layout: chapter strip on the right edge ---- */
+.strip{position:fixed;top:0;right:0;bottom:0;width:72px;z-index:20;background:var(--wash-1);
+  display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:4px;
+  clip-path:polygon(12% 0,100% 0,100% 100%,0 100%,8% 60%,0 35%)}
+.strip .stamp{writing-mode:vertical-rl;font-family:"Ma Shan Zheng",cursive;color:var(--seal-ink);background:var(--seal);
+  font-size:18px;padding:6px 4px;border-radius:3px;margin-bottom:8px;letter-spacing:2px}
+.strip a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#b9b0a1;
+  font-family:"Caveat Brush",cursive;font-size:24px;line-height:1;padding:6px 4px;width:100%}
+.strip a span{writing-mode:vertical-rl;font-family:"EB Garamond",serif;font-size:15px;letter-spacing:1px;margin-top:4px;opacity:0;max-height:0;overflow:hidden;transition:opacity .3s}
+.strip a.on{color:#fff}
+.strip a.on::before{content:"";display:block;width:34px;height:34px;border:2px solid #fff;border-radius:50%;margin-bottom:-29px}
+.strip a.on span,.strip a:hover span{opacity:1;max-height:200px;margin-top:12px}
+.strip .ver{margin-top:auto;writing-mode:vertical-rl;color:#8f8677;font-size:15px;letter-spacing:1px}
+main{margin-right:72px}
+
+/* bottom-left controls, as on The Boat */
+.controls{position:fixed;left:16px;bottom:14px;z-index:15;display:flex;gap:18px;align-items:center;
+  font-family:"Caveat Brush",cursive;font-size:20px;color:var(--ink);background:color-mix(in srgb,var(--paper) 85%,transparent);
+  padding:6px 12px;border-radius:20px}
+.controls button{all:unset;cursor:pointer;display:flex;gap:8px;align-items:center}
+.controls .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);display:inline-block}
+.controls button[aria-pressed="true"] .dot{background:var(--seal);border-color:var(--seal)}
+.inkbar{position:fixed;left:0;top:0;height:5px;background:var(--seal);z-index:25;width:0}
+
+/* pages */
+.page{display:none;min-height:100vh;padding-bottom:120px}
+.page.on{display:block}
+
+/* hero: ink wash band */
+.hero{position:relative;min-height:92vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+  color:var(--hero-ink);padding:60px 90px 80px;overflow:hidden;
+  background:linear-gradient(180deg,var(--wash-1) 0%,var(--wash-2) 55%,var(--wash-3) 85%,var(--paper) 100%)}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 20% at 30% 75%,rgba(0,0,0,.45),transparent 70%),
+  radial-gradient(ellipse 50% 18% at 75% 68%,rgba(0,0,0,.35),transparent 70%),
+  repeating-linear-gradient(105deg,transparent 0 22px,rgba(255,255,255,.06) 22px 23px);pointer-events:none}
+.hero .kind{font-family:"EB Garamond",serif;font-style:italic;font-size:20px;letter-spacing:3px;text-transform:uppercase;opacity:.85}
+.hero h1{font-size:clamp(52px,10vw,124px);color:#f2ebdc;text-shadow:0 2px 0 rgba(0,0,0,.4);margin:.1em 0}
+.hero .sub{font-family:"Caveat Brush",cursive;font-size:24px;color:#f2ebdc;opacity:.9}
+.hero .vert{position:absolute;left:24px;top:60px;writing-mode:vertical-rl;font-family:"Ma Shan Zheng",cursive;font-size:30px;color:#f2ebdc;opacity:.55;letter-spacing:6px}
+.hero .seal{position:absolute;right:28px;bottom:90px;background:var(--seal);color:#fff6ee;font-family:"Ma Shan Zheng",cursive;font-size:26px;
+  padding:8px;line-height:1.05;border-radius:4px;transform:rotate(-4deg);writing-mode:vertical-rl}
+.scrollcue{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-family:"Caveat Brush",cursive;font-size:20px;color:var(--ink)}
+.scrollcue::after{content:"";display:block;width:2px;height:24px;background:var(--ink);margin:4px auto 0;animation:drip 1.6s infinite}
+@keyframes drip{0%{transform:scaleY(.2);transform-origin:top}50%{transform:scaleY(1)}100%{transform:scaleY(.2);transform-origin:bottom}}
+
+/* cards */
+.card{background:var(--paper-2);border:1px solid var(--line);border-left:6px solid var(--ink);padding:22px 24px;margin:28px 0;border-radius:2px;position:relative}
+.card.answer{border-left-color:var(--seal)}
+.card .lab{font-family:"Caveat Brush",cursive;font-size:22px;color:var(--seal);display:block;margin-bottom:6px}
+.alert{background:var(--seal);color:#fff6ee;padding:14px 18px;margin:0 0 16px;border-radius:2px;font-weight:600}
+.alert a{color:#fff6ee}
+.alert .t{background:#fff6ee;color:#2f5d3a;border-color:#fff6ee}
+ul.opts{list-style:none;padding:0;margin:0 0 12px}
+ul.opts li{padding:8px 0 8px 44px;position:relative;border-bottom:1px dashed var(--line)}
+ul.opts li b.k{position:absolute;left:0;top:8px;width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:"Caveat Brush",cursive;font-size:20px}
+ul.opts li.rec b.k{background:var(--seal);color:#fff6ee}
+.t{display:inline-block;font:600 15px/1.3 "EB Garamond",serif;letter-spacing:.5px;padding:1px 7px;border:1.5px solid currentColor;border-radius:3px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+.t.m{color:var(--m)} .t.i{color:var(--i)} .t.g{color:var(--g)}
+.ref{font-size:18px;color:var(--ink-soft)}
+.ref p{margin:0 0 .5em}
+dl.gloss{margin:0}
+dl.gloss dt{font-weight:600;margin-top:10px}
+dl.gloss dd{margin:0 0 4px 0;color:var(--ink-soft)}
+.changelog{font-size:18px;color:var(--ink-soft);border-top:2px solid var(--ink);padding-top:10px}
+.pagehead{padding:70px 16px 10px;max-width:70ch;margin:0 auto}
+.pagehead .num{font-family:"Caveat Brush",cursive;font-size:22px;color:var(--seal)}
+.pagehead .lede{color:var(--ink-soft)}
+
+/* ---- The Boat interaction: tilted ink panels revealed by scroll ---- */
+.reel{max-width:1100px;margin:0 auto;padding:10px 16px 0}
+.panel{position:relative;margin:70px 0;display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.panel .frame{background:var(--paper-2);border:3px solid var(--ink);padding:24px 26px;max-width:62ch;
+  box-shadow:8px 8px 0 var(--ink);
+  transform:translateX(-80px) rotate(-7deg);opacity:0;clip-path:inset(0 100% 0 0);
+  transition:transform 1s cubic-bezier(.2,.7,.2,1),opacity .6s,clip-path 1.1s cubic-bezier(.6,0,.2,1)}
+.panel:nth-child(even) .frame{margin-left:auto;transform:translateX(80px) rotate(6deg);clip-path:inset(0 0 0 100%)}
+.panel.in .frame{transform:rotate(-1.6deg);opacity:1;clip-path:inset(0 0 0 0)}
+.panel:nth-child(even).in .frame{transform:rotate(1.4deg)}
+.panel .when{font-family:"Caveat Brush",cursive;font-size:26px;color:var(--seal);display:block}
+.panel .cap{font-style:italic;color:var(--ink-soft);font-size:19px;margin-top:10px;display:block;
+  transform:rotate(-3deg);opacity:0;transition:opacity .8s .7s}
+.panel.in .cap{opacity:1}
+.panel .bg{position:absolute;inset:-30px -10px;z-index:-1;opacity:0;transition:opacity 1.2s;
+  background:radial-gradient(ellipse 70% 50% at 40% 50%,color-mix(in srgb,var(--ink) 14%,transparent),transparent 70%)}
+.panel.in .bg{opacity:1}
+.panel.final .frame{border-color:var(--seal);box-shadow:8px 8px 0 var(--seal)}
+.reelhint{font-family:"Caveat Brush",cursive;font-size:22px;color:var(--ink-soft);text-align:center;margin:10px 0 0}
+
+/* figures */
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+figure{margin:0;background:var(--paper-2);border:2px solid var(--ink);padding:10px}
+figure img{width:100%;display:block;background:#000}
+figcaption{font-size:17px;color:var(--ink-soft);margin-top:8px;line-height:1.5}
+.bug{border-left-color:var(--seal)}
+
+/* tables */
+.tbl{overflow-x:auto;margin:20px 0}
+table{border-collapse:collapse;width:100%;font-size:17px;min-width:560px}
+th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:"Caveat Brush",cursive;font-size:21px;font-weight:400;border-bottom:3px solid var(--ink)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:15px;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 5px;border-radius:3px;word-break:break-word}
+.yes{color:var(--m);font-weight:600}
+
+/* option panels */
+.optgrid .frame h3{margin-bottom:.2em}
+.optgrid .row{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;border-top:1px dashed var(--line);padding:8px 0}
+.optgrid .row b{font-family:"Caveat Brush",cursive;font-weight:400;font-size:21px;color:var(--ink-soft)}
+.recstamp{position:absolute;top:-18px;right:-10px;background:var(--seal);color:#fff6ee;font-family:"Caveat Brush",cursive;font-size:20px;padding:4px 12px;transform:rotate(6deg);border-radius:3px}
+
+ol.decide{counter-reset:d;list-style:none;padding:0}
+ol.decide li{counter-increment:d;position:relative;padding:14px 0 14px 60px;border-bottom:1px dashed var(--line)}
+ol.decide li::before{content:attr(data-n);position:absolute;left:0;top:10px;width:42px;height:42px;background:var(--seal);color:#fff6ee;
+  font-family:"Caveat Brush",cursive;font-size:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;transform:rotate(-4deg)}
+
+.pn{display:flex;justify-content:space-between;gap:12px;max-width:70ch;margin:60px auto 0;padding:0 16px}
+.pn button{font-family:"Caveat Brush",cursive;font-size:22px;background:var(--ink);color:var(--paper);border:0;padding:10px 18px;cursor:pointer;border-radius:2px}
+.pn button:disabled{opacity:.25;cursor:default}
+
+@media (max-width:760px){
+  body{font-size:19px}
+  .strip{top:auto;left:0;width:auto;height:58px;flex-direction:row;padding:0 6px;justify-content:space-between;clip-path:polygon(0 18%,40% 0,100% 12%,100% 100%,0 100%)}
+  .strip .stamp,.strip .ver{display:none}
+  .strip a{font-size:22px;padding:14px 2px 6px;width:auto;flex:1}
+  .strip a span{display:none}
+  .strip a.on::before{width:30px;height:30px;margin-bottom:-27px}
+  main{margin-right:0}
+  .controls{bottom:68px;left:8px;font-size:18px}
+  .hero{padding:60px 16px 80px}
+  .hero .vert{display:none}
+  .hero .seal{right:14px;bottom:70px;font-size:20px}
+  .panel .frame,.panel:nth-child(even) .frame{transform:translateX(0) rotate(-4deg)}
+  .optgrid .row{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){
+  .panel .frame,.panel .cap,.panel .bg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="inkbar" id="inkbar"></div>
+
+<nav class="strip" aria-label="Chapters">
+  <div class="stamp">台北記憶</div>
+  <a href="#cover" data-k="cover">1<span>Cover</span></a>
+  <a href="#story" data-k="story">2<span>Where it stands</span></a>
+  <a href="#live" data-k="live">3<span>Live site</span></a>
+  <a href="#branches" data-k="branches">4<span>Branches</span></a>
+  <a href="#issues" data-k="issues">5<span>Issues</span></a>
+  <a href="#money" data-k="money">6<span>Money paths</span></a>
+  <a href="#options" data-k="options">7<span>Options</span></a>
+  <a href="#decide" data-k="decide">8<span>What CJ decides</span></a>
+  <div class="ver">v1 · 2026-11-01 · style #66 Chinese ink wash</div>
+</nav>
+
+<div class="controls">
+  <button id="auto" aria-pressed="false" type="button"><i class="dot"></i>auto scroll</button>
+  <button id="theme" type="button"><i class="dot"></i>light / dark</button>
+</div>
+
+<main>
+<!-- ============ 1 COVER ============ -->
+<section class="page" id="pg-cover" data-k="cover">
+  <header class="hero">
+    <div class="vert">我們在台北的記憶</div>
+    <div class="kind">Decision brief</div>
+    <h1>Decision brief · Our Memory in Taipei</h1>
+    <div class="sub">continue · park · close — decide in two minutes</div>
+    <div class="seal">決定</div>
+    <div class="scrollcue">scroll</div>
+  </header>
+
+  <div class="wrap">
+    <div class="card answer">
+      <span class="lab">Answer</span>
+      <div class="alert">First: your live link is down. <a href="https://cjthewestie.github.io/Our-Memory-in-Taipei/">cjthewestie.github.io/Our-Memory-in-Taipei</a> shows a 404, because GitHub Pages was never turned on after the 2026-10-25 move. Only Joy's copy works. Turning it on takes about 2 minutes, and it is your call because it is public. <span class="t m">measured</span></div>
+      <p><b>Then park it.</b> Keep it as a finished portfolio piece and use it as the demo in Landmark-Online-Space's demand test (pitch 10 place operators). Build nothing more until 2 of 10 operators answer. <span class="t i">inferred</span></p>
+      <ul class="opts">
+        <li class="rec"><b class="k">A</b><b>Park + use as demo</b> — about 1 hour of your time, no code. Step one: turn Pages on.</li>
+        <li><b class="k">B</b><b>Continue</b> — merge the walkable square with visitor lanterns, about 2–4 days <span class="t g">guess</span>, before any buyer said yes.</li>
+        <li><b class="k">C</b><b>Close</b> — archive the repo in minutes, and lose your best demo.</li>
+      </ul>
+      <p style="margin:0"><b>Recommendation: A.</b> The pitch gets real proof at zero build cost, and building waits for a buyer.</p>
+    </div>
+
+    <div class="card">
+      <span class="lab">Leverage concept</span>
+      <p style="margin:0">A finished demo is worth more as proof in a pitch than as a product to keep building. <span class="t i">inferred</span></p>
+    </div>
+
+    <h3>Glossary</h3>
+    <dl class="gloss">
+      <dt>branch</dt><dd>A separate line of work in the code, kept apart from the main version until it is ready.</dd>
+      <dt>merged</dt><dd>A branch's changes have been added into main. A merged branch holds nothing new.</dd>
+      <dt>main</dt><dd>The main branch: the official version of the code. Here, what the public site would show.</dd>
+      <dt>GitHub Pages</dt><dd>GitHub's free web hosting. It turns a repo into a public website, but only after you switch it on in Settings.</dd>
+      <dt>worktree</dt><dd>An extra folder on your disk with a copy of the code on another branch, so two things can be worked on at once.</dd>
+      <dt>demand test</dt><dd>Asking real buyers before building, to see if anyone wants it. Here: pitch 10 operators, pass if 2 answer.</dd>
+      <dt>Supabase</dt><dd>An online database service. The walkable-square branch stores visitors' memories there.</dd>
+    </dl>
+
+    <div class="card ref">
+      <span class="lab">Reference</span>
+      <p><b>Style #66 Chinese ink wash (水墨) · reference: <a href="http://www.sbs.com.au/theboat" target="_blank" rel="noopener">The Boat (SBS) ↗</a></b> · award page: <a href="https://thefwa.com/cases/the-boat" target="_blank" rel="noopener">FWA case ↗</a> (site opened live on 2026-11-01)</p>
+      <p><b>Layout from The Boat:</b> a full-screen ink-wash title, a dark brushed strip of chapter numbers on the right edge, small controls (sound, auto scroll, full screen) in the bottom-left corner, and a "scroll" cue at the bottom centre. Here: 8 chapters on the right strip, auto scroll bottom-left.</p>
+      <p style="margin:0"><b>Interaction from The Boat:</b> scrolling drives the story. Tilted, ink-bordered comic panels slide and wipe in one after another, with captions set at an angle beside them. Here it runs on chapter 2 (the project's story) and chapter 7 (the three options). Press "auto scroll" to let it play.</p>
+    </div>
+
+    <div class="changelog">
+      <b>Changelog</b><br>
+      v1 · 2026-11-01 · first version
+    </div>
+  </div>
+  <div class="pn"><button disabled>← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 2 STORY (ink panels) ============ -->
+<section class="page" id="pg-story" data-k="story">
+  <div class="pagehead"><span class="num">Chapter 2</span><h2>Where it stands</h2>
+    <p class="lede">Scroll down. Each panel is one fact about the project, in order.</p></div>
+  <div class="reel">
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">2026-09-21 → 09-25</span>
+      Built in Joy-shen123's repo: 16 issues, 13 closed. The last code change is <code>aa9afcd</code> on 2026-09-25. <span class="t m">measured</span>
+      <span class="cap">Three districts, three generations, one scroll.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">2026-10-25</span>
+      Moved to cjthewestie's repo. main is <code>46ea823</code>, a link cleanup. The issues were not copied. Public, 0 stars, 0 forks. <span class="t m">measured</span>
+      <span class="cap">The code moved. The site did not.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">Today · your link</span>
+      <b>Not live.</b> cjthewestie.github.io/Our-Memory-in-Taipei returns 404. GitHub Pages is not enabled. README and HANDOFF wrongly say "Live". <span class="t m">measured</span>
+      <span class="cap">The link you would pitch with is broken.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">Today · Joy's link</span>
+      joy-shen123.github.io/Our-Memory-in-Taipei serves (HTTP 200). Its main is <code>aa9afcd</code>, one commit behind yours. <span class="t m">measured</span> It runs the same page code. <span class="t i">inferred</span>
+      <span class="cap">The work itself still stands.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">Money and visitors</span>
+      No payment, donation, sponsor or analytics code anywhere in the page. Nobody can pay, and nobody is counted. <span class="t m">measured</span>
+      <span class="cap">No till, no counter.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">Owner</span>
+      No company owns it. It is not in Husky's company.md (Husky is your trading-content persona), nor any other. Only archived CJ-HUNG notes from 09-22 to 09-24 mention it. <span class="t m">measured</span>
+      <span class="cap">A project with no seat.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame"><span class="when">2026-10-31</span>
+      Landmark-Online-Space started, with "Place owner pays" and "Demand test first". This page is the strongest real-place proof you own for that pitch. <span class="t m">measured</span> on the file, <span class="t i">inferred</span> on the fit.
+      <span class="cap">A buyer search that needs a demo.</span></div></div>
+    <div class="panel final"><div class="bg"></div><div class="frame"><span class="when">So</span>
+      Turn Pages on, then park it and pitch with it. Build again only when 2 of 10 operators answer. <span class="t i">inferred</span>
+      <span class="cap">Fix the link. Show the work. Wait for a yes.</span></div></div>
+  </div>
+  <p class="reelhint">end of the story</p>
+  <div class="pn"><button data-go="prev">← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 3 LIVE SITE ============ -->
+<section class="page" id="pg-live" data-k="live">
+  <div class="pagehead"><span class="num">Chapter 3</span><h2>Live site</h2>
+    <p class="lede">Checked today in headless Chromium (SwiftShader, no real GPU).</p></div>
+  <div class="wrap">
+    <div class="card bug"><span class="lab">Your URL is down</span>
+      <p><code>curl -sI https://cjthewestie.github.io/Our-Memory-in-Taipei/</code> → HTTP/2 404. <code>gh api repos/cjthewestie/Our-Memory-in-Taipei/pages</code> → Not Found. The repo has 0 deployments. <span class="t m">measured</span></p>
+      <p style="margin:0">Fix: Settings → Pages → Deploy from branch <code>main</code>, <code>/</code> root. About 2 minutes. Public, so your call. <span class="t i">inferred</span></p>
+    </div>
+  </div>
+  <div class="wide">
+    <div class="shots">
+      <figure><img src="briefs/live-check-2026-11-01/desktop-1440x900-000.png" alt="GitHub 404 page on CJ's URL" loading="lazy"><figcaption>Your URL, desktop: GitHub's "404 File not found". The other desktop and mobile shots of your URL are the same. <span class="t m">measured</span></figcaption></figure>
+    </div>
+    <h3 style="margin-top:40px">What works, on Joy's copy (same code)</h3>
+    <div class="shots">
+      <figure><img src="briefs/live-check-2026-11-01/upstream-desktop-1440x900-000.png" alt="Title screen" loading="lazy"><figcaption>Title "Our Memory in Taipei / Three generations. One street.", chapter 01 Ximending 1985, music bar (望春風 · 鄧麗君). <span class="t m">measured</span></figcaption></figure>
+      <figure><img src="briefs/live-check-2026-11-01/upstream-desktop-1440x900-033.png" alt="Ximending 1998" loading="lazy"><figcaption>Ximending 3D street, 1998: the girl, crowd, 年貨大街 arch, neon, track 吻別. <span class="t m">measured</span></figcaption></figure>
+      <figure><img src="briefs/live-check-2026-11-01/upstream-desktop-1440x900-066.png" alt="Taipei 101 2021" loading="lazy"><figcaption>Chapter 03 Taipei 101, 2021, "We build things.", track 後來的我們. <span class="t m">measured</span></figcaption></figure>
+      <figure><img src="briefs/live-check-2026-11-01/upstream-desktop-1440x900-100.png" alt="Top of Taipei 101" loading="lazy"><figcaption>Top of Taipei 101, the red climbing man, "Keep climbing", 2027. <span class="t m">measured</span></figcaption></figure>
+      <figure><img src="briefs/live-check-2026-11-01/upstream-desktop-1440x900-music-after-click.png" alt="Music on" loading="lazy"><figcaption>Music button reads SOUND ON after a click. Headless has no audio, so sound is unverified. <span class="t m">measured</span></figcaption></figure>
+      <figure><img src="briefs/live-check-2026-11-01/upstream-mobile-390x844-000.png" alt="Phone title" loading="lazy"><figcaption>Phone: the title fits, with a scroll arrow, music bar and photo credits. <span class="t m">measured</span></figcaption></figure>
+      <figure><img src="briefs/live-check-2026-11-01/upstream-mobile-390x844-050.png" alt="Phone Dadaocheng" loading="lazy"><figcaption>Phone: Dadaocheng 2009, lanterns and crowd. Bug: the "Spring Fe…" overlay is cut off at the right edge. <span class="t m">measured</span></figcaption></figure>
+    </div>
+  </div>
+  <div class="wrap">
+    <h3 style="margin-top:40px">Numbers (Joy's copy, not a real GPU)</h3>
+    <div class="tbl"><table>
+      <tr><th></th><th>First draw</th><th>DOM ready</th><th>Load event</th><th>Requests</th><th>Size</th></tr>
+      <tr><td>Desktop</td><td>1.2 s</td><td>2.9 s</td><td>15.0 s</td><td>78</td><td>~2.97 MB</td></tr>
+      <tr><td>Phone</td><td>1.2 s</td><td>2.8 s</td><td>13.4 s</td><td>69</td><td>~2.96 MB</td></tr>
+    </table></div>
+    <p>All numbers <span class="t m">measured</span>. The slow load event is likely held open by the YouTube player. <span class="t i">inferred</span></p>
+    <p>Console: 2 errors. A 404 for <code>asset/music/private/manifest.js</code>, which is ignored on purpose, so an expected probe <span class="t i">inferred</span>; and the YouTube embed's doubleclick redirect. The rest are warnings. <span class="t m">measured</span></p>
+    <p>The YouTube embed calls googleads.doubleclick.net. <span class="t m">measured</span> Ads ride on the music; that money does not go to you. <span class="t i">inferred</span></p>
+  </div>
+  <div class="pn"><button data-go="prev">← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 4 BRANCHES ============ -->
+<section class="page" id="pg-branches" data-k="branches">
+  <div class="pagehead"><span class="num">Chapter 4</span><h2>Branches</h2>
+    <p class="lede">The 4 named branches are all already in main. Safe to delete — your call.</p></div>
+  <div class="wrap">
+    <p>Checked per branch with:<br><code>git rev-list --count main..origin/&lt;b&gt;</code><br><code>git cherry main origin/&lt;b&gt;</code><br><code>git merge-base --is-ancestor origin/&lt;b&gt; main</code></p>
+    <div class="tbl"><table>
+      <tr><th>Branch</th><th>Tip</th><th>Not in main</th><th>In main</th><th>Merged as</th></tr>
+      <tr><td><code>issue-1-part-1</code></td><td>06e01da · 09-21</td><td>0</td><td class="yes">yes</td><td>PR #2</td></tr>
+      <tr><td><code>issue-3-texture</code></td><td>327b4d7 · 09-23</td><td>0</td><td class="yes">yes</td><td>PR #6</td></tr>
+      <tr><td><code>issue-5-models</code></td><td>b2fd197 · 09-23</td><td>0</td><td class="yes">yes</td><td>PR #14</td></tr>
+      <tr><td><code>issue-music-player</code></td><td>da0117f · 09-23</td><td>0</td><td class="yes">yes</td><td>PR #7</td></tr>
+    </table></div>
+    <p>PR numbers from <code>gh pr list -R Joy-shen123/Our-Memory-in-Taipei --state all</code>, all merged. <span class="t m">measured</span></p>
+
+    <h3 style="margin-top:40px">Other unmerged work</h3>
+    <div class="card"><span class="lab">claude/gracious-allen-7tbgxq · 10-31 · 1 commit</span>
+      Turns the page into a walkable square: 西門町 west, 大稻埕 north, 信義 east. WASD or stick control. The scroll film stays as "Guided tour". Visitors leave memories as paper lanterns, stored in Supabase after approval. This is the Sansa-Temple-style direction of Landmark-Online-Space. <span class="t m">measured</span></div>
+    <div class="card"><span class="lab">claude/friendly-johnson-t8f7m2 · 10-31 · 9 commits</span>
+      Music research: singer analyses (張學友, 五月天, 任賢齊, 齊秦, 張雨生 …). Docs only. <span class="t m">measured</span></div>
+    <div class="card"><span class="lab">claude/kind-euler-3z9a9p · 10-31 · 1 commit</span>
+      "Ghost Month Market", a Godot 4 roguelite: 16 files, 2,531 lines under <code>games/</code>. A different product sitting in this repo. <span class="t m">measured</span></div>
+    <div class="card"><span class="lab">claude/amazing-hamilton-hb90kp · 10-31 · 1 commit</span>
+      A <code>resources/harry-potter-book-1</code> folder for "a local copy of the book". Unrelated to this project. <span class="t m">measured</span> A copyrighted book does not belong in a public repo; the folder has a .gitignore, so the book itself is likely not committed. <span class="t i">inferred</span></div>
+    <div class="card"><span class="lab">Joy's repo · claude/phone-zone-3-issues-xcvspb · 10-28</span>
+      1 commit not in your main: roads keep their texture on a phone, the arrow clears the title, the title shows at once. A phone fix that is not on your site. <span class="t m">measured</span></div>
+    <div class="card"><span class="lab">Orphan worktree folders · ~526 MB</span>
+      In <code>~/Documents/CJ-project-vault/_worktrees/Our-Memory-in-Taipei/</code>: arcane-chapter1 (95 MB), blender-redhouse (228 MB), blender-scene-export (203 MB), perf-and-ads.brief-only (8 KB). Git no longer knows them (the repo was re-cloned). arcane-chapter1 holds the only copy of <code>asset/blender/paint_tiles.py</code>, <code>asset/tex/</code> and <code>BRIEF-arcane-chapter1.md</code>, a painted-texture test. The other two are older snapshots. <span class="t m">measured</span></div>
+  </div>
+  <div class="pn"><button data-go="prev">← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 5 ISSUES ============ -->
+<section class="page" id="pg-issues" data-k="issues">
+  <div class="pagehead"><span class="num">Chapter 5</span><h2>Issues</h2>
+    <p class="lede">On Joy-shen123/Our-Memory-in-Taipei: 3 open, 13 closed. Two of the three look already fixed.</p></div>
+  <div class="wrap">
+    <div class="card"><span class="lab">#18 · Fix the phone</span>
+      Markers live during the opening; the panel will not close. main has <code>0c81073</code> "the photograph panel closes on scroll, Escape and a tap outside", and later phone fixes. <span class="t m">measured</span> Likely fixed, issue left open. <span class="t i">inferred</span></div>
+    <div class="card"><span class="lab">#19 · Realism pass, zone by zone</span>
+      Partly done: "preview: realism-ximen/dadao/xinyi" commits on 09-24 and <code>c67d647</code>. <span class="t m">measured</span> Still open, and large. <span class="t i">inferred</span></div>
+    <div class="card"><span class="lab">#20 · Swap three hotspot photos</span>
+      main has <code>7798851</code> "three landmark photographs without the surveyors' colour card". <span class="t m">measured</span> Likely fixed, issue left open. <span class="t i">inferred</span></div>
+  </div>
+  <div class="pn"><button data-go="prev">← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 6 MONEY ============ -->
+<section class="page" id="pg-money" data-k="money">
+  <div class="pagehead"><span class="num">Chapter 6</span><h2>Money paths</h2>
+    <p class="lede">Who could pay, from strongest to weakest.</p></div>
+  <div class="wrap">
+    <div class="card answer"><span class="lab">1 · Demo for Landmark-Online-Space</span>
+      You picked "Place owner pays": a temple, shop, museum or tourism office pays to build and host an online walk-in version. First step "Demand test first", done when 2+ of 10 operators agree to a call or ask a price. Comparables in that file: Wales Metaverse £16–45k, Korea Tourism Organization paid for ZEPETO/Roblox worlds, Matterport tours $2–5k. <span class="t m">measured</span><br>This page is a finished, real-place, three-district piece: your strongest proof for that pitch. <span class="t i">inferred</span></div>
+    <div class="card"><span class="lab">2 · Taipei tourism and culture offices</span>
+      Taipei City Dept. of Information and Tourism, Dadaocheng / Dihua St associations, the Red House operator — as buyers of a branded version. <span class="t g">guess</span></div>
+    <div class="card"><span class="lab">3 · Commissioned scroll-story pages</span>
+      "Your street through 40 years" for brands and places, as a service, priced like a microsite. <span class="t g">guess</span></div>
+    <div class="card"><span class="lab">4 · Money from the page itself</span>
+      Ads or tips. Weak: no traffic measured, no analytics. <span class="t i">inferred</span></div>
+    <div class="card bug"><span class="lab">Blocker on every path: rights</span>
+      Four commercial songs via YouTube embed, and CC share-alike photographs. Fine for a free page; re-check before a paid commercial build. <span class="t i">inferred</span></div>
+  </div>
+  <div class="pn"><button data-go="prev">← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 7 OPTIONS (ink panels) ============ -->
+<section class="page" id="pg-options" data-k="options">
+  <div class="pagehead"><span class="num">Chapter 7</span><h2>Options</h2>
+    <p class="lede">Scroll. Each option comes in as a panel: cost, gain, worst case.</p></div>
+  <div class="reel optgrid">
+    <div class="panel final"><div class="bg"></div><div class="frame" style="position:relative"><span class="recstamp">recommended</span>
+      <h3>A · Park + use as demo</h3>
+      <div class="row"><b>Step one</b><span>Turn GitHub Pages on, so the link works.</span></div>
+      <div class="row"><b>Cost</b><span>About 1 hour of your time: answer the cleanup questions, put the live link in the Landmark pitch deck or email. No code.</span></div>
+      <div class="row"><b>Gain</b><span>The pitch has real proof at zero build cost. Building waits for a buyer signal.</span></div>
+      <div class="row"><b>Worst case</b><span>Nobody answers. You lost an hour.</span></div>
+      <span class="cap">Cheap, and it tells you if anyone wants this.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame">
+      <h3>B · Continue</h3>
+      <div class="row"><b>What</b><span>Merge gracious-allen (walkable square + visitor memories) and ship it as the live Taipei landmark space.</span></div>
+      <div class="row"><b>Cost</b><span>Review, Supabase setup and moderation: about 2–4 days <span class="t g">guess</span>. It publishes visitors' content, so you must moderate it.</span></div>
+      <div class="row"><b>Gain</b><span>A playable, Sansa-like demo.</span></div>
+      <div class="row"><b>Worst case</b><span>Days spent before any buyer said yes — the "3D built for zero users" failure your rules warn about.</span></div>
+      <span class="cap">More impressive, but it builds before anyone asked.</span></div></div>
+    <div class="panel"><div class="bg"></div><div class="frame">
+      <h3>C · Close</h3>
+      <div class="row"><b>What</b><span>Archive the repo; leave the page as it is.</span></div>
+      <div class="row"><b>Cost</b><span>Minutes.</span></div>
+      <div class="row"><b>Gain</b><span>One less lane.</span></div>
+      <div class="row"><b>Worst case</b><span>You lose the best demo for Landmark-Online-Space.</span></div>
+      <span class="cap">Clean, but it throws away proof.</span></div></div>
+  </div>
+  <p class="reelhint">Recommendation: A. What would change it: an operator asks to walk around the space — then B is worth the days. <span class="t i">inferred</span></p>
+  <div class="pn"><button data-go="prev">← prev</button><button data-go="next">next →</button></div>
+</section>
+
+<!-- ============ 8 DECIDE ============ -->
+<section class="page" id="pg-decide" data-k="decide">
+  <div class="pagehead"><span class="num">Chapter 8</span><h2>What CJ decides</h2>
+    <p class="lede">Only you can make these. One line each.</p></div>
+  <div class="wrap">
+    <ol class="decide">
+      <li data-n="0"><b>Turn on GitHub Pages</b> for cjthewestie/Our-Memory-in-Taipei (Settings → Pages → main, /)? Without it, the demo link in any pitch is a 404.</li>
+      <li data-n="1"><b>Direction:</b> A, B or C?</li>
+      <li data-n="2"><b>Delete the 4 merged branches?</b> All checked: already in main.</li>
+      <li data-n="3"><b>Move kind-euler</b> (Godot game) <b>and amazing-hamilton</b> (book folder) out of this public repo?</li>
+      <li data-n="4"><b>Bring Joy's 10-28 phone fix into main?</b> Pushing main deploys the public site.</li>
+      <li data-n="5"><b>Delete ~526 MB of orphan worktree folders?</b> arcane-chapter1 has the only copy of paint_tiles.py.</li>
+    </ol>
+  </div>
+  <div class="pn"><button data-go="prev">← prev</button><button disabled>next →</button></div>
+</section>
+</main>
+
+<script>
+(function(){
+  var KEYS=["cover","story","live","branches","issues","money","options","decide"];
+  var cur="cover";
+  function show(k){
+    if(KEYS.indexOf(k)<0) k="cover";
+    cur=k;
+    document.querySelectorAll(".page").forEach(function(p){p.classList.toggle("on",p.dataset.k===k)});
+    document.querySelectorAll(".strip a").forEach(function(a){a.classList.toggle("on",a.dataset.k===k)});
+    try{history.replaceState(null,"","#"+k)}catch(e){}
+    stopAuto();
+    window.scrollTo(0,0);
+    onScroll();
+  }
+  window.__show=show;
+  document.addEventListener("click",function(e){
+    var a=e.target.closest('a[href^="#"]');
+    if(a){e.preventDefault();show(a.getAttribute("href").slice(1));return}
+    var b=e.target.closest("button[data-go]");
+    if(b){var i=KEYS.indexOf(cur)+(b.dataset.go==="next"?1:-1);if(i>=0&&i<KEYS.length)show(KEYS[i])}
+  });
+  window.addEventListener("hashchange",function(){var k=location.hash.slice(1);if(k&&k!==cur)show(k)});
+
+  /* scroll-driven ink panels (The Boat) */
+  var bar=document.getElementById("inkbar");
+  function onScroll(){
+    var vh=window.innerHeight;
+    document.querySelectorAll(".page.on .panel").forEach(function(p){
+      var r=p.getBoundingClientRect();
+      if(r.top<vh*0.82&&r.bottom>0) p.classList.add("in");
+      else if(r.top>vh) p.classList.remove("in");
+    });
+    var h=document.documentElement.scrollHeight-vh;
+    bar.style.width=(h>0?Math.min(100,window.scrollY/h*100):0)+"%";
+  }
+  window.addEventListener("scroll",onScroll,{passive:true});
+  window.addEventListener("resize",onScroll);
+
+  /* auto scroll, as on The Boat */
+  var autoBtn=document.getElementById("auto"),raf=null;
+  function step(){
+    var max=document.documentElement.scrollHeight-window.innerHeight;
+    if(window.scrollY>=max-1){stopAuto();return}
+    window.scrollBy(0,2);raf=requestAnimationFrame(step);
+  }
+  function stopAuto(){if(raf)cancelAnimationFrame(raf);raf=null;autoBtn.setAttribute("aria-pressed","false")}
+  autoBtn.addEventListener("click",function(){
+    if(raf){stopAuto()}else{autoBtn.setAttribute("aria-pressed","true");raf=requestAnimationFrame(step)}
+  });
+  window.addEventListener("wheel",function(){if(raf)stopAuto()},{passive:true});
+  window.addEventListener("touchstart",function(){if(raf)stopAuto()},{passive:true});
+
+  /* theme toggle */
+  var tb=document.getElementById("theme");
+  try{var saved=localStorage.getItem("omt-brief-theme");if(saved)document.documentElement.setAttribute("data-theme",saved)}catch(e){}
+  tb.addEventListener("click",function(){
+    var root=document.documentElement,now=root.getAttribute("data-theme");
+    if(!now) now=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+    var next=now==="dark"?"light":"dark";root.setAttribute("data-theme",next);
+    try{localStorage.setItem("omt-brief-theme",next)}catch(e){}
+  });
+
+  var start=(location.hash||"").slice(1);
+  show(KEYS.indexOf(start)>=0?start:"cover");
+})();
+</script>
+</body>
+</html>
