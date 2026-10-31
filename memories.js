@@ -69,6 +69,7 @@
     o.traverse(c => { c.userData.memory = m; });
     group.add(o);
     memories.push({ m, obj: o });
+    window.dispatchEvent(new CustomEvent('memory:added', { detail: m }));   // gallery.js hangs the photo ones
   }
 
   // ── storage ─────────────────────────────────────────────────────────────────
@@ -186,7 +187,8 @@
     '<button type="button" class="mem-close" aria-label="Close">×</button>' +
     '<div class="mem-body">' +
       '<div class="mem-k" id="memFormWhere"></div>' +
-      '<h2 class="mem-title" id="memFormTitle">Leave a memory here</h2>' +
+      '<h2 class="mem-title" id="memFormTitle">Add your photo or a memory</h2>' +
+      '<label class="mem-field mem-photo"><span>Your photo <em>(optional, one you took or may share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
       '<label class="mem-field"><span>What happened here?</span>' +
         '<textarea name="body" rows="4" maxlength="' + MAX_TEXT + '" required placeholder="The ten dollars my mother gave me, the film we saw, the stall that isn’t there any more…"></textarea>' +
         '<span class="mem-count"><span id="memCount">0</span>/' + MAX_TEXT + '</span></label>' +
@@ -194,7 +196,6 @@
         '<label class="mem-field"><span>Year</span><input name="year" type="number" inputmode="numeric" min="1900" max="' + THIS_YEAR + '"></label>' +
         '<label class="mem-field"><span>Your name <em>(optional)</em></span><input name="name" type="text" maxlength="' + MAX_NAME + '" autocomplete="nickname"></label>' +
       '</div>' +
-      '<label class="mem-field"><span>A photo <em>(optional, one you took or may share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
       '<label class="mem-hp" aria-hidden="true">Leave this empty <input name="website" type="text" tabindex="-1" autocomplete="off"></label>' +
       '<label class="mem-consent"><input name="ok" type="checkbox" required> <span>I’m happy for this to be shown publicly on this page. It names no one who hasn’t agreed and shares nobody’s private details.</span></label>' +
       '<p class="mem-status" role="status" aria-live="polite"></p>' +
@@ -225,7 +226,7 @@
     F.year.min = 1900; F.year.placeholder = yr[0] + '–' + Math.min(yr[1], THIS_YEAR);
     F.status.textContent = ''; F.status.classList.remove('ok'); F.send.disabled = false;
     form.hidden = false; openedAt = performance.now();
-    setTimeout(() => F.body.focus(), 30);
+    setTimeout(() => F.photo.focus(), 30);   // the photo field comes first (gallery.js)
   }
   function closeForm() { form.hidden = true; }
   form.addEventListener('submit', async ev => {
@@ -245,8 +246,10 @@
     if (file && file.size > 25e6) return say('That photo is too large.');
     F.send.disabled = true; say(file ? 'Making the photo small…' : 'Hanging it…');
     try {
-      const how = await submit({ section: spot.section, x: spot.x, z: spot.z, year, body, name: name || null }, file);
+      const rec = { section: spot.section, x: spot.x, z: spot.z, year, body, name: name || null };
+      const how = await submit(rec, file);
       lastSent = Date.now();
+      window.dispatchEvent(new CustomEvent('memory:saved', { detail: { rec, file, how } }));   // gallery.js
       F.body.value = ''; F.name.value = ''; F.year.value = ''; F.photo.value = ''; F.ok.checked = false; F.count.textContent = '0';
       say(how === 'local'
         ? 'Your lantern is hanging here, kept in this browser.'
@@ -291,7 +294,7 @@
     let best = null, bestD = NEAR;
     const p = WALK.on ? WALK.pos : null;
     memories.forEach(e => {
-      const on = e.m.section === sec;
+      const on = e.m.section === sec && !(window.__gallery && photoURL(e.m));   // a photo memory hangs on the wall instead (gallery.js)
       e.obj.visible = on;
       if (!on) return;
       e.obj.position.y = 2.9 + Math.sin(t * 1.3 + e.obj.userData.phase) * 0.12;
@@ -314,5 +317,5 @@
   fetchApproved();
   requestAnimationFrame(tick);
 
-  window.__memories = { get count() { return memories.length; }, ONLINE, openForm, openRead, list: () => memories.map(e => e.m) };
+  window.__memories = { get count() { return memories.length; }, ONLINE, openForm, openRead, photoURL, list: () => memories.map(e => e.m) };
 })();

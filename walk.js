@@ -66,6 +66,7 @@
     section() { return WALK.on ? st.where : ERAS[R.eraIdx].key; },
     update, enter, goSquare, startTour, startWalk,
     bar: null,
+    layout: { SQ, SECT, SIDE },   // read by gallery.js to hang its walls
   };
 
   // ── building helpers ────────────────────────────────────────────────────────
@@ -358,6 +359,7 @@
     document.body.classList.toggle('in-square', where === 'square');
     showFor(where);
     if (where !== 'square') document.documentElement.dataset.section = where; else delete document.documentElement.dataset.section;
+    window.dispatchEvent(new CustomEvent('walk:section', { detail: where }));   // gallery.js shows that place's wall
   }
   function enter(k, instant) {
     const go = () => place(k, 0, SECT[k].top - 9, 0);
