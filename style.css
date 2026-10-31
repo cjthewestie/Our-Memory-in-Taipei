@@ -46,6 +46,21 @@ body.booting { background: radial-gradient(ellipse at 50% 45%, #f7e5ca 55%, #dbc
 body.booting #scene { visibility: hidden; }
 body.booting .hud-opening { opacity: 1; visibility: visible; color: var(--ink); }
 body.booting .hud-guide { opacity: 1; visibility: visible; }
+/* area 14: a slow network leaves the title up for many seconds; say it is loading, not stuck */
+body.booting::after, body.loading-street::after {
+  content: 'Loading the street…'; position: fixed; left: 50%; top: calc(50% + min(19vw, 210px)); transform: translateX(-50%);
+  z-index: 6; font: 500 11px/1 "Barlow", sans-serif; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink); opacity: 0.6;
+  pointer-events: none; animation: boot-pulse 1.6s ease-in-out infinite alternate;
+}
+@keyframes boot-pulse { from { opacity: 0.25; } to { opacity: 0.7; } }
+body.no-webgl { background: radial-gradient(ellipse at 50% 45%, #f7e5ca 55%, #dbcab2 130%) fixed; }
+body.no-webgl #scene { visibility: hidden; }
+body.no-webgl .hud-opening { opacity: 1; visibility: visible; color: var(--ink); }
+.fail-note {
+  position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 60; max-width: min(560px, calc(100vw - 32px));
+  padding: 10px 16px; border-radius: 10px; background: rgba(247, 242, 232, 0.94); color: #262c38;
+  font: 400 13px/1.45 "Barlow", sans-serif; text-align: center; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12); pointer-events: none;
+}
 
 /* the world: fixed, full viewport, under everything */
 #scene {
