@@ -210,7 +210,7 @@
     '<div class="mem-body">' +
       '<div class="mem-k" id="memFormWhere"></div>' +
       '<h2 class="mem-title" id="memFormTitle">Add your photo or a memory</h2>' +
-      '<label class="mem-field mem-photo"><span>Your photo <em>(optional: one you took, or have permission to share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
+      '<label class="mem-field mem-photo"><span>Your photo <em>(optional: yours, or one you may share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
       '<label class="mem-field"><span>What happened here?</span>' +
         '<textarea name="body" rows="4" maxlength="' + MAX_TEXT + '" required placeholder="The ten dollars my mother gave me, the film we saw, the stall that isn’t there any more…"></textarea>' +
         '<span class="mem-count"><span id="memCount">0</span>/' + MAX_TEXT + '</span></label>' +
