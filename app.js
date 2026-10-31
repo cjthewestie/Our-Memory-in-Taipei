@@ -167,7 +167,34 @@
 
   // ── renderer, scene, camera ──────────────────────────────────────────────────
   const canvas = document.getElementById('scene');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+  // a plain note over the page when something could not load (area 14: degrade, never a blank or a stuck screen)
+  const notice = text => {
+    const n = document.createElement('div'); n.className = 'fail-note'; n.setAttribute('role', 'status'); n.textContent = text;
+    document.body.appendChild(n); return n;
+  };
+  window.NOTICE = notice;
+  // No WebGL (switched off, a blocklisted GPU, an old browser): the title stays on its cream field, the music
+  // still plays, and a note says why there is no street. Probe first, so three.js never throws on the page.
+  const probe = document.createElement('canvas');
+  let renderer = null;
+  if (probe.getContext('webgl2') || probe.getContext('webgl')) {
+    try { renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' }); } catch (e) { renderer = null; }
+  }
+  if (!renderer) {
+    document.body.classList.remove('booting'); document.body.classList.add('no-webgl');
+    notice('This browser can’t draw the 3D street (WebGL is off or not supported). Try Chrome, Safari or Firefox with hardware acceleration switched on.');
+    return;
+  }
+  // a model bundle that fails (offline, blocked, a bad deploy): the square and street still stand, a note says so once
+  if (THREE.GLTFLoader) {
+    const load0 = THREE.GLTFLoader.prototype.load; let told = false;
+    THREE.GLTFLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+      return load0.call(this, url, onLoad, onProgress, err => {
+        if (!told) { told = true; notice('Some of the buildings didn’t load, so parts of the street look plain. Reload to try again.'); }
+        if (onError) onError(err);
+      });
+    };
+  }
   // pixel ratio cap: 2 on a desktop, 1.5 on a phone (coarse pointer or a narrow screen), so a
   // 3x phone does not render 9x the pixels of a laptop
   const IS_PHONE = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || window.innerWidth < 768;
@@ -1463,6 +1490,7 @@
 
   function updateOpening(u, camZ) {
     const floor = veilFloor();
+    document.body.classList.toggle('loading-street', veilHeld);   // style.css shows "Loading the street…" under the title
     const fog = Math.max(floor, 1 - sm(u / OPENING.fogTo)), title = Math.max(floor, 1 - sm((u - OPENING.titleFrom) / (OPENING.titleTo - OPENING.titleFrom)));
     openState = { fog: +fog.toFixed(3), title: +title.toFixed(3) };
     if (fog > 0.001) {

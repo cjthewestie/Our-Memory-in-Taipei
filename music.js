@@ -351,8 +351,9 @@
     const onYT = mode === 'youtube', n = onYT ? d.videos.length : d.local.length, i = onYT ? d.vi : d.li;
     if (el.decade) el.decade.textContent = d.label + (mode !== 'pending' && n > 1 ? ' · ' + (i + 1) + '/' + n : '');
     if (el.track) el.track.textContent = onYT && v ? v.title + ' · ' + v.artist + ' · ' + v.year : mode === 'local' ? t.title + ' · ' + t.credit : '';
-    const what = privateOn ? 'your songs' : 'local loops';
-    if (el.status) el.status.textContent = onYT ? 'YouTube · ' + (v ? v.channel : '') : mode === 'local' ? (why === 'referrer' ? what + ' · YouTube needs http' : why === 'refused' ? what + ' · YouTube refused to embed' : 'offline: ' + what) : 'connecting to YouTube…';
+    // the reason first, so the bar's ellipsis never cuts it off
+    const what = privateOn ? 'your songs' : 'our own loops';
+    if (el.status) el.status.textContent = onYT ? 'YouTube · ' + (v ? v.channel : '') : mode === 'local' ? (why === 'referrer' ? 'YouTube needs a web address · ' + what : 'YouTube unavailable · ' + what) : 'connecting to YouTube…';
     if (el.toggle) {
       const started = onYT ? gestured : unlocked;
       el.toggle.textContent = !started ? (onYT ? 'Click to play' : 'Click for sound') : muted ? 'Sound off' : 'Sound on';
