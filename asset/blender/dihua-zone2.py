@@ -1,4 +1,10 @@
 """Dihua reference bays: deep arcades, fanlights, pierced parapets and open shops.
+Detail pass blender-detail 2026-11-01 (research/reference/dadao/img dihua-01, -02, -06):
+curved stone brackets and keystones on the arcade, sill consoles and keystones on the upper
+windows, end pedestals with ball finials and a pedimented name plaque on the 洋樓 parapet, urns,
+a finial, a medallion ring and a sunk field on the 巴洛克 gable, a ridge roll and eave board on
+the 閩南 roof. Node names (arcade, min, yang, baroque, yang_crest, baroque_crest) and every
+dimension unchanged; scene-dadao.js lines ~185-358 look them up.
 Blender --background --python asset/blender/dihua-zone2.py -- --out asset/models/dihua-zone2.glb
 Dimensions are an interpretation of refs/1,2,5,6, not an address survey.
 """
@@ -150,12 +156,72 @@ def minnan():
     boxes('min_purlins','ink',[((W,.16,.16),(0,2.2,5.32)),((W,.15,.18),(0,-.55,3.94))], 'min')
 
 
+def arcade_detail(group='arcade'):
+    # Curved stone brackets under each arch spring (dihua-06) and a keystone on each arch.
+    def brackets(bm):
+        for px, s in ((-2.18, 1), (0, -1), (0, 1), (2.18, -1)):
+            fx = px + s * .14
+            pts = [(fx, 2.75), (fx, 2.2)]
+            for t in (.35, .7, 1.0):
+                pts.append((fx + s * .3 * (1 - math.cos(t * math.pi / 2)) ** .7, 2.2 + .5 * math.sin(t * math.pi / 2)))
+            pts.append((fx + s * .32, 2.75))
+            if s > 0:
+                pts = pts[::-1]
+            bm_solid(bm, pts, -.36, .04)
+    solid('arcade_brackets', 'walk', brackets, bevel=.025, group=group)
+    boxes('arcade_keys', 'walk', [((.22, .5, .34), (x, -.08, 3.72)) for x in (-1.09, 1.09)], group)
+
+
+def upper_detail(style, group, z0=4.1):
+    # Keystones over the fanlights and a pair of consoles under each sill.
+    entries = []
+    for x, w in ((-1.52, .88), (0, 1.5), (1.52, .88)):
+        entries.append(((.2, .2, .3), (x, -.2, z0 + 3.05 + .44)))
+        for dx in (-w / 2 + .05, w / 2 - .05):
+            entries.append(((.1, .2, .2), (x + dx, -.18, z0 + .64)))
+    boxes(group + '_keys', 'bone', entries, group)
+
+
+def crest_detail(style):
+    group = style + '_crest'
+    if style == 'yang':
+        # end pedestals with ball finials, and a pedimented blank name plaque in the middle
+        boxes('yang_pedestals', 'brick', [((.4, .5, 1.0), (x, 0, TOP + .5)) for x in (-2.1, 2.1)], group)
+        boxes('yang_pedestal_caps', 'bone', [((.5, .58, .12), (x, 0, TOP + 1.06)) for x in (-2.1, 2.1)], group)
+        solid('yang_balls', 'bone', lambda bm: [S.bm_sphere(bm, .15, (x, 0, TOP + 1.27), 8, 6) for x in (-2.1, 2.1)], bevel=0, group=group)
+        boxes('yang_plaque', 'bone', [((1.0, .5, .5), (0, 0, TOP + 1.25)), ((1.2, .56, .08), (0, 0, TOP + 1.03))], group)
+        solid('yang_plaque_pediment', 'bone', lambda bm: bm_solid(bm, [(-.62, TOP + 1.5), (.62, TOP + 1.5), (0, TOP + 1.82)], -.24, .24), bevel=.025, group=group)
+    else:
+        # sunk field inside the gable, a medallion ring round the tablet, urns on the
+        # shoulders and a finial on the apex (dihua-01, -02)
+        field = [(-1.35, TOP + .5), (1.35, TOP + .5), (1.1, TOP + .68), (.82, TOP + .76), (.6, TOP + 1.18), (0, TOP + 1.45), (-.6, TOP + 1.18), (-.82, TOP + .76), (-1.1, TOP + .68)]
+        solid('gable_field', 'bone', lambda bm: bm_solid(bm, field, -.06, 0), bevel=0, group=group, smooth=False)
+        solid('tablet_ring', 'walk', lambda bm: S.bm_prism(bm, 12, .5, .5, 0, .08, rot=0,
+              xform=Matrix.Translation((0, -.06, TOP + .9)) @ Matrix.Rotation(math.pi / 2, 4, 'X')), bevel=0, group=group)
+        prof = [(0, 0), (.1, 0), (.07, .05), (.14, .18), (.1, .32), (.05, .35), (.08, .4), (0, .44)]
+        def urns(bm):
+            for x in (-1.85, 1.85):
+                S.bm_lathe(bm, prof, n=6, xform=Matrix.Translation((x, .1, TOP + .45)))
+            S.bm_lathe(bm, [(0, 0), (.13, 0), (.08, .1), (.12, .22), (.04, .34), (0, .44)], n=6, xform=Matrix.Translation((0, .1, TOP + 1.53)))
+        solid('urns', 'bone', urns, bevel=0, group=group)
+
+
+def minnan_detail():
+    # ridge roll along the top of the tile slope and a fascia board at the eave
+    solid('min_ridge', 'haze', lambda bm: bm_bar(bm, (-2.3, 2.2, 5.33), (2.3, 2.2, 5.33), .14), bevel=0, group='min')
+    boxes('min_eave_board', 'ink', [((W, .06, .18), (0, -.66, 3.96))], 'min')
+
+
 def build():
     arcade('arcade')
+    arcade_detail()
     minnan()
+    minnan_detail()
     for style in ('yang','baroque'):
         upper(style,style)
+        upper_detail(style, style)
         crest(style)
+        crest_detail(style)
 
 if __name__=='__main__':
     S.run(build,camera=((9,-13,7),(0,1,4.3),50))
