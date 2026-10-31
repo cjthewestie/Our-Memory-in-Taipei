@@ -393,14 +393,14 @@
     const cz = G.z, WH = 5.0, xf = -8.8;                       // hall z -244 … -236, x -8.8 … -17.8, walls 5 m
     // Issue #5 step 2: the hall, carved front with red doors, porch columns, brackets, tiled
     // roof, swallowtail ridge, lanterns and incense burner are the glb from asset/blender/temple.py
-    // (8.4k triangles); the name board and the 月老 sign stay canvas text on it.
+    // (21.4k triangles); the name board and the 月老 sign stay canvas text on it.
     const temple = libGroup(ALL);
     MODELS.load('temple', gltf => {
       const root = MODELS.lambertize(gltf.scene);
       root.position.set(xf, 0, cz); root.rotation.y = Math.PI / 2;
       temple.add(root);
     });
-    lightBox('霞海城隍廟', 'ink', 'lamp', false, 'x', -5.65, WH - 0.9, cz, 0.85, ALL);   // the name on the eave, facing the road
+    lightBox('霞海城隍廟', 'ink', 'lamp', false, 'x', -7.45, WH - 0.9, cz, 0.85, ALL);   // the name on the eave fascia (medallion faces at x -7.43), facing the road
     part(-6.9, WALK + 1.05, cz, 0.1, 0.1, only(ALL, 2.4, 'bone'));                     // smoke off the burner
     part(-6.75, WALK + 1.05, cz - 0.12, 0.07, 0.07, only(ALL, 3.0, 'bone'));
     lightBox('月老', 'verm', 'bone', true, 'x', -6.35, WALK, cz + 5.2, 1.8, DT);       // the matchmaker board at the queue head
