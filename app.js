@@ -419,7 +419,11 @@
     for (let i = 0; i < 26; i++) {
       const a = -Math.PI * 0.05 + (i / 26) * Math.PI * 2.1, r = 430 + (i % 3) * 30;
       const h = 60 + ((i * 37) % 70), w = 140 + ((i * 53) % 120);
-      m.makeScale(w, h, w).setPosition(Math.sin(a) * r, -6, -200 + Math.cos(a) * r);
+      const mx = Math.sin(a) * r, mz = -200 + Math.cos(a) * r;
+      // the cones behind the street's start (which the tour camera never turns round to see) would
+      // stand over walk.js's square at z ≈ 150: their bases are wider than the gap, so they go
+      if (Math.hypot(mx, mz - 150) < w + 70) { m.makeScale(0, 0, 0); mountains.setMatrixAt(i, m); continue; }
+      m.makeScale(w, h, w).setPosition(mx, -6, mz);
       mountains.setMatrixAt(i, m);
     }
     mountains.instanceMatrix.needsUpdate = true;
@@ -851,17 +855,23 @@
   let stride = 0, lastProg = 0, run = 0;
   function updateGirl(u, camZ, dt) {
     const speed = Math.abs(u - lastProg) / Math.max(dt, 1e-3); lastProg = u;      // scroll speed drives the run
-    run += (Math.min(1, speed * 6) - run) * (1 - Math.exp(-6 * dt));
-    stride += (0.4 + run * 14) * dt * 2.2;
+    poseGirl(Math.min(1, speed * 6), dt);
     const z = Math.max(-398, camZ - 18 + run * 4);
     girl.position.set(Math.sin(stride * 0.15) * 0.6, Math.abs(Math.sin(stride)) * 0.12 * run, z);
+    girl.rotation.y = 0;
+  }
+  // the run itself, apart from where she is: the tour drives it from scroll speed, walk.js from the
+  // stick. runTarget 0 = standing (a slow idle sway), 1 = a full run. Returns the bob height.
+  function poseGirl(runTarget, dt) {
+    run += (runTarget - run) * (1 - Math.exp(-6 * dt));
+    stride += (0.4 + run * 14) * dt * 2.2;
     const sw = Math.sin(stride) * (0.25 + run * 0.9);
     legL.rotation.x = Math.PI + sw; legR.rotation.x = Math.PI - sw;
     if (frameA) { const fwd = Math.sin(stride) >= 0; frameA.visible = fwd; frameB.visible = !fwd; }   // the two-frame run
     const carry = Math.sin(stride * 2) * 0.04 * run;                                 // the bowl bobs a little as she runs; the arms stay on it
     bowl.position.y = 1.78 + carry; gArmL.position.y = gArmR.position.y = 1.95 + carry;
     hair.position.z = -0.2 - run * 0.06; fringe.position.y = 2.42 + Math.sin(stride * 2) * 0.01 * run;
-    girl.rotation.y = 0;
+    return Math.abs(Math.sin(stride)) * 0.12 * run;
   }
 
   // ── curve particles (IVRESS borrow g): lantern sparks in Dadaocheng, a light stream up 101 ──
@@ -1346,9 +1356,9 @@
   function openingFogAll() {
     if (openFogged) return; openFogged = true;
     scene.traverse(o => {
-      if (!o.material || o.isPoints || o.material === skyMat || o.material === mountainMat) return;
+      if (!o.material || o.isPoints || o.isSprite || o.material === skyMat || o.material === mountainMat) return;
       (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => {
-        if (m.fog !== false) return;
+        if (m.fog !== false || m.isShaderMaterial) return;           // a ShaderMaterial has no fog uniforms to take it (walk.js's gate glow)
         m.fog = true;
         const prev = m.onBeforeCompile;
         m.onBeforeCompile = (shader, r) => { if (prev) prev(shader, r); shader.uniforms.uFrontier = FOG_U.frontier; shader.uniforms.uSoft = FOG_U.soft; };
@@ -1431,8 +1441,10 @@
   window.addEventListener('focus', resetClocks);
   // keyboard: arrows, page keys, space, home, end scroll the page even when the browser gave the
   // canvas focus and stopped scrolling the document itself
+  const walking = () => !!(window.WALK && window.WALK.on);         // walk.js owns the keys and the touch then
   window.addEventListener('keydown', ev => {
-    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (ev.metaKey || ev.ctrlKey || ev.altKey || walking()) return;
+    if (ev.target && /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(ev.target.tagName)) return;
     const page = window.innerHeight * 0.8, step = 120;
     const by = { ArrowDown: step, ArrowUp: -step, PageDown: page, PageUp: -page, ' ': ev.shiftKey ? -page : page }[ev.key];
     if (by !== undefined) { ev.preventDefault(); window.scrollBy({ top: by, behavior: 'smooth' }); }
@@ -1444,6 +1456,7 @@
   let touchY = 0, touchScroll0 = 0, touchMoves = 0, touchManual = false;
   window.addEventListener('touchstart', ev => { touchY = ev.touches[0].clientY; touchScroll0 = window.scrollY; touchMoves = 0; touchManual = false; }, { passive: true });
   window.addEventListener('touchmove', ev => {
+    if (walking()) return;
     const y = ev.touches[0].clientY, dy = touchY - y; touchY = y; touchMoves++;
     if (!touchManual && touchMoves >= 3 && Math.abs(dy) > 4 && window.scrollY === touchScroll0) touchManual = true;
     if (touchManual) window.scrollBy(0, dy);
@@ -1476,13 +1489,22 @@
     if (now - lastT > hitch.max && lastT > 0) { hitch.max = Math.round(now - lastT); hitch.at = +progress.toFixed(3); }
     lastT = now;
     if (!warm && !NOWARM) { enableShadows(); openingFogAll(); warmUp(); hitch.max = 0; }
-    const target = Math.min(1, Math.max(0, window.scrollY / maxScroll()));
-    progress += (target - progress) * (1 - Math.exp(-DAMP * dt));
-    if (Math.abs(target - progress) < 0.00005) progress = target;
-    driftX += (mouseX * PARALLAX_X - driftX) * (1 - Math.exp(-2 * dt));
-    driftY += (-mouseY * PARALLAX_Y - driftY) * (1 - Math.exp(-2 * dt));
-
-    const camZ = placeCamera(progress);
+    // walk mode (walk.js): the visitor steers the girl; walk.js places her and the camera and hands
+    // back the progress her spot on the street stands for, so the eras, the year, the labels, the
+    // photographs and the man on the tower all keep reading the one number they always read.
+    const W = walking();
+    let camZ;
+    if (W) {
+      camZ = window.WALK.update(dt, now);
+      progress = window.WALK.u;
+    } else {
+      const target = Math.min(1, Math.max(0, window.scrollY / maxScroll()));
+      progress += (target - progress) * (1 - Math.exp(-DAMP * dt));
+      if (Math.abs(target - progress) < 0.00005) progress = target;
+      driftX += (mouseX * PARALLAX_X - driftX) * (1 - Math.exp(-2 * dt));
+      driftY += (-mouseY * PARALLAX_Y - driftY) * (1 - Math.exp(-2 * dt));
+      camZ = placeCamera(progress);
+    }
     sunFollow(camZ);
     frontier = Math.min(frontier, camZ - FOG_LEAD);
     FOG_U.frontier.value = -1e5; // mist switched off: the whole street is visible in daylight
@@ -1493,8 +1515,8 @@
     if (!streamCurve && TOWER.faceX) buildStreamCurve();
     updateParticles(dt, now, ERAS[eraIdx].key);
     updateMan(progress);
-    updateGirl(progress, camZ, dt);
-    updateWords(progress);
+    if (!W) { updateGirl(progress, camZ, dt); updateWords(progress); }
+    else if (wordShown !== -1) { wordShown = -1; wordEl.classList.remove('show'); wordEl.style.opacity = '0'; }
     updateLabels();
     closingA = Math.min(1, Math.max(0, (progress - CLOSING.showFrom) / (1 - CLOSING.showFrom) * 1.6));   // the labels step aside on this
     closingParts.forEach(({ p, el }) => { const a = Math.min(1, Math.max(0, (progress - p.from) / (p.to - p.from))); el.style.opacity = a.toFixed(2); el.classList.toggle('in', a > 0.02); });
@@ -1525,6 +1547,12 @@
   const wantYear = parseInt(new URLSearchParams(location.search).get('year'), 10);
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (!isNaN(wantYear)) jumpToYear(wantYear); else { window.scrollTo(0, 0); setEra(0, true); }
+
+  // what walk.js and memories.js need from the rig: the camera, the girl and her run, the scroll ⇄ street
+  // mapping, and the portrait fov lift. Read-only from their side except the camera and the girl.
+  window.RIG = { camera, girl, poseGirl, uAtZ, BOUNDS, eraAtU, yearAtU, renderer, canvas, IS_PHONE, PORTRAIT,
+                 get progress() { return progress; }, get eraIdx() { return eraIdx; }, maxScroll,
+                 jumpToU(u) { window.scrollTo(0, u * maxScroll()); progress = u; placeCamera(u); setEra(eraAtU(u), true); } };
 
   // a tiny probe for testing; harmless in the demo
   window.__fog = { get progress() { return progress; }, get year() { return shownYear; }, get era() { return ERAS[eraIdx].key; }, people: peopleCalls,
