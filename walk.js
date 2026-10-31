@@ -433,6 +433,133 @@
     } catch (_) { /* file:// or a sandbox: the address bar just does not follow */ }
   }
 
+  // ── walk feel: she slides into a gate, steps round what stands on the pavement, and the camera
+  // never ends up inside or behind a wall ─────────────────────────────────────
+  // The solid things round the space she is in: every opaque mesh (and every instance of an instanced
+  // one) whose bounds reach into it, kept as world-space spheres. Gathered on entering a space and again
+  // every 0.3 s for two seconds (every 2 s after), because models load and the street re-lays its eras
+  // as she arrives and walks; whether one is
+  // shown is checked each frame, since eras are shown and hidden by her progress.
+  const ray = new THREE.Raycaster(); ray.camera = camera;
+  const rO = new THREE.Vector3(), rD = new THREE.Vector3(), m4b = new THREE.Matrix4(), hits = [];
+  const proxy = new THREE.Mesh();   // stands in for one instance of an instanced mesh when a ray tests it
+  let items = [], near = [], byHer = [], occWhere = null, occT = -1e9, occIn = 0, nearT = -1;
+  const seen = new Map();   // this frame's answer to "is it shown", per mesh
+  const inGirl = o => { for (let q = o; q; q = q.parent) if (q === girl) return true; return false; };
+  const shown = o => { for (let q = o; q; q = q.parent) if (!q.visible) return false; return true; };
+  function solids() {
+    if (occWhere !== st.where) occIn = st.t;
+    else if (st.t - occT < (st.t - occIn < 2 ? 0.3 : 2)) return items;
+    occWhere = st.where; occT = st.t; items = [];
+    const s = SECT[st.where];
+    const box3 = st.where === 'square'
+      ? new THREE.Box3(new THREE.Vector3(SQ.x - SQ.h - 14, -1, SQ.z - SQ.h - 14), new THREE.Vector3(SQ.x + SQ.h + 14, 40, SQ.z + SQ.h + 14))
+      : new THREE.Box3(new THREE.Vector3(-SIDE - 14, -1, s.end - 14), new THREE.Vector3(SIDE + 14, 40, s.top + 14));
+    scene.updateMatrixWorld();
+    scene.traverse(o => {
+      if (!o.isMesh || o.isSprite || inGirl(o) || (st.where !== 'square' && o.parent === square)) return;
+      const m = Array.isArray(o.material) ? o.material[0] : o.material;
+      if (!m || m.isShaderMaterial || m.depthWrite === false || (m.transparent && m.opacity < 0.6)) return;
+      const g = o.geometry; if (!g.boundingSphere) g.computeBoundingSphere();
+      if (!g.boundingBox) g.computeBoundingBox();   // Mesh.raycast tries the box before the triangles
+      const add = mw => {
+        const sp = g.boundingSphere.clone().applyMatrix4(mw);
+        if (box3.intersectsSphere(sp)) items.push({ o, i, sp, mw: mw.clone() });
+      };
+      let i = -1;
+      if (o.isInstancedMesh) for (i = 0; i < o.count; i++) { o.getMatrixAt(i, m4b); add(m4b.premultiply(o.matrixWorld)); }
+      // small loose things (a lantern on a string) may pass between her and the camera; they hide nothing
+      else if (g.boundingSphere.radius * o.matrixWorld.getMaxScaleOnAxis() > 0.6) add(o.matrixWorld);
+    });
+    nearT = -1;
+    return items;
+  }
+  // the nearest shown solid along the ray rO→rD within far, or Infinity. Only things within a camera's
+  // length of her are tried (gathered once a frame; for her body, only what is within reach of her),
+  // and only those whose sphere the ray touches.
+  const isShown = o => { let v = seen.get(o); if (v === undefined) { v = shown(o); seen.set(o, v); } return v; };
+  function firstHit(far) {
+    const all = solids();
+    if (nearT !== st.t) {
+      nearT = st.t; near = []; byHer = []; seen.clear();
+      for (const it of all) {
+        if (it.i >= 0) {   // an instance: the street raises and re-lays them as she walks, so read where it is now
+          if (it.i >= it.o.count) continue;
+          it.o.getMatrixAt(it.i, it.mw); it.mw.premultiply(it.o.matrixWorld);
+          it.sp.copy(it.o.geometry.boundingSphere).applyMatrix4(it.mw);
+        }
+        const d = Math.hypot(it.sp.center.x - st.x, it.sp.center.z - st.z) - it.sp.radius;
+        // a whole merged street front (radius 15 and up) is the walls' job, and costly to ray at her feet
+        if (d < CAM_D + 1.5 && isShown(it.o)) { near.push(it); if (d < 1.2 && it.sp.radius < 15) byHer.push(it); }
+      }
+    }
+    ray.set(rO, rD); ray.near = 0; ray.far = far;
+    let best = Infinity;
+    for (const it of far < 1.2 ? byHer : near) {
+      if (!ray.ray.intersectsSphere(it.sp)) continue;
+      hits.length = 0;
+      if (it.o.isInstancedMesh) { proxy.geometry = it.o.geometry; proxy.material = it.o.material; proxy.matrixWorld.copy(it.mw); proxy.raycast(ray, hits); }
+      else it.o.raycast(ray, hits);
+      for (const h of hits) if (h.distance < best) best = h.distance;
+    }
+    return best;
+  }
+
+  // Pushing into the wall just beside a gate turns into a slide toward its opening, so the posts never
+  // catch her; inside a side gate's passage the posts keep her in it.
+  function funnelToGate(inner, dt) {
+    const gw = SQ.gate - 0.6, reach = SQ.gate + 2.4;
+    const dx = st.x - SQ.x, dz = st.z - SQ.z;
+    if (Math.abs(dx) > inner - 0.05 && Math.abs(dz) >= gw - 0.3 && Math.abs(dz) < reach && st.vx * dx > 0)
+      st.z -= Math.sign(dz) * Math.min(Math.abs(dz) - gw + 0.3, Math.abs(st.vx) * dt);
+    if (dz < -(inner - 0.05) && Math.abs(dx) >= gw - 0.3 && Math.abs(dx) < reach && st.vz < 0)
+      st.x -= Math.sign(dx) * Math.min(Math.abs(dx) - gw + 0.3, Math.abs(st.vz) * dt);
+    // was she already in a passage before this frame's step? (st.x/z have just had v*dt added)
+    const px = st.x - st.vx * dt - SQ.x, pz = st.z - st.vz * dt - SQ.z;
+    if (Math.abs(px) > inner + 0.01) st.z = Math.min(SQ.z + gw - 0.01, Math.max(SQ.z - gw + 0.01, st.z));
+    if (pz < -inner - 0.01) st.x = Math.min(SQ.x + gw - 0.01, Math.max(SQ.x - gw + 0.01, st.x));
+  }
+
+  // Stalls, scooters, posts: short rays out from her hips; whatever is closer than her radius pushes
+  // her back out. Her step into it is taken off, and walking at it head-on turns into a step round it,
+  // toward the open middle (the road, or the square's centre), so nothing on a pavement can hold her.
+  const BODY_R = 0.5, slide = { side: 1, t: -1e9 };
+  function bumpProps(lim, cx, cz) {
+    if (Math.hypot(st.vx, st.vz) < 0.05) return;   // standing still, nothing moves her into anything
+    let px = 0, pz = 0;
+    for (let k = 0; k < 12; k++) {
+      const a = k * Math.PI / 6;
+      rO.set(st.x, 0.8, st.z); rD.set(Math.sin(a), 0, Math.cos(a));
+      const d = firstHit(BODY_R);
+      if (d < BODY_R) { px -= rD.x * (BODY_R - d); pz -= rD.z * (BODY_R - d); }
+    }
+    const pl = Math.hypot(px, pz);
+    if (pl > 1e-4) {
+      st.x += px; st.z += pz;
+      const nx = px / pl, nz = pz / pl, vn = st.vx * nx + st.vz * nz;
+      if (vn < 0) {
+        // which way round: the way she was already leaning, else toward the open middle; kept while
+        // she stays in touch, so walking at the far side of a stall cannot rock her back and forth
+        const tx0 = -nz, tz0 = nx, along = st.vx * tx0 + st.vz * tz0;
+        if (st.t - slide.t > 0.6) slide.side = Math.abs(along) > -vn * 0.25 ? Math.sign(along) : (tx0 * (cx - st.x) + tz0 * (cz - st.z) < 0 ? -1 : 1);
+        slide.t = st.t;
+        st.vx -= nx * vn; st.vz -= nz * vn;
+        const tx = tx0 * slide.side, tz = tz0 * slide.side, tv = st.vx * tx + st.vz * tz;
+        if (tv < -vn * 0.8) { st.vx += tx * (-vn * 0.8 - tv); st.vz += tz * (-vn * 0.8 - tv); }
+      }
+    }
+    st.x = Math.min(lim, Math.max(-lim, st.x));
+  }
+
+  // The camera: if anything solid stands between her and it, it comes in to just this side of it.
+  // It eases back out on its own (the follow ease keeps pulling it toward its place behind her).
+  function keepCamClear() {
+    rO.set(st.x, CAM_LOOK_Y, st.z);
+    rD.subVectors(st.cam, rO); const L = rD.length(); if (L < 1e-3) return; rD.multiplyScalar(1 / L);
+    const d = firstHit(L + 0.3);
+    if (d < L + 0.3) st.cam.copy(rO).addScaledVector(rD, Math.max(0.6, d - 0.5));
+  }
+
   // ── per frame ───────────────────────────────────────────────────────────────
   const angDiff = (a, b) => { let d = a - b; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; };
   const look3 = new THREE.Vector3(), camT = new THREE.Vector3();
@@ -471,11 +598,13 @@
 
     // walls, and the gates in them
     if (st.where === 'square') {
+      funnelToGate(SQ.h - 1.4, dt);
       const inner = SQ.h - 1.4, gx = Math.abs(st.z - SQ.z) < SQ.gate - 0.6, gz = Math.abs(st.x - SQ.x) < SQ.gate - 0.6;
       st.x = Math.min(SQ.x + (gx ? SQ.h + 1 : inner), Math.max(SQ.x - (gx ? SQ.h + 1 : inner), st.x));
       st.z = Math.min(SQ.z + inner, Math.max(SQ.z - (gz ? SQ.h + 1 : inner), st.z));
       const px = st.x - SQ.x, pz = st.z - SQ.z, pd = Math.hypot(px, pz);         // round the stone in the middle
       if (pd < 3.3) { const k = 3.3 / Math.max(pd, 1e-3); st.x = SQ.x + px * k; st.z = SQ.z + pz * k; }
+      bumpProps(Infinity, SQ.x, SQ.z);
       if (!st.busy) {
         if (gx && st.x < SQ.x - SQ.h + 0.2) enter('red');
         else if (gx && st.x > SQ.x + SQ.h - 0.2) enter('tower');
@@ -486,6 +615,7 @@
       const s = SECT[st.where];
       st.x = Math.min(SIDE, Math.max(-SIDE, st.x));
       st.z = Math.min(s.top, Math.max(s.end, st.z));
+      bumpProps(SIDE, 0, st.z - 1);
       if (!st.busy) {
         if (st.z >= s.top - 0.05 && st.vz > 0.2) goSquare(st.where);
         else if (s.next && st.z <= s.end + 0.05 && st.vz < -0.2) enter(s.next);
@@ -522,6 +652,7 @@
     // ease between two points inside the box stays inside it.
     if (st.snap) { st.cam.set(cx, cy, cz); st.aim.copy(look3); st.snap = false; }
     else { const k = 1 - Math.exp(-dt / CAM_T); st.cam.lerp(camT.set(cx, cy, cz), k); st.aim.lerp(look3, k); }
+    keepCamClear();
     camera.position.copy(st.cam);
     camera.lookAt(st.aim);
     let fov = FOV;
@@ -542,5 +673,5 @@
   if (QS.get('tour') === '1' || QS.has('year')) { showFor('tour'); square.visible = false; }
   else startWalk(true);
 
-  window.__walk = { st, SECT, SQ, GATES, enter, goSquare, startTour, startWalk };
+  window.__walk = { st, SECT, SQ, GATES, enter, goSquare, startTour, startWalk, solids: () => solids().map(it => it.o) };
 })();
