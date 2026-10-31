@@ -22,7 +22,7 @@
   const LOCAL_KEY = 'our-memory-in-taipei:memories';
   const MAX_TEXT = 280, MAX_NAME = 40, NEAR = 4.5;
 
-  const PLACE = { square: '廣場 · The Square', red: '西門町 · Ximending', dadao: '大稻埕 · Dadaocheng', tower: '信義 · Xinyi' };
+  const PLACE = { square: 'The Square · 廣場', red: 'Ximending · 西門町', dadao: 'Dadaocheng · 大稻埕', tower: 'Xinyi · 信義' };
   const YEARS = { square: [1950, 2026], red: [1985, 1999], dadao: [2000, 2019], tower: [2020, 2027] };
   const THIS_YEAR = new Date().getFullYear();
 
@@ -152,7 +152,7 @@
       if (file) { const p = await shrink(file, 640); rec.photoData = p.canvas.toDataURL(p.type, 0.7); }
       rec.id = 'local-' + uuid(); rec.local = true; rec.created_at = new Date().toISOString();
       const list = loadLocal(); list.push(rec);
-      if (!saveLocal(list)) { delete rec.photoData; list[list.length - 1] = rec; if (!saveLocal(list)) throw new Error('This browser would not save it (private mode?).'); }
+      if (!saveLocal(list)) { delete rec.photoData; list[list.length - 1] = rec; if (!saveLocal(list)) throw new Error('This browser couldn’t save it. Private browsing may be blocking it.'); }
       addLantern(rec);
       return 'local';
     }
@@ -162,12 +162,12 @@
       photo_path = uuid() + '.' + p.ext;
       const up = await net(`${API}/storage/v1/object/${BUCKET}/${photo_path}`, {
         method: 'POST', headers: headers({ 'Content-Type': p.type, 'x-upsert': 'false' }), body: p.blob }, 60000);
-      if (!up.ok) throw new Error('Saving failed: the photo did not upload (error ' + up.status + '). Your words are still here; try again, or send it without the photo.');
+      if (!up.ok) { console.warn('[memories] photo upload failed:', up.status); throw new Error('Saving failed: your photo didn’t upload. Your words are still here; try again, or send it without the photo.'); }
     }
     const res = await net(`${API}/rest/v1/memories`, {
       method: 'POST', headers: headers({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
       body: JSON.stringify({ section: rec.section, x: rec.x, z: rec.z, year: rec.year, body: rec.body, name: rec.name, photo_path }) });
-    if (!res.ok) throw new Error('Saving failed (error ' + res.status + '). Your words are still here; please try again in a moment.');
+    if (!res.ok) { console.warn('[memories] save failed:', res.status); throw new Error('Saving failed. Your words are still here; please try again in a moment.'); }
     return 'pending';
   }
 
@@ -176,7 +176,7 @@
 
   const bubble = el('button', 'mem-bubble', document.body);
   bubble.type = 'button'; bubble.hidden = true;
-  bubble.innerHTML = '<span class="mem-b-k">A memory</span><span class="mem-b-key">E</span>';
+  bubble.innerHTML = '<span class="mem-b-k">Read this memory</span><span class="mem-b-key">E</span>';
   let nearest = null;
   bubble.addEventListener('click', () => { if (nearest) openRead(nearest.m); });
 
@@ -195,7 +195,7 @@
     pK.textContent = (m.year ? m.year + ' · ' : '') + (PLACE[m.section] || '');
     pText.textContent = m.body;
     pBy.textContent = '— ' + (m.name && m.name.trim() ? m.name.trim() : 'someone who was there');
-    pNote.textContent = m.local ? 'Kept in this browser only.' : '';
+    pNote.textContent = m.local ? 'Saved in this browser only. Only you can see it.' : '';
     const u = photoURL(m);
     pFig.hidden = !u; if (u) pImg.src = u; else pImg.removeAttribute('src');
     panel.hidden = false; pClose.focus({ preventScroll: true });
@@ -210,7 +210,7 @@
     '<div class="mem-body">' +
       '<div class="mem-k" id="memFormWhere"></div>' +
       '<h2 class="mem-title" id="memFormTitle">Add your photo or a memory</h2>' +
-      '<label class="mem-field mem-photo"><span>Your photo <em>(optional, one you took or may share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
+      '<label class="mem-field mem-photo"><span>Your photo <em>(optional: one you took, or have permission to share)</em></span><input name="photo" type="file" accept="image/*"></label>' +
       '<label class="mem-field"><span>What happened here?</span>' +
         '<textarea name="body" rows="4" maxlength="' + MAX_TEXT + '" required placeholder="The ten dollars my mother gave me, the film we saw, the stall that isn’t there any more…"></textarea>' +
         '<span class="mem-count"><span id="memCount">0</span>/' + MAX_TEXT + '</span></label>' +
@@ -219,7 +219,7 @@
         '<label class="mem-field"><span>Your name <em>(optional)</em></span><input name="name" type="text" maxlength="' + MAX_NAME + '" autocomplete="nickname"></label>' +
       '</div>' +
       '<label class="mem-hp" aria-hidden="true">Leave this empty <input name="website" type="text" tabindex="-1" autocomplete="off"></label>' +
-      '<label class="mem-consent"><input name="ok" type="checkbox" required> <span>I’m happy for this to be shown publicly on this page. It names no one who hasn’t agreed and shares nobody’s private details.</span></label>' +
+      '<label class="mem-consent"><input name="ok" type="checkbox" required> <span>I’m happy for this to be shown publicly on this page. It doesn’t name anyone without their agreement or share anyone’s private details.</span></label>' +
       '<p class="mem-status" role="status" aria-live="polite"></p>' +
       '<div class="mem-actions"><button type="submit" class="wk-btn primary">Hang my lantern</button></div>' +
       '<p class="mem-fine"></p>' +
@@ -231,7 +231,7 @@
   };
   F.fine.textContent = ONLINE
     ? 'Every memory is read by the makers before it appears, usually within a few days.'
-    : 'This copy of the page isn’t connected to a shared store yet, so your lantern is kept in this browser and only you will see it.';
+    : 'Memories aren’t shared online yet, so your lantern is saved in this browser and only you will see it.';
   F.body.addEventListener('input', () => { F.count.textContent = F.body.value.length; });
   F.close.addEventListener('click', closeForm);
   let spot = null, openedAt = 0, lastSent = 0;
@@ -260,13 +260,13 @@
     if (!body) return say('Write a line or two first.');
     if (body.length > MAX_TEXT) return say('Keep it under ' + MAX_TEXT + ' characters.');
     if (year !== null && (isNaN(year) || year < 1900 || year > THIS_YEAR)) return say('The year should be between 1900 and ' + THIS_YEAR + '.');
-    if (!F.ok.checked) return say('Please tick the box to say it can be shown.');
+    if (!F.ok.checked) return say('Please tick the box so your memory can be shown.');
     if (performance.now() - openedAt < 2500) return say('One moment…');
     if (Date.now() - lastSent < 30000) return say('Thank you, one lantern at a time. Try again in half a minute.');
     const file = F.photo.files && F.photo.files[0];
-    if (file && !/^image\//.test(file.type)) return say('That file is not a photo.');
-    if (file && file.size > 25e6) return say('That photo is too large.');
-    F.send.disabled = true; say(file ? 'Making the photo small…' : 'Hanging it…');
+    if (file && !/^image\//.test(file.type)) return say('That file isn’t a photo.');
+    if (file && file.size > 25e6) return say('That photo is too large. Please choose one under 25 MB.');
+    F.send.disabled = true; say(file ? 'Resizing your photo…' : 'Hanging your lantern…');
     try {
       const rec = { section: spot.section, x: spot.x, z: spot.z, year, body, name: name || null };
       const how = await submit(rec, file);
@@ -274,13 +274,13 @@
       window.dispatchEvent(new CustomEvent('memory:saved', { detail: { rec, file, how } }));   // gallery.js
       F.body.value = ''; F.name.value = ''; F.year.value = ''; F.photo.value = ''; F.ok.checked = false; F.count.textContent = '0';
       say(how === 'local'
-        ? 'Your lantern is hanging here, kept in this browser.'
-        : 'Thank you. Your lantern will light up here once it has been read.', true);
+        ? 'Your lantern is hanging here, saved in this browser.'
+        : 'Thank you. Your lantern will light up here once the makers have read it.', true);
       setTimeout(closeForm, 2600);
     } catch (e) {
       // a network failure is said plainly: nothing was saved, and the words are still in the form
       const m = e && e.message;
-      say(m === 'unreachable' ? 'Saving failed: the memory store can’t be reached right now. Your words are still here; please try again in a moment.'
+      say(m === 'unreachable' ? 'Saving failed: the page can’t reach the internet right now. Your words are still here; please try again in a moment.'
         : m === 'timeout' ? 'Saving failed: the connection is too slow and it timed out. Your words are still here; please try again.'
         : m || 'Saving failed. Your words are still here; please try again.');
     } finally { F.send.disabled = false; }

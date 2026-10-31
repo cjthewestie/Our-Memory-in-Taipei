@@ -45,9 +45,9 @@
   // ── the square ──────────────────────────────────────────────────────────────
   const SQ = { x: 0, z: 150, h: 26, gate: 4.6 };   // h: half the plaza (centre to wall face); gate: half a gate's opening
   const GATES = {
-    red:   { side: 'west',  zh: '西門町', en: 'XIMENDING',  years: '1985 – 1999', line: 'When We Were Young', col: 'verm'  },
-    dadao: { side: 'north', zh: '大稻埕', en: 'DADAOCHENG', years: '2000 – 2019', line: 'Spring Festival',    col: 'brick' },
-    tower: { side: 'east',  zh: '信義',   en: 'XINYI',      years: '2020 – 2027', line: 'Into the Future',    col: 'glass' },
+    red:   { side: 'west',  zh: '西門町', en: 'XIMENDING',  years: '1985–1999', line: 'When We Were Young', col: 'verm'  },
+    dadao: { side: 'north', zh: '大稻埕', en: 'DADAOCHENG', years: '2000–2019', line: 'Spring Festival',    col: 'brick' },
+    tower: { side: 'east',  zh: '信義',   en: 'XINYI',      years: '2020–2027', line: 'The Future',         col: 'glass' },
   };
   // each section: its stretch of the street (girl z), the era it is, and where its arches lead
   const TOWER_FRONT = anchors.tower101 ? anchors.tower101.z + (anchors.tower101.tile.size[1] / 2) + 6 : -402;
@@ -140,18 +140,18 @@
     g.fillStyle = P.bone; g.fillRect(0, 0, W, H);
     g.fillStyle = P[G.col]; g.fillRect(0, 0, W, H * 0.07); g.fillRect(0, H * 0.93, W, H * 0.07);
     g.fillStyle = P.ink; g.textBaseline = 'middle';
-    g.textAlign = 'left';  g.font = `700 ${Math.round(H * 0.5)}px ${FONT_ZH}`; g.fillText(G.zh, W * 0.05, H * 0.5);
-    g.textAlign = 'right'; g.font = `700 ${Math.round(H * 0.24)}px ${FONT_EN}`; g.fillText(G.en, W * 0.95, H * 0.35);
-    g.font = `400 ${Math.round(H * 0.17)}px ${FONT_EN}`; g.fillText(G.years + ' · ' + G.line, W * 0.95, H * 0.66);
+    // English is the headline, the Chinese name the small secondary line (CJ's rule: "English copy, Chinese small")
+    g.textAlign = 'left';  g.font = `700 ${Math.round(H * 0.46)}px ${FONT_EN}`; g.fillText(G.en, W * 0.05, H * 0.4);
+    g.font = `400 ${Math.round(H * 0.17)}px ${FONT_EN}`; g.fillText(G.years + ' · ' + G.line, W * 0.05, H * 0.76);
+    g.textAlign = 'right'; g.font = `700 ${Math.round(H * 0.3)}px ${FONT_ZH}`; g.fillText(G.zh, W * 0.95, H * 0.5);
   };
   const arrowSign = (zh, en, dir, col) => (g, W, H) => {
     g.fillStyle = P.ink; g.fillRect(0, 0, W, H);
     g.fillStyle = P[col]; g.fillRect(0, H * 0.88, W, H * 0.12);
     g.fillStyle = P.bone; g.textBaseline = 'middle'; g.textAlign = 'center';
-    g.font = `700 ${Math.round(H * 0.42)}px ${FONT_ZH}`;
-    const t = dir < 0 ? '← ' + zh : zh + ' →';
-    g.fillText(t, W / 2, H * 0.36);
-    g.font = `700 ${Math.round(H * 0.18)}px ${FONT_EN}`; g.fillText(en, W / 2, H * 0.7);
+    g.font = `700 ${Math.round(H * 0.3)}px ${FONT_EN}`;
+    g.fillText(dir < 0 ? '← ' + en : en + ' →', W / 2, H * 0.36);
+    g.font = `400 ${Math.round(H * 0.2)}px ${FONT_ZH}`; g.fillText(zh, W / 2, H * 0.7);
   };
 
   // ── build the square ────────────────────────────────────────────────────────
@@ -281,7 +281,7 @@
     const list = [back];
     if (s.next) {
       const N = GATES[s.next];
-      const fwd = arch(SIDE * 2 + 0.6, 6.2, N.col, arrowSign(N.zh, N.en + ' · ' + N.years, 1, N.col), N.col);
+      const fwd = arch(SIDE * 2 + 0.6, 6.2, N.col, arrowSign(N.zh + ' · ' + N.years, 'ON TO ' + N.en, 1, N.col), N.col);
       fwd.position.set(0, 0, s.end - 1.4);
       list.push(fwd);
     }
@@ -299,13 +299,13 @@
   const fade = document.createElement('div'); fade.id = 'walkFade'; document.body.appendChild(fade);
   const touch = R.IS_PHONE || ('ontouchstart' in window);
   hud.innerHTML =
-    '<div class="wk-square" id="wkSquare"><div class="wk-sq-zh">廣場</div><div class="wk-sq-en">THE SQUARE</div>' +
-      '<div class="wk-sq-line">Three gates, forty years.<br><b>West</b> 西門町 · <b>North</b> 大稻埕 · <b>East</b> 信義</div></div>' +
+    '<div class="wk-square" id="wkSquare"><div class="wk-sq-en">The Square</div><div class="wk-sq-zh">廣場</div>' +
+      '<div class="wk-sq-line">Three gates, forty years. Walk through one.<br><b>West</b> Ximending <i>西門町</i><br><b>North</b> Dadaocheng <i>大稻埕</i><br><b>East</b> Xinyi <i>信義</i></div></div>' +
     '<div class="wk-hint" id="wkHint">' + (touch
       ? 'Use the stick to walk · drag anywhere to look around'
-      : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrows to walk · <kbd>Shift</kbd> to run · drag to look around') + '</div>' +
+      : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or the arrow keys to walk · <kbd>Shift</kbd> to run · drag to look around') + '</div>' +
     '<div class="wk-bar" id="wkBar">' +
-      '<button type="button" class="wk-btn" id="wkHome">⌂ Square</button>' +
+      '<button type="button" class="wk-btn" id="wkHome">⌂ The square</button>' +
       '<button type="button" class="wk-btn" id="wkTour">▶ Guided tour</button>' +
     '</div>' +
     '<div class="wk-stick" id="wkStick" aria-hidden="true"><div class="wk-knob"></div></div>';
