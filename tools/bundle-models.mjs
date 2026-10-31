@@ -16,7 +16,7 @@ import { mergeDocuments, unpartition, dedup, prune } from '@gltf-transform/funct
 const GROUPS = {
   'bundle-core':     ['bollard','chunghwa','girl','lamp','lux','props','red-house','shopfront','tree'],
   'bundle-dadao':    ['dihua-min','dihua-yang','dihua-baroque','dihua-zone2','dadao-entrance','stall','temple','yongle'],
-  'bundle-tower':    ['tower101','skywalk','a11'],
+  'bundle-tower':    ['tower101','skywalk','a11','cityhall'],
 };
 
 const fh = process.argv.indexOf('--from-head');

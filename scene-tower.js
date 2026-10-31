@@ -190,17 +190,17 @@
     [z0 - 0.5, z1 + 0.5].forEach(z => part(x - 1.2, 0, z, 0.5, 0.5, TW(Y, 'haze')));   // the mall-front run's ground pillars (the segment has none)
   })();
 
-  // ── 台北市政府 on the horizon: a wide symmetrical stepped silhouette, unlit, in haze ──
+  // ── 台北市政府 on the horizon: asset/blender/cityhall.py, built at the silhouette's 1.7× size ──
+  // 12 storeys of punched window grid, the two pylons by the centre court, the granite entrance
+  // block, end blocks stepped down; 153 wide, 50 deep, 57.8 tall. Lit, so the grid reads; the
+  // scene's distance haze softens it. Tower era only.
   (() => {
-    // Drawn at 1.7× so the outline clears the office ring from the approach camera; it is a horizon
-    // silhouette, so presence matters more than metric scale. Centre block, two wings, two end pavilions.
-    const x = -46, z = -505, d = 50, k = 1.7;
-    const basic = () => withFog(new THREE.MeshBasicMaterial({ color: C('haze') }));
-    [[0, 24, 30], [-22, 20, 22], [22, 20, 22], [-38, 12, 14], [38, 12, 14]].forEach(([dx, w, h]) => {
-      const p = part(x + dx * k, 0, z, w * k, d, TW(h * k, 'haze'));
-      p.mesh.material = basic();
+    const cityhallGroup = libGroup(['tower']);
+    MODELS.load('cityhall', gltf => {
+      const root = MODELS.lambertize(gltf.scene);
+      root.position.set(-46, 0, -505);   // the old silhouette's centre; front already faces +z
+      cityhallGroup.add(root);
     });
-    const p = part(x, 30 * k, z, 10 * k, 10 * k, TW(4 * k, 'haze')); p.mesh.material = basic();   // the roof-top block
   })();
 
   // ── LED billboards: canvas text, lamp on ink, unlit material so it reads as a screen ──
