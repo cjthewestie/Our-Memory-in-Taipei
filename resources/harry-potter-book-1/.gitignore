@@ -1,0 +1,4 @@
+# Keep the copyrighted book local; only the README is tracked.
+*
+!.gitignore
+!README.md
