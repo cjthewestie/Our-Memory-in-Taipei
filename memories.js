@@ -81,16 +81,29 @@
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; return (c === 'x' ? r : (r & 3) | 8).toString(16); }));
 
+  // fetch with a time limit: a store that never answers (a slow network, a paused project) fails plainly
+  // after `ms` instead of leaving the form on "Hanging it…" for ever
+  async function net(url, opts, ms) {
+    const ctl = window.AbortController ? new AbortController() : null;
+    const timer = ctl && setTimeout(() => ctl.abort(), ms || 20000);
+    try { return await fetch(url, Object.assign({}, opts, ctl ? { signal: ctl.signal } : {})); }
+    catch (e) { throw new Error(e && e.name === 'AbortError' ? 'timeout' : 'unreachable'); }
+    finally { clearTimeout(timer); }
+  }
+
   async function fetchApproved() {
     if (!ONLINE) return;
     try {
       const q = 'select=id,created_at,section,x,z,year,body,name,photo_path&status=eq.approved&order=created_at.desc&limit=500';
-      const res = await fetch(`${API}/rest/v1/memories?${q}`, { headers: headers() });
+      const res = await net(`${API}/rest/v1/memories?${q}`, { headers: headers() });
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
       const rows = await res.json();
       await signPhotos(rows);
       rows.forEach(addLantern);
-    } catch (e) { console.warn('[memories] could not load the shared memories:', e.message); }
+    } catch (e) {
+      console.warn('[memories] could not load the shared memories:', e.message);
+      F.fine.textContent = 'Other visitors’ lanterns couldn’t be loaded just now, so saving may fail too. If it does, your words stay in the form to try again.';
+    }
   }
 
   // one request signs every approved photo for 12 hours; a photo that fails to sign is simply left off its card
@@ -98,7 +111,7 @@
     const paths = rows.filter(r => r.photo_path).map(r => r.photo_path);
     if (!paths.length) return;
     try {
-      const res = await fetch(`${API}/storage/v1/object/sign/${BUCKET}`, {
+      const res = await net(`${API}/storage/v1/object/sign/${BUCKET}`, {
         method: 'POST', headers: headers({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ expiresIn: 43200, paths }) });
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
@@ -137,14 +150,14 @@
     if (file) {
       const p = await shrink(file, 1280);
       photo_path = uuid() + '.' + p.ext;
-      const up = await fetch(`${API}/storage/v1/object/${BUCKET}/${photo_path}`, {
-        method: 'POST', headers: headers({ 'Content-Type': p.type, 'x-upsert': 'false' }), body: p.blob });
-      if (!up.ok) throw new Error('The photo did not upload (' + up.status + ').');
+      const up = await net(`${API}/storage/v1/object/${BUCKET}/${photo_path}`, {
+        method: 'POST', headers: headers({ 'Content-Type': p.type, 'x-upsert': 'false' }), body: p.blob }, 60000);
+      if (!up.ok) throw new Error('Saving failed: the photo did not upload (error ' + up.status + '). Your words are still here; try again, or send it without the photo.');
     }
-    const res = await fetch(`${API}/rest/v1/memories`, {
+    const res = await net(`${API}/rest/v1/memories`, {
       method: 'POST', headers: headers({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
       body: JSON.stringify({ section: rec.section, x: rec.x, z: rec.z, year: rec.year, body: rec.body, name: rec.name, photo_path }) });
-    if (!res.ok) throw new Error('It did not save (' + res.status + '). Please try again in a moment.');
+    if (!res.ok) throw new Error('Saving failed (error ' + res.status + '). Your words are still here; please try again in a moment.');
     return 'pending';
   }
 
@@ -253,7 +266,11 @@
         : 'Thank you. Your lantern will light up here once it has been read.', true);
       setTimeout(closeForm, 2600);
     } catch (e) {
-      say(e.message || 'Something went wrong. Please try again.');
+      // a network failure is said plainly: nothing was saved, and the words are still in the form
+      const m = e && e.message;
+      say(m === 'unreachable' ? 'Saving failed: the memory store can’t be reached right now. Your words are still here; please try again in a moment.'
+        : m === 'timeout' ? 'Saving failed: the connection is too slow and it timed out. Your words are still here; please try again.'
+        : m || 'Saving failed. Your words are still here; please try again.');
     } finally { F.send.disabled = false; }
   });
 
