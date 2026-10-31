@@ -4,15 +4,17 @@ Scroll-driven three.js page for Claude Code Build Day. Repo: https://github.com/
 
 > **Status 2026-11-01 (decision brief `docs/decision-brief-2026-11-01.html`):** the cjthewestie Pages URL below returns 404 — GitHub Pages was never enabled on this repo after the 2026-10-25 copy (`gh api repos/cjthewestie/Our-Memory-in-Taipei/pages` → 404). Only https://joy-shen123.github.io/Our-Memory-in-Taipei/ serves the page. Enabling Pages is CJ's call. The branches `issue-1-part-1`, `issue-3-texture`, `issue-5-models`, `issue-music-player` are fully in `main` (0 commits ahead each).
 
-> **Lantern square (branch `claude/gracious-allen-7tbgxq`, 17455b1, 2026-10-31) — decided 2026-11-01: not merged into this page.** It opens the bare URL on a walkable square instead of the scroll film, which breaks "one page, one verb: scroll" and CJ, 2026-09-20: "REMOVE MOVE MOVING OBEJECT ON THE ROAD"; the 2026-10-31 CJ quote it cites lives only in `walk.js`, not in the decisions list below. It is exactly Landmark-Online-Space's product (a walk-in online place), so it stays on its branch as that project's optional demo link. Before it ever goes public with Supabase: make the `memory-photos` bucket private (today anyone holding the shipped anon key can upload 2 MB images that are public by URL), add a server-side rate limit, a privacy notice and a named moderator. It merges clean with `fix/joy-phone-zone-3` (`git merge-tree`). Known bugs: a new lantern hides behind the girl's head; lamp discs cover the square's signboard; `?tour=1` not yet checked at runtime.
+> **Lantern square (branch `claude/gracious-allen-7tbgxq`, 17455b1) — merged into `demo-ready` 2026-11-01 on CJ's call.** Asked "Make your lantern square the main Taipei page?", CJ answered, 2026-10-31: "Yes, merge it in" (relayed by the Orchestrator session). This overrides the 2026-11-01 verdict to keep it for Landmark-Online-Space, and it supersedes "one page, one verb: scroll" for the entry: the page now opens on the walkable square, and the scroll film stays as the Guided tour (`?tour=1`, `?year=`). The photo bucket is locked down before anything goes public (branch `photo-lock`): photos are private until a memory is approved.
 >
-> **CJ's single-yes list (2026-11-01).** Each line is one command, run from the repo:
+> **CJ's single-yes list (2026-11-01).** Each line is one command, run from the repo, in this order:
 > 1. Turn Pages on (public): `gh api -X POST repos/cjthewestie/Our-Memory-in-Taipei/pages -f 'source[branch]=main' -f 'source[path]=/'`
-> 2. Merge Joy's phone fix, PR #1 (deploys once Pages is on): `gh pr merge 1 --merge`
-> 3. Merge the demo-ready branch after #1 (label fix, demo kit, this brief): `gh pr create --base main --head demo-ready --fill && gh pr merge demo-ready --merge`
-> 4. Delete the 4 merged branches: `git push origin --delete issue-1-part-1 issue-3-texture issue-5-models issue-music-player`
-> 5. Move the orphan worktree folders (~526 MB) to the Trash, recoverable: `mv ~/Documents/CJ-project-vault/_worktrees/Our-Memory-in-Taipei/{arcane-chapter1,blender-redhouse,blender-scene-export,perf-and-ads.brief-only} ~/.Trash/`
-> 6. Move the off-topic branches out of this public repo, needs new repos: `claude/kind-euler-3z9a9p` (Godot game, "Ghost Month Market") and `claude/amazing-hamilton-hb90kp` (a Harry Potter book folder). Then delete them here: `git push origin --delete claude/kind-euler-3z9a9p claude/amazing-hamilton-hb90kp`
+> 2. Merge Joy's phone fix, PR #1: `gh pr merge 1 --merge`
+> 3. Merge `demo-ready` (lantern square, label fix, photo lock, demo kit, this brief) into main, which deploys: `gh pr create --base main --head demo-ready --fill && gh pr merge demo-ready --merge`
+> 4. Optional, to collect real memories: create a free Supabase project, run `supabase/schema.sql` in its SQL Editor, put the URL and anon key in `memories-config.js`, push. Needs a named person to approve memories daily (docs/MEMORIES.md). Without it, memories stay in each visitor's browser.
+> 5. Delete the merged branches: `git push origin --delete issue-1-part-1 issue-3-texture issue-5-models issue-music-player claude/gracious-allen-7tbgxq`
+> 6. Move the orphan worktree folders (~526 MB) to the Trash, recoverable: `mv ~/Documents/CJ-project-vault/_worktrees/Our-Memory-in-Taipei/{arcane-chapter1,blender-redhouse,blender-scene-export,perf-and-ads.brief-only} ~/.Trash/`
+> 7. Move the off-topic branches out of this public repo (needs new repos): `claude/kind-euler-3z9a9p` (Godot game) and `claude/amazing-hamilton-hb90kp` (Harry Potter book folder), then `git push origin --delete claude/kind-euler-3z9a9p claude/amazing-hamilton-hb90kp`
+> 8. Set the pitch price in `submission/pitch.md`.
 
 ## What it is
 
