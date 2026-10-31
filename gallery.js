@@ -35,11 +35,22 @@
 
   // ── a frame: one canvas texture on a plane, in a dark moulding ──────────────
   const FW = 2.3, FH = 2.9;                     // world size of one frame
-  const CW = 460, CH = 580;                     // its canvas
+  const CW = 460, CH = 580;                     // its canvas, in layout px (same aspect as FW:FH, so nothing on it stretches)
+  const Q = R.IS_PHONE ? 1 : 1.5;               // canvas px per layout px: sharper captions on a desktop screen
   const PH = { x: 34, y: 34, w: CW - 68, h: 330 };   // the photo's place on the mat
   const moulding = S.lit({ color: C('ink'), vertexColors: false });
   const frameGeo = new THREE.BoxGeometry(FW + 0.16, FH + 0.16, 0.1);
   const planeGeo = new THREE.PlaneGeometry(FW, FH);
+  // a soft shadow on the wall behind each frame, as in a gallery under ceiling lights
+  const shadowMat = (() => {
+    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 160;
+    const g = cv.getContext('2d');
+    g.shadowColor = 'rgba(40, 24, 10, 0.9)'; g.shadowBlur = 14; g.shadowOffsetY = 9;
+    g.fillStyle = 'rgba(40, 24, 10, 0.9)'; g.fillRect(22, 22, 84, 112);
+    const t = new THREE.CanvasTexture(cv);
+    return new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false });
+  })();
+  const shadowGeo = new THREE.PlaneGeometry((FW + 0.16) * 128 / 84, (FH + 0.16) * 160 / 112);
 
   function wrap(g, text, x, y, maxW, lineH, maxLines) {
     const words = String(text).replace(/\s+/g, ' ').trim().split(/(\s|(?<=[　-鿿]))/).filter(w => w && w !== ' ');
@@ -64,6 +75,7 @@
 
   // item: { kind: 'add' | 'empty' | 'photo', m?, title?, sub?, note? }
   function drawFrame(g, item, img) {
+    g.setTransform(Q, 0, 0, Q, 0, 0);
     g.fillStyle = P.bone; g.fillRect(0, 0, CW, CH);
     g.textBaseline = 'alphabetic';
     if (item.kind === 'add') {
@@ -82,11 +94,15 @@
     }
     // the photo, or the empty outline where one could hang
     if (item.kind === 'photo' && img) {
-      g.fillStyle = '#e9e1d2'; g.fillRect(PH.x, PH.y, PH.w, PH.h);
-      const k = Math.max(PH.w / img.width, PH.h / img.height), w = img.width * k, h = img.height * k;
-      g.save(); g.beginPath(); g.rect(PH.x, PH.y, PH.w, PH.h); g.clip();
-      g.drawImage(img, PH.x + (PH.w - w) / 2, PH.y + (PH.h - h) / 2, w, h); g.restore();
-      g.strokeStyle = P.ink; g.lineWidth = 2; g.strokeRect(PH.x, PH.y, PH.w, PH.h);
+      // the whole photo, fitted inside its place on the mat at its own aspect: a tall photo hangs tall,
+      // a wide one wide, nothing cropped and nothing stretched
+      const k = Math.min(PH.w / img.width, PH.h / img.height), w = img.width * k, h = img.height * k;
+      const x = PH.x + (PH.w - w) / 2, y = PH.y + (PH.h - h) / 2;
+      g.save(); g.shadowColor = 'rgba(40, 24, 10, 0.35)'; g.shadowBlur = 10; g.shadowOffsetY = 3;
+      g.fillStyle = '#fff'; g.fillRect(x, y, w, h); g.restore();
+      g.drawImage(img, x, y, w, h);
+      g.strokeStyle = P.ink; g.lineWidth = 1.5; g.strokeRect(x, y, w, h);
+      item.fit = { nw: img.width, nh: img.height, dw: w, dh: h, sx: FW / CW, sy: FH / CH, visible: 1 };
     } else {
       g.fillStyle = '#efe7d8'; g.fillRect(PH.x, PH.y, PH.w, PH.h);
       dashed(g, PH.x + 10, PH.y + 10, PH.w - 20, PH.h - 20, P.ink, 3, [10, 9]);
@@ -96,9 +112,9 @@
     }
     g.textAlign = 'left'; g.fillStyle = P.ink;
     if (item.kind === 'empty') return;
-    g.font = `400 25px ${FONT_TXT}`;
-    wrap(g, item.title || '', PH.x, PH.y + PH.h + 44, PH.w, 31, 3);
-    g.font = `700 21px ${FONT_EN}`; g.globalAlpha = 0.75;
+    g.font = `400 29px ${FONT_TXT}`;
+    wrap(g, item.title || '', PH.x, PH.y + PH.h + 44, PH.w, 34, 3);
+    g.font = `700 23px ${FONT_EN}`; g.globalAlpha = 0.8;
     wrap(g, item.sub || '', PH.x, CH - (item.note ? 62 : 34), PH.w, 24, 1);
     g.globalAlpha = 1;
     if (item.note) {
@@ -122,7 +138,8 @@
   function makeFrame(item) {
     const g0 = new THREE.Group();
     const back = new THREE.Mesh(frameGeo, moulding); back.position.z = -0.06; back.castShadow = true; g0.add(back);
-    const cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
+    const shade = new THREE.Mesh(shadowGeo, shadowMat); shade.position.set(0, -0.06, -0.044); shade.renderOrder = 1; g0.add(shade);
+    const cv = document.createElement('canvas'); cv.width = CW * Q; cv.height = CH * Q;
     const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4; tex.encoding = THREE.sRGBEncoding;
     const face = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }));
     face.position.z = 0.002; g0.add(face);
@@ -209,9 +226,12 @@
     return [{ kind: 'add', section }].concat(photos);
   }
   // where each wall stands: the square's two halves flank the arrival path and lean toward it; a district's
-  // wall stands on the east pavement just inside its gate, turned to face the visitor walking in
+  // wall stands on the east pavement just inside its gate, turned to face the visitor walking in.
+  // GAP: half the path between the square's two walls, narrow enough that a phone's view on arrival
+  // already holds the "Add your photo" frame (it hangs at the path end of the visitors' wall)
+  const GAP = 1.8;
   function place(key, g, w) {
-    if (key === 'square') { g.position.set(SQ.x + 3 + w / 2 * Math.cos(0.22), 0, SQ.z + 10 + w / 2 * Math.sin(0.22)); g.rotation.y = -0.22; }
+    if (key === 'square') { g.position.set(SQ.x + GAP + w / 2 * Math.cos(0.22), 0, SQ.z + 10 + w / 2 * Math.sin(0.22)); g.rotation.y = -0.22; }
     else {
       const s = SECT[key], th = -Math.PI / 2 + 0.42;
       g.position.set(SIDE - 2.6, 0, s.top - 20); g.rotation.y = th;
@@ -233,7 +253,7 @@
   const opening = buildWall(OPENING.length ? OPENING : [{ kind: 'empty' }], ['開幕展', 'OPENING EXHIBITION', 'Taipei, photographed · credits on each frame', 'lamp']);
   {
     const w = OPENING.length * STEP + 0.4;
-    opening.group.position.set(SQ.x - 3 - w / 2 * Math.cos(0.22), 0, SQ.z + 10 + w / 2 * Math.sin(0.22));
+    opening.group.position.set(SQ.x - GAP - w / 2 * Math.cos(0.22), 0, SQ.z + 10 + w / 2 * Math.sin(0.22));
     opening.group.rotation.y = 0.22;
     S.scene.add(opening.group);
   }

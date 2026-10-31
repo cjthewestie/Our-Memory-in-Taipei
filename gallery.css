@@ -15,6 +15,21 @@
 /* near a frame, the lantern bubble steps aside so only one asks for E */
 body.gal-near .mem-bubble { display: none; }
 
+/* a photo opened from a wall: shown large on a dimmed room, the caption under it; Escape or × closes it */
+.mem-panel:has(> .mem-fig:not([hidden])) {
+  width: min(880px, calc(100vw - 32px));
+  box-shadow: 0 0 0 100vmax rgba(20, 14, 8, 0.6), 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+.mem-panel:has(> .mem-fig:not([hidden])) .mem-fig { background: #1d1813; padding: 18px; }
+.mem-panel:has(> .mem-fig:not([hidden])) .mem-fig img {
+  max-height: calc(100vh - 32px - 36px - 190px); margin: 0 auto; width: auto; max-width: 100%;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+@media (max-width: 600px) {
+  .mem-panel:has(> .mem-fig:not([hidden])) .mem-fig { padding: 10px; }
+  .mem-panel:has(> .mem-fig:not([hidden])) .mem-fig img { max-height: calc(100vh - 32px - 20px - 200px); }
+}
+
 /* the photo field, first in the form: a big dashed drop zone */
 .mem-form .mem-field.mem-photo {
   border: 2px dashed var(--verm); border-radius: 12px; padding: 14px 14px 12px;
