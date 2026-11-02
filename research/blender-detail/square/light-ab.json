@@ -1,0 +1,71 @@
+{
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "where": "square",
+  "light": {
+    "stats": {
+      "aoDecals": 16,
+      "spills": 22,
+      "sunBox": [
+        -60,
+        60,
+        60,
+        -60
+      ],
+      "covered": true
+    },
+    "visible": true,
+    "shadow": {
+      "enabled": true,
+      "lightCasts": true,
+      "meshes": 1528,
+      "casters": 1294,
+      "receivers": 1299,
+      "uncoloured": 0,
+      "map": true,
+      "size": 2048,
+      "box": [
+        -60,
+        60
+      ],
+      "pos": [
+        85.1,
+        123,
+        211.8
+      ],
+      "target": [
+        0,
+        0,
+        155
+      ],
+      "camZ": 175.4
+    }
+  },
+  "timing": [
+    {
+      "on": false,
+      "frames": 1,
+      "mean": 6683,
+      "p95": 6683
+    },
+    {
+      "on": true,
+      "frames": 1,
+      "mean": 5316.5,
+      "p95": 5316.5
+    },
+    {
+      "on": false,
+      "frames": 1,
+      "mean": 9733,
+      "p95": 9733
+    },
+    {
+      "on": true,
+      "frames": 1,
+      "mean": 4633.0999999996275,
+      "p95": 4633.0999999996275
+    }
+  ]
+}

@@ -128,5 +128,60 @@
       "triangles": 1216620
     },
     "note": "rAF frame time under this load is 1-3 frames per 3 s on both pages, so it is noise; the forced-render minimum (+13%) and the triangle count (+16.4%) are the comparable numbers."
+  },
+  "paving-fix": {
+    "label": "paving-fix",
+    "when": "2026-10-31T19:52:24.474Z",
+    "viewport": "1440x900",
+    "console": [
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x1240043a800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400438400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400438400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+      },
+      {
+        "type": "warning",
+        "text": "[.WebGL-0x12400438400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+      },
+      {
+        "type": "warning",
+        "text": "Unrecognized feature: 'web-share'."
+      }
+    ],
+    "errors": [],
+    "httpErrors": [
+      {
+        "status": 404,
+        "url": "http://127.0.0.1:8957/asset/music/private/manifest.js"
+      }
+    ],
+    "views": {
+      "1": "arrival",
+      "2": "west-gate",
+      "3": "north-gate"
+    },
+    "squareReady": true,
+    "frame": {
+      "frames": 3,
+      "meanMs": 1016.6,
+      "p95Ms": 1450
+    },
+    "render": {
+      "calls": 1,
+      "triangles": 2,
+      "geometries": 1267,
+      "textures": 236
+    }
   }
 }
