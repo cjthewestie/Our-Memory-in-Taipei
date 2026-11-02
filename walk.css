@@ -14,14 +14,15 @@ body.walk #walkHud { display: block; }
 
 .wk-square {
   position: absolute; left: clamp(20px, 4vw, 56px); top: clamp(20px, 4vw, 56px);
-  border-top: 1px solid var(--bone); padding-top: 8px; max-width: 280px;
-  text-shadow: 0 2px 16px var(--ink), 0 0 3px var(--ink), 0 1px 2px var(--ink);
+  max-width: 280px; padding: 12px 16px 14px; border-radius: 12px;
+  background: color-mix(in srgb, var(--ink) 74%, transparent);   /* the square is pale: the text needs its own ground */
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   display: none;
 }
 body.in-square .wk-square { display: block; }
 .wk-sq-zh { font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 30px; font-weight: 700; letter-spacing: 0.3em; }
 .wk-sq-en { font-size: 12px; letter-spacing: 0.3em; margin-top: 2px; }
-.wk-sq-line { font-size: 13px; line-height: 1.6; margin-top: 10px; opacity: 0.92; }
+.wk-sq-line { font-size: 13px; line-height: 1.6; margin-top: 10px; border-top: 1px solid color-mix(in srgb, var(--bone) 40%, transparent); padding-top: 8px; }
 .wk-sq-line b { color: var(--lamp); font-weight: 600; }
 
 .wk-hint {
@@ -79,3 +80,54 @@ body.walk #wkWalk { display: none; }
 
 #walkFade { position: fixed; inset: 0; z-index: 50; background: var(--ink); opacity: 0; pointer-events: none; transition: opacity 300ms ease; }
 #walkFade.on { opacity: 1; }
+
+/* ── the music player, folded in walk mode: play, the decade, sound on/off, and a button to unfold ── */
+body.walk .hud-music:not(.open) .mus-body { flex-direction: row; align-items: center; gap: 10px; border-top: 0; padding: 6px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 70%, transparent); width: max-content; }
+body.walk .hud-music:not(.open) .mus-bar, body.walk .hud-music:not(.open) .mus-row { display: contents; }
+body.walk .hud-music:not(.open) :is(.mus-track, .mus-decades, .mus-scrub, .mus-time) { display: none; }
+body.walk .hud-music:not(.open) .mus-k { order: 2; font-size: 0; letter-spacing: 0; }
+body.walk .hud-music:not(.open) .mus-k #musDecade { font-size: 12px; letter-spacing: 0.16em; }
+body.walk .hud-music:not(.open) .mus-k #musDecade::before { content: "\266A  "; }
+body.walk .hud-music:not(.open) .mus-k #musStatus { display: none; }
+body.walk .hud-music:not(.open) .mus-play { order: 1; }
+body.walk .hud-music:not(.open) .mus-mute { order: 3; }
+body.walk .hud-music .mus-more { order: 4; }
+body.walk .hud-music { width: auto; }
+.mus-more { display: none; }
+body.walk .mus-more {
+  display: inline-block; pointer-events: auto; cursor: pointer; border: 1px solid var(--bone); border-radius: 999px;
+  background: transparent; color: var(--bone); font: 600 11px/1 var(--font-hud), var(--font-sys); letter-spacing: 0.12em; padding: 5px 9px;
+}
+body.walk .hud-music.open .mus-more { align-self: flex-start; }
+
+/* ── the welcome card: first visit only ── */
+#wkWelcome {
+  position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
+}
+#wkWelcome[hidden] { display: none; }
+body.wk-welcome .hud-opening, body.wk-welcome .wk-hint { visibility: hidden !important; }
+.wk-card {
+  width: min(480px, 100%); background: var(--bone); color: var(--ink); border-radius: 18px; padding: 26px 26px 22px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35); font-family: var(--font-hud), var(--font-sys);
+}
+.wk-card-k { font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; opacity: 0.65; border-top: 1px solid var(--ink); padding-top: 8px; }
+.wk-card-k span { font-family: var(--font-zh), var(--font-hud), var(--font-sys); letter-spacing: 0.2em; }
+.wk-card h1 { font-family: var(--font-big), var(--font-hud), var(--font-sys); font-size: clamp(30px, 6vw, 42px); line-height: 1.02; margin: 12px 0 12px; }
+.wk-card p { font-size: 15px; line-height: 1.55; margin: 0 0 10px; }
+.wk-card-gates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 18px; }
+.wk-card-gates div { border-radius: 10px; padding: 8px 10px; color: var(--bone); font-size: 11px; letter-spacing: 0.1em; line-height: 1.4; }
+.wk-card-gates b { display: block; font-family: var(--font-zh), var(--font-hud), var(--font-sys); font-size: 17px; letter-spacing: 0.12em; }
+.wk-card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.wk-card-actions .wk-btn { flex: 1 1 auto; font-size: 13px; padding: 13px 18px; }
+.wk-card-actions .wk-btn.ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.wk-card-actions .wk-btn.ghost:hover { background: var(--ink); color: var(--bone); }
+.wk-card-keys { margin-top: 14px; font-size: 12px; opacity: 0.6; }
+body.walk .hud-music:not(.open) .mus-k, body.walk .hud-music:not(.open) .mus-k #musDecade { opacity: 1; color: var(--bone); }
+body.walk .hud-music:not(.open) .mus-play { opacity: 1; color: var(--bone); border-color: var(--bone); }
+body.walk .hud-music:not(.open) .mus-play svg { fill: var(--bone); }
+.wk-sq-line span { white-space: nowrap; }
+body.wk-welcome .wk-square { visibility: hidden; }
+body.walk .hud-music:not(.open) .mus-mute { opacity: 1; color: var(--bone); }
+body.walk .hud-music:not(.open) .mus-mute[aria-pressed="true"] { color: var(--ink); }

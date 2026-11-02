@@ -286,7 +286,7 @@
   const touch = R.IS_PHONE || ('ontouchstart' in window);
   hud.innerHTML =
     '<div class="wk-square" id="wkSquare"><div class="wk-sq-zh">廣場</div><div class="wk-sq-en">THE SQUARE</div>' +
-      '<div class="wk-sq-line">Three gates, forty years.<br><b>West</b> 西門町 · <b>North</b> 大稻埕 · <b>East</b> 信義</div></div>' +
+      '<div class="wk-sq-line">Three gates, forty years.<br><span><b>West</b> 西門町</span> · <span><b>North</b> 大稻埕</span> · <span><b>East</b> 信義</span></div></div>' +
     '<div class="wk-hint" id="wkHint">' + (touch
       ? 'Use the stick to walk · drag anywhere to look around'
       : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrows to walk · <kbd>Shift</kbd> to run · drag to look around') + '</div>' +
@@ -303,6 +303,58 @@
   document.getElementById('wkHome').addEventListener('click', () => goSquare('home'));
   document.getElementById('wkTour').addEventListener('click', startTour);
   tourOut.addEventListener('click', () => startWalk());
+
+  // the music player folds to one pill while walking (play, the decade, sound on/off); "More" unfolds it
+  const musRoot = document.getElementById('music');
+  if (musRoot) {
+    const more = document.createElement('button');
+    more.type = 'button'; more.className = 'mus-more'; more.textContent = 'More';
+    more.setAttribute('aria-expanded', 'false');
+    more.addEventListener('click', () => {
+      const open = musRoot.classList.toggle('open');
+      more.textContent = open ? 'Less' : 'More'; more.setAttribute('aria-expanded', String(open));
+    });
+    const body = musRoot.querySelector('.mus-body');
+    (body || musRoot).appendChild(more);
+  }
+
+  // ── the welcome card: the first time someone arrives, say what this place is and what to do ──
+  const SEEN_KEY = 'our-memory-in-taipei:welcomed';
+  const welcome = document.createElement('div');
+  welcome.id = 'wkWelcome'; welcome.hidden = true;
+  welcome.setAttribute('role', 'dialog'); welcome.setAttribute('aria-modal', 'true'); welcome.setAttribute('aria-labelledby', 'wkWelcomeTitle');
+  welcome.innerHTML =
+    '<div class="wk-card">' +
+      '<div class="wk-card-k">Our Memory in Taipei · <span>我們的台北記憶</span></div>' +
+      '<h1 id="wkWelcomeTitle">Walk into a decade of Taipei.</h1>' +
+      '<p>Three gates lead out of this square, each into a different Taipei.</p>' +
+      '<div class="wk-card-gates">' +
+        '<div style="background:var(--verm)"><b>西門町</b>West · 1985–99</div>' +
+        '<div style="background:var(--brick)"><b>大稻埕</b>North · 2000–19</div>' +
+        '<div style="background:var(--glass)"><b>信義</b>East · 2020s</div>' +
+      '</div>' +
+      '<p>Walk through one, and leave a lantern where your own memory happened.</p>' +
+      '<div class="wk-card-actions">' +
+        '<button type="button" class="wk-btn primary" id="wkStart">Start walking</button>' +
+        '<button type="button" class="wk-btn ghost" id="wkWelcomeTour">Guided tour</button>' +
+      '</div>' +
+      '<div class="wk-card-keys">' + (touch ? 'Walk with the stick · drag to look around' : 'Walk with W A S D or the arrows · drag to look around') + '</div>' +
+    '</div>';
+  document.body.appendChild(welcome);
+  let welcomeOpen = false;
+  function showWelcome() {
+    welcomeOpen = true; welcome.hidden = false; document.body.classList.add('wk-welcome');
+    setTimeout(() => { const b = document.getElementById('wkStart'); if (b) b.focus({ preventScroll: true }); }, 50);
+  }
+  function closeWelcome() {
+    if (!welcomeOpen) return;
+    welcomeOpen = false; welcome.hidden = true; document.body.classList.remove('wk-welcome');
+    try { localStorage.setItem(SEEN_KEY, '1'); } catch (_) { /* private mode: it shows again next time, which is fine */ }
+  }
+  document.getElementById('wkStart').addEventListener('click', closeWelcome);
+  document.getElementById('wkWelcomeTour').addEventListener('click', () => { closeWelcome(); startTour(); });
+  welcome.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeWelcome(); });
+  const firstVisit = () => { try { return !localStorage.getItem(SEEN_KEY); } catch (_) { return true; } };
 
   // ── input ───────────────────────────────────────────────────────────────────
   const keys = new Set();
@@ -410,7 +462,7 @@
 
     // input → a direction relative to the camera
     let f = 0, r = 0;
-    if (!st.busy) {
+    if (!st.busy && !welcomeOpen) {
       if (keys.has('w') || keys.has('arrowup')) f += 1;
       if (keys.has('s') || keys.has('arrowdown')) f -= 1;
       if (keys.has('d') || keys.has('arrowright')) r += 1;
@@ -502,7 +554,7 @@
   // ── start ───────────────────────────────────────────────────────────────────
   // ?tour=1 or ?year= (the old demo link) opens the scroll film; anything else starts in the square
   if (QS.get('tour') === '1' || QS.has('year')) { showFor('tour'); square.visible = false; }
-  else startWalk(true);
+  else { startWalk(true); if (firstVisit() && !QS.has('nowelcome')) showWelcome(); }
 
-  window.__walk = { st, SECT, SQ, GATES, enter, goSquare, startTour, startWalk };
+  window.__walk = { st, SECT, SQ, GATES, enter, goSquare, startTour, startWalk, showWelcome, closeWelcome };
 })();
