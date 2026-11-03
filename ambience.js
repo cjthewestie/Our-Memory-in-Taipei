@@ -12,6 +12,7 @@
 //   西門町      a crowd bed (cinema queue, shopping street)
 //   大稻埕      a New Year market bed, and strings of firecrackers going off somewhere a few streets away
 //   信義        a city crowd bed, and the metro: a low rumble passing under, a two-note door chime
+//   (both)      西門町 and 信義 now and then: the garbage truck's 給愛麗絲 a block away, the plan's easter egg
 //   her steps   red brick, the terrazzo circle round the tree and the arcades' terrazzo, asphalt on the road,
 //               timed to poseGirl's stride (RIG.gait), harder and quicker when she runs
 //
@@ -45,7 +46,7 @@
   const beds = {};                      // key → { gain, src, buf }
   const S = {};                         // the square's sources
   let step = null;                      // footsteps
-  let fire = null, metro = null;        // the sections' events
+  let fire = null, metro = null, truck = null;   // the sections' events
   let bleed = null;                     // the karaoke tune
 
   // ── the switch ──────────────────────────────────────────────────────────────
@@ -66,7 +67,12 @@
   });
   function resume() { if (ctx.state !== 'running') { const r = ctx.resume(); if (r && r.catch) r.catch(() => { }); } }
   function suspendLater() { clearTimeout(suspendTimer); suspendTimer = setTimeout(() => { if (ctx && (!wanted || document.hidden) && ctx.state === 'running') ctx.suspend().catch(() => { }); }, 800); }
-  const ramp = (param, v, tc) => { const t = ctx.currentTime; param.cancelScheduledValues(t); param.setTargetAtTime(v, t, tc); };
+  const ramp = (param, v, tc) => { const t = ctx.currentTime; param.cancelScheduledValues(t); param.setTargetAtTime(v, t, tc); param._aim = undefined; };
+  // the per-frame steering: a new setTargetAtTime only when the target really moves. Scheduling one per param per
+  // frame (some twenty params, 60 times a second) piles events onto every param's automation timeline, and how
+  // soon a browser prunes the old ones varies; on a phone that is audio-thread work for nothing. While nothing
+  // moves, nothing is scheduled (review, 2026-11-03)
+  const aim = (param, v, tc) => { if (param._aim !== undefined && Math.abs(param._aim - v) < 0.002) return; param._aim = v; param.setTargetAtTime(v, ctx.currentTime, tc); };
 
   // iOS mutes Web Audio with the ringer switch unless the page says it is playback (Safari 16.4+); where it cannot
   // say so, tell the visitor once why the music plays and the street does not
@@ -219,7 +225,7 @@
   }
 
   // ── footsteps ───────────────────────────────────────────────────────────────
-  function buildSteps() { step = { gain: ctx.createGain(), k: -1, n: 0, last: '' }; step.gain.gain.value = 0.42; step.gain.connect(duckG); }
+  function buildSteps() { step = { gain: ctx.createGain(), k: null, n: 0, last: '' }; step.gain.gain.value = 0.42; step.gain.connect(duckG); }
   function footstep(surface, run) {
     step.n++; step.last = surface;
     const dst = step.gain, j = jit(), a = (0.55 + 0.35 * run) * rnd(0.8, 1);
@@ -241,6 +247,29 @@
     fire.gain.gain.value = 0.32; fire.gain.connect(lp); lp.connect(duckG);
     metro = { gain: ctx.createGain(), next: rnd(8, 20) }; metro.gain.gain.value = 0.5; metro.gain.connect(duckG);
     metro.brown = makeNoise(4, 'brown');
+    truck = { gain: ctx.createGain(), next: rnd(25, 60), n: 0 }; truck.gain.gain.value = 0; truck.gain.connect(duckG);
+  }
+  // the easter egg the plan suggests (item #8: 「全台都認得的垃圾車音樂可以當彩蛋」): somewhere down the street the
+  // garbage truck goes by playing 給愛麗絲 through its horn speaker, Beethoven's Für Elise (1810, public domain),
+  // synthesised here: the opening phrase twice, swelling in and dying away as it passes a block off
+  const ELISE = [[76, 1], [75, 1], [76, 1], [75, 1], [76, 1], [71, 1], [74, 1], [72, 1], [69, 2], [0, 1], [60, 1], [64, 1], [69, 1], [71, 2], [0, 1], [64, 1], [68, 1], [71, 1], [72, 2], [0, 2]];
+  function garbageTruck() {
+    const t0 = ctx.currentTime + 0.05, beat = 0.19, bars = 2;
+    const len = ELISE.reduce((a, n) => a + n[1], 0) * beat * bars, pan = rnd(-0.6, 0.6);
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1300; bp.Q.value = 0.9;   // a tinny horn speaker
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;                        // and a block of air between
+    const env = ctx.createGain(); env.gain.setValueAtTime(0, t0);
+    env.gain.linearRampToValueAtTime(1, t0 + len * 0.45); env.gain.linearRampToValueAtTime(0, t0 + len);
+    const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    bp.connect(lp); lp.connect(env);
+    if (p) { p.pan.setValueAtTime(pan, t0); p.pan.linearRampToValueAtTime(-pan * 0.5, t0 + len); env.connect(p); p.connect(truck.gain); } else env.connect(truck.gain);
+    let at = 0;
+    for (let r = 0; r < bars; r++) ELISE.forEach(([m, d]) => {
+      if (m) tone(bp, { f: 440 * Math.pow(2, (m - 69) / 12), type: 'square', dur: d * beat * 0.95, a: 0.16, at: t0 - ctx.currentTime + at, attack: 0.01 });
+      at += d * beat;
+    });
+    truck.gain.gain.setValueAtTime(0.12, t0);   // about the crowd bed's level: heard, never on top of it
+    truck.n++;
   }
   function firecrackers() {
     if (!fire.buf) return;
@@ -287,12 +316,12 @@
     const inSq = walking && where === 'square';
     const pos = walking ? W.pos : null;
     const musicOn = !!(M.playing && !M.muted);
-    duckG.gain.setTargetAtTime(musicOn ? DUCK : 1, now, 0.4);
+    aim(duckG.gain, musicOn ? DUCK : 1, 0.4);
 
     // the street beds: the section's own, crossfading over a second or so
     const bedOf = { red: 'ximen', dadao: 'dadao', tower: 'xinyi' };
-    Object.keys(beds).forEach(k => { const on = !inSq && bedOf[where] === k; beds[k].gain.gain.setTargetAtTime(on ? 0.55 : 0, now, 0.6); });
-    if (S.murmur) S.murmur.gain.gain.setTargetAtTime(inSq ? 0.3 : 0, now, 0.6);
+    Object.keys(beds).forEach(k => { const on = !inSq && bedOf[where] === k; aim(beds[k].gain.gain, on ? 0.55 : 0, 0.6); });
+    if (S.murmur) aim(S.murmur.gain.gain, inSq ? 0.3 : 0, 0.6);
 
     // the square's placed sources
     const cam = R && R.camera;
@@ -303,15 +332,15 @@
       if (inSq && pos) {
         const p = at || src.at, dx = p.x - pos.x, dz = p.z - pos.z, d = Math.hypot(dx, dz);
         k = remapClamp(d, src.near, src.far);
-        if (src.pan) src.pan.pan.setTargetAtTime(d > 0.5 ? Math.max(-0.85, Math.min(0.85, (dx * rx + dz * rz) / d * 0.85)) : 0, now, 0.08);
+        if (src.pan) aim(src.pan.pan, d > 0.5 ? Math.round(Math.max(-0.85, Math.min(0.85, (dx * rx + dz * rz) / d * 0.85)) * 50) / 50 : 0, 0.08);
       }
       src.k = k;
-      src.gain.gain.setTargetAtTime(k < 0.01 ? 0 : k * src.level, now, 0.12);
+      if (src !== bleed) aim(src.gain.gain, k < 0.01 ? 0 : k * src.level, 0.12);
       return k;
     };
     if (S.cicada) {
       place(S.cicada);
-      S.cicada.layers.forEach(L => { if (now > L.next) { L.swell.gain.setTargetAtTime(rnd(0.25, 1), now, rnd(0.8, 2.5)); L.next = now + rnd(2, 6); } });
+      S.cicada.layers.forEach(L => { if (now > L.next) { L.swell.gain.cancelScheduledValues(now); L.swell.gain.setTargetAtTime(rnd(0.25, 1), now, rnd(0.8, 2.5)); L.next = now + rnd(2, 6); } });
       place(S.sizzle);
       const shot = (src, fn, lo, hi) => { place(src); if (now > src.next) { if (src.k >= 0.01) fn(src.in); src.next = now + rnd(lo, hi); } };
       shot(S.chess, chessClack, 2.5, 8);
@@ -321,19 +350,22 @@
       else place(S.pigeon);
       // the karaoke speaker leaks its tune only while the player is silent: when the music plays, that is the karaoke
       const kk = place(bleed);
-      bleed.gain.gain.setTargetAtTime(musicOn || kk < 0.01 ? 0 : kk * bleed.level, now, 0.3);
+      aim(bleed.gain.gain, musicOn || kk < 0.01 ? 0 : kk * bleed.level, 0.3);
       if (!musicOn && kk >= 0.01) scheduleBleed(now); else bleed.t = 0;
     }
 
     // the sections' events
     if (where === 'dadao' && !inSq && now > fire.next) { fire.pan = rnd(-0.7, 0.7); firecrackers(); fire.next = now + rnd(12, 30); }
     if (where === 'tower' && !inSq && now > metro.next) { metroPass(); metro.next = now + rnd(28, 55); }
+    if ((where === 'red' || where === 'tower') && !inSq && now > truck.next) { garbageTruck(); truck.next = now + rnd(100, 200); }
 
-    // her steps: a foot lands each time sin(stride) crosses zero (two a stride), walking mode only
+    // her steps, walking mode only: a heel lands where poseGirl's leg reaches furthest forward, |sin(stride)| = 1,
+    // twice a stride (the zero crossings are the legs passing each other, a quarter stride late: the review moved
+    // the sound onto the visible footfall, 2026-11-03)
     const G = R && R.gait;
     if (walking && G && pos) {
-      const k = Math.floor(G.stride / Math.PI);
-      if (step.k >= 0 && k > step.k && G.move > 0.35) footstep(surfaceAt(where, pos), G.run);
+      const k = Math.floor((G.stride - Math.PI / 2) / Math.PI);
+      if (step.k !== null && k > step.k && G.move > 0.35) footstep(surfaceAt(where, pos), G.run);
       step.k = k;
     }
   }
@@ -345,13 +377,14 @@
     get square() { return Object.keys(S).reduce((o, k) => (S[k] && S[k].gain && (o[k] = +S[k].gain.gain.value.toFixed(3)), o), {}); },
     get bleed() { return bleed ? +bleed.gain.gain.value.toFixed(3) : 0; },
     get master() { return master ? +master.gain.value.toFixed(2) : 0; }, get vis() { return vis ? +vis.gain.value.toFixed(2) : 0; },
-    get steps() { return step ? { n: step.n, last: step.last } : null; },
+    get steps() { return step ? { n: step.n, last: step.last } : null; }, get truck() { return truck ? truck.n : 0; },
     surfaceAt,
+    fire(kind) { if (!ctx || !built) return false; if (kind === 'truck') garbageTruck(); else if (kind === 'metro') metroPass(); else if (kind === 'crackers') { fire.pan = 0; firecrackers(); } else return false; return true; },   // tests only: set one event off now
     credits: [
       { what: 'Street crowd beds (西門町, 信義)', by: 'timsc', title: 'Century Square, Shanghai, at night', licence: 'CC0 1.0', page: 'https://freesound.org/s/186676/', path: 'freesound.org/186676__timsc__century-square-shanghai-at-night.flac' },
       { what: 'New Year market bed (大稻埕)', by: 'nikitralala', title: 'China market', licence: 'CC0 1.0', page: 'https://freesound.org/s/139951/', path: 'freesound.org/139951__nikitralala__china_market.aiff' },
       { what: 'Firecracker', by: 'genel', title: 'Firecracker', licence: 'CC0 1.0', page: 'https://freesound.org/s/197044/', path: 'freesound.org/197044__genel__firecracker.mp3' },
-      { what: 'Cicadas, chess, tea cups, the 磬, sizzle, pigeons, the karaoke tune, the metro, footsteps', by: 'synthesised in ambience.js', title: '', licence: 'CC0 1.0', page: '', path: '' },
+      { what: 'Cicadas, chess, tea cups, the 磬, sizzle, pigeons, the karaoke tune, the metro, footsteps, and the garbage truck’s Für Elise (Beethoven, public domain)', by: 'synthesised in ambience.js', title: '', licence: 'CC0 1.0', page: '', path: '' },
     ],
   };
 })();

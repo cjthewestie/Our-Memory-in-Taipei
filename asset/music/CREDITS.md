@@ -33,7 +33,7 @@ while the page is muted.
 | 1990s | `90s-1-martini-sunset.mp3` | Martini Sunset | Kevin MacLeod | Public domain (FreePD) | light jazz ("Oh! The LIGHT JAZZ!!!") | `freepd.com/Martini Sunset.mp3` | 2:52 |
 | 1990s | `90s-2-nostalgic-piano.mp3` | Nostalgic Piano | not named in the file | Public domain (FreePD) | none | `freepd.com/Nostalgic Piano.mp3` | 3:13 |
 | 2000s | `00s-1-coy-koi.mp3` | Coy Koi | Kevin MacLeod | Public domain (FreePD) | "Chinese thing? Sure." | `freepd.com/Coy Koi.mp3` | 0:48 |
-| 2000s | `00s-2-celebration.mp3` | Celebration | Alexander Nakarada | Public domain (FreePD) | — | `freepd.com/Celebration.mp3` | 2:21 |
+| 2000s | `00s-2-celebration.mp3` | Celebration | Alexander Nakarada | Public domain (FreePD) | no licence named; album "Complete Discography", a link to the composer's Bandcamp (the FreePD copy is the public-domain one; his Bandcamp releases are CC BY, so credit him if this file is ever taken from there instead) | `freepd.com/Celebration.mp3` | 2:21 |
 | 2010s–2020s | `10s-1-study-and-relax.mp3` | Study and Relax | Kevin MacLeod | Public domain (FreePD) | — | `freepd.com/Study and Relax.mp3` | 3:37 |
 | 2010s–2020s | `10s-2-be-chillin.mp3` | Be Chillin | Alexander Nakarada | Public domain (FreePD) | "source: freepd.com" | `freepd.com/Be Chillin.mp3` | 3:18 |
 | the square | `sq-1-slice-of-life.mp3` | Slice of Life | Bryan Teoh | Public domain | the same dedication as above | `freepd.com/Slice of Life.mp3` | 2:20 |
@@ -59,8 +59,9 @@ MP3 at 48 kbps. 455 KB in all.
 
 Synthesised in `ambience.js` (no file, CC0 like the rest of the code): the cicadas in the banyan, chess pieces,
 tea cups, the shrine's 磬, the sausage cart's sizzle, the pigeons, the karaoke stand's little tune (an original
-pentatonic line), the metro's rumble and a generic two-note door chime, and her footsteps on brick, terrazzo and
-asphalt.
+pentatonic line), the metro's rumble and a generic two-note door chime, her footsteps on brick, terrazzo and
+asphalt, and now and then in 西門町 and 信義 the garbage truck going by a block away playing 給愛麗絲 (Beethoven's
+Für Elise, 1810, public domain; the opening phrase, played by oscillators through a 'horn speaker' filter).
 
 ## CJ's own copies
 

@@ -69,7 +69,9 @@
   function currentYear() { const f = window.__fog; const y = f && typeof f.year === 'number' ? f.year : -1; return y < 0 ? 1985 : y; }
   const inSquare = () => !!(window.WALK && window.WALK.on && window.WALK.where === 'square');
   const placeDecade = () => inSquare() ? SQUARE_I : decadeOfYear(currentYear());
-  const isPhone = () => window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
+  // a phone, for Fault 4: narrow, or a touch-first screen of any width. Width alone let a phone held sideways (844 px
+  // wide) read as a desktop, honour a stored sound-on and start its speaker on the first swipe (review, 2026-11-03).
+  const isPhone = () => !!window.matchMedia && (window.matchMedia('(max-width: 480px)').matches || window.matchMedia('(pointer: coarse)').matches);
 
   // ── shared state ────────────────────────────────────────────────────────────
   const mode = 'local';                 // the only path now; kept as a field for the karaoke stand and old tests
@@ -107,7 +109,7 @@
 
   // ── two <audio> elements, crossfading ───────────────────────────────────────
   const players = [0, 1].map(() => { const a = document.createElement('audio'); a.preload = 'none'; a.volume = 0; a.setAttribute('aria-hidden', 'true'); a.hidden = true; document.body.appendChild(a); return a; });   // in the DOM, so a test can mute them from outside
-  let active = 0, unlocked = false, playing = false, fade = null;
+  let active = 0, unlocked = false, fade = null;
   players.forEach(p => {
     p.muted = muted;
     p.addEventListener('error', () => { /* a missing file only means silence */ });
@@ -155,7 +157,9 @@
     p.volume = VOLUME;
     if (!userPaused) {
       const r = p.play();
-      if (r && r.catch) r.catch(() => { unlocked = false; p.volume = 0; render(); emit(); });   // the browser refused (no gesture yet): stay locked
+      // the browser refused (no gesture yet): stay locked. Only a refusal counts: a pause() right after this play()
+      // rejects it with an AbortError, and that is the visitor's pause, not a lock (review, 2026-11-03)
+      if (r && r.catch) r.catch(e => { if (e && e.name === 'AbortError') return; unlocked = false; p.volume = 0; render(); emit(); });
     }
     const o = players[1 - active];
     if (o.getAttribute('src')) { tryPlay(o); o.pause(); o.volume = 0; }           // prime the other element inside the gesture (iOS)
@@ -295,7 +299,6 @@
     const p = players[active];
     // a track near its end crossfades into the decade's other track, so the two run on without a gap
     if (unlocked && !fade && !userPaused && !p.paused && !loopsItself(cur) && isFinite(p.duration) && p.duration > 4 && p.duration - p.currentTime < FADE_MS / 1000) nextLocal(cur);
-    playing = unlocked && !p.paused && !p.ended;
     requestAnimationFrame(frame);
   }
   const storedDecade = store.get(LS_DECADE);                      // a stored manual choice holds the same way a fresh one does
@@ -348,7 +351,9 @@
     get mode() { return mode; }, get decade() { return DECADES[cur].key; },
     get track() { return localOf(cur).title; }, get src() { return localOf(cur).src; },
     get private() { return privateOn; }, get localCount() { return DECADES[cur].local.length; }, get localIndex() { return DECADES[cur].li; }, get chorus() { const t = localOf(cur); return [t.start || 0, t.end || 0]; },
-    get playing() { return playing; }, get muted() { return muted; }, get gestured() { return gestured; }, get unlocked() { return unlocked; },
+    // live, not the last frame's: the karaoke stand asks right after setMuted(false) has started the music, and a
+    // stale false made it call playPause() and pause what it had just started (review, 2026-11-03)
+    get playing() { const p = players[active]; return unlocked && !p.paused && !p.ended; }, get muted() { return muted; }, get gestured() { return gestured; }, get fresh() { return justGestured; }, get unlocked() { return unlocked; },
     get manual() { return manual ? DECADES[manual.decade].key : null; }, get placeDecade() { return DECADES[lastPlaceDecade < 0 ? 0 : lastPlaceDecade].key; },
     get fading() { return !!fade; }, get volumes() { return players.map(p => +p.volume.toFixed(2)); },
     get state() { return players.map(p => ({ src: (p.getAttribute('src') || '').split('/').pop(), paused: p.paused, ready: p.readyState, err: p.error && p.error.code, t: +p.currentTime.toFixed(1), dur: +(p.duration || 0).toFixed(0), muted: p.muted })); },

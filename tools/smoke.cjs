@@ -44,6 +44,7 @@ const IGNORE = /ERR_TUNNEL|ERR_CONNECTION|ERR_NAME|net::ERR|supabase|Failed to l
     await p.waitForTimeout(3000);
     stats.sound = await p.evaluate(() => ({ decade: __music.decade, unlocked: __music.unlocked, playing: __music.playing, ambience: window.__ambience && __ambience.state, iframes: document.querySelectorAll('iframe').length }));
     if (stats.sound.iframes) errors.push('[walk] an iframe is on the page');
+    if (!stats.sound.unlocked || !stats.sound.ambience || stats.sound.ambience === 'none') errors.push('[walk] a desktop click did not start the music and the ambience');
     for (const k of ['red', 'dadao', 'tower']) {
       await p.evaluate(k => window.__walk && __walk.enter(k, true), k);
       await p.waitForTimeout(4000);
@@ -68,7 +69,22 @@ const IGNORE = /ERR_TUNNEL|ERR_CONNECTION|ERR_NAME|net::ERR|supabase|Failed to l
     await q.touchscreen.tap(195, 420); await q.waitForTimeout(1500);
     stats.phoneSound = await q.evaluate(() => ({ muted: __music.muted, unlocked: __music.unlocked, ambience: window.__ambience && __ambience.state }));
     if (!stats.phoneSound.muted || stats.phoneSound.unlocked || stats.phoneSound.ambience !== 'none') errors.push('[phone] a tap turned the sound on (Fault 4: a phone starts with sound off)');
+    // the karaoke stand's 唱一首 on a muted phone is a "with sound" press: the music and the ambience start, and stay on
+    await q.evaluate(() => document.addEventListener('click', () => SQUARE.sing(), { once: true }));
+    await q.touchscreen.tap(195, 600); await q.waitForTimeout(2500);
+    stats.phoneSing = await q.evaluate(() => ({ muted: __music.muted, playing: __music.playing, ambience: __ambience.state }));
+    if (stats.phoneSing.muted || !stats.phoneSing.playing || stats.phoneSing.ambience !== 'running') errors.push('[phone] the karaoke stand did not start the sound');
     await ctx.close();
+    // a phone held sideways is wider than 480 px: still a phone, still silent (review, 2026-11-03)
+    const ctx2 = await b.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+    const r = await ctx2.newPage(); watch(r, 'phone-landscape');
+    await r.addInitScript(() => { try { localStorage.setItem('omit.music.muted', '0'); } catch (e) { } });   // a stored sound-on must not count on a phone
+    await r.goto(URL0 + '?nowelcome&skip', { waitUntil: 'load', timeout: 120000 });
+    await r.waitForTimeout(5000);
+    await r.touchscreen.tap(420, 200); await r.waitForTimeout(1500);
+    stats.landscapeSound = await r.evaluate(() => ({ muted: __music.muted, unlocked: __music.unlocked, ambience: window.__ambience && __ambience.state }));
+    if (!stats.landscapeSound.muted || stats.landscapeSound.unlocked || stats.landscapeSound.ambience !== 'none') errors.push('[phone-landscape] a tap turned the sound on (Fault 4)');
+    await ctx2.close();
   } catch (e) {
     errors.push('HARNESS ' + e.message);
   } finally {

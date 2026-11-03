@@ -39,7 +39,7 @@
 /* ── the panel: a bright card on the right, the model still visible beside it ── */
 #photoPanel, #photoCredits {
   position: fixed;
-  z-index: 3;
+  z-index: 5;   /* above walk mode's HUD (walk.css #walkHud, z 3, later in the page), whose Leave a memory / Guided tour pills sat over the panel's foot; the credits grew a music section on 2026-11-03 and the overlap hid its last lines */
   top: clamp(72px, 10vh, 110px);
   right: clamp(20px, 4vw, 56px);
   width: min(460px, calc(100vw - 40px));

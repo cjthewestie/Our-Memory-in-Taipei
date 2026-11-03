@@ -905,7 +905,9 @@
   let kNear = false;
   function sing() {
     const m = window.__music; if (!m) return;
-    if (m.playing && !m.muted) { m.next(); return; }
+    // the press that woke the page has already started the decade's song (music.js fresh): that press sings, it does
+    // not skip (review, 2026-11-03)
+    if (m.playing && !m.muted) { if (!m.fresh) m.next(); return; }
     if (m.muted) m.setMuted(false);
     if (!m.playing) m.playPause();
   }
@@ -948,5 +950,5 @@
     terrazzo: 10.5,                      // the terrazzo circle round the tree; red brick beyond it
   };
 
-  window.SQUARE = { SQ, group, board, makeLantern, obstacles, karaoke: K, sources, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
+  window.SQUARE = { SQ, group, board, makeLantern, obstacles, karaoke: K, sing, sources, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
 })();
