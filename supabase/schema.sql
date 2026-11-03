@@ -31,7 +31,8 @@ create table if not exists public.memories (
   status      text not null default 'pending' check (status in ('pending', 'approved', 'rejected'))
 );
 
--- item #5: whose memory it is (「這是誰的記憶：我的／爸媽的／阿公阿嬤的」). Older rows stay null = the writer's own.
+-- item #5: whose memory it is (「這是誰的記憶：我的／爸媽的／阿公阿嬤的」). Rows from before this column
+-- take the default, 'me' (the writer's own), which is what the old form meant.
 alter table public.memories add column if not exists whose text default 'me';
 alter table public.memories drop constraint if exists memories_whose_check;
 alter table public.memories add constraint memories_whose_check check (whose in ('me', 'parents', 'grandparents'));
@@ -39,10 +40,13 @@ alter table public.memories add constraint memories_whose_check check (whose in 
 -- spam control (the trigger below): a one-way hash of the sender's address, never shown, never granted
 alter table public.memories add column if not exists source_hash text;
 
--- a photo may only carry the memory's own name, so one memory can never point at another's photo
+-- a photo may only carry the memory's own name, so one memory can never point at another's photo.
+-- NOT VALID (review, 2026-11-03): the page before this version named a photo with a second random uuid,
+-- so an older row's photo_path is not its id, and checking old rows would make a re-run fail. New rows
+-- are checked; old ones keep the photo they have.
 alter table public.memories drop constraint if exists memories_photo_is_own;
 alter table public.memories add constraint memories_photo_is_own
-  check (photo_path is null or photo_path in (id::text || '.webp', id::text || '.jpg'));
+  check (photo_path is null or photo_path in (id::text || '.webp', id::text || '.jpg')) not valid;
 
 -- the year belongs to the street it hangs on (the form only offers these; item #5). NOT VALID so that
 -- re-running this on a project with older rows never fails; new and edited rows are checked.
@@ -108,13 +112,17 @@ begin
     raise exception 'duplicate' using errcode = 'PT409', hint = 'This memory has already been received.';
   end if;
 
-  -- a rough per-sender limit: the first address in X-Forwarded-For, hashed with the day so the
-  -- stored value cannot be turned back into an address or followed from one day to the next
+  -- a rough per-sender limit: the sender's address, hashed with the day so the stored value cannot be
+  -- turned back into an address or followed from one day to the next. Which address (review,
+  -- 2026-11-03): Supabase sits behind Cloudflare, whose cf-connecting-ip a sender cannot forge; the
+  -- first X-Forwarded-For entry is whatever the sender wrote there, so it is only the last resort
+  -- (the site-wide limit above holds even when a sender lies about it)
   begin
     hdrs := current_setting('request.headers', true)::json;
   exception when others then hdrs := null;
   end;
-  src := nullif(btrim(split_part(coalesce(hdrs ->> 'x-forwarded-for', hdrs ->> 'x-real-ip', ''), ',', 1)), '');
+  src := nullif(btrim(coalesce(hdrs ->> 'cf-connecting-ip', hdrs ->> 'x-real-ip',
+                               split_part(coalesce(hdrs ->> 'x-forwarded-for', ''), ',', 1))), '');
   if src is not null then
     new.source_hash := encode(sha256(convert_to(src || '|' || to_char(now() at time zone 'utc', 'YYYY-MM-DD') || '|our-memory-in-taipei', 'UTF8')), 'hex');
     if (select count(*) from public.memories

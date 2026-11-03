@@ -73,7 +73,8 @@
   const STARTS = [].concat(...Object.values(PROMPTS)).map(p => p.start);
 
   // The makers' own memories (item #6): the first lanterns on the street, so the board is not empty.
-  // The first two are the README's words; the others were written for this page by its makers, in
+  // Two are the README's words (the ten dollars, the climb), kept as written, with the Chinese put in
+  // front of them in review (2026-11-03) so that every seed reads Chinese first like the form; the others were written for this page by its makers, in
   // their own voice, about real places in the years each street is. They are the makers', and say so
   // (name, and the note under each); they are not anyone else's testimony and name no one.
   // Long and short on purpose (the plan: a seed that is too polished stops people writing), one is a
@@ -85,7 +86,7 @@
     { id: 'seed-chess-1987', section: 'square', x: 0, z: 150, year: 1987, whose: 'me',
       body: '1987 年我七歲，大樹下有一位伯伯教我下象棋，每次都讓我一隻車，我還是輸。\nIn 1987 I was seven. An old man under the banyan taught me 象棋 and always gave me a chariot start, and I still lost.' },
     { id: 'seed-ten-dollars', section: 'red', x: -5.2, z: 18, year: 1990, whose: 'me',
-      body: 'The ten dollars our mothers gave us in Ximending when we were small.' },
+      body: '小時候在西門町，媽媽塞給我們的那十塊錢。\nThe ten dollars our mothers gave us in Ximending when we were small.' },
     { id: 'seed-zhonghua-1992', section: 'red', x: 5.6, z: -42, year: 1992, whose: 'me',
       body: '1992 年中華商場要拆了。爸爸牽著我走天橋過去，指著一間關起來的小店說，他的第一副眼鏡是在這裡配的。\nIn 1992 the Zhonghua Market was coming down. Dad walked me over the footbridge and pointed at a shuttered stall: that is where he got his first pair of glasses.' },
     { id: 'seed-movie-1994', section: 'red', x: -4.8, z: -104, year: 1994, whose: 'me',
@@ -96,8 +97,8 @@
       body: '2014 年七夕，我們坐在大稻埕碼頭的堤防上看煙火。\nQixi 2014: we sat on the river wall at Dadaocheng Wharf and watched the fireworks.' },
     { id: 'seed-countdown-2020', section: 'tower', x: -5.0, z: -332, year: 2020, whose: 'me',
       body: '2020 年的最後一晚，大家都戴著口罩倒數。數到零的時候，我在 101 下面打視訊給在國外的妹妹，她那邊還是早上。\nThe last night of 2020, everyone counting down in masks. At zero I video-called my sister abroad from the foot of 101; it was still morning where she was.' },
-    { id: 'seed-climb', section: 'tower', x: 4.5, z: -388, year: THIS_YEAR, whose: 'me',
-      body: 'The day we could finally build something of our own, we looked up at Taipei 101, and the man high on the tower was waving at us. Let’s climb higher, together.' },
+    { id: 'seed-climb', section: 'tower', x: 4.5, z: -388, year: Math.min(THIS_YEAR, YEARS.tower[1]), whose: 'me',
+      body: '終於可以親手做出一點自己的東西的那天，我們抬頭看台北 101，塔上高高的那個人正在對我們揮手。一起爬得更高吧。\nThe day we could finally build something of our own, we looked up at Taipei 101, and the man high on the tower was waving at us. Let’s climb higher, together.' },
   ];
   SEEDS.forEach(m => { m.seed = true; m.name = MAKERS; });
 
@@ -204,9 +205,12 @@
     const id = uuid();
     const p = file ? await shrink(file, 1280) : null;
     const photo_path = p ? id + '.' + p.ext : null;
+    // a phone that loses its signal makes fetch throw a bare English "Failed to fetch": say it properly
+    // (review, 2026-11-03)
     const res = await fetch(`${API}/rest/v1/memories`, {
       method: 'POST', headers: headers({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
-      body: JSON.stringify({ id, section: rec.section, x: rec.x, z: rec.z, year: rec.year, body: rec.body, name: rec.name, whose: rec.whose, photo_path }) });
+      body: JSON.stringify({ id, section: rec.section, x: rec.x, z: rec.z, year: rec.year, body: rec.body, name: rec.name, whose: rec.whose, photo_path }) })
+      .catch(() => { throw new Error('連不上網路，還沒送出去，請再按一次。 · No connection, not sent yet. Please try again.'); });
     if (!res.ok) throw new Error(await refusal(res));
     if (!p) return 'pending';
     try {

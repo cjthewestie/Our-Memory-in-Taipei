@@ -110,7 +110,8 @@ Supabase 的免費專案大約一週沒有活動就會被暫停。repo 裡的 [`
 - **記憶的 id 由網頁產生**（`crypto.randomUUID()`）。因為 RLS 只讓訪客讀 `approved` 的列，送出之後讀不回剛寫的 pending 列，所以 insert 用 `Prefer: return=minimal`，id 自己帶。id 重複時主鍵直接擋下。
 - **順序：先寫記憶、再傳照片。**記憶那一列送出時 `photo_path` 已經是 `<id>.webp`（瀏覽器不能做 webp 時是 `.jpg`）；資料表的 `memories_photo_is_own` 規則保證 `photo_path` 只能是自己的 id。接著才上傳照片，`memory_photo_ok()` 確認那一列在等的正是這個檔案。不需要第三步「回頭補 photo_path」，所以 anon 金鑰也不需要任何 update 權限。
 - `memory_photo_ok()` 和 trigger 函式都是 `SECURITY DEFINER`，`search_path` 固定為 `public, pg_temp`：用訪客的權限執行的話，它們受 RLS 影響，看不到 pending 列，限流會永遠數到 0。函式只回傳 true／false，不會把待審的內容帶出去。
-- **每來源限流**用的是請求標頭裡 `X-Forwarded-For` 的第一個位址，加上當天日期做 SHA-256，只存雜湊（`source_hash` 欄位，訪客讀不到），隔天就對不起來。代理後面的很多人可能共用一個位址，所以門檻故意放寬。
+- **每來源限流**用的是送出者的位址：先用 Cloudflare 填的 `cf-connecting-ip`（送出者偽造不了），沒有的話用 `x-real-ip`，最後才用 `X-Forwarded-For` 的第一個位址（這個送出者自己寫得進去，所以只是備案；就算有人假造，全站每分鐘的上限照樣擋）。位址加上當天日期做 SHA-256，只存雜湊（`source_hash` 欄位，訪客讀不到），隔天就對不起來。代理後面的很多人可能共用一個位址，所以門檻故意放寬。如果上面的 curl 測試灌到第 7 筆還是 201，代表 Supabase 沒有把這些標頭傳進資料庫，那就只剩全站的上限，請在 GitHub issues 記一筆。
+  *The per-sender address is `cf-connecting-ip` first (set by Cloudflare, not forgeable), then `x-real-ip`, then the first `X-Forwarded-For` entry (which a sender can write themselves; the site-wide limit holds regardless). If the curl test above still gets 201 on the 7th send, the headers are not reaching the database and only the site-wide limit applies.*
 - 年份規則 `memories_year_in_era`：廣場 1950 年起；西門町 1985–1999；大稻埕 2000–2019；信義 2020–2027，和表單能選的一樣。
 
 ### 自己用 curl 驗證 · Checking the limits yourself

@@ -145,4 +145,6 @@
 .mem-item:hover, .mem-item:focus-visible { border-color: var(--verm); outline: none; }
 .mem-item-k { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.6; }
 .mem-item-t { font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* review 2026-11-03: a memory's Chinese and English are two lines (as on the reading card), not one run-on line */
+.mem-item-t { white-space: pre-line; }
 .mem-item-by { font-size: 12px; opacity: 0.65; }
