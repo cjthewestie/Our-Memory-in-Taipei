@@ -14,7 +14,7 @@
 // an additive halo, never real lights: a light would recompile every material on the street.
 //
 // walk.js owns movement and the gates' triggers; memories.js pins the newest memories to the notice
-// board (SQUARE.board) and uses SQUARE.makeLantern for the lanterns out on the street.
+// board (SQUARE.board) and takes the lantern's parts from SQUARE.lanternKit() for the lanterns out on the street.
 (function () {
   'use strict';
   if (!window.SCENE || !window.THREE || !window.RIG) return;
@@ -87,63 +87,63 @@
   // ── the lantern: a Taiwanese 燈籠, not a ball ────────────────────────────────
   // A lathe body (a rounded drum, wider in the middle), bamboo ribs and a soft inner glow painted on,
   // gold caps, a red tassel, a character on two sides, and a halo. Unlit, so it reads as lit from inside.
+  //
+  // 2026-11-03 (research/similar-works/README.md §5 item #11): memories.js now draws every lantern on a
+  // street as a handful of InstancedMeshes (one per part, per section), so this file no longer builds
+  // lantern groups; it hands over the parts. The paper is painted once, pale, and memories.js tints each
+  // lantern with its instance colour (the makers' red, a visitor's orange); the year is no longer
+  // painted on, a shared bubble shows it when you walk up (a texture per year was a texture per year).
+  // The three gold pieces are merged into one geometry and the tassel is moved to its place, so all the
+  // parts of one lantern share one instance matrix.
   const LANTERN_PROFILE = (() => {
     const pts = [];
     for (let i = 0; i <= 14; i++) { const t = i / 14; pts.push(new THREE.Vector2(0.17 + 0.31 * Math.pow(Math.sin(Math.PI * t), 0.75), -0.48 + 0.96 * t)); }
     return pts;
   })();
-  const lanternGeo = new THREE.LatheGeometry(LANTERN_PROFILE, 22);
-  const capGeo = cyl(0.19, 0.19, 0.07, 16);
-  const rimGeo = cyl(0.13, 0.13, 0.05, 12);
-  const tasselGeo = new THREE.ConeGeometry(0.075, 0.42, 8, 1, true); tasselGeo.translate(0, -0.21, 0);
-  const cordGeo = cyl(0.012, 0.012, 1, 4);
-  const goldMat = mat('#c9a043', { metalness: 0.6, roughness: 0.35 });
-  const tasselMat = basic('#c4211b', { side: THREE.DoubleSide });
-  const cordMat = basic('#3a2a20');
-  const lanternTex = {};
-  function lanternMaterial(text, body) {
-    const key = text + '|' + body;
-    if (lanternTex[key]) return lanternTex[key];
-    const tex = canvasTex(512, 256, (g, W, H) => {
-      // the paper: brighter where the candle is, darker toward the caps
-      const v = g.createLinearGradient(0, 0, 0, H);
-      v.addColorStop(0, shade(body, -0.45)); v.addColorStop(0.18, shade(body, -0.1)); v.addColorStop(0.5, shade(body, 0.28));
-      v.addColorStop(0.82, shade(body, -0.1)); v.addColorStop(1, shade(body, -0.45));
-      g.fillStyle = v; g.fillRect(0, 0, W, H);
-      // bamboo ribs
-      g.strokeStyle = 'rgba(70,10,5,0.35)'; g.lineWidth = 3;
-      for (let i = 0; i < 22; i++) { const x = (i + 0.5) * W / 22; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
-      // two thin gold bands near the caps
-      g.fillStyle = '#e9c060'; g.fillRect(0, H * 0.1, W, 4); g.fillRect(0, H * 0.88, W, 4);
-      // the character, twice round
-      g.fillStyle = '#2a120c'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      const big = /^[0-9]+$/.test(text) ? H * 0.32 : H * 0.5;
-      g.font = `700 ${Math.round(big)}px ${FONT_ZH}`;
-      [0.25, 0.75].forEach(u => g.fillText(text, W * u, H * 0.52));
+  function mergeGeos(list) {                     // [[geometry, y offset], ...] → one non-indexed geometry
+    const pos = [], nor = [], uv = [];
+    list.forEach(([g0, y]) => {
+      const g = g0.index ? g0.toNonIndexed() : g0.clone(); g.translate(0, y, 0);
+      pos.push(...g.attributes.position.array); nor.push(...g.attributes.normal.array); uv.push(...g.attributes.uv.array);
     });
-    lanternTex[key] = basic('#ffffff', { map: tex, toneMapped: false });   // lit from inside: dusk does not darken it
-    return lanternTex[key];
+    const out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    out.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    return out;
   }
   function shade(hex, k) {
     const c = new THREE.Color(hex);
     if (k > 0) c.lerp(new THREE.Color('#ffd7a0'), k); else c.multiplyScalar(1 + k);
     return '#' + c.getHexString();
   }
-  // makeLantern({ text, body, size, cord }): a group with its centre at the origin; cord = length of
-  // string above it (0 for none). userData.phase is a per-lantern sway offset.
-  function makeLantern(o) {
-    o = Object.assign({ text: '福', body: '#d23a2a', size: 1, cord: 0, halo: true }, o || {});
-    const g = new THREE.Group();
-    g.add(new THREE.Mesh(lanternGeo, lanternMaterial(o.text, o.body)));
-    const top = new THREE.Mesh(capGeo, goldMat); top.position.y = 0.46; g.add(top);
-    const bot = new THREE.Mesh(capGeo, goldMat); bot.position.y = -0.53; g.add(bot);
-    const rim = new THREE.Mesh(rimGeo, goldMat); rim.position.y = 0.53; g.add(rim);
-    const tas = new THREE.Mesh(tasselGeo, tasselMat); tas.position.y = -0.53; g.add(tas);
-    if (o.cord > 0) { const c = new THREE.Mesh(cordGeo, cordMat); c.position.y = 0.58; c.scale.y = o.cord; g.add(c); }
-    if (o.halo) { const h = new THREE.Sprite(halo); h.scale.setScalar(2.1); g.add(h); }
-    g.scale.setScalar(o.size);
-    g.userData.phase = rnd() * 6.28;
-    return g;
+  let lanternParts = null;
+  function lanternKit() {
+    if (lanternParts) return lanternParts;
+    const capGeo = cyl(0.19, 0.19, 0.07, 16), rimGeo = cyl(0.13, 0.13, 0.05, 12);
+    const tasselGeo = new THREE.ConeGeometry(0.075, 0.42, 8, 1, true); tasselGeo.translate(0, -0.21 - 0.53, 0);
+    // the paper, pale and warm: the instance colour multiplies it, so the bright middle (where the
+    // candle is) stays the brightest part of every lantern whatever its colour
+    const paper = canvasTex(512, 256, (g, W, H) => {
+      const v = g.createLinearGradient(0, 0, 0, H);
+      v.addColorStop(0, '#6a5a52'); v.addColorStop(0.18, '#e2d2c6'); v.addColorStop(0.5, '#ffffff');
+      v.addColorStop(0.82, '#e2d2c6'); v.addColorStop(1, '#6a5a52');
+      g.fillStyle = v; g.fillRect(0, 0, W, H);
+      g.strokeStyle = 'rgba(70,30,20,0.35)'; g.lineWidth = 3;                      // bamboo ribs
+      for (let i = 0; i < 22; i++) { const x = (i + 0.5) * W / 22; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
+      g.fillStyle = '#fff0b0'; g.fillRect(0, H * 0.1, W, 4); g.fillRect(0, H * 0.88, W, 4);   // two thin bands near the caps
+      g.fillStyle = 'rgba(60,20,12,0.9)'; g.textAlign = 'center'; g.textBaseline = 'middle';  // 憶, twice round
+      g.font = `700 ${Math.round(H * 0.46)}px ${FONT_ZH}`;
+      [0.25, 0.75].forEach(u => g.fillText('憶', W * u, H * 0.53));
+    });
+    lanternParts = {
+      body: new THREE.LatheGeometry(LANTERN_PROFILE, 22),
+      gold: mergeGeos([[capGeo, 0.46], [capGeo, -0.53], [rimGeo, 0.53]]),
+      tassel: tasselGeo,
+      paper, halo: halo.map, haloSize: 2.1,
+      goldColor: '#c9a043', tasselColor: '#c4211b',
+    };
+    return lanternParts;
   }
 
   // ── the ground: red brick, a terrazzo circle round the tree, a pool of warm light under it ──
@@ -950,5 +950,5 @@
     terrazzo: 10.5,                      // the terrazzo circle round the tree; red brick beyond it
   };
 
-  window.SQUARE = { SQ, group, board, makeLantern, obstacles, karaoke: K, sing, sources, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
+  window.SQUARE = { SQ, group, board, lanternKit, obstacles, karaoke: K, sing, sources, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
 })();

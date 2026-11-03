@@ -17,6 +17,12 @@
 -- the photo; the storage rule lets the photo in only if that row is waiting for exactly that file.
 -- There is deliberately no update grant: nobody can edit a memory from the page, not even its own
 -- writer, so a pending memory cannot be changed after the makers have read it.
+--
+-- 2026-11-03 (items #11 #12 #23): a memory may carry a title (its label's first line, 40 characters)
+-- and a place (one of the page's landmarks, by id: memories.js LANDMARKS; empty = the nearest is
+-- named). And a visitor may say 「我也記得 · I remember this too」: the offerings table takes one row
+-- per press and nothing can read it back; the memory_warmth view gives only a coarse level, 1 to 3,
+-- for each approved memory that has any. The page never shows a number, and nothing here returns one.
 
 create table if not exists public.memories (
   id          uuid primary key default gen_random_uuid(),
@@ -36,6 +42,15 @@ create table if not exists public.memories (
 alter table public.memories add column if not exists whose text default 'me';
 alter table public.memories drop constraint if exists memories_whose_check;
 alter table public.memories add constraint memories_whose_check check (whose in ('me', 'parents', 'grandparents'));
+
+-- items #11 #12: the label's title, and the place by landmark id (the shape is checked here, the list
+-- lives in memories.js so a landmark can be added without touching the database)
+alter table public.memories add column if not exists title text;
+alter table public.memories add column if not exists place text;
+alter table public.memories drop constraint if exists memories_title_len;
+alter table public.memories add constraint memories_title_len check (title is null or char_length(title) between 1 and 40);
+alter table public.memories drop constraint if exists memories_place_id;
+alter table public.memories add constraint memories_place_id check (place is null or place ~ '^[a-z0-9-]{1,24}$');
 
 -- spam control (the trigger below): a one-way hash of the sender's address, never shown, never granted
 alter table public.memories add column if not exists source_hash text;
@@ -75,10 +90,10 @@ create policy "submit a pending memory" on public.memories
 -- The visitor's role may only write these columns; created_at, status and source_hash take their
 -- defaults or the trigger's value. id is the page's own uuid: a repeated one fails on the primary key.
 revoke insert, update, delete on public.memories from anon, authenticated;
-grant insert (id, section, x, z, year, body, name, whose, photo_path) on public.memories to anon, authenticated;
+grant insert (id, section, x, z, year, body, name, whose, photo_path, title, place) on public.memories to anon, authenticated;
 -- and read only what the page shows (source_hash stays private even on an approved row)
 revoke select on public.memories from anon, authenticated;
-grant select (id, created_at, section, x, z, year, body, name, whose, photo_path, status) on public.memories to anon, authenticated;
+grant select (id, created_at, section, x, z, year, body, name, whose, photo_path, status, title, place) on public.memories to anon, authenticated;
 
 -- ── the speed limit ─────────────────────────────────────────────────────────────
 -- Before every insert. SECURITY DEFINER with a fixed search_path: run as the visitor it would be
@@ -97,6 +112,7 @@ declare
   src text;
 begin
   new.body := btrim(new.body);
+  new.title := nullif(btrim(regexp_replace(coalesce(new.title, ''), '\s+', ' ', 'g')), '');
   if new.whose is null then new.whose := 'me'; end if;
   -- the visitor can only send 'pending' (RLS and the column grant); a row the makers add in the
   -- dashboard as 'approved' is theirs and skips the limits
@@ -180,3 +196,89 @@ drop policy if exists "upload a memory photo" on storage.objects;
 create policy "upload a memory photo" on storage.objects
   for insert to anon, authenticated
   with check (bucket_id = 'memory-photos' and public.memory_photo_ok(name));
+
+-- ── 我也記得 · I remember this too (item #23) ─────────────────────────────────────
+-- One row each time a visitor presses it on an approved memory (the page lets each browser press it
+-- once per memory). Insert-only: the visitor may write memory_id and nothing else, and nobody can read
+-- the rows from the page, so no count ever leaves the database. Same speed limit as the memories
+-- (item #1): a SECURITY DEFINER trigger with a fixed search_path.
+create table if not exists public.offerings (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  memory_id   uuid not null references public.memories (id) on delete cascade,
+  source_hash text
+);
+create index if not exists offerings_memory on public.offerings (memory_id);
+create index if not exists offerings_recent on public.offerings (created_at desc);
+create index if not exists offerings_source on public.offerings (source_hash, created_at desc);
+
+alter table public.offerings enable row level security;
+drop policy if exists "leave an offering" on public.offerings;
+create policy "leave an offering" on public.offerings
+  for insert to anon, authenticated
+  with check (true);                        -- the trigger below decides: an approved memory, not too fast
+revoke all on public.offerings from anon, authenticated;
+grant insert (memory_id) on public.offerings to anon, authenticated;
+
+create or replace function public.offerings_before_insert()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  per_minute constant int := 240;          -- from the whole world in one minute
+  per_source constant int := 40;           -- from one address in ten minutes
+  hdrs json;
+  src text;
+begin
+  -- only an approved memory can be remembered (a pending id from a share link cannot collect any)
+  if not exists (select 1 from public.memories where id = new.memory_id and status = 'approved') then
+    raise exception 'not_found' using errcode = 'PT404', hint = 'No such memory.';
+  end if;
+  if (select count(*) from public.offerings where created_at > now() - interval '1 minute') >= per_minute then
+    raise exception 'rate_limited' using errcode = 'PT429', hint = 'Too many in the last minute. Try again shortly.';
+  end if;
+  begin
+    hdrs := current_setting('request.headers', true)::json;
+  exception when others then hdrs := null;
+  end;
+  src := nullif(btrim(coalesce(hdrs ->> 'cf-connecting-ip', hdrs ->> 'x-real-ip',
+                               split_part(coalesce(hdrs ->> 'x-forwarded-for', ''), ',', 1))), '');
+  if src is not null then
+    new.source_hash := encode(sha256(convert_to(src || '|' || to_char(now() at time zone 'utc', 'YYYY-MM-DD') || '|our-memory-in-taipei', 'UTF8')), 'hex');
+    if (select count(*) from public.offerings
+          where source_hash = new.source_hash and created_at > now() - interval '10 minutes') >= per_source then
+      raise exception 'rate_limited' using errcode = 'PT429', hint = 'Too many from here. Try again later.';
+    end if;
+    -- the same address, the same memory, the same day: once (a cleared browser cannot press it twice)
+    if exists (select 1 from public.offerings where source_hash = new.source_hash and memory_id = new.memory_id) then
+      raise exception 'duplicate' using errcode = 'PT409', hint = 'Already remembered.';
+    end if;
+  else
+    new.source_hash := null;
+  end if;
+  new.created_at := now();
+  return new;
+end;
+$$;
+
+revoke all on function public.offerings_before_insert() from public, anon, authenticated;
+
+drop trigger if exists offerings_before_insert on public.offerings;
+create trigger offerings_before_insert
+  before insert on public.offerings
+  for each row execute function public.offerings_before_insert();
+
+-- The only thing anyone can read about offerings: a level per approved memory. 1 for a few, 2 for
+-- several, 3 for many; a memory with none has no row (level 0). Thresholds are coarse on purpose, so
+-- the level cannot be turned back into a count. It runs with its owner's rights (security_invoker
+-- off), which is what lets it read a table the visitor cannot; it returns only these two columns.
+create or replace view public.memory_warmth with (security_invoker = false) as
+  select o.memory_id,
+         (case when count(*) >= 12 then 3 when count(*) >= 4 then 2 else 1 end)::int as level
+    from public.offerings o
+    join public.memories m on m.id = o.memory_id and m.status = 'approved'
+   group by o.memory_id;
+revoke all on public.memory_warmth from public, anon, authenticated;
+grant select on public.memory_warmth to anon, authenticated;

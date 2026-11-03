@@ -49,6 +49,10 @@ const IGNORE = /ERR_TUNNEL|ERR_CONNECTION|ERR_NAME|net::ERR|supabase|Failed to l
       await p.evaluate(k => window.__walk && __walk.enter(k, true), k);
       await p.waitForTimeout(4000);
       await shot(p, 'walk-' + k);
+      // items #11 #12: the section's lanterns are one instanced set, lit (the makers' seeds are in every street)
+      const lan = await p.evaluate(k => window.__memories && __memories.sets ? __memories.sets()[k] : null, k);
+      (stats.lanterns = stats.lanterns || {})[k] = lan ? lan.count : null;
+      if (!lan || !lan.visible || !lan.count) errors.push(`[walk] no lanterns lit in ${k}`);
     }
     await p.evaluate(() => window.__walk && __walk.goSquare(null, true));
     await p.waitForTimeout(2500);

@@ -79,6 +79,19 @@
 .pp-note[hidden] { display: none; }
 .pp-credit { margin-top: 12px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); font-size: 11px; letter-spacing: 0.06em; line-height: 1.6; opacity: 0.8; }
 .pp-credit a, .pc-line a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+/* 2026-11-03 (item #12): the memories near this building, oldest first; each opens its card (memories.js) */
+.pp-mem { margin-top: 14px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+.pp-mem[hidden] { display: none; }
+.pp-mem-h { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.65; margin-bottom: 6px; }
+.pp-mem-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pp-mem-item {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 40px; padding: 7px 10px; text-align: left; cursor: pointer;
+  font: inherit; font-size: 14px; line-height: 1.35; color: var(--hud-fg, #2b2f3a); background: #fff;
+  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); border-radius: 8px;
+}
+.pp-mem-item:hover, .pp-mem-item:focus-visible { border-color: var(--verm); outline: none; }
+.pp-mem-k { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3em; }
+.pp-mem-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* CJ, 2026-09-24: 「沒有一致」. These buttons kept their own shape and colour after the chrome in
    style.css moved to one dark system, so the page carried two button languages at once. Same hand
    now: hairline rule, 3px corner, dark type, tracking pulled in. */

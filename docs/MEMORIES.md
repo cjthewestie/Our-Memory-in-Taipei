@@ -64,7 +64,7 @@ Supabase 的免費專案大約一週沒有活動就會被暫停。repo 裡的 [`
 ## 審核記憶 · Approving memories
 
 1. 打開 **Table Editor → memories**。
-2. 用 `status` = `pending` 篩選。讀 `body`；`whose` 是 `me`（我的）、`parents`（爸媽的）或 `grandparents`（阿公阿嬤的）。
+2. 用 `status` = `pending` 篩選。讀 `body`；`whose` 是 `me`（我的）、`parents`（爸媽的）或 `grandparents`（阿公阿嬤的）。`title` 是卡片上那一句標題（可以是空的，最多 40 字），`place` 是訪客選的地點代號（`redhouse` 紅樓前、`temple` 霞海城隍廟口……，清單在 `memories.js` 的 `LANDMARKS`；空的就由網頁自動寫最近的地點）。標題也要讀：它和內容一樣會公開。
 3. 有照片的話，`photo_path` 會有值，照片在 `https://<專案>.supabase.co/storage/v1/object/public/memory-photos/<photo_path>`，或在 **Storage → memory-photos** 裡點開看。
    - 如果 `photo_path` 有值、但 Storage 裡找不到那張照片（訪客的網路在傳照片時斷了），核准前先把 `photo_path` 清空，燈籠就會不帶照片地掛上去。
 4. 把 `status` 改成 **approved** 就公開；改成 **rejected** 就一直藏著。核准的記憶，下一個打開網頁的人就看得到。
@@ -104,6 +104,7 @@ Supabase 的免費專案大約一週沒有活動就會被暫停。repo 裡的 [`
 | 太大或奇怪的檔案 · Huge or odd files | 照片在瀏覽器裡縮到 1280 px 的 webp／jpeg；照片空間拒絕超過 2 MB 或其他格式的檔案。 · Shrunk in the browser to 1280 px; the bucket refuses anything over 2 MB or of another type. |
 | 改掉或刪掉別人的記憶或照片 · Editing or deleting someone's memory or photo | anon 金鑰沒有任何 update／delete 權限，照片也只能新增，不能覆蓋、列出或刪除。 · The anon key has no update or delete right at all. |
 | 照片的 EXIF 定位 · A photo's EXIF location | 照片在瀏覽器裡經 canvas 重新編碼，相機的 EXIF（包括拍攝地點）不會送出去。 · Re-encoded through a canvas in the browser, so EXIF (location included) is never sent. |
+| 灌「我也記得」· Flooding 「我也記得」 | 一樣是 `before insert` trigger：只能回應已核准的記憶；全站每分鐘最多 240 次、同一個來源十分鐘最多 40 次、同一個來源同一天對同一則只算一次。`offerings` 表訪客只能新增、讀不到；能讀的只有 `memory_warmth` 這個 view，每則只給 1–3 的粗略等級，網頁上從不顯示數字。 · The same kind of trigger: approved memories only, 240 a minute site-wide, 40 per sender per ten minutes, once per sender per memory per day. Visitors can insert into `offerings` but never read it; `memory_warmth` gives only a coarse level 1–3 per memory, and the page never shows a number. |
 | 簡單的機器人 · Simple bots | 隱藏的蜜罐欄位、表單至少要開 2.5 秒、每位訪客 30 秒一則。 · A honeypot field, a minimum time on the form, one memory per 30 s per visitor. |
 
 ### 這些規則怎麼做到的 · How the rules work (for whoever maintains `schema.sql`)
@@ -112,6 +113,10 @@ Supabase 的免費專案大約一週沒有活動就會被暫停。repo 裡的 [`
 - `memory_photo_ok()` 和 trigger 函式都是 `SECURITY DEFINER`，`search_path` 固定為 `public, pg_temp`：用訪客的權限執行的話，它們受 RLS 影響，看不到 pending 列，限流會永遠數到 0。函式只回傳 true／false，不會把待審的內容帶出去。
 - **每來源限流**用的是送出者的位址：先用 Cloudflare 填的 `cf-connecting-ip`（送出者偽造不了），沒有的話用 `x-real-ip`，最後才用 `X-Forwarded-For` 的第一個位址（這個送出者自己寫得進去，所以只是備案；就算有人假造，全站每分鐘的上限照樣擋）。位址加上當天日期做 SHA-256，只存雜湊（`source_hash` 欄位，訪客讀不到），隔天就對不起來。代理後面的很多人可能共用一個位址，所以門檻故意放寬。如果上面的 curl 測試灌到第 7 筆還是 201，代表 Supabase 沒有把這些標頭傳進資料庫，那就只剩全站的上限，請在 GitHub issues 記一筆。
   *The per-sender address is `cf-connecting-ip` first (set by Cloudflare, not forgeable), then `x-real-ip`, then the first `X-Forwarded-For` entry (which a sender can write themselves; the site-wide limit holds regardless). If the curl test above still gets 201 on the 7th send, the headers are not reaching the database and only the site-wide limit applies.*
+- **「我也記得」**（2026-11-03，第 23 項）：每按一次寫一列到 `offerings`（只有 `memory_id`，其餘由資料庫填）。`offerings_before_insert` 和記憶的 trigger 一樣是 `SECURITY DEFINER`、固定 `search_path`，先確認那則記憶是 approved，再限流（來源雜湊和記憶用同一套）。`memory_warmth` view 用擁有者的權限執行（`security_invoker = false`），所以讀得到訪客讀不到的表，但只回傳 `memory_id` 和 `level`：1（1–3 次）、2（4–11 次）、3（12 次以上）；沒有人回應的記憶沒有那一列。門檻刻意粗，等級推不回次數。**不要改成回傳次數**：不顯示數字是這個功能的原則。燈籠依等級稍微變暖、變亮。網頁的種子記憶和只存在瀏覽器裡的燈籠沒有資料庫列，按了只記在那個瀏覽器。
+  *「我也記得」 writes one `offerings` row (memory_id only). Its trigger is SECURITY DEFINER with a fixed search_path: approved memories only, then the limits. `memory_warmth` runs with its owner's rights and returns only `memory_id` and a `level` of 1 (1–3), 2 (4–11) or 3 (12+); never change it to return a count.*
+- **分享連結 `?m=<記憶 id>`**（第 12 項）：投稿成功的畫面會給投稿者這個連結。核准之前，任何人打開都只看到「還在等作者讀過」，因為 RLS 讓訪客讀不到 pending 的內容；核准後，打開就會走到那盞燈籠下並打開卡片。
+  *The `?m=<id>` link a sender gets as a receipt: before approval it only says 「還在等作者讀過」 (RLS hides the pending row); after, it walks to the lantern and opens it.*
 - 年份規則 `memories_year_in_era`：廣場 1950 年起；西門町 1985–1999；大稻埕 2000–2019；信義 2020–2027，和表單能選的一樣。
 
 ### 自己用 curl 驗證 · Checking the limits yourself

@@ -64,6 +64,8 @@
     on: false, u: HUB_U, dusk: 0,         // dusk: 0…1, golden hour in the square (app.js reads it)
     get where() { return st.where; },
     get pos() { return { x: st.x, z: st.z, h: st.h }; },
+    get welcoming() { return welcomeOpen; },   // the first-visit card is up (memories.js waits for it before a ?m= link moves her)
+    get busy() { return st.busy; },
     // the section the memories belong to right now: where she is when walking, the era on the tour
     section() { return WALK.on ? st.where : ERAS[R.eraIdx].key; },
     update, enter, goSquare, startTour, startWalk,
@@ -296,9 +298,27 @@
     showFor(where);
     if (where !== 'square') document.documentElement.dataset.section = where; else delete document.documentElement.dataset.section;
   }
-  function enter(k, instant) {
-    const go = () => place(k, 0, SECT[k].top - 9, 0);
+  // enter(k, instant, at): into section k at its near end, or, with at = { x, z, h }, at that spot
+  // (2026-11-03, item #12: 「帶我去那裡」 and the ?m= share links put her next to a lantern). k may be
+  // 'square' when a spot is given (the memory board). The spot is kept inside the walls, and h, if
+  // missing, faces down the street. Returns false while another move is still fading.
+  function enter(k, instant, at) {
+    if (st.busy && !instant) return false;
+    const fin = v => typeof v === 'number' && isFinite(v);
+    const go = () => {
+      if (at && fin(at.x) && fin(at.z)) {
+        const h = fin(at.h) ? at.h : 0;
+        if (k === 'square') {
+          const lim = SQ.h - 2.4;
+          let x = Math.min(SQ.x + lim, Math.max(SQ.x - lim, at.x)), z = Math.min(SQ.z + lim, Math.max(SQ.z - lim, at.z));
+          OBST.forEach(o => { const px = x - o.x, pz = z - o.z, pd = Math.hypot(px, pz); if (pd < o.r) { const q = o.r / Math.max(pd, 1e-3); x = o.x + px * q; z = o.z + pz * q; } });
+          place('square', x, z, h);
+        } else if (SECT[k]) place(k, Math.min(SIDE, Math.max(-SIDE, at.x)), Math.min(SECT[k].top, Math.max(SECT[k].end, at.z)), h);
+      } else if (SECT[k]) place(k, 0, SECT[k].top - 9, 0);
+      else place('square', SQ.x, SQ.z + SQ.h - 5, 0);
+    };
     instant ? go() : teleport(go);
+    return true;
   }
   // back to the square: in front of the gate you came through, facing in (or the arrival spot from the button)
   function goSquare(from, instant) {

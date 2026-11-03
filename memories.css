@@ -148,3 +148,64 @@
 /* review 2026-11-03: a memory's Chinese and English are two lines (as on the reading card), not one run-on line */
 .mem-item-t { white-space: pre-line; }
 .mem-item-by { font-size: 12px; opacity: 0.65; }
+
+/* 2026-11-03, items #11 #12 #23: the reading card as a museum label, the board as an exhibition, the receipt */
+.mem-label-title { margin: 12px 36px 4px 0; font-size: 24px; line-height: 1.2; font-weight: 700; overflow-wrap: anywhere; }
+.mem-label-title[hidden] { display: none; }
+.mem-label-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 13px; letter-spacing: 0.04em; }
+.mem-label-meta[hidden] { display: none; }
+.mem-label-place { font-weight: 600; }
+.mem-label-year { opacity: 0.7; font-variant-numeric: tabular-nums; }
+.mem-label-year::before { content: '· '; opacity: 0.6; }
+.mem-label-title + .mem-label-meta { margin-top: 2px; }
+.mem-by[hidden] { display: none; }
+.mem-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.mem-acts[hidden] { display: none; }
+.mem-acts .wk-btn { min-height: 44px; pointer-events: auto; white-space: normal; text-align: left; line-height: 1.3; }
+.mem-acts .wk-btn[hidden] { display: none; }
+.mem-rem { background: color-mix(in srgb, var(--lamp) 30%, var(--bone)); color: var(--ink); border-color: transparent; }
+.mem-rem.done { background: var(--lamp); color: var(--ink); opacity: 1; cursor: default; }
+.mem-read.mem-waiting .mem-label-title { color: var(--verm); }
+
+/* the board: era tabs (only once there are enough memories), the place filter, 我家在…… */
+.mem-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.mem-tabs[hidden] { display: none; }
+.mem-tab {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-height: 40px; padding: 6px 11px; border-radius: 10px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); background: #fff; color: var(--ink); font: 600 13px/1.2 var(--font-hud), var(--font-sys);
+}
+.mem-tab em { font-size: 10.5px; font-weight: 400; opacity: 0.6; font-style: normal; }
+.mem-tab[aria-selected="true"] { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+.mem-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 10px; }
+.mem-filter { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+.mem-filter[hidden] { display: none; }
+.mem-filter select { font: 400 16px/1.3 var(--font-hud), var(--font-sys); color: var(--ink); background: #fff; min-height: 40px; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); border-radius: 8px; padding: 6px 8px; width: 100%; }
+.mem-filter:only-child, .mem-filter[hidden] + .mem-filter { grid-column: 1 / -1; }
+.mem-home { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--lamp) 20%, var(--bone)); font-size: 13.5px; line-height: 1.45; }
+.mem-home[hidden] { display: none; }
+.mem-home p { margin: 0; flex: 1 1 220px; }
+.mem-home .wk-btn { min-height: 40px; pointer-events: auto; }
+.mem-li { display: flex; align-items: stretch; gap: 6px; }
+.mem-li .mem-item { flex: 1 1 auto; min-width: 0; }
+.mem-item-title { font-size: 16px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.mem-item-go {
+  flex: none; align-self: center; min-height: 44px; min-width: 44px; padding: 6px 10px; border-radius: 10px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); background: transparent; color: var(--ink); font: 600 12px/1.2 var(--font-hud), var(--font-sys);
+}
+.mem-item-go:hover, .mem-item-go:focus-visible { border-color: var(--verm); color: var(--verm); outline: none; }
+.mem-empty { font-size: 13.5px; opacity: 0.7; }
+.mem-empty[hidden] { display: none; }
+@media (max-width: 480px) { .mem-filters { grid-template-columns: 1fr; } }
+
+/* the form: where (the street's places), the square's note, the receipt */
+.mem-place[hidden], .mem-where-note[hidden], .mem-receipt[hidden] { display: none; }
+.mem-place .mem-hint { font-size: 11.5px; opacity: 0.7; font-weight: 400; }
+.mem-where-note { margin: -4px 0 12px; padding: 8px 11px; border-radius: 10px; background: color-mix(in srgb, var(--leaf, #6fae6a) 18%, var(--bone)); font-size: 13px; line-height: 1.5; }
+.mem-where-note em { display: block; font-size: 11.5px; opacity: 0.7; }
+.mem-receipt { padding: 4px 0 2px; font-size: 14px; line-height: 1.55; }
+.mem-receipt p { margin: 0 0 8px; }
+.mem-receipt-zh { font-size: 17px; font-weight: 700; }
+.mem-receipt-note { font-size: 12.5px; opacity: 0.75; }
+.mem-receipt-url { font-size: 14px !important; font-family: ui-monospace, Menlo, Consolas, monospace !important; }
+.mem-receipt-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+.mem-receipt-acts .wk-btn { min-height: 44px; pointer-events: auto; }

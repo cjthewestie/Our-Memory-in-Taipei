@@ -371,7 +371,17 @@
   }
 
   // a probe for testing, like window.__music
+  // a lantern lighting up, or a 「我也記得」 (memories.js, 2026-11-03, items #11 #23): one soft, high bell
+  // stroke. Only ever into sound that is already on: it never creates or resumes the context itself, so a
+  // phone that is still silent stays silent (music.js Fault 4).
+  function chime(soft) {
+    if (!ctx || !built || !wanted || ctx.state !== 'running' || document.hidden) return false;
+    ring(duckG, 1318.5, soft ? 0.025 : 0.04);
+    return true;
+  }
+  window.AMBIENCE = { chime };
   window.__ambience = {
+    chime,
     get state() { return ctx ? ctx.state : 'none'; }, get wanted() { return wanted; }, get built() { return built; },
     get beds() { return Object.keys(beds).reduce((o, k) => (o[k] = { loaded: !!beds[k].src, gain: +beds[k].gain.gain.value.toFixed(2) }, o), {}); },
     get square() { return Object.keys(S).reduce((o, k) => (S[k] && S[k].gain && (o[k] = +S[k].gain.gain.value.toFixed(3)), o), {}); },

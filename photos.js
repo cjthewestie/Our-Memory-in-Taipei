@@ -103,6 +103,7 @@
       '<p class="pp-cap"></p>' +
       '<p class="pp-note"></p>' +
       '<div class="pp-credit"></div>' +
+      '<div class="pp-mem" hidden><div class="pp-mem-h">這附近的記憶 · Memories near here</div><ol class="pp-mem-list"></ol></div>' +
       '<button type="button" class="pp-all">All photo credits</button>' +
     '</div>';
   document.body.appendChild(panel);
@@ -110,7 +111,27 @@
     img: panel.querySelector('img'), fig: panel.querySelector('.pp-fig'), when: panel.querySelector('.pp-when'), name: panel.querySelector('.pp-name'),
     zh: panel.querySelector('.pp-zh'), cap: panel.querySelector('.pp-cap'), note: panel.querySelector('.pp-note'), credit: panel.querySelector('.pp-credit'),
     close: panel.querySelector('.pp-close'), all: panel.querySelector('.pp-all'),
+    mem: panel.querySelector('.pp-mem'), memList: panel.querySelector('.pp-mem-list'),
   };
+  // 2026-11-03 (research/similar-works/README.md §5 item #12): under the photograph, the visitors' and
+  // the makers' memories of the street around this building, oldest first ("one place, every year"),
+  // from memories.js (MEMORIES.near; loaded after this file, so asked when the panel opens). Each
+  // opens its own card. Their words are visitors' words: textContent only, never this file's innerHTML.
+  function fillMemories(s) {
+    const M = window.MEMORIES, L = P.memList;
+    L.textContent = '';
+    const list = M && M.near ? M.near(s.x, s.z, 32).slice(0, 6) : [];
+    P.mem.hidden = !list.length;
+    list.forEach(m => {
+      const li = document.createElement('li'), b = document.createElement('button');
+      b.type = 'button'; b.className = 'pp-mem-item';
+      const k = document.createElement('span'); k.className = 'pp-mem-k'; k.textContent = m.year ? String(m.year) : '·';
+      const t = document.createElement('span'); t.className = 'pp-mem-t';
+      t.textContent = (m.title && String(m.title).trim()) || String(m.body || '').split('\n')[0];
+      b.appendChild(k); b.appendChild(t); li.appendChild(b); L.appendChild(li);
+      b.addEventListener('click', () => { close(false); M.openRead(m); });
+    });
+  }
 
   // the credits: a small caps button top-right under the title, and the block it opens
   const credBtn = document.createElement('button');
@@ -162,6 +183,7 @@
     P.fig.classList.toggle('tall', s.h > s.w);
     P.when.textContent = s.when; P.name.textContent = s.en; P.zh.textContent = s.zh; P.cap.textContent = s.caption;
     P.note.textContent = s.note || ''; P.note.hidden = !s.note;
+    fillMemories(s);
     P.credit.innerHTML = 'Photo: ' + esc(s.by) + ' · ' + esc(s.holder) + ' · <a href="' + esc(s.licenceUrl) + '" target="_blank" rel="noopener license">' + esc(s.licence) + '</a> · <a href="' + esc(s.src) + '" target="_blank" rel="noopener">source</a>';
     panel.hidden = false;
     requestAnimationFrame(() => panel.classList.add('show'));
