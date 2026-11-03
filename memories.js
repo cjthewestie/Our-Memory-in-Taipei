@@ -105,6 +105,8 @@
   // a memory's place: the one it names, or (none, or one from another street) the nearest
   const placeOf = m => (m.place && LM[m.place] && LM[m.place].section === m.section) ? LM[m.place] : nearestLandmark(m.section, m.x, m.z);
   const placeLine = m => { const l = placeOf(m); return l ? l.zh + ' · ' + l.en : ''; };
+  // a landmark in an English sentence: "where Ximending begins", "under the skywalk", "at the pedestrian zone"
+  const enWhere = l => /^(In|At|On|Under|Outside|Where)\b/.test(l.en) ? l.en[0].toLowerCase() + l.en.slice(1) : 'at ' + l.en.replace(/^The /, 'the ');
   // the fill-in lines (item #5): a question you can answer standing there, and the words it starts you with
   const PROMPTS = {
     red: [
@@ -202,7 +204,7 @@
         vUv = uv; vWarm = aWarm; vFade = aFade;
         // the lantern's centre, then the quad laid out in view space so it always faces the camera
         vec3 transformed = vec3(0.0);
-        float s = length(instanceMatrix[0].xyz) * uSize * (1.0 + 0.12 * aWarm);
+        float s = length(instanceMatrix[0].xyz) * uSize * (1.0 + 0.08 * aWarm);
         vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
         mvPosition.xy += position.xy * s;
         gl_Position = projectionMatrix * mvPosition;
@@ -216,8 +218,11 @@
       #include <fog_pars_fragment>
       void main() {
         vec4 t = texture2D(map, vUv);
-        vec3 col = t.rgb * mix(vec3(1.0), vec3(1.2, 1.02, 0.78), clamp(vWarm / 3.0, 0.0, 1.0));
-        gl_FragColor = vec4(col, t.a * vFade * (1.0 + 0.18 * vWarm));
+        vec3 col = t.rgb * mix(vec3(1.0), vec3(1.12, 1.0, 0.84), clamp(vWarm / 3.0, 0.0, 1.0));
+        gl_FragColor = vec4(col, t.a * vFade * (1.0 + 0.1 * vWarm));
+        // tone-mapped like the Sprite it replaces (review, 2026-11-03: without it the halo came out
+        // brighter than before and a warm lantern washed out to cream)
+        #include <tonemapping_fragment>
         #include <fog_fragment>
         #ifdef USE_FOG
           gl_FragColor.a *= 1.0 - fogFactor;
@@ -252,13 +257,21 @@
   const memories = [];   // { m, sec, x, z, phase, lit, fade, pin, level, mine, pulse }
   const entryOf = m => memories.find(e => e.m === m || e.m.id === (m && m.id));
   let started = false;   // the first batch (seeds, this browser's own, the first fetch) does not chime
-  function addLantern(m) {
+  // many = true while a whole batch is coming in (the fetch, the seeds): the caller relights and redraws
+  // the board once at the end. Review, 2026-11-03: one at a time, 500 fetched memories redrew the board's
+  // canvas (and re-sorted everything) 500 times on load, which a phone feels.
+  function addLantern(m, many) {
     if (!m || memories.some(e => e.m.id === m.id)) return null;
     const e = { m, sec: m.section, x: +m.x || 0, z: +m.z || 0, phase: (m.x * 3.1 + m.z * 1.7) % 6.28, lit: false, fade: 0, pin: !!m.local, level: 0, mine: remembered.has(m.id), pulse: 0, fresh: started };
     memories.push(e);
+    if (many === true) return e;
     if (SETS[e.sec]) relight(e.sec);
     rebuildTree();
     return e;
+  }
+  function addAll(list) {
+    (Array.isArray(list) ? list : []).forEach(m => addLantern(m, true));
+    SECS.forEach(relight); rebuildTree();
   }
   // which lanterns are lit: all of them up to MAX_LIT; past that the pinned ones, the newest dozen, and
   // the rest in an order that changes every ROTATE seconds, so every lantern has its turns
@@ -309,7 +322,7 @@
       const q = 'select=' + COLS + '&status=eq.approved&order=created_at.desc&limit=500';
       const res = await fetch(`${API}/rest/v1/memories?${q}`, { headers: headers() });
       if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-      (await res.json()).forEach(addLantern);
+      addAll(await res.json());
     } catch (e) { console.warn('[memories] could not load the shared memories:', e.message); }
     fetchWarmth();
   }
@@ -525,10 +538,13 @@
     if (!WALK.on && WALK.startWalk) WALK.startWalk(true);
     e.pin = true; relight(e.sec);
     closeForm(); list.hidden = true; closeRead();
-    const ok = WALK.enter(e.sec, false, standBy(e));
-    if (ok === false) { setTimeout(() => goTo(m, after), 450); return true; }   // another move is still fading: try once it is done
-    if (after) setTimeout(after, 600);
+    walkTo(e.sec, standBy(e), after);
     return true;
+  }
+  // walk.js refuses a move while another is still fading (enter returns false): try again once it is done
+  function walkTo(sec, at, after, tries) {
+    if (WALK.enter(sec, false, at) === false) { if ((tries || 0) < 20) setTimeout(() => walkTo(sec, at, after, (tries || 0) + 1), 450); return; }
+    if (after) setTimeout(after, 600);
   }
 
   // the board's list (item #12): an exhibition you can walk through by era, by place, or from your own
@@ -594,7 +610,7 @@
     const l = LM[filt.home]; if (!l) return;
     if (!WALK.on && WALK.startWalk) WALK.startWalk(true);
     list.hidden = true;
-    WALK.enter(l.section, false, { x: l.x * 0.6, z: l.z + 4, h: Math.atan2(-(l.x - l.x * 0.6), 4) });
+    walkTo(l.section, { x: l.x * 0.6, z: l.z + 4, h: Math.atan2(-(l.x - l.x * 0.6), 4) });
   });
   function fillList() {
     const all = newest();
@@ -911,12 +927,13 @@
       setPrompt(0, true); buildYears();
       say('');
       // the receipt (item #12): the link to this lantern, now, while it is still waiting to be read
-      F.rZh.textContent = how === 'local' ? (spot.section === 'square' ? '你的記憶釘上公布欄了，存在這個瀏覽器裡。' : '你的燈籠掛上了，存在這個瀏覽器裡。')
+      // (review, 2026-11-03: a lantern sent to another place says that place, not 「這裡」)
+      F.rZh.textContent = how === 'local' ? (spot.section === 'square' ? '你的記憶釘上公布欄了，存在這個瀏覽器裡。' : '你的燈籠掛在' + (place ? LM[place].zh : '這裡') + '了，存在這個瀏覽器裡。')
         : how === 'pending-nophoto' ? '字收到了，但照片沒有傳上去。作者讀過之後，燈籠會亮起來（沒有照片）。'
-        : spot.section === 'square' ? '謝謝你。作者讀過之後，它就會釘上公布欄。' : '謝謝你。作者讀過之後，你的燈籠就會在這裡亮起來。';
-      F.rEn.textContent = how === 'local' ? (spot.section === 'square' ? 'Your memory is pinned to the board, kept in this browser.' : 'Your lantern is hanging here, kept in this browser.')
+        : spot.section === 'square' ? '謝謝你。作者讀過之後，它就會釘上公布欄。' : '謝謝你。作者讀過之後，你的燈籠就會在' + (place ? LM[place].zh : '這裡') + '亮起來。';
+      F.rEn.textContent = how === 'local' ? (spot.section === 'square' ? 'Your memory is pinned to the board, kept in this browser.' : 'Your lantern is hanging ' + (place ? enWhere(LM[place]) : 'here') + ', kept in this browser.')
         : how === 'pending-nophoto' ? 'Your words arrived but the photo did not upload. The lantern will light up, without it, once it has been read.'
-        : spot.section === 'square' ? 'Thank you. It will be pinned to the board once it has been read.' : 'Thank you. Your lantern will light up here once it has been read.';
+        : spot.section === 'square' ? 'Thank you. It will be pinned to the board once it has been read.' : 'Thank you. Your lantern will light up ' + (place ? enWhere(LM[place]) : 'here') + ' once it has been read.';
       F.rUrl.value = shareURL(r.id);
       F.rNote.textContent = how === 'local'
         ? '這個連結只在這個瀏覽器裡打得開。 · This link only opens in this browser.'
@@ -1001,7 +1018,7 @@
         set.body.setMatrixAt(i, M4); set.gold.setMatrixAt(i, M4); set.tassel.setMatrixAt(i, M4); set.halo.setMatrixAt(i, M4);
         // dark paper that lights from inside as it fades in; warmer (more amber, a touch brighter) the
         // more it is remembered (#23), and a short glow right after a 「我也記得」
-        tint.copy(COL[kindOf(e.m)]).lerp(WARM, 0.16 * w + 0.25 * e.pulse).multiplyScalar((0.1 + 0.9 * f) * (1 + 0.07 * w + 0.35 * e.pulse));
+        tint.copy(COL[kindOf(e.m)]).lerp(WARM, 0.12 * w + 0.2 * e.pulse).multiplyScalar((0.1 + 0.9 * f) * (1 + 0.05 * w + 0.25 * e.pulse));
         set.body.setColorAt(i, tint);
         set.aWarm.setX(i, glow); set.aFade.setX(i, f);
         if (p) { const d = Math.hypot(e.x - p.x, e.z - p.z); if (d < bestD) { bestD = d; best = e; } }
@@ -1048,8 +1065,8 @@
     else openWaiting('unknown');
   }
 
-  SEEDS.forEach(addLantern);
-  loadLocal().forEach(m => { m.local = true; addLantern(m); });
+  const ownLocal = loadLocal();
+  addAll(SEEDS.concat((Array.isArray(ownLocal) ? ownLocal : []).filter(m => m && typeof m === 'object').map(m => { m.local = true; return m; })));
   firstLoad = fetchApproved().then(() => { started = true; }, () => { started = true; });
   if (!ONLINE) started = true;
   requestAnimationFrame(tick);

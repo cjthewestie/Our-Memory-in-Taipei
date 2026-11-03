@@ -353,7 +353,9 @@
   function setURL(tour) {
     try {
       const q = new URLSearchParams(location.search);
-      if (tour) q.set('tour', '1'); else { q.delete('tour'); q.delete('year'); }
+      // (review, 2026-11-03) a ?m= share link has done its work once she is on the tour: kept, a reload
+      // of the tour's address would pull the visitor out of the tour and back to that lantern
+      if (tour) { q.set('tour', '1'); q.delete('m'); } else { q.delete('tour'); q.delete('year'); }
       const s = q.toString();
       history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash);
     } catch (_) { /* file:// or a sandbox: the address bar just does not follow */ }
