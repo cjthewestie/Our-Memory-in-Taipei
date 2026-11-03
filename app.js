@@ -800,79 +800,103 @@
   window.SCENE.camera = camera;   // issue #17: photos.js projects its street markers with the scroll camera; it only reads it
 
 
-  // ── 張君雅小妹妹 running down the middle of the street, always a little ahead of the camera ──
-  // Issue #1 Part 2 (CJ, 2026-09-21: 「go 開始 Part 2」). Suggested, not copied: bowl-cut black
-  // hair with a straight fringe, white shirt, dark skirt on two straps, red cheeks, a bowl of
-  // noodles carried in both hands in front of her. She is the viewer's memory, so she runs the
-  // whole street, not only the 2000s. Primitives and the palette only.
+  // ── the girl: a schoolgirl, the viewer's memory, the one you steer ─────────────
+  // CJ, 2026-11-03: 「角色小一點然後不要拿著一碗麵 動作自然一點」. She was 張君雅小妹妹 with a bowl of noodles
+  // in both hands, 2.8 units tall (taller than the grown-ups in the square), animated by swapping two
+  // fixed run poses. Now: child-sized (about 1.6), hands free, and a jointed rig (hips, knees, shoulders,
+  // elbows, neck) driven by a walk/run cycle: legs swing and the swinging knee bends, arms swing against
+  // the legs, the body bobs twice a stride and leans into a run, and standing still she breathes and
+  // looks about. Same look: bowl-cut hair and fringe, red cheeks, white shirt, dark pinafore skirt, the
+  // red school bag. Primitives only; she faces -z (the street, and walk.js's heading 0).
   const girl = new THREE.Group();
-  const gSkin = withFog(lit({ color: C('bone') }));
+  const gSkin = withFog(lit({ color: new THREE.Color('#f1d3b8') }));
   const gShirt = withFog(lit({ color: C('bone') }));
   const gInk = withFog(lit({ color: C('ink') }));
+  const gSkirt = withFog(lit({ color: new THREE.Color('#2f3d5c') }));
   const gVerm = withFog(lit({ color: C('verm') }));
-  const gLamp = withFog(lit({ color: C('lamp') }));
-  const skirtGeo = new THREE.ConeGeometry(0.5, 1, 10); skirtGeo.translate(0, 0.5, 0);
-  const skirt = new THREE.Mesh(skirtGeo, gInk); skirt.scale.set(1, 0.85, 1); skirt.position.y = 0.8; girl.add(skirt);        // dark skirt
-  const torso = new THREE.Mesh(boxGeo, gShirt); torso.scale.set(0.52, 0.6, 0.32); torso.position.y = 1.62; girl.add(torso);   // white shirt
-  [-0.13, 0.13].forEach(x => { const st = new THREE.Mesh(boxGeo, gInk); st.scale.set(0.09, 0.6, 0.34); st.position.set(x, 1.62, 0); girl.add(st); }); // straps
-  const bib = new THREE.Mesh(boxGeo, gInk); bib.scale.set(0.36, 0.22, 0.35); bib.position.y = 1.62; girl.add(bib);          // the skirt's bib
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.27, 12, 10), gSkin); head.position.y = 2.46; girl.add(head);
-  // bowl cut: a cap of hair over the top and back, a straight fringe across the forehead
-  const capGeo = new THREE.SphereGeometry(0.3, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.58);
-  const hairCap = new THREE.Mesh(capGeo, gInk); hairCap.position.y = 2.47; girl.add(hairCap);
-  const fringe = new THREE.Mesh(boxGeo, gInk); fringe.scale.set(0.5, 0.16, 0.14); fringe.position.set(0, 2.42, 0.2); girl.add(fringe);
-  const hair = new THREE.Mesh(boxGeo, gInk); hair.scale.set(0.56, 0.3, 0.16); hair.position.set(0, 2.28, -0.2); girl.add(hair);  // the back of the bowl
-  [-0.17, 0.17].forEach(x => { const ch = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), gVerm); ch.position.set(x, 2.38, 0.22); girl.add(ch); }); // red cheeks
-  const legL = new THREE.Mesh(boxGeo, gSkin); legL.scale.set(0.16, 0.8, 0.16); legL.position.set(-0.15, 0.8, 0); legL.rotation.x = Math.PI; girl.add(legL);
-  const legR = new THREE.Mesh(boxGeo, gSkin); legR.scale.set(0.16, 0.8, 0.16); legR.position.set(0.15, 0.8, 0); legR.rotation.x = Math.PI; girl.add(legR);
-  [legL, legR].forEach(l => { const shoe = new THREE.Mesh(boxGeo, gInk); shoe.scale.set(1.2, 0.12, 1.6); shoe.position.set(0, 0.95, -0.25); l.add(shoe); }); // shoes at the foot end of the leg
-  // arms held forward, both hands on the bowl
-  const gArmL = new THREE.Mesh(boxGeo, gSkin); gArmL.scale.set(0.13, 0.55, 0.13); gArmL.position.set(-0.3, 1.95, 0.06); gArmL.rotation.x = -Math.PI / 2 + 0.25; girl.add(gArmL);
-  const gArmR = new THREE.Mesh(boxGeo, gSkin); gArmR.scale.set(0.13, 0.55, 0.13); gArmR.position.set(0.3, 1.95, 0.06); gArmR.rotation.x = -Math.PI / 2 + 0.25; girl.add(gArmR);
-  const bowl = new THREE.Group();
-  const bowlGeo = new THREE.CylinderGeometry(0.3, 0.2, 0.22, 12); bowlGeo.translate(0, 0.11, 0);
-  bowl.add(new THREE.Mesh(bowlGeo, gShirt));
-  const noodles = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.5), gLamp); noodles.position.y = 0.18; bowl.add(noodles);
-  const egg = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 5), gVerm); egg.position.set(0.08, 0.36, 0.05); bowl.add(egg);
-  [-0.05, 0.03].forEach((x, i) => { const cs = new THREE.Mesh(boxGeo, gInk); cs.scale.set(0.025, 0.5, 0.025); cs.position.set(x, 0.2, -0.02 + i * 0.03); cs.rotation.z = 0.35 + i * 0.1; cs.rotation.x = -0.4; bowl.add(cs); });
-  bowl.position.set(0, 1.78, 0.5); girl.add(bowl);
-  girl.scale.setScalar(1.15);
+  const gSock = withFog(lit({ color: new THREE.Color('#f7f4ee') }));
+  const seg = (w, h, d, m, y) => { const o = new THREE.Mesh(boxGeo, m); o.scale.set(w, h, d); o.position.y = y; return o; };   // a box hanging below its joint: y = -h/2
+  const rig = new THREE.Group(); girl.add(rig);                          // carries the bob
+  const HIP = 0.74;
+  const pelvis = new THREE.Group(); pelvis.position.y = HIP; rig.add(pelvis);
+  const chest = new THREE.Group(); pelvis.add(chest);                    // leans, breathes
+  // the skirt and the shirt
+  const skirtGeo2 = new THREE.CylinderGeometry(0.17, 0.3, 0.36, 12); skirtGeo2.translate(0, -0.1, 0);
+  const skirt2 = new THREE.Mesh(skirtGeo2, gSkirt); pelvis.add(skirt2);
+  const torso2 = seg(0.32, 0.4, 0.2, gShirt, 0.27); chest.add(torso2);
+  const bib2 = seg(0.22, 0.2, 0.205, gSkirt, 0.18); chest.add(bib2);           // the pinafore's bib
+  [-0.09, 0.09].forEach(x => { const st = seg(0.05, 0.4, 0.21, gSkirt, 0.27); st.position.x = x; chest.add(st); });
+  const collar = seg(0.2, 0.05, 0.21, gShirt, 0.47); chest.add(collar);
+  // the school bag
+  const bag = seg(0.3, 0.34, 0.12, gVerm, 0.3); bag.position.z = 0.16; chest.add(bag);
+  const flap = seg(0.31, 0.12, 0.13, withFog(lit({ color: new THREE.Color('#b8322a') })), 0.42); flap.position.z = 0.165; chest.add(flap);
+  // neck and head
+  const neck = new THREE.Group(); neck.position.y = 0.5; chest.add(neck);
+  const headM = new THREE.Mesh(new THREE.SphereGeometry(0.15, 14, 12), gSkin); headM.position.y = 0.15; neck.add(headM);
+  const capGeo2 = new THREE.SphereGeometry(0.165, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.6);
+  const hairCap2 = new THREE.Mesh(capGeo2, gInk); hairCap2.position.y = 0.165; neck.add(hairCap2);
+  const fringe2 = seg(0.27, 0.07, 0.06, gInk, 0.23); fringe2.position.z = -0.12; neck.add(fringe2);
+  const back2 = seg(0.3, 0.17, 0.1, gInk, 0.1); back2.position.z = 0.1; neck.add(back2);
+  [-0.09, 0.09].forEach(x => { const ch = new THREE.Mesh(new THREE.SphereGeometry(0.032, 6, 5), gVerm); ch.position.set(x, 0.11, -0.13); neck.add(ch); });
+  // arms: shoulder → upper arm → elbow → forearm → hand
+  function girlArm(side) {
+    const sh = new THREE.Group(); sh.position.set(side * 0.2, 0.44, 0); chest.add(sh);
+    sh.add(seg(0.085, 0.24, 0.085, gShirt, -0.11));
+    const el = new THREE.Group(); el.position.y = -0.23; sh.add(el);
+    el.add(seg(0.07, 0.21, 0.07, gSkin, -0.1));
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), gSkin); hand.position.y = -0.22; el.add(hand);
+    return { sh, el };
+  }
+  // legs: hip → thigh → knee → shin → shoe
+  function girlLeg(side) {
+    const hp = new THREE.Group(); hp.position.set(side * 0.085, 0, 0); pelvis.add(hp);
+    hp.add(seg(0.1, 0.37, 0.1, gSkin, -0.18));
+    const kn = new THREE.Group(); kn.position.y = -0.36; hp.add(kn);
+    kn.add(seg(0.085, 0.24, 0.085, gSkin, -0.1));
+    kn.add(seg(0.09, 0.12, 0.09, gSock, -0.27));
+    const shoe = seg(0.1, 0.07, 0.19, gInk, -0.35); shoe.position.z = -0.035; kn.add(shoe);
+    return { hp, kn };
+  }
+  const ARM = { L: girlArm(-1), R: girlArm(1) }, LEG = { L: girlLeg(-1), R: girlLeg(1) };
   scene.add(girl);
-  // Issue #5 step 4: the girl is a glb (asset/blender/girl.py) with two run frames, runA (left
-  // leg forward) and runB (right leg forward), swapped by stride phase. The primitive build above
-  // stays until the glb arrives; the same group carries position, bob and scale.
-  let frameA = null, frameB = null;
-  if (window.MODELS) MODELS.load('girl', gltf => {
-    const root = MODELS.lambertize(gltf.scene);
-    const a = MODELS.node(root, 'runA'), b = MODELS.node(root, 'runB');
-    if (!a || !b) return;
-    girl.children.slice().forEach(c => girl.remove(c));
-    // the glb faces +z (the library convention) and she runs down -z ahead of the camera, so
-    // turn the frames once here and the camera sees her back (CJ, 2026-09-23: 「人物可以不要倒著走嗎」)
-    a.rotation.y = b.rotation.y = Math.PI;
-    girl.add(a, b);
-    frameA = a; frameB = b;
-  });
-  let stride = 0, lastProg = 0, run = 0;
+
+  let stride = 0, lastProg = 0, run = 0, move = 0, idleT = 0;
   function updateGirl(u, camZ, dt) {
     const speed = Math.abs(u - lastProg) / Math.max(dt, 1e-3); lastProg = u;      // scroll speed drives the run
     poseGirl(Math.min(1, speed * 6), dt);
-    const z = Math.max(-398, camZ - 18 + run * 4);
-    girl.position.set(Math.sin(stride * 0.15) * 0.6, Math.abs(Math.sin(stride)) * 0.12 * run, z);
+    const z = Math.max(-398, camZ - 14 + run * 3);
+    girl.position.set(Math.sin(stride * 0.07) * 0.5, 0, z);
     girl.rotation.y = 0;
   }
-  // the run itself, apart from where she is: the tour drives it from scroll speed, walk.js from the
-  // stick. runTarget 0 = standing (a slow idle sway), 1 = a full run. Returns the bob height.
+  // the gait, apart from where she is: the tour drives it from scroll speed, walk.js from the stick.
+  // runTarget 0 = standing, ~0.5 = walking, 1 = running. Returns 0 (the bob lives inside the rig).
   function poseGirl(runTarget, dt) {
-    run += (runTarget - run) * (1 - Math.exp(-6 * dt));
-    stride += (0.4 + run * 14) * dt * 2.2;
-    const sw = Math.sin(stride) * (0.25 + run * 0.9);
-    legL.rotation.x = Math.PI + sw; legR.rotation.x = Math.PI - sw;
-    if (frameA) { const fwd = Math.sin(stride) >= 0; frameA.visible = fwd; frameB.visible = !fwd; }   // the two-frame run
-    const carry = Math.sin(stride * 2) * 0.04 * run;                                 // the bowl bobs a little as she runs; the arms stay on it
-    bowl.position.y = 1.78 + carry; gArmL.position.y = gArmR.position.y = 1.95 + carry;
-    hair.position.z = -0.2 - run * 0.06; fringe.position.y = 2.42 + Math.sin(stride * 2) * 0.01 * run;
-    return Math.abs(Math.sin(stride)) * 0.12 * run;
+    run += (runTarget - run) * (1 - Math.exp(-7 * dt));
+    move += ((runTarget > 0.04 ? 1 : 0) - move) * (1 - Math.exp(-8 * dt));      // 0 standing … 1 in motion
+    const r = Math.min(1, run * 1.4);                                              // 0 walk … 1 run
+    stride += dt * Math.PI * 2 * (1.2 + 0.6 * r) * move;                           // strides a second: ~1.3 walking, ~1.8 running
+    idleT += dt;
+    const s = Math.sin(stride), c = Math.cos(stride), m = move;
+    const legA = (0.42 + 0.38 * r) * m, armA = (0.32 + 0.55 * r) * m;
+    // legs: the thigh swings; the knee bends most as the leg swings through, little on the planted leg
+    LEG.L.hp.rotation.x = s * legA; LEG.R.hp.rotation.x = -s * legA;
+    LEG.L.kn.rotation.x = Math.max(0, -c) * (0.55 + 0.6 * r) * m + 0.05;
+    LEG.R.kn.rotation.x = Math.max(0, c) * (0.55 + 0.6 * r) * m + 0.05;
+    // arms swing against the legs, elbows bent more in a run; at rest they hang a little out from the body
+    ARM.L.sh.rotation.x = -s * armA; ARM.R.sh.rotation.x = s * armA;
+    ARM.L.sh.rotation.z = -0.08; ARM.R.sh.rotation.z = 0.08;
+    ARM.L.el.rotation.x = ARM.R.el.rotation.x = -(0.15 + 0.85 * r * m);
+    // the body: two bobs a stride, a lean into the run, a little twist with the shoulders
+    rig.position.y = Math.abs(s) * (0.025 + 0.05 * r) * m;
+    chest.rotation.x = -(0.04 + 0.16 * r) * m;
+    chest.rotation.y = s * 0.08 * m;
+    pelvis.rotation.y = -s * 0.06 * m;
+    // standing: breathing, and now and then a look around
+    const idle = 1 - m;
+    chest.scale.y = 1 + Math.sin(idleT * 2.1) * 0.012 * idle;
+    neck.rotation.y = (Math.sin(idleT * 0.37) * 0.35 + Math.sin(idleT * 0.91) * 0.12) * idle;
+    neck.rotation.x = (0.05 * r * m) + Math.sin(idleT * 0.5) * 0.03 * idle;
+    return 0;
   }
 
   // ── curve particles (IVRESS borrow g): lantern sparks in Dadaocheng, a light stream up 101 ──

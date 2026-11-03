@@ -673,11 +673,13 @@
   // ── the 土地公 shrine (福德祠) at the foot of the tree, and its 金爐 ──────────
   // The heart of a 伯公下 (research/banyan-square): a small temple with a swallowtail ridge, red columns
   // and couplets, the god inside lit by two red 神明燈, an incense burner in front with smoke rising.
-  // It faces south, toward where you arrive, so it is the first lit thing you see under the dark crown.
-  const SHRINE = { x: SQ.x, z: SQ.z + 5.5, r: 2.1 };
+  // It stands on the far, north-east side of the tree, facing out: you come round the trunk and find
+  // it, rather than walking in straight at it (CJ, 2026-11-03: 「我不要進去就看到廟」).
+  const SH_DIR = -Math.PI / 2, SH_D = 5.7;   // due north of the trunk: from the arrival the trunk hides it
+  const SHRINE = { x: SQ.x + Math.cos(SH_DIR) * SH_D, z: SQ.z + Math.sin(SH_DIR) * SH_D, r: 2.1, rot: Math.atan2(Math.cos(SH_DIR), Math.sin(SH_DIR)) };
   const smoke = [];
   (function shrine() {
-    const g = new THREE.Group(); g.position.set(SHRINE.x, 0, SHRINE.z); group.add(g);
+    const g = new THREE.Group(); g.position.set(SHRINE.x, 0, SHRINE.z); g.rotation.y = SHRINE.rot; g.scale.setScalar(0.85); group.add(g); g.updateMatrixWorld(true);
     const stone = mat('#bfb8aa'), red = mat('#b8261f', { roughness: 0.6 }), tile = mat('#c9643a', { roughness: 0.8 }), dark = mat('#3a1c16');
     box(3.4, 0.35, 3.0, stone, 0, 0, 0, g);
     box(0.9, 0.18, 0.5, stone, 0, 0, 1.7, g);                                     // the step
@@ -717,11 +719,11 @@
     const burner = new THREE.Mesh(cyl(0.32, 0.24, 0.32, 16), mat('#8a6a3a', { metalness: 0.7, roughness: 0.4 })); burner.position.set(0, 0.75, 2.15); g.add(burner);
     for (let i = 0; i < 5; i++) { const st = new THREE.Mesh(cyl(0.012, 0.012, 0.45, 4), basic('#b23a26')); st.position.set(-0.12 + i * 0.06, 1.05, 2.15 + (i % 2) * 0.05); g.add(st); }
     const smokeMat = new THREE.SpriteMaterial({ map: canvasTex(64, 64, (c) => { const r = c.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(235,232,225,0.5)'); r.addColorStop(1, 'rgba(235,232,225,0)'); c.fillStyle = r; c.fillRect(0, 0, 64, 64); }), transparent: true, depthWrite: false, fog: false });   // a sprite cannot take this page's fog chunk
-    for (let i = 0; i < 7; i++) { const s = new THREE.Sprite(smokeMat.clone()); s.userData = { t: i / 7, base: new THREE.Vector3(SHRINE.x, 1.35, SHRINE.z + 2.15) }; group.add(s); smoke.push(s); }
+    for (let i = 0; i < 7; i++) { const s = new THREE.Sprite(smokeMat.clone()); s.userData = { t: i / 7, base: g.localToWorld(new THREE.Vector3(0, 1.35, 2.15)) }; group.add(s); smoke.push(s); }
   })();
-  const BURNER = { x: SHRINE.x + 3.0, z: SHRINE.z + 0.6, r: 0.9 };
+  const BURNER = { x: SHRINE.x - Math.sin(SH_DIR) * 1.3 + Math.cos(SH_DIR) * 3.2, z: SHRINE.z + Math.cos(SH_DIR) * 1.3 + Math.sin(SH_DIR) * 3.2, r: 0.9 };   // out in front of the shrine, on its far side
   (function goldFurnace() {   // 金爐, where the paper money is burned
-    const g = new THREE.Group(); g.position.set(BURNER.x, 0, BURNER.z); g.rotation.y = -0.3; group.add(g);
+    const g = new THREE.Group(); g.position.set(BURNER.x, 0, BURNER.z); g.rotation.y = SHRINE.rot; group.add(g);
     box(1.1, 0.3, 1.1, mat('#bfb8aa'), 0, 0, 0, g);
     box(0.85, 1.3, 0.85, mat('#c2452c'), 0, 0.3, 0, g);
     const mouth = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.4), basic('#ff8a3a', { toneMapped: false })); mouth.position.set(0, 0.85, 0.43); g.add(mouth);

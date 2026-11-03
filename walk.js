@@ -28,8 +28,8 @@
   const QS = new URLSearchParams(location.search);
 
   // ── tunables ────────────────────────────────────────────────────────────────
-  const SPEED = 7.5, RUN = 13;          // world units a second, walking and with Shift held
-  const CAM_D = 7.5, CAM_LOOK_Y = 1.9;  // camera distance behind her, and the height it looks at
+  const SPEED = 4.2, RUN = 7.8;          // world units a second, walking and with Shift held (she is child-sized: ~1.6)
+  const CAM_D = 6.2, CAM_LOOK_Y = 1.35; // camera distance behind her, and the height it looks at
   const PITCH0 = 0.28, PITCH_MIN = -0.45, PITCH_MAX = 1.0;
   const FOV = 55;
   const HUB_U = D.OPENING.fogTo + 0.002;   // the progress the square stands for: past the opening fog, chapter 1's light
@@ -366,6 +366,19 @@
       const fx = -Math.sin(st.yaw), fz = -Math.cos(st.yaw), rx = Math.cos(st.yaw), rz = -Math.sin(st.yaw);
       tx = fx * f + rx * r; tz = fz * f + rz * r;
       const l = Math.hypot(tx, tz); tx = tx / l * sp; tz = tz / l * sp;
+      // walking into the tree's seat, a table, the karaoke tent: slide along it instead of stopping dead,
+      // and head-on, steer round it (CJ, 2026-11-03: 「按W會卡住」)
+      if (st.where === 'square') OBST.forEach(o => {
+        const px = st.x - o.x, pz = st.z - o.z, pd = Math.hypot(px, pz);
+        if (pd > o.r + 0.9 || pd < 1e-3) return;
+        const nx = px / pd, nz = pz / pd, vn = tx * nx + tz * nz;
+        if (vn >= 0) return;
+        const sp0 = Math.hypot(tx, tz);
+        tx -= vn * nx; tz -= vn * nz;
+        const tl = Math.hypot(tx, tz), side = (-nz * tx + nx * tz) >= 0 ? 1 : -1;
+        if (tl < sp0 * 0.35) { tx = -nz * side * sp0; tz = nx * side * sp0; }
+        else { tx *= sp0 / tl; tz *= sp0 / tl; }
+      });
       const want = Math.atan2(-tx, -tz);
       st.h += angDiff(want, st.h) * (1 - Math.exp(-12 * dt));
       if (!st.moved) { st.moved = true; setTimeout(() => hint.classList.add('gone'), 4000); }
@@ -408,7 +421,10 @@
     }
 
     // her run, her place
-    const bob = R.poseGirl(Math.min(1, Math.hypot(st.vx, st.vz) / RUN * 1.3), dt);
+    // the gait: 0 standing, ~0.2 walking, 1 running
+    const v = Math.hypot(st.vx, st.vz);
+    const gait = v < 0.25 ? 0 : v <= SPEED ? 0.06 + 0.14 * v / SPEED : 0.2 + 0.8 * Math.min(1, (v - SPEED) / (RUN - SPEED));
+    const bob = R.poseGirl(gait, dt);
     girl.position.set(st.x, bob, st.z);
     girl.rotation.y = st.h;
 
