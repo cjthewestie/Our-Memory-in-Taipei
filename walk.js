@@ -36,7 +36,9 @@
   const SIDE = 8.4;                     // how far from the centre line she can walk in a section (the pavement's edge)
 
   // ── the square ──────────────────────────────────────────────────────────────
-  const SQ = { x: 0, z: 150, h: 26, gate: 4.6 };   // h: half the plaza (centre to wall face); gate: half a gate's opening
+  const SQ_MOD = window.SQUARE;                    // square.js, loaded just before this file
+  const SQ = SQ_MOD ? SQ_MOD.SQ : { x: 0, z: 150, h: 26, gate: 4.6 };   // h: centre to the arcade's columns; gate: half a gate's opening
+  const OBST = SQ_MOD ? SQ_MOD.obstacles : [{ x: SQ.x, z: SQ.z, r: 3.3 }];
   const GATES = {
     red:   { side: 'west',  zh: '西門町', en: 'XIMENDING',  years: '1985 – 1999', line: 'When We Were Young', col: 'verm'  },
     dadao: { side: 'north', zh: '大稻埕', en: 'DADAOCHENG', years: '2000 – 2019', line: 'Spring Festival',    col: 'brick' },
@@ -59,7 +61,7 @@
     lastLook: -1e9, moved: false, busy: false, t: 0,
   };
   const WALK = window.WALK = {
-    on: false, u: HUB_U,
+    on: false, u: HUB_U, dusk: 0,         // dusk: 0…1, golden hour in the square (app.js reads it)
     get where() { return st.where; },
     get pos() { return { x: st.x, z: st.z, h: st.h }; },
     // the section the memories belong to right now: where she is when walking, the era on the tour
@@ -127,14 +129,6 @@
     scene.add(g);
     return g;
   }
-  const gateSign = G => (g, W, H) => {
-    g.fillStyle = P.bone; g.fillRect(0, 0, W, H);
-    g.fillStyle = P[G.col]; g.fillRect(0, 0, W, H * 0.07); g.fillRect(0, H * 0.93, W, H * 0.07);
-    g.fillStyle = P.ink; g.textBaseline = 'middle';
-    g.textAlign = 'left';  g.font = `700 ${Math.round(H * 0.5)}px ${FONT_ZH}`; g.fillText(G.zh, W * 0.05, H * 0.5);
-    g.textAlign = 'right'; g.font = `700 ${Math.round(H * 0.24)}px ${FONT_EN}`; g.fillText(G.en, W * 0.95, H * 0.35);
-    g.font = `400 ${Math.round(H * 0.17)}px ${FONT_EN}`; g.fillText(G.years + ' · ' + G.line, W * 0.95, H * 0.66);
-  };
   const arrowSign = (zh, en, dir, col) => (g, W, H) => {
     g.fillStyle = P.ink; g.fillRect(0, 0, W, H);
     g.fillStyle = P[col]; g.fillRect(0, H * 0.88, W, H * 0.12);
@@ -145,117 +139,8 @@
     g.font = `700 ${Math.round(H * 0.18)}px ${FONT_EN}`; g.fillText(en, W / 2, H * 0.7);
   };
 
-  // ── build the square ────────────────────────────────────────────────────────
-  const square = new THREE.Group(); scene.add(square);
-  (function buildSquare() {
-    // paving: a canvas of square stones, tiled
-    const cv = document.createElement('canvas'); cv.width = cv.height = 256;
-    const g = cv.getContext('2d');
-    // Taipei's red-brick sidewalk tiles, laid in a running bond
-    g.fillStyle = '#8f5a48'; g.fillRect(0, 0, 256, 256);
-    for (let j = 0; j < 8; j++) for (let i = -1; i < 4; i++) {
-      const k = (i * 7 + j * 3 + 11) % 5;
-      g.fillStyle = ['#c47f66', '#b8735b', '#cc8a70', '#b06c55', '#c17a62'][k];
-      g.fillRect(i * 64 + (j % 2) * 32 + 2, j * 32 + 2, 60, 28);
-    }
-    const tex = new THREE.CanvasTexture(cv); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(14, 14);
-    const pave = new THREE.Mesh(new THREE.PlaneGeometry(SQ.h * 2 + 2, SQ.h * 2 + 2), mat('#ffffff', { map: tex }));
-    pave.rotation.x = -Math.PI / 2; pave.position.set(SQ.x, 0.04, SQ.z); pave.receiveShadow = true; square.add(pave);
-    // the centre: a round stone with the title on it, a ring of red paving round it
-    const ring = new THREE.Mesh(new THREE.RingGeometry(5.5, 7, 48), mat('verm'));
-    ring.rotation.x = -Math.PI / 2; ring.position.set(SQ.x, 0.06, SQ.z); square.add(ring);
-    const plinth = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.9, 1.1, 32), mat('bone'));
-    plinth.position.set(SQ.x, 0.55, SQ.z); plinth.castShadow = plinth.receiveShadow = true; square.add(plinth);
-    box(0.5, 3.2, 0.5, mat('ink'), SQ.x, 1.1, SQ.z, square);
-    const title = (g, W, H) => {
-      g.fillStyle = P.bone; g.fillRect(0, 0, W, H);
-      g.fillStyle = P.ink; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = `700 ${Math.round(H * 0.3)}px ${FONT_ZH}`; g.fillText('我們的台北記憶', W / 2, H * 0.3);
-      g.font = `700 ${Math.round(H * 0.2)}px ${FONT_EN}`; g.fillText('OUR MEMORY IN TAIPEI', W / 2, H * 0.6);
-      g.font = `400 ${Math.round(H * 0.12)}px ${FONT_EN}`; g.fillText('Three gates · forty years · walk through one', W / 2, H * 0.84);
-    };
-    const board = new THREE.Group(); board.position.set(SQ.x, 4.3, SQ.z); square.add(board);
-    box(5.6, 2.4, 0.3, mat('ink'), 0, -1.2, 0, board);
-    const b1 = sign(5.3, 2.1, title, board); b1.position.z = 0.17;
-    const b2 = sign(5.3, 2.1, title, board); b2.position.z = -0.17; b2.rotation.y = Math.PI;
-
-    // the walls: rows of three-to-five storey blocks on every side, gaps where the gates are
-    const tones = ['#e0bf96', '#b9c6cc', '#dda287', '#b3c2a8', '#ead6ad', '#9fb1c4', 'bone'];
-    const winMat = mat('#40465a', { emissive: C('lamp'), emissiveIntensity: 0.05 });
-    const winGeo = new THREE.BoxGeometry(1.1, 1.4, 0.2);
-    const wins = [];
-    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-    // one side: blocks along `along` from -SQ.h-9 to SQ.h+9, the inner face at distance SQ.h, a gate gap
-    // round 0 if gate; facing = the inner face's outward normal toward the centre
-    function side(name, gate) {
-      let a = -SQ.h - 9;
-      while (a < SQ.h + 9) {
-        let w = 7 + Math.floor(rnd() * 5);
-        if (gate && a < SQ.gate + 2.6 && a + w > -SQ.gate - 2.6) { a = SQ.gate + 2.6; continue; }   // leave the gate (and its posts) clear
-        if (gate && a < -SQ.gate - 2.6 && a + w > -SQ.gate - 2.6) w = -SQ.gate - 2.6 - a;
-        if (w < 2) { a += w; continue; }
-        const hgt = 9 + Math.floor(rnd() * 4) * 3, d = 9, col = tones[Math.floor(rnd() * tones.length)];
-        const mid = a + w / 2;
-        let x, z, rot;
-        if (name === 'west')  { x = SQ.x - SQ.h - d / 2; z = SQ.z + mid; rot = Math.PI / 2; }
-        if (name === 'east')  { x = SQ.x + SQ.h + d / 2; z = SQ.z + mid; rot = -Math.PI / 2; }
-        if (name === 'north') { x = SQ.x + mid; z = SQ.z - SQ.h - d / 2; rot = 0; }
-        if (name === 'south') { x = SQ.x + mid; z = SQ.z + SQ.h + d / 2; rot = Math.PI; }
-        const along = name === 'north' || name === 'south';
-        box(along ? w - 0.2 : d, hgt, along ? d : w - 0.2, mat(col), x, 0, z, square);
-        // a shopfront band at street level and a cornice, both in ink
-        const face = new THREE.Vector3(Math.sin(rot), 0, Math.cos(rot));   // the inner face's normal
-        const fx = x + face.x * (d / 2), fz = z + face.z * (d / 2);
-        const band = box(along ? w - 0.6 : 0.3, 0.5, along ? 0.3 : w - 0.6, mat('ink'), fx, 3.1, fz, square);
-        const awn = box(along ? w - 0.8 : 1.2, 0.18, along ? 1.2 : w - 0.8, mat(rnd() < 0.5 ? 'verm' : 'lamp'), fx + face.x * 0.6, 2.7, fz + face.z * 0.6, square);
-        box(along ? w - 0.2 : 0.5, 0.4, along ? 0.5 : w - 0.2, mat('ink'), fx, hgt - 0.4, fz, square);
-        band.castShadow = awn.castShadow = false;
-        // windows above the shops
-        for (let y = 4.6; y < hgt - 1.4; y += 3) for (let k = 0.8; k < w - 1; k += 2.1) {
-          const off = a + k + 0.5;
-          const wx = name === 'west' || name === 'east' ? fx + face.x * 0.05 : SQ.x + off;
-          const wz = name === 'north' || name === 'south' ? fz + face.z * 0.05 : SQ.z + off;
-          wins.push([wx, y, wz, rot]);
-        }
-        a += w;
-      }
-    }
-    side('west', true); side('north', true); side('east', true); side('south', false);
-    const wim = new THREE.InstancedMesh(winGeo, winMat, wins.length);
-    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
-    wins.forEach((w, i) => { q.setFromEuler(e.set(0, w[3], 0)); m4.compose(p.set(w[0], w[1] + 0.7, w[2]), q, one); wim.setMatrixAt(i, m4); });
-    square.add(wim);
-
-    // lamp posts, and lanterns strung across the plaza between them
-    const lampPosts = [[-16, -16], [16, -16], [-16, 16], [16, 16]];
-    lampPosts.forEach(([dx, dz]) => {
-      box(0.35, 5.5, 0.35, mat('ink'), SQ.x + dx, 0, SQ.z + dz, square);
-      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 8), new THREE.MeshBasicMaterial({ color: C('lamp') }));
-      bulb.position.set(SQ.x + dx, 5.8, SQ.z + dz); square.add(bulb);
-    });
-    const lantGeo = new THREE.SphereGeometry(0.42, 10, 8); lantGeo.scale(1, 1.25, 1);
-    const lantMat = new THREE.MeshBasicMaterial({ color: C('verm') });
-    // two diagonals of lanterns over the centre
-    [[[-16, -16], [16, 16]], [[16, -16], [-16, 16]]].forEach(([a, b]) => {
-      for (let i = 1; i < 11; i++) {
-        const t = i / 11, sag = Math.sin(t * Math.PI) * 1.4;
-        const l = new THREE.Mesh(lantGeo, lantMat);
-        l.position.set(SQ.x + a[0] + (b[0] - a[0]) * t, 5.6 - sag, SQ.z + a[1] + (b[1] - a[1]) * t);
-        square.add(l);
-      }
-    });
-  })();
-
-  // ── the gates out of the square ─────────────────────────────────────────────
-  const gateArch = {};
-  Object.keys(GATES).forEach(k => {
-    const G = GATES[k], a = arch(SQ.gate * 2, 7.5, G.col, gateSign(G), G.col);
-    if (G.side === 'west')  { a.position.set(SQ.x - SQ.h, 0, SQ.z); a.rotation.y = Math.PI / 2; }
-    if (G.side === 'east')  { a.position.set(SQ.x + SQ.h, 0, SQ.z); a.rotation.y = -Math.PI / 2; }
-    if (G.side === 'north') { a.position.set(SQ.x, 0, SQ.z - SQ.h); a.rotation.y = 0; }
-    square.add(a);
-    gateArch[k] = a;
-  });
+  // ── the square itself is square.js: the banyan, the arcades, the three gates, the karaoke stand ──
+  const square = SQ_MOD ? SQ_MOD.group : new THREE.Group();
 
   // ── the arches at each end of a section ─────────────────────────────────────
   // near end: back to the square; far end: on to the next section. Only the current section's show.
@@ -419,7 +304,7 @@
   function goSquare(from, instant) {
     const go = () => {
       const G = GATES[from];
-      if (!G) return place('square', SQ.x, SQ.z + SQ.h - 6, 0);
+      if (!G) { place('square', SQ.x, SQ.z + SQ.h - 5, 0); st.pitch = 0.06; return; }   // arriving: low, so the banyan's crown is in the frame
       if (G.side === 'west')  place('square', SQ.x - SQ.h + 10, SQ.z, -Math.PI / 2);
       if (G.side === 'east')  place('square', SQ.x + SQ.h - 10, SQ.z, Math.PI / 2);
       if (G.side === 'north') place('square', SQ.x, SQ.z - SQ.h + 10, Math.PI);
@@ -435,7 +320,8 @@
     setURL(false);
   }
   function startTour() {
-    WALK.on = false; keys.clear();
+    WALK.on = false; keys.clear(); WALK.dusk = 0;
+    if (SQ_MOD) SQ_MOD.leave();
     document.body.classList.remove('walk', 'in-square');
     delete document.documentElement.dataset.section;
     showFor('tour');
@@ -457,8 +343,11 @@
   const angDiff = (a, b) => { let d = a - b; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; };
   const look3 = new THREE.Vector3();
   function update(dt, now) {
+    const prevT = st.t;
     st.t = now / 1000;
     portalMats.forEach(m => { m.uniforms.uTime.value = st.t; });
+    WALK.dusk += ((st.where === 'square' ? 1 : 0) - WALK.dusk) * (1 - Math.exp(-3 * dt));
+    if (SQ_MOD) { if (st.where === 'square') SQ_MOD.update(st.t, Math.max(0, Math.min(0.1, st.t - prevT))); else SQ_MOD.leave(); }
 
     // input → a direction relative to the camera
     let f = 0, r = 0;
@@ -491,11 +380,13 @@
 
     // walls, and the gates in them
     if (st.where === 'square') {
-      const inner = SQ.h - 1.4, gx = Math.abs(st.z - SQ.z) < SQ.gate - 0.6, gz = Math.abs(st.x - SQ.x) < SQ.gate - 0.6;
+      const inner = SQ.h - 2.4, gx = Math.abs(st.z - SQ.z) < SQ.gate - 0.6, gz = Math.abs(st.x - SQ.x) < SQ.gate - 0.6;
       st.x = Math.min(SQ.x + (gx ? SQ.h + 1 : inner), Math.max(SQ.x - (gx ? SQ.h + 1 : inner), st.x));
       st.z = Math.min(SQ.z + inner, Math.max(SQ.z - (gz ? SQ.h + 1 : inner), st.z));
-      const px = st.x - SQ.x, pz = st.z - SQ.z, pd = Math.hypot(px, pz);         // round the stone in the middle
-      if (pd < 3.3) { const k = 3.3 / Math.max(pd, 1e-3); st.x = SQ.x + px * k; st.z = SQ.z + pz * k; }
+      OBST.forEach(o => {                                                          // round the tree's seat, the karaoke stand, the chess table
+        const px = st.x - o.x, pz = st.z - o.z, pd = Math.hypot(px, pz);
+        if (pd < o.r) { const k = o.r / Math.max(pd, 1e-3); st.x = o.x + px * k; st.z = o.z + pz * k; }
+      });
       if (!st.busy) {
         if (gx && st.x < SQ.x - SQ.h + 0.2) enter('red');
         else if (gx && st.x > SQ.x + SQ.h - 0.2) enter('tower');
@@ -528,8 +419,10 @@
     if (st.where === 'square') {
       const lim = SQ.h - 0.6;
       cx = Math.min(SQ.x + lim, Math.max(SQ.x - lim, cx)); cz = Math.min(SQ.z + lim, Math.max(SQ.z - lim, cz));
-      const ox = cx - SQ.x, oz = cz - SQ.z, od = Math.hypot(ox, oz);           // and out of the signboard in the middle
-      if (od < 3.8) { const k = 3.8 / Math.max(od, 1e-3); cx = SQ.x + ox * k; cz = SQ.z + oz * k; }
+      OBST.forEach((o, i) => {                                                     // and out of the trunk, the karaoke tent, the chess table
+        const r = i === 0 ? 2.2 : o.r, ox = cx - o.x, oz = cz - o.z, od = Math.hypot(ox, oz);
+        if (od < r) { const k = r / Math.max(od, 1e-3); cx = o.x + ox * k; cz = o.z + oz * k; }
+      });
     } else {
       const s = SECT[st.where];
       cx = Math.min(SIDE + 0.8, Math.max(-SIDE - 0.8, cx)); cz = Math.min(s.top + 0.9, Math.max(s.end - 0.9, cz));

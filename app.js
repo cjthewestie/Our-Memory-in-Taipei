@@ -214,6 +214,7 @@
   const key = new THREE.DirectionalLight(C('lamp'), 0.9);
   key.position.set(18, 26, 12);
   scene.add(key);
+  const sunLight = key;   // updateWorld names the era key `key`, which hides this light there; dusk reaches it by this name
   // ── the sun casts shadows (issue #3 step 3) ──────────────────────────────────
   // One shadow map for the whole street: an orthographic box SUN_BOX units square, re-centred every
   // frame on a point SUN_AHEAD units down the road from the scroll camera, so the map's texels are
@@ -990,6 +991,9 @@
     swapEraLabel(ERAS[i], instant);
   }
   const tmpC = new THREE.Color();
+  const DUSK = { horizon: new THREE.Color('#f59a5e'), top: new THREE.Color('#5a68a6'), mount: new THREE.Color('#8a6f92'), sun: new THREE.Color('#ff8a4a') };
+  const duskSky = { horizon: new THREE.Color(), top: new THREE.Color(), mount: new THREE.Color() };
+  const keyBaseColor = sunLight.color.clone(), keyBaseI = sunLight.intensity;   // the sun as it is; dusk tints and dims a copy
   let mixCur = { lamp: KEY * 0.5, hemi: HEMI * 0.65, env: 0.7, print: 1 }, mixFrom = { ...mixCur };
   const skyCur = { horizon: SKY.red.horizon.clone(), top: SKY.red.top.clone(), mount: SKY.red.mount.clone() };
   const skyFrom = { horizon: skyCur.horizon.clone(), top: skyCur.top.clone(), mount: skyCur.mount.clone() };
@@ -1018,17 +1022,27 @@
     skyCur.horizon.copy(skyFrom.horizon).lerp(S.horizon, e);
     skyCur.top.copy(skyFrom.top).lerp(S.top, e);
     skyCur.mount.copy(skyFrom.mount).lerp(S.mount, e);
-    scene.fog.color.copy(skyCur.horizon);
-    skyMat.uniforms.horizon.value.copy(skyCur.horizon);
-    skyMat.uniforms.top.value.copy(skyCur.top);
-    mountainMat.color.copy(skyCur.mount);
+    // dusk (walk.js's square, 2026-11-03: the banyan square at golden hour, so its lanterns glow while the
+    // sky stays bright): WALK.dusk 0…1 pulls the applied sky, fog and sun toward DUSK. Applied on copies, so
+    // skyCur and the era tween never see it, and at 0 the street is exactly as before.
+    const dk = (window.WALK && window.WALK.on && window.WALK.dusk) || 0;
+    duskSky.horizon.copy(skyCur.horizon).lerp(DUSK.horizon, dk);
+    duskSky.top.copy(skyCur.top).lerp(DUSK.top, dk);
+    duskSky.mount.copy(skyCur.mount).lerp(DUSK.mount, dk);
+    scene.fog.color.copy(duskSky.horizon);
+    skyMat.uniforms.horizon.value.copy(duskSky.horizon);
+    skyMat.uniforms.top.value.copy(duskSky.top);
+    mountainMat.color.copy(duskSky.mount);
+    sunLight.color.copy(keyBaseColor).lerp(DUSK.sun, dk);
+    sunLight.intensity = keyBaseI * (1 - 0.35 * dk);
+    renderer.toneMappingExposure = EXPOSURE * (1 - 0.22 * dk);   // the whole frame a little lower, so what glows (toneMapped: false) stands out
     sky.position.copy(camera.position);
     liftTops();
     instUpdate(e, key);
     updateRisers(now);
     updateWindows(key);
     key.intensity = mixCur.lamp;
-    hemi.intensity = mixCur.hemi;
+    hemi.intensity = mixCur.hemi * (1 - 0.45 * dk);
     const ei = ENV_I * mixCur.env;                                   // only touched while an era tween runs
     if (ei !== envCur) { envCur = ei; litMats.forEach(m => { m.envMapIntensity = ei; }); }
     post.uniforms.uPrint.value = mixCur.print;

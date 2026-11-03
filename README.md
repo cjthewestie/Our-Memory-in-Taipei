@@ -11,7 +11,7 @@ We wanted this to be a page that could carry everyone's memory of Taipei. From t
 
 So every building here has a real one behind it: the eight blocks of 中華商場, the hand-painted billboards of 樂聲戲院, the octagon of the Red House, the three gable styles of Dihua Street, the swallowtail ridge of 霞海城隍廟, the red sign of 永樂市場. Not a backdrop — a street you may have actually walked down.
 
-You arrive in a square. Three gates stand where their districts are in the real city: 西門町 to the **west** (西門 is literally "the west gate"), 大稻埕 to the **north**, 信義 to the **east**. Walk through one and you are in that part of Taipei, in its decade, steering the girl in red wherever you like. An arch at each end of a section leads back to the square or on to the next one, and 信義 ends at the foot of Taipei 101, where you can look up at the man climbing it.
+You arrive in a square at golden hour: a great banyan in the middle with the newest memories hanging in it as lanterns, arcades all round with shop signs from every decade, uncles at 象棋 under the tree, and a little open-air karaoke stand in the corner (walk up and press `E` to start a song). Three gates stand where their districts are in the real city: 西門町 to the **west** (西門 is literally "the west gate"), 大稻埕 to the **north**, 信義 to the **east**. Walk through one and you are in that part of Taipei, in its decade, steering the girl in red wherever you like. An arch at each end of a section leads back to the square or on to the next one, and 信義 ends at the foot of Taipei 101, where you can look up at the man climbing it.
 
 | | Keyboard and mouse | Phone |
 |---|---|---|

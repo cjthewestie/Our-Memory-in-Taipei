@@ -36,39 +36,45 @@
 
   // ── the lanterns ────────────────────────────────────────────────────────────
   const group = new THREE.Group(); scene.add(group);
-  const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.6, 14);
-  const capGeo = new THREE.CylinderGeometry(0.2, 0.24, 0.08, 12);
-  const tasselGeo = new THREE.BoxGeometry(0.04, 0.32, 0.04);
-  const cordGeo = new THREE.BoxGeometry(0.02, 1, 0.02);
-  const inkMat = new THREE.MeshBasicMaterial({ color: C('ink') });
-  const paper = { visitor: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd27f') }),
-                  seed: new THREE.MeshBasicMaterial({ color: C('verm') }),
-                  local: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffe9b8') }) };
-  const glowTex = (() => {
-    const cv = document.createElement('canvas'); cv.width = cv.height = 64;
-    const g = cv.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    r.addColorStop(0, 'rgba(255,214,140,0.9)'); r.addColorStop(0.35, 'rgba(255,190,110,0.35)'); r.addColorStop(1, 'rgba(255,170,90,0)');
-    g.fillStyle = r; g.fillRect(0, 0, 64, 64);
-    return new THREE.CanvasTexture(cv);
-  })();
-  const glowMat = new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
-
-  const memories = [];   // { m: the record, obj: its lantern }
-  function addLantern(m) {
-    if (memories.some(e => e.m.id === m.id)) return;
-    const o = new THREE.Group();
-    const kind = m.seed ? 'seed' : m.local ? 'local' : 'visitor';
-    const body = new THREE.Mesh(bodyGeo, paper[kind]); o.add(body);
-    const top = new THREE.Mesh(capGeo, inkMat); top.position.y = 0.33; o.add(top);
-    const bot = new THREE.Mesh(capGeo, inkMat); bot.position.y = -0.33; o.add(bot);
-    const tas = new THREE.Mesh(tasselGeo, paper.seed); tas.position.y = -0.55; o.add(tas);
-    const cord = new THREE.Mesh(cordGeo, inkMat); cord.position.y = 0.87; o.add(cord);
-    const glow = new THREE.Sprite(glowMat); glow.scale.setScalar(2.2); o.add(glow);
-    o.position.set(m.x, 2.9, m.z);
+  // the lantern itself is square.js's Taiwanese 燈籠 (lathe body, ribs, gold caps, tassel, halo), with the
+  // memory's year written on it; the makers' own are red, the visitors' a warmer orange
+  const SQM = window.SQUARE;
+  const BODY = { seed: '#d23a2a', visitor: '#e0582c', local: '#e8952f' };
+  const SIZE = 0.9;
+  const kindOf = m => m.seed ? 'seed' : m.local ? 'local' : 'visitor';
+  function lantern(m, cord) {
+    const text = m.year ? String(m.year) : '憶';
+    let o;
+    if (SQM) o = SQM.makeLantern({ text, body: BODY[kindOf(m)], size: SIZE, cord: cord || 0 });
+    else { o = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.6, 14), new THREE.MeshBasicMaterial({ color: new THREE.Color(BODY[kindOf(m)]) })); o.userData.phase = 0; }
     o.userData.memory = m; o.userData.phase = (m.x * 3.1 + m.z * 1.7) % 6.28;
     o.traverse(c => { c.userData.memory = m; });
     group.add(o);
-    memories.push({ m, obj: o });
+    return o;
+  }
+
+  // on the street: each memory floats where it was left. A memory left in the square has no street
+  // lantern: the square shows its memories in the banyan instead (below).
+  const memories = [];   // { m, obj }  (obj null for the square's own)
+  function addLantern(m) {
+    if (memories.some(e => e.m.id === m.id)) return;
+    let obj = null;
+    if (m.section !== 'square') { obj = lantern(m, 0); obj.position.set(m.x, 2.9, m.z); }
+    memories.push({ m, obj });
+    rebuildTree();
+  }
+  // in the banyan: the newest memories from all three sections and the square, the newest lowest
+  const tree = [];       // { m, obj, slot }
+  function rebuildTree() {
+    if (!SQM) return;
+    tree.splice(0).forEach(e => group.remove(e.obj));
+    const order = memories.map(e => e.m).slice().sort((a, b) => (b.created_at ? Date.parse(b.created_at) : 0) - (a.created_at ? Date.parse(a.created_at) : 0));
+    order.slice(0, SQM.treeSlots.length).forEach((m, i) => {
+      const slot = SQM.treeSlots[i];
+      const obj = lantern(m, Math.max(0, (slot.top - slot.y - 0.58 * SIZE) / SIZE));
+      obj.position.set(slot.x, slot.y, slot.z);
+      tree.push({ m, obj, slot });
+    });
   }
 
   // ── storage ─────────────────────────────────────────────────────────────────
@@ -261,23 +267,32 @@
     down = null;
     ndc.set(ev.clientX / innerWidth * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1);
     ray.setFromCamera(ndc, R.camera);
-    const hit = ray.intersectObjects(memories.filter(e => e.obj.visible).map(e => e.obj), true)[0];
+    const hit = ray.intersectObjects(memories.concat(tree).filter(e => e.obj && e.obj.visible).map(e => e.obj), true)[0];
     if (hit && hit.object.userData.memory) openRead(hit.object.userData.memory);
   });
 
   // ── per frame: show the lanterns of the place you are in, bob them, find the nearest ──
   const v = new THREE.Vector3();
   function tick(now) {
-    const sec = WALK.section(), t = now / 1000;
+    const sec = WALK.section(), t = now / 1000, inSquare = sec === 'square';
     let best = null, bestD = NEAR;
     const p = WALK.on ? WALK.pos : null;
+    const near = e => { if (!p) return; const d = Math.hypot(e.obj.position.x - p.x, e.obj.position.z - p.z); if (d < bestD) { bestD = d; best = e; } };
     memories.forEach(e => {
-      const on = e.m.section === sec;
+      if (!e.obj) return;
+      const on = !inSquare && e.m.section === sec;
       e.obj.visible = on;
       if (!on) return;
       e.obj.position.y = 2.9 + Math.sin(t * 1.3 + e.obj.userData.phase) * 0.12;
       e.obj.rotation.y = Math.sin(t * 0.7 + e.obj.userData.phase) * 0.25;
-      if (p) { const d = Math.hypot(e.m.x - p.x, e.m.z - p.z); if (d < bestD) { bestD = d; best = e; } }
+      near(e);
+    });
+    tree.forEach(e => {
+      e.obj.visible = inSquare;
+      if (!inSquare) return;
+      e.obj.rotation.y = Math.sin(t * 0.5 + e.obj.userData.phase) * 0.3;          // turning a little on its cord
+      e.obj.rotation.z = Math.sin(t * 1.1 + e.obj.userData.phase) * 0.04;
+      near(e);
     });
     nearest = best;
     if (best && panel.hidden && form.hidden) {
@@ -295,5 +310,5 @@
   fetchApproved();
   requestAnimationFrame(tick);
 
-  window.__memories = { get count() { return memories.length; }, ONLINE, openForm, openRead, list: () => memories.map(e => e.m) };
+  window.__memories = { get count() { return memories.length; }, get tree() { return tree.map(e => e.m.id); }, ONLINE, openForm, openRead, list: () => memories.map(e => e.m) };
 })();
