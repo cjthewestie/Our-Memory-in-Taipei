@@ -24,3 +24,4 @@ render/
 
 # bundling: the per-model sources are inputs, the bundles are what ships
 tools/node_modules/
+.smoke/
