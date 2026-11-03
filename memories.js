@@ -63,19 +63,11 @@
     memories.push({ m, obj });
     rebuildTree();
   }
-  // in the banyan: the newest memories from all three sections and the square, the newest lowest
-  const tree = [];       // { m, obj, slot }
-  function rebuildTree() {
-    if (!SQM) return;
-    tree.splice(0).forEach(e => group.remove(e.obj));
-    const order = memories.map(e => e.m).slice().sort((a, b) => (b.created_at ? Date.parse(b.created_at) : 0) - (a.created_at ? Date.parse(a.created_at) : 0));
-    order.slice(0, SQM.treeSlots.length).forEach((m, i) => {
-      const slot = SQM.treeSlots[i];
-      const obj = lantern(m, Math.max(0, (slot.top - slot.y - 0.58 * SIZE) / SIZE));
-      obj.position.set(slot.x, slot.y, slot.z);
-      tree.push({ m, obj, slot });
-    });
-  }
+  // in the square: the newest memories, pinned to the notice board (square.js), and listed in full when
+  // you walk up to it and press E
+  const BOARD = SQM && SQM.board;
+  const newest = () => memories.map(e => e.m).slice().sort((a, b) => (b.created_at ? Date.parse(b.created_at) : 0) - (a.created_at ? Date.parse(a.created_at) : 0));
+  function rebuildTree() { if (BOARD) BOARD.setNotes(newest().slice(0, 8)); if (!list.hidden) fillList(); }
 
   // ── storage ─────────────────────────────────────────────────────────────────
   const loadLocal = () => { try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch (_) { return []; } };
@@ -142,7 +134,8 @@
   bubble.type = 'button'; bubble.hidden = true;
   bubble.innerHTML = '<span class="mem-b-k">A memory</span><span class="mem-b-key">E</span>';
   let nearest = null;
-  bubble.addEventListener('click', () => { if (nearest) openRead(nearest.m); });
+  let nearBoard = false;
+  bubble.addEventListener('click', () => { if (nearBoard) openList(); else if (nearest) openRead(nearest.m); });
 
   const panel = el('aside', 'mem-panel', document.body); panel.hidden = true;
   panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-labelledby', 'memReadBody');
@@ -155,7 +148,7 @@
   const pNote = el('div', 'mem-note', pBody);
   pClose.addEventListener('click', closeRead);
   function openRead(m) {
-    closeForm();
+    closeForm(); list.hidden = true;
     pK.textContent = (m.year ? m.year + ' · ' : '') + (PLACE[m.section] || '');
     pText.textContent = m.body;
     pBy.textContent = '— ' + (m.name && m.name.trim() ? m.name.trim() : 'someone who was there');
@@ -165,6 +158,27 @@
     panel.hidden = false; pClose.focus({ preventScroll: true });
   }
   function closeRead() { panel.hidden = true; }
+
+  // the list: every memory, newest first, opened from the board in the square
+  const list = el('aside', 'mem-panel mem-list', document.body); list.hidden = true;
+  list.setAttribute('role', 'dialog'); list.setAttribute('aria-labelledby', 'memListTitle');
+  const lClose = el('button', 'mem-close', list, '×'); lClose.type = 'button'; lClose.setAttribute('aria-label', 'Close');
+  const lBody = el('div', 'mem-body', list);
+  el('div', 'mem-k', lBody, '記憶公布欄 · The memory board');
+  const lTitle = el('h2', 'mem-title', lBody, 'Everyone’s memories'); lTitle.id = 'memListTitle';
+  const lItems = el('ol', 'mem-items', lBody);
+  lClose.addEventListener('click', () => { list.hidden = true; });
+  function fillList() {
+    lItems.textContent = '';
+    newest().forEach(m => {
+      const li = el('li', '', lItems), b = el('button', 'mem-item', li); b.type = 'button';
+      el('span', 'mem-item-k', b, (m.year ? m.year + ' · ' : '') + (PLACE[m.section] || ''));
+      el('span', 'mem-item-t', b, m.body);
+      if (m.name) el('span', 'mem-item-by', b, '— ' + m.name);
+      b.addEventListener('click', () => { list.hidden = true; openRead(m); });
+    });
+  }
+  function openList() { closeForm(); closeRead(); fillList(); list.hidden = false; lClose.focus({ preventScroll: true }); }
 
   // the form
   const form = el('form', 'mem-form', document.body); form.hidden = true; form.noValidate = true;
@@ -253,9 +267,11 @@
   // keys: E reads the nearest, Escape closes
   window.addEventListener('keydown', ev => {
     const t = ev.target;
-    if (ev.key === 'Escape') { if (!form.hidden) closeForm(); else if (!panel.hidden) closeRead(); return; }
+    if (ev.key === 'Escape') { if (!form.hidden) closeForm(); else if (!panel.hidden) closeRead(); else if (!list.hidden) list.hidden = true; return; }
     if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-    if ((ev.key === 'e' || ev.key === 'E') && WALK.on && nearest && panel.hidden && form.hidden) { ev.preventDefault(); openRead(nearest.m); }
+    if ((ev.key === 'e' || ev.key === 'E') && WALK.on && panel.hidden && form.hidden && list.hidden) {
+      if (nearBoard) { ev.preventDefault(); openList(); } else if (nearest) { ev.preventDefault(); openRead(nearest.m); }
+    }
   });
 
   // a click (not a drag) on a lantern opens it, in either mode
@@ -267,7 +283,10 @@
     down = null;
     ndc.set(ev.clientX / innerWidth * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1);
     ray.setFromCamera(ndc, R.camera);
-    const hit = ray.intersectObjects(memories.concat(tree).filter(e => e.obj && e.obj.visible).map(e => e.obj), true)[0];
+    const targets = memories.filter(e => e.obj && e.obj.visible).map(e => e.obj);
+    if (BOARD && BOARD.mesh && WALK.section() === 'square') targets.push(BOARD.mesh);
+    const hit = ray.intersectObjects(targets, true)[0];
+    if (hit && BOARD && hit.object === BOARD.mesh) { openList(); return; }
     if (hit && hit.object.userData.memory) openRead(hit.object.userData.memory);
   });
 
@@ -287,16 +306,15 @@
       e.obj.rotation.y = Math.sin(t * 0.7 + e.obj.userData.phase) * 0.25;
       near(e);
     });
-    tree.forEach(e => {
-      e.obj.visible = inSquare;
-      if (!inSquare) return;
-      e.obj.rotation.y = Math.sin(t * 0.5 + e.obj.userData.phase) * 0.3;          // turning a little on its cord
-      e.obj.rotation.z = Math.sin(t * 1.1 + e.obj.userData.phase) * 0.04;
-      near(e);
-    });
+    // the board: near enough, and it is the thing to read
+    let board = false;
+    if (inSquare && BOARD && p && Math.hypot(BOARD.x - p.x, BOARD.z - p.z) < BOARD.r && !best) board = true;
+    nearBoard = board;
     nearest = best;
-    if (best && panel.hidden && form.hidden) {
-      v.copy(best.obj.position); v.y += 0.9; v.project(R.camera);
+    bubble.firstChild.textContent = nearBoard ? '記憶公布欄 · Read' : 'A memory';
+    if ((best || nearBoard) && panel.hidden && form.hidden && list.hidden) {
+      if (nearBoard) v.set(BOARD.x, 3.4, BOARD.z); else { v.copy(best.obj.position); v.y += 0.9; }
+      v.project(R.camera);
       if (v.z < 1) {
         bubble.hidden = false;
         bubble.style.transform = `translate(${((v.x + 1) / 2 * innerWidth).toFixed(0)}px, ${((1 - v.y) / 2 * innerHeight).toFixed(0)}px) translate(-50%, -100%)`;
@@ -310,5 +328,5 @@
   fetchApproved();
   requestAnimationFrame(tick);
 
-  window.__memories = { get count() { return memories.length; }, get tree() { return tree.map(e => e.m.id); }, ONLINE, openForm, openRead, list: () => memories.map(e => e.m) };
+  window.__memories = { get count() { return memories.length; }, get nearBoard() { return nearBoard; }, openList, ONLINE, openForm, openRead, list: () => memories.map(e => e.m) };
 })();

@@ -54,3 +54,16 @@
 .mem-actions .wk-btn { pointer-events: auto; }
 .mem-actions .wk-btn:disabled { opacity: 0.5; cursor: progress; }
 .mem-fine { font-size: 11.5px; line-height: 1.5; opacity: 0.6; margin: 12px 0 0; }
+
+/* the memory board's list (memories.js openList) */
+.mem-list { width: min(520px, calc(100vw - 32px)); }
+.mem-items { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: min(60vh, 520px); overflow: auto; }
+.mem-item {
+  display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; cursor: pointer;
+  background: #fff; color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); border-radius: 10px; padding: 10px 12px;
+  font-family: var(--font-hud), var(--font-sys);
+}
+.mem-item:hover, .mem-item:focus-visible { border-color: var(--verm); outline: none; }
+.mem-item-k { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.6; }
+.mem-item-t { font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.mem-item-by { font-size: 12px; opacity: 0.65; }

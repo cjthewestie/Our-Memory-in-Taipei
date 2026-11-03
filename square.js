@@ -1,21 +1,20 @@
 // square.js — the square everyone arrives in: a banyan at golden hour, arcades all round, three gates,
 // and a little open-air karaoke stand.
 //
-// CJ, 2026-11-03: 「廣場的燈籠太粗糙了 再想一下廣場要怎麼設計」, then, choosing the banyan square:
-//   中心: 一棵大榕樹, 垂著氣根. 大家留下的記憶燈籠掛在樹上, 最新的掛得最低、最好讀.
-//   四周: 騎樓, 一樓是不同年代的店招混在一起.
-//   三座門: 西門町紅色鐵架招牌門, 大稻埕紅磚拱門, 信義玻璃門框.
-//   時間: 黃昏, 天還是亮的, 但燈籠開始發光.
-// and 「我還想要小卡啦ok站」: the plastic stools, the CRT on a cart, the speakers and the striped tarp
-// you find on the edge of any temple square or park in Taiwan of an evening.
+// CJ, 2026-11-03: 「廣場的燈籠太粗糙了 再想一下廣場要怎麼設計」, then the banyan square (騎樓 all round, three
+// gates: 西門町 red steel sign, 大稻埕 brick arch, 信義 glass; golden hour), 「我還想要小卡啦ok站」, and then
+// 「燈籠先拆掉 做一個完整的榕樹廣場」 after research: research/banyan-square/README.md is the brief.
+// So: the banyan as 大樹公 (red cloth round it) with the 土地公 shrine at its foot, the 伯公下 life under it
+// (象棋, 老人茶, people resting on the tree's seat), a notice board with everyone's memories on it, a karaoke
+// stand, a sausage cart, street lamps, potted plants and pigeons. No lanterns in the square.
 //
 // Everything is built from primitives and canvas textures, no new model files. Repeated small parts
-// (windows, grilles, air conditioners, columns, scooters, aerial roots) are InstancedMeshes, so the
-// whole square costs a few dozen draw calls. Lanterns glow by being unlit (MeshBasicMaterial) with an
-// additive halo, never by adding lights: a light would recompile every material on the street.
+// (windows, grilles, air conditioners, columns, scooters, roots, leaf cards, pots) are InstancedMeshes,
+// so the whole square costs a few dozen draw calls. Things that glow are unlit (toneMapped: false) with
+// an additive halo, never real lights: a light would recompile every material on the street.
 //
-// walk.js owns movement and the gates' triggers; memories.js hangs the visitors' lanterns in the tree
-// (SQUARE.treeSlots) using SQUARE.makeLantern. This file only builds and animates the place.
+// walk.js owns movement and the gates' triggers; memories.js pins the newest memories to the notice
+// board (SQUARE.board) and uses SQUARE.makeLantern for the lanterns out on the street.
 (function () {
   'use strict';
   if (!window.SCENE || !window.THREE || !window.RIG) return;
@@ -71,6 +70,15 @@
     const tex = canvasTex(64, 64, (g) => {
       const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
       r.addColorStop(0, 'rgba(255,200,120,0.95)'); r.addColorStop(0.3, 'rgba(255,160,80,0.4)'); r.addColorStop(1, 'rgba(255,140,60,0)');
+      g.fillStyle = r; g.fillRect(0, 0, 64, 64);
+    });
+    return new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+  })();
+
+  const haloRed = (() => {
+    const tex = canvasTex(64, 64, (g) => {
+      const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      r.addColorStop(0, 'rgba(255,90,60,0.95)'); r.addColorStop(0.35, 'rgba(255,60,40,0.35)'); r.addColorStop(1, 'rgba(255,40,30,0)');
       g.fillStyle = r; g.fillRect(0, 0, 64, 64);
     });
     return new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
@@ -138,7 +146,7 @@
     return g;
   }
 
-  // ── the ground: red brick, a terrazzo circle round the tree, a pool of lantern light ──
+  // ── the ground: red brick, a terrazzo circle round the tree, a pool of warm light under it ──
   (function ground() {
     const brick = canvasTex(256, 256, (g) => {
       g.fillStyle = '#8f5a48'; g.fillRect(0, 0, 256, 256);
@@ -165,89 +173,128 @@
     pool.rotation.x = -Math.PI / 2; pool.position.set(SQ.x, 0.08, SQ.z); group.add(pool);
   })();
 
-  // ── the banyan ──────────────────────────────────────────────────────────────
+  const pillarRoots = [];   // where the banyan's pillar roots meet the ground: she walks round them
+  // ── the banyan (大樹公) ──────────────────────────────────────────────────────
+  // research/banyan-square: a small-leaved banyan (Ficus microcarpa) is wider than it is tall, pale smooth
+  // grey bark, buttresses at the foot, several trunks grown together, curtains of aerial roots and a few
+  // that reached the ground and thickened into pillars. A tree people worship wears a red cloth round it.
+  // The crown is ~800 alpha-cut leaf cards in one InstancedMesh, their normals bent outward from the
+  // centre of their own clump so the crown shades like soft clumps of foliage, swaying a little; their
+  // shadow is cut by the same alpha, so the ground under the tree gets dappled shade, not a black disc.
   const tree = new THREE.Group(); tree.position.set(SQ.x, 0, SQ.z); group.add(tree);
-  const BARK = mat('#6e5a4a', { roughness: 1 });
-  const treeSway = [];
+  const BARK = mat('#9b958a', { roughness: 0.95 });
+  const leafTime = { value: 0 };
   (function banyan() {
-    // the planter: a round terrazzo seat everyone sits on, and a plaque on its south face
+    // the round seat everyone sits on
     const seat = new THREE.Mesh(cyl(3.9, 4.1, 0.55, 40), mat('#cfc9bd')); seat.castShadow = seat.receiveShadow = true; tree.add(seat);
     const lip = new THREE.Mesh(cyl(4.15, 4.15, 0.12, 40), mat('#b9b2a4')); lip.position.y = 0.55; tree.add(lip);
     const soil = new THREE.Mesh(cyl(3.5, 3.5, 0.06, 32), mat('#4a3b2e')); soil.position.y = 0.62; tree.add(soil);
-    const plaque = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.42), basic('#ffffff', { map: canvasTex(512, 84, (g, W, H) => {
-      g.fillStyle = '#3b2c22'; g.fillRect(0, 0, W, H); g.fillStyle = '#e9c87a'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = `700 ${H * 0.5}px ${FONT_ZH}`; g.fillText('我們的台北記憶', W * 0.36, H * 0.52);
-      g.font = `600 ${H * 0.3}px ${FONT_EN}`; g.fillText('OUR MEMORY IN TAIPEI', W * 0.79, H * 0.55);
-    }) }));
-    plaque.position.set(0, 0.29, 4.12); tree.add(plaque);
 
-    // trunks: a knot of several, leaning in, the way a banyan's aerial roots thicken into new trunks
-    const limb = (a, b, r0, r1) => {
+    const limb = (a, b, r0, r1, seg) => {
       const d = new THREE.Vector3().subVectors(b, a), len = d.length();
-      const m = new THREE.Mesh(cyl(r1, r0, len, 9), BARK);
+      const m = new THREE.Mesh(cyl(r1, r0, len, seg || 10), BARK);
       m.position.copy(a); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
       m.castShadow = m.receiveShadow = true; tree.add(m); return m;
     };
-    limb(new THREE.Vector3(0, 0.6, 0), new THREE.Vector3(0.2, 6.2, -0.1), 1.25, 0.75);
-    [[1.4, 0.3], [-1.3, 0.6], [0.5, -1.4], [-0.7, -1.1], [1.0, 1.2]].forEach(([x, z]) => limb(new THREE.Vector3(x, 0.6, z), new THREE.Vector3(x * 0.25, 4.6, z * 0.25), 0.45, 0.3));
-    // limbs reaching out under the canopy
-    for (let i = 0; i < 7; i++) {
-      const a = i / 7 * Math.PI * 2 + 0.3, r = 5.5 + rnd() * 2.2;
-      limb(new THREE.Vector3(0.1, 5.4 + rnd() * 0.8, 0), new THREE.Vector3(Math.cos(a) * r, 7.1 + rnd() * 0.9, Math.sin(a) * r), 0.42, 0.14);
+    // buttresses flaring into the seat, and a knot of trunks grown together
+    const flare = new THREE.Mesh(cyl(1.15, 2.0, 1.4, 14), BARK); flare.position.y = 0.55; flare.castShadow = true; tree.add(flare);
+    limb(new THREE.Vector3(0, 0.6, 0), new THREE.Vector3(0.15, 6.6, -0.1), 1.2, 0.7, 14);
+    [[1.0, 0.4], [-0.9, 0.7], [0.3, -1.05], [-0.65, -0.8], [0.8, -0.6], [-0.2, 1.05]].forEach(([x, z]) =>
+      limb(new THREE.Vector3(x, 0.6, z), new THREE.Vector3(x * 0.3, 5.2 + rnd(), z * 0.3), 0.42, 0.3));
+    // limbs reaching out low and level, the way a banyan spreads
+    const tips = [];
+    for (let i = 0; i < 9; i++) {
+      const a = i / 9 * Math.PI * 2 + 0.2 + rnd() * 0.3, r = 6 + rnd() * 3;
+      const from = new THREE.Vector3(0.1, 5.3 + rnd() * 1.0, 0), mid = new THREE.Vector3(Math.cos(a) * r * 0.55, 6.9 + rnd() * 0.6, Math.sin(a) * r * 0.55);
+      const to = new THREE.Vector3(Math.cos(a) * r, 7.4 + rnd() * 0.8, Math.sin(a) * r);
+      limb(from, mid, 0.46, 0.3); limb(mid, to, 0.3, 0.12, 8);
+      tips.push(mid, to);
     }
-    // the crown: lumpy, flat-shaded clusters on a low wide dome
-    const greens = ['#4d7a47', '#5a8a50', '#436b40', '#679a59', '#3f633c'].map(c => mat(c, { flatShading: true, roughness: 0.95 }));
-    const blob = new THREE.IcosahedronGeometry(1, 1);
+    // pillar roots: aerial roots that reached the ground and turned into wood, under the outer limbs
+    tips.forEach((p, i) => {
+      if (i % 2 === 0 && rnd() < 0.55) {
+        const r = Math.hypot(p.x, p.z); if (r < 4.6) return;
+        limb(new THREE.Vector3(p.x, 0, p.z), new THREE.Vector3(p.x, p.y, p.z), 0.2, 0.14, 8);
+        pillarRoots.push({ x: SQ.x + p.x, z: SQ.z + p.z, r: 0.5 });
+      }
+    });
+    // the red cloth: a band round the trunks and its two loose ends
+    const RED = mat('#c4211b', { roughness: 0.7, side: THREE.DoubleSide });
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(1.42, 1.48, 0.42, 28, 1, true), RED);
+    band.position.y = 1.85; tree.add(band);
+    [[-0.2, 0.18], [0.15, 0.12]].forEach(([dx, rz]) => {
+      const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.85), RED); tail.position.set(dx, 1.3, 1.47); tail.rotation.z = rz; tree.add(tail);
+    });
+
+    // the crown: clumps of leaf cards
+    const leafTex = canvasTex(128, 128, (g) => {
+      g.clearRect(0, 0, 128, 128);
+      for (let i = 0; i < 90; i++) {
+        const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * 54, x = 64 + Math.cos(a) * d, y = 64 + Math.sin(a) * d;
+        const k = rnd();
+        g.fillStyle = `hsl(${100 + k * 22}, ${38 + k * 18}%, ${22 + k * 26 + (64 - y) * 0.12}%)`;
+        g.save(); g.translate(x, y); g.rotate(rnd() * 6.28); g.beginPath(); g.ellipse(0, 0, 10, 5.5, 0, 0, 6.28); g.fill(); g.restore();
+      }
+    });
+    const leafMat = mat('#ffffff', { map: leafTex, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.85 });
+    leafMat.onBeforeCompile = shader => {
+      shader.uniforms.uTime = leafTime;
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nattribute vec3 aCenter;\nuniform float uTime;')
+        .replace('#include <defaultnormal_vertex>',
+          'vec4 lfP = instanceMatrix * vec4(position, 1.0);\n' +
+          'vec3 transformedNormal = normalMatrix * normalize(lfP.xyz - aCenter + vec3(0.0, 0.35, 0.0));')
+        .replace('#include <begin_vertex>',
+          'vec3 transformed = vec3(position);\n' +
+          'float lfW = uTime * 1.4 + aCenter.x * 0.6 + aCenter.z * 0.45;\n' +
+          'transformed.x += sin(lfW + position.y * 2.0) * 0.05; transformed.z += cos(lfW * 0.8) * 0.04;');
+      shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_begin>',
+        'float faceDirection = gl_FrontFacing ? 1.0 : -1.0;\nvec3 normal = normalize(vNormal);\nvec3 geometryNormal = normal;');   // no back-face flip: both sides take the clump's normal
+    };
+    const cardGeo = new THREE.PlaneGeometry(1, 1);
+    const clumps = [];
+    const NCL = R.IS_PHONE ? 40 : 55;
+    for (let i = 0; i < NCL; i++) {
+      const a = rnd() * Math.PI * 2, r = Math.pow(rnd(), 0.7) * 9.8;
+      clumps.push(new THREE.Vector3(Math.cos(a) * r, 8.5 + (1 - r / 10) * 2.4 + rnd() * 0.8, Math.sin(a) * r));
+    }
+    const PER = R.IS_PHONE ? 30 : 38, N = clumps.length * PER;
+    const leaves = new THREE.InstancedMesh(cardGeo, leafMat, N);
+    const centers = new Float32Array(N * 3);
+    clumps.forEach((c, ci) => {
+      const cr = 1.7 + rnd() * 0.9;
+      for (let j = 0; j < PER; j++) {
+        const k = ci * PER + j;
+        const u = rnd() * Math.PI * 2, v = Math.acos(2 * rnd() - 1), rr = cr * Math.cbrt(rnd());
+        const p = new THREE.Vector3(SQ.x + c.x + Math.sin(v) * Math.cos(u) * rr, c.y + Math.cos(v) * rr * 0.62, SQ.z + c.z + Math.sin(v) * Math.sin(u) * rr);
+        const s = 1.7 + rnd() * 0.9;
+        leaves.setMatrixAt(k, local(p.x, p.y, p.z, s, s, s, rnd() * 6.28, rnd() * 6.28, rnd() * 6.28));
+        centers[k * 3] = SQ.x + c.x; centers[k * 3 + 1] = c.y - 0.4; centers[k * 3 + 2] = SQ.z + c.z;
+      }
+    });
+    cardGeo.setAttribute('aCenter', new THREE.InstancedBufferAttribute(centers, 3));
+    leaves.instanceMatrix.needsUpdate = true;
+    leaves.castShadow = true; leaves.receiveShadow = true;
+    leaves.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: leafTex, alphaTest: 0.45 });
+    leaves.frustumCulled = false;
+    group.add(leaves);
+    // dark masses inside the crown, so it never reads as see-through
+    const inner = mat('#2f4a2d', { flatShading: true, roughness: 1 }), blob = new THREE.IcosahedronGeometry(1, 1);
+    clumps.forEach((c, i) => { if (i % 3) return; const m = new THREE.Mesh(blob, inner); m.position.set(c.x, c.y - 0.2, c.z); m.scale.set(1.7, 1.0, 1.7); tree.add(m); });
+
+    // aerial roots: curtains of thin strands, bunched, of every length, hanging from the limbs
+    const roots = Inst(cyl(1, 1, 1, 5), mat('#7d7064', { roughness: 1 }));
     for (let i = 0; i < 34; i++) {
-      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 8.6, y = 8.6 + (1 - r / 9) * 2.8 + rnd() * 0.9;
-      const m = new THREE.Mesh(blob, pick(greens));
-      const s = 2.0 + rnd() * 1.7;
-      m.scale.set(s * (1.1 + rnd() * 0.3), s * (0.62 + rnd() * 0.2), s * (1.1 + rnd() * 0.3));
-      m.position.set(Math.cos(a) * r, y, Math.sin(a) * r); m.rotation.y = rnd() * 6;
-      m.castShadow = true; m.receiveShadow = true; tree.add(m);
-      treeSway.push({ m, y, ph: rnd() * 6.28 });
-    }
-    // aerial roots: thin strands hanging from the crown, a few reaching the ground as pillars
-    const roots = Inst(cyl(1, 1, 1, 5), mat('#7b6654', { roughness: 1 }));
-    for (let i = 0; i < 170; i++) {
-      const a = rnd() * Math.PI * 2, r = 1.8 + Math.sqrt(rnd()) * 6.8, top = 7.3 + rnd() * 0.8;
-      if (r < 4.6 && rnd() < 0.08) { roots.add(local(SQ.x + Math.cos(a) * r, 0, SQ.z + Math.sin(a) * r, 0.09, top, 0.09, 0)); continue; }
-      const len = 1.2 + rnd() * 3.4;
-      roots.add(local(SQ.x + Math.cos(a) * r, top - len, SQ.z + Math.sin(a) * r, 0.025 + rnd() * 0.02, len, 0.025 + rnd() * 0.02, 0, (rnd() - 0.5) * 0.08));
+      const a = rnd() * Math.PI * 2, r = 2.6 + Math.sqrt(rnd()) * 6.6, top = 7.3 + rnd() * 0.6;
+      const n = 3 + Math.floor(rnd() * 6);
+      for (let j = 0; j < n; j++) {
+        const len = 0.6 + Math.pow(rnd(), 1.6) * (r < 5 ? 5.5 : 4.2);
+        const x = SQ.x + Math.cos(a) * r + (rnd() - 0.5) * 0.7, z = SQ.z + Math.sin(a) * r + (rnd() - 0.5) * 0.7;
+        roots.add(local(x, top - len, z, 0.014 + rnd() * 0.014, len, 0.014 + rnd() * 0.014, 0, (rnd() - 0.5) * 0.06, (rnd() - 0.5) * 0.06));
+      }
     }
     roots.build(false);
   })();
-
-  // where the visitors' memories hang: 16 places under the crown, the newest lowest and nearest the path.
-  // y is the lantern's centre; top is where its cord ties to a branch.
-  const treeSlots = [];
-  for (let i = 0; i < 16; i++) {
-    const a = i * 2.39996 + 1.2, r = 4.7 + (i % 3) * 1.1;
-    treeSlots.push({ x: SQ.x + Math.cos(a) * r, y: 3.0 + i * 0.2, z: SQ.z + Math.sin(a) * r, top: 7.5 });
-  }
-  // a few lanterns of the square's own in the crown, above the memories
-  const ownLanterns = [];
-  for (let i = 0; i < 9; i++) {
-    const a = i / 9 * Math.PI * 2 + 0.15, r = 3.2 + (i % 2) * 3.4, y = 6.6 + (i % 3) * 0.25;
-    const l = makeLantern({ text: '福', size: 0.8, cord: (7.6 - y) / 0.8 - 0.5 });
-    l.position.set(SQ.x + Math.cos(a) * r, y, SQ.z + Math.sin(a) * r); group.add(l); ownLanterns.push(l);
-  }
-  // strings of small lanterns from the crown out to the arcades, the way a temple square dresses for a festival
-  const STRING_DIRS = [Math.PI * 0.25, Math.PI * 0.75, Math.PI * 1.25, Math.PI * 1.75, Math.PI * 0.5];   // diagonals and south: clear of the three gates
-  STRING_DIRS.forEach(a => {
-    const c = Math.cos(a), s = Math.sin(a), t = SQ.h / Math.max(Math.abs(c), Math.abs(s));
-    const ax = SQ.x + c * 6.2, az = SQ.z + s * 6.2, bx = SQ.x + c * (t - 0.4), bz = SQ.z + s * (t - 0.4);
-    const n = 9;
-    const pts = [];
-    for (let i = 0; i <= 24; i++) { const k = i / 24; pts.push(new THREE.Vector3(ax + (bx - ax) * k, 7.4 + (4.7 - 7.4) * k - Math.sin(Math.PI * k) * 0.9, az + (bz - az) * k)); }
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: '#3a2a20' }));
-    group.add(line);
-    for (let i = 1; i < n; i++) {
-      const k = i / n, p = pts[Math.round(k * 24)];
-      const l = makeLantern({ text: i % 2 ? '福' : '春', size: 0.48, body: i % 3 === 0 ? '#e0a22a' : '#d23a2a', cord: 0.6 });
-      l.position.set(p.x, p.y - 0.62, p.z); group.add(l); ownLanterns.push(l);
-    }
-  });
 
   // ── the arcades (騎樓) round all four sides ─────────────────────────────────
   // Each block: upper floors over a covered walkway on square columns, shops set back behind it,
@@ -464,8 +511,6 @@
     const s = signPlane(4.2, 1.3, tex); s.position.set(0, H + R2 + 1.6, 0.92); g.add(s);
     const s2 = s.clone(); s2.position.z = -0.92; g.add(s2);
     box(4.5, 1.5, 0.5, mat('#3b2418'), 0, H + R2 + 0.85, 0, g);
-    // two lanterns hanging in the arch
-    [-1.9, 1.9].forEach(x => { const l = makeLantern({ text: '春', size: 0.7, cord: 1.4 }); l.position.set(x, H - 0.4, 0); g.add(l); ownLanterns.push(l); });
     g.add(portal(GW, H + 1.0, 'brick'));
   })();
 
@@ -625,12 +670,211 @@
     p.position.set(SQ.x - 2.9, 0.55, SQ.z + 3.0); p.rotation.y = Math.atan2(-2.9, 3.0) + Math.PI; p.userData.fan = true; group.add(p);
   })();
 
+  // ── the 土地公 shrine (福德祠) at the foot of the tree, and its 金爐 ──────────
+  // The heart of a 伯公下 (research/banyan-square): a small temple with a swallowtail ridge, red columns
+  // and couplets, the god inside lit by two red 神明燈, an incense burner in front with smoke rising.
+  // It faces south, toward where you arrive, so it is the first lit thing you see under the dark crown.
+  const SHRINE = { x: SQ.x, z: SQ.z + 5.5, r: 2.1 };
+  const smoke = [];
+  (function shrine() {
+    const g = new THREE.Group(); g.position.set(SHRINE.x, 0, SHRINE.z); group.add(g);
+    const stone = mat('#bfb8aa'), red = mat('#b8261f', { roughness: 0.6 }), tile = mat('#c9643a', { roughness: 0.8 }), dark = mat('#3a1c16');
+    box(3.4, 0.35, 3.0, stone, 0, 0, 0, g);
+    box(0.9, 0.18, 0.5, stone, 0, 0, 1.7, g);                                     // the step
+    box(2.6, 2.3, 0.22, red, 0, 0.35, -1.0, g);                                  // back wall
+    [-1, 1].forEach(s => box(0.22, 2.3, 2.0, red, s * 1.2, 0.35, 0, g));          // side walls
+    box(2.2, 2.2, 0.05, dark, 0, 0.4, -0.86, g, false);                          // the dim inside
+    [-1, 1].forEach(s => box(0.24, 2.25, 0.24, mat('#d23a2a'), s * 1.05, 0.35, 0.92, g));   // front columns
+    box(2.6, 0.32, 0.3, red, 0, 2.6, 0.92, g);                                   // lintel
+    // the roof: two pitches, a ridge, and swallowtails curling up at both ends
+    [1, -1].forEach(s => { const r = new THREE.Mesh(BOX, tile); r.scale.set(3.5, 0.14, 1.75); r.position.set(0, 2.72, s * 0.62); r.rotation.x = s * 0.42; r.castShadow = true; g.add(r); });
+    box(3.0, 0.2, 0.22, tile, 0, 3.08, 0, g);
+    [-1, 1].forEach(s => [0.0, 0.14].forEach((dz, k) => {
+      const t = new THREE.Mesh(BOX, tile); t.scale.set(0.75, 0.1, 0.08); t.position.set(s * 1.75, 3.24 + k * 0.05, dz - 0.07); t.rotation.z = s * (0.55 + k * 0.15); g.add(t);
+    }));
+    const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), mat('#e6b54a', { metalness: 0.5 })); pearl.position.set(0, 3.36, 0); g.add(pearl);
+    // the plaque and the couplets
+    const plaque = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.42), basic('#ffffff', { map: canvasTex(256, 76, (c, W, H) => {
+      c.fillStyle = '#2b1712'; c.fillRect(0, 0, W, H); c.strokeStyle = '#d9b265'; c.lineWidth = 5; c.strokeRect(4, 4, W - 8, H - 8);
+      c.fillStyle = '#efc76a'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `700 ${H * 0.62}px ${FONT_ZH}`; c.fillText('福德祠', W / 2, H * 0.54);
+    }) }));
+    plaque.position.set(0, 2.45, 1.08); g.add(plaque);
+    const couplet = text => basic('#ffffff', { map: canvasTex(48, 320, (c, W, H) => {
+      c.fillStyle = '#c8261e'; c.fillRect(0, 0, W, H); c.fillStyle = '#1d0f0b'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      const ch = [...text]; c.font = `700 ${Math.floor(H / ch.length * 0.78)}px ${FONT_ZH}`; ch.forEach((t, i) => c.fillText(t, W / 2, (i + 0.5) * H / ch.length));
+    }) });
+    [['福而有德千家敬', -1], ['正則為神萬世尊', 1]].forEach(([t, s]) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 1.6), couplet(t)); p.position.set(s * 1.05, 1.45, 1.05); g.add(p); });
+    // inside: the altar, the god, the two red lamps
+    box(1.6, 0.85, 0.6, mat('#9c2a1e'), 0, 0.35, -0.55, g);
+    const god = person({ shirt: '#c99a3a', pants: '#8a5a22', hair: '#1d1d1d', skin: '#d8b57a', seated: true, scale: 0.55 });
+    god.position.set(0, 1.2, -0.75); g.add(god);
+    [-0.55, 0.55].forEach(x => {
+      const l = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), basic('#ff3b2a', { toneMapped: false })); l.position.set(x, 1.62, -0.45); g.add(l);
+      const h = new THREE.Sprite(haloRed); h.scale.setScalar(1.1); h.position.copy(l.position); g.add(h);
+    });
+    // the incense burner on its table, a few sticks, the smoke
+    box(1.1, 0.75, 0.6, mat('#a52a1f'), 0, 0, 2.15, g);
+    const burner = new THREE.Mesh(cyl(0.32, 0.24, 0.32, 16), mat('#8a6a3a', { metalness: 0.7, roughness: 0.4 })); burner.position.set(0, 0.75, 2.15); g.add(burner);
+    for (let i = 0; i < 5; i++) { const st = new THREE.Mesh(cyl(0.012, 0.012, 0.45, 4), basic('#b23a26')); st.position.set(-0.12 + i * 0.06, 1.05, 2.15 + (i % 2) * 0.05); g.add(st); }
+    const smokeMat = new THREE.SpriteMaterial({ map: canvasTex(64, 64, (c) => { const r = c.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(235,232,225,0.5)'); r.addColorStop(1, 'rgba(235,232,225,0)'); c.fillStyle = r; c.fillRect(0, 0, 64, 64); }), transparent: true, depthWrite: false, fog: false });   // a sprite cannot take this page's fog chunk
+    for (let i = 0; i < 7; i++) { const s = new THREE.Sprite(smokeMat.clone()); s.userData = { t: i / 7, base: new THREE.Vector3(SHRINE.x, 1.35, SHRINE.z + 2.15) }; group.add(s); smoke.push(s); }
+  })();
+  const BURNER = { x: SHRINE.x + 3.0, z: SHRINE.z + 0.6, r: 0.9 };
+  (function goldFurnace() {   // 金爐, where the paper money is burned
+    const g = new THREE.Group(); g.position.set(BURNER.x, 0, BURNER.z); g.rotation.y = -0.3; group.add(g);
+    box(1.1, 0.3, 1.1, mat('#bfb8aa'), 0, 0, 0, g);
+    box(0.85, 1.3, 0.85, mat('#c2452c'), 0, 0.3, 0, g);
+    const mouth = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.4), basic('#ff8a3a', { toneMapped: false })); mouth.position.set(0, 0.85, 0.43); g.add(mouth);
+    const h = new THREE.Sprite(halo); h.scale.setScalar(1.2); h.position.set(0, 0.85, 0.5); g.add(h);
+    const r = new THREE.Mesh(new THREE.ConeGeometry(0.75, 0.45, 4), mat('#c9643a')); r.position.y = 1.83; r.rotation.y = Math.PI / 4; g.add(r);
+    box(0.22, 0.6, 0.22, mat('#8a3a26'), 0, 1.95, 0, g);
+  })();
+
+  // ── the tea table: 老人茶 on a stone table, two aunties and an uncle ─────────
+  const TEA = { x: SQ.x - 6.8, z: SQ.z + 3.4, r: 1.9 };
+  (function tea() {
+    const g = new THREE.Group(); g.position.set(TEA.x, 0, TEA.z); group.add(g);
+    const stone = mat('#bdb6a8');
+    const leg = new THREE.Mesh(cyl(0.28, 0.4, 0.68, 12), stone); g.add(leg);
+    const top = new THREE.Mesh(cyl(0.72, 0.72, 0.08, 24), stone); top.position.y = 0.68; top.castShadow = true; g.add(top);
+    box(0.62, 0.05, 0.42, mat('#5a3a24'), 0, 0.76, 0, g);                                    // the tea tray
+    const pot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), mat('#7a3e22', { roughness: 0.5 })); pot.scale.y = 0.8; pot.position.set(-0.12, 0.9, 0); g.add(pot);
+    const spout = new THREE.Mesh(cyl(0.02, 0.03, 0.14, 6), mat('#7a3e22')); spout.position.set(0.0, 0.86, 0); spout.rotation.z = -1.0; g.add(spout);
+    [[0.1, -0.1], [0.2, 0.05], [0.08, 0.13], [0.22, -0.12]].forEach(([x, z]) => { const c = new THREE.Mesh(cyl(0.035, 0.03, 0.05, 8), mat('#f4f1ea')); c.position.set(x, 0.79, z); g.add(c); });
+    const flask = new THREE.Mesh(cyl(0.08, 0.08, 0.36, 10), mat('#3f7fb3')); flask.position.set(0.45, 0.72, -0.35); g.add(flask);
+    [[-1.05, 0], [0, -1.05], [0, 1.05], [1.05, 0]].forEach(([x, z]) => { const s = new THREE.Mesh(cyl(0.24, 0.26, 0.45, 12), stone); s.position.set(x, 0, z); g.add(s); });
+    const p1 = person({ shirt: '#d98b8b', pants: '#4a4152', hair: '#c9c9c9', seated: true }); p1.position.set(-1.05, 0, 0); p1.rotation.y = Math.PI / 2; g.add(p1);
+    const p2 = person({ shirt: '#f2e6c4', pants: '#3c3f4a', hair: '#9a9a9a', seated: true }); p2.position.set(0, 0, -1.05); g.add(p2);
+    const p3 = person({ shirt: '#7d9c6c', pants: '#3a3a3a', hair: '#555', seated: true }); p3.position.set(0, 0, 1.05); p3.rotation.y = Math.PI; g.add(p3);
+    p1.userData.fan = true;
+  })();
+
+  // ── the memory board (公布欄): where everyone's memories are pinned up in the square ──
+  // Every 里 has a notice board. Here the newest memories are pinned to it as paper slips; walk up
+  // and press E (memories.js) to read them. One canvas, redrawn when the list changes.
+  const BOARD = { x: SQ.x + 10.5, z: SQ.z + 14.2, r: 4.5 };
+  const board = (function noticeBoard() {
+    const g = new THREE.Group(); g.position.set(BOARD.x, 0, BOARD.z);
+    g.rotation.y = Math.atan2(SQ.x - 2 - BOARD.x, SQ.z + 22 - BOARD.z);          // turned toward the arrival
+    group.add(g);
+    const wood = mat('#6b4a32');
+    [-1.8, 1.8].forEach(x => box(0.14, 2.9, 0.14, wood, x, 0, 0, g));
+    box(3.9, 0.12, 0.6, mat('#3f5a4a'), 0, 2.9, 0.05, g);                         // its little roof
+    box(3.6, 2.0, 0.12, wood, 0, 0.75, -0.08, g);
+    let notes = [];
+    const tex = canvasTex(1024, 600, (c, W, H) => {
+      c.fillStyle = '#2f5a45'; c.fillRect(0, 0, W, H);                             // green felt
+      c.fillStyle = '#1f3d2f'; c.fillRect(0, 0, W, 86);
+      c.fillStyle = '#fff6e0'; c.textBaseline = 'middle'; c.textAlign = 'left';
+      c.font = `700 52px ${FONT_ZH}`; c.fillText('記憶公布欄', 26, 46);
+      c.textAlign = 'right'; c.font = `600 30px ${FONT_EN}`; c.fillText('MEMORY BOARD · press E', W - 26, 46);
+      const COLS = 4, ROWS = 2, cw = (W - 40) / COLS, ch = (H - 110) / ROWS;
+      const list = notes.length ? notes : [{ year: '', body: 'Leave the first memory here.\n在這裡留下第一則記憶。', name: '' }];
+      list.slice(0, COLS * ROWS).forEach((m, i) => {
+        const x = 20 + (i % COLS) * cw + cw / 2, y = 100 + Math.floor(i / COLS) * ch + ch / 2;
+        c.save(); c.translate(x, y); c.rotate(((i * 37) % 9 - 4) * 0.012);
+        c.fillStyle = ['#fffaf0', '#fff1a8', '#ffd9d2', '#d9ecff'][i % 4]; c.fillRect(-cw / 2 + 12, -ch / 2 + 12, cw - 24, ch - 24);
+        c.fillStyle = '#c8261e'; c.beginPath(); c.arc(0, -ch / 2 + 24, 8, 0, 6.3); c.fill();
+        c.fillStyle = '#2b2f3a'; c.textAlign = 'left'; c.textBaseline = 'top';
+        if (m.year) { c.font = `700 34px ${FONT_EN}`; c.fillText(String(m.year), -cw / 2 + 28, -ch / 2 + 40); }
+        c.font = `400 22px ${FONT_ZH}`;
+        wrap(c, String(m.body || ''), cw - 60, 4).forEach((ln, k) => c.fillText(ln, -cw / 2 + 28, -ch / 2 + 84 + k * 28));
+        if (m.name) { c.font = `600 19px ${FONT_ZH}`; c.fillText('— ' + m.name, -cw / 2 + 28, ch / 2 - 46); }
+        c.restore();
+      });
+    });
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 1.85), basic('#ffffff', { map: tex }));
+    face.position.set(0, 1.75, 0.0); g.add(face);
+    const redrawBoard = redraws[redraws.length - 1];
+    return { ...BOARD, mesh: face, setNotes(list) { notes = list || []; redrawBoard(); } };
+  })();
+  function wrap(c, text, width, maxLines) {
+    const out = []; let line = '';
+    for (const ch of text.replace(/\s+/g, ' ')) {
+      if (c.measureText(line + ch).width > width) { out.push(line); line = ch; if (out.length === maxLines) break; } else line += ch;
+    }
+    if (out.length < maxLines && line) out.push(line);
+    if (out.length === maxLines && text.length > out.join('').length) out[maxLines - 1] = out[maxLines - 1].slice(0, -1) + '…';
+    return out;
+  }
+
+  // ── the sausage cart (烤香腸), by the east side ──────────────────────────────
+  const CART = { x: SQ.x + 17.5, z: SQ.z + 7.5, r: 1.9 };
+  (function cart() {
+    const g = new THREE.Group(); g.position.set(CART.x, 0, CART.z); g.rotation.y = Math.atan2(SQ.x - CART.x, SQ.z - CART.z); group.add(g);
+    box(1.7, 0.85, 0.85, mat('#e9e4d6'), 0, 0.25, 0, g);
+    [-0.6, 0.6].forEach(x => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.1, 14), mat('#2a2a2a')); w.rotation.x = Math.PI / 2; w.position.set(x, 0.25, 0.46); g.add(w); });
+    box(1.4, 0.08, 0.5, mat('#3a3a3a', { metalness: 0.6 }), 0, 1.1, 0, g);                       // the grill
+    for (let i = 0; i < 9; i++) { const s = new THREE.Mesh(cyl(0.045, 0.045, 0.4, 8), mat('#a8382a', { roughness: 0.5 })); s.rotation.x = Math.PI / 2; s.position.set(-0.6 + i * 0.15, 1.2, 0.2); g.add(s); }
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.55), basic('#ffffff', { map: canvasTex(320, 110, (c, W, H) => {
+      c.fillStyle = '#c8261e'; c.fillRect(0, 0, W, H); c.fillStyle = '#fff6e0'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = `700 ${H * 0.58}px ${FONT_ZH}`; c.fillText('烤香腸', W / 2, H * 0.54);
+    }) }));
+    front.position.set(0, 0.68, 0.44); g.add(front);
+    box(0.06, 2.6, 0.06, mat('#9aa0a6'), 0.75, 0, -0.35, g);
+    const umb = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.55, 12, 1, true), mat('#ffffff', { side: THREE.DoubleSide, map: canvasTex(256, 32, (c, W, H) => { for (let i = 0; i < 12; i++) { c.fillStyle = i % 2 ? '#f4efe4' : '#d23a2a'; c.fillRect(i * W / 12, 0, W / 12, H); } }) }));
+    umb.position.set(0.75, 2.75, -0.35); umb.castShadow = true; g.add(umb);
+    const v = person({ shirt: '#ffffff', pants: '#3c3f4a', hair: '#2b2b2b' }); v.position.set(0, 0, -0.8); g.add(v);
+    for (let i = 0; i < 4; i++) { const s = new THREE.Sprite(smoke[0] ? smoke[0].material.clone() : new THREE.SpriteMaterial({ fog: false })); s.userData = { t: i / 4, base: new THREE.Vector3() }; g.add(s); s.userData.local = true; s.userData.base.set(0, 1.25, 0); smoke.push(s); }
+  })();
+
+  // ── street lamps, potted plants along the arcades, pigeons on the stones ──────
+  (function lamps() {
+    const pole = mat('#4d5a55', { metalness: 0.5, roughness: 0.5 });
+    [[-19, -19], [19, -19], [20, 20], [-20, -6], [13, -22]].forEach(([dx, dz]) => {
+      const x = SQ.x + dx, z = SQ.z + dz;
+      box(0.16, 5.4, 0.16, pole, x, 0, z);
+      const arm = box(1.0, 0.1, 0.1, pole, x + 0.4, 5.3, z); void arm;
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.16, 0.3), basic('#fff0c8', { toneMapped: false })); head.position.set(x + 0.85, 5.25, z); group.add(head);
+      const h = new THREE.Sprite(halo); h.scale.setScalar(1.8); h.position.set(x + 0.85, 5.15, z); group.add(h);
+    });
+  })();
+  (function pots() {
+    const potI = Inst(cyl(1, 0.75, 1, 10), mat('#ffffff')), leafI = Inst(new THREE.IcosahedronGeometry(1, 0), mat('#4f8a46', { flatShading: true }));
+    const potCols = ['#b5643f', '#3a6fb0', '#c9c4b8', '#2f8a5a'].map(c => new THREE.Color(c));
+    Object.keys(SIDES).forEach(side => {
+      const sd = SIDES[side];
+      for (let a = -SQ.h + 2; a < SQ.h - 2; a += 1.6 + rnd() * 2.5) {
+        if (sd.gate && Math.abs(a) < SQ.gate + 3) continue;
+        if (rnd() < 0.4) continue;
+        const inset = SQ.h + 0.9, x = SQ.x + sd.out[0] * inset + sd.along[0] * a, z = SQ.z + sd.out[1] * inset + sd.along[1] * a;
+        const s = 0.25 + rnd() * 0.2;
+        potI.add(local(x, 0.16, z, s, s * 1.4, s), pick(potCols));
+        leafI.add(local(x, 0.16 + s * 1.4 + s * 0.8, z, s * 1.4, s * 1.6, s * 1.4, rnd() * 6));
+      }
+    });
+    potI.build(); leafI.build();
+  })();
+  const pigeons = [];
+  (function birds() {
+    const body = mat('#8d939c'), headM = mat('#6f7884');
+    for (let i = 0; i < 9; i++) {
+      const g = new THREE.Group();
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), body); b.scale.set(0.8, 0.75, 1.3); b.position.y = 0.17; g.add(b);
+      const h = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), headM); h.position.set(0, 0.3, 0.17); g.add(h);
+      const a = rnd() * Math.PI * 2, r = 5.2 + rnd() * 3.5;
+      g.position.set(SQ.x - 2 + Math.cos(a) * r, 0.05, SQ.z + 8 + Math.sin(a) * r * 0.5); g.rotation.y = rnd() * 6.28;
+      g.userData = { head: h, ph: rnd() * 6.28, home: g.position.clone() };
+      group.add(g); pigeons.push(g);
+    }
+  })();
+
   // ── per frame ───────────────────────────────────────────────────────────────
   let lastScreen = 0;
   function update(t, dt) {
     portalMats.forEach(m => { m.uniforms.uTime.value = t; });
-    ownLanterns.forEach(l => { l.rotation.z = Math.sin(t * 1.1 + l.userData.phase) * 0.05; l.rotation.y = Math.sin(t * 0.5 + l.userData.phase) * 0.3; });
-    treeSway.forEach(b => { b.m.position.y = b.y + Math.sin(t * 0.6 + b.ph) * 0.04; });
+    leafTime.value = t;
+    smoke.forEach(sp => {
+      const u = sp.userData; u.t += dt * 0.22; if (u.t > 1) u.t -= 1;
+      if (u.local) sp.position.set(u.base.x + Math.sin(u.t * 5 + 1) * 0.15, u.base.y + u.t * 1.6, u.base.z);
+      else sp.position.set(u.base.x + Math.sin(u.t * 4) * 0.2 * u.t, u.base.y + u.t * 2.4, u.base.z);
+      sp.scale.setScalar(0.25 + u.t * 1.1); sp.material.opacity = Math.sin(Math.PI * u.t) * 0.7;
+    });
+    pigeons.forEach(p => {
+      const u = p.userData, k = Math.sin(t * 3 + u.ph);
+      u.head.position.y = 0.3 - Math.max(0, k) * 0.14; u.head.position.z = 0.17 + Math.max(0, k) * 0.08;   // pecking
+      p.rotation.y += Math.sin(t * 0.3 + u.ph) * dt * 0.6;
+    });
     const music = window.__music, playing = !!(music && music.playing && !music.muted);
     people.forEach(p => {
       const u = p.userData;
@@ -684,10 +928,15 @@
 
   // what walk.js needs to keep her and the camera out of things
   const obstacles = [
-    { x: SQ.x, z: SQ.z, r: 4.6 },          // the tree's seat
+    { x: SQ.x, z: SQ.z, r: 4.6 },          // the tree's seat (first: walk.js keeps the camera out of the trunk only)
     { x: K.x, z: K.z, r: K.r },            // the karaoke stand
     { x: CHESS.x, z: CHESS.z, r: CHESS.r },
-  ];
+    { x: TEA.x, z: TEA.z, r: TEA.r },
+    { x: SHRINE.x, z: SHRINE.z, r: SHRINE.r },
+    { x: BURNER.x, z: BURNER.z, r: BURNER.r },
+    { x: CART.x, z: CART.z, r: CART.r },
+    { x: BOARD.x, z: BOARD.z, r: 1.5 },
+  ].concat(pillarRoots);
 
-  window.SQUARE = { SQ, group, treeSlots, makeLantern, obstacles, karaoke: K, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
+  window.SQUARE = { SQ, group, board, makeLantern, obstacles, karaoke: K, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
 })();
