@@ -33,7 +33,9 @@ You arrive in a square at golden hour, under a great banyan wrapped in red cloth
 
 ## Your memories
 
-Anyone can leave a memory where it happened: a line or two, a year, an optional name and an optional photo. Press **+ Leave a memory** wherever you are standing, and it hangs there as a paper lantern for the next visitor to find. Every memory is read by the makers before it appears. Setup and moderation: [`docs/MEMORIES.md`](docs/MEMORIES.md).
+Anyone can leave a memory where it happened. Press **+ Leave a memory** wherever you are standing: the form (Chinese first, English under it) offers a fill-in line for that place, such as 「你第一次自己去西門町，是去……」 in Ximending or 「你在 101 下面等誰？」 in Xinyi, or 「或者，寫你想寫的」 for anything else; asks whose memory it is (我的 mine, 爸媽的 my parents', 阿公阿嬤的 my grandparents': ask them at home); and offers only the years that street is (Xinyi cannot be 1962; the square goes back to 1950). A name and a photo are optional. It hangs there as a paper lantern for the next visitor to find, or, in the square, is pinned to the memory board. Every memory is read by the makers before it appears, and the form says so before you send; its privacy note says what is kept, where, that a photo is re-encoded in your browser so its EXIF location never leaves your phone, and how to have a memory taken down. When the makers pause submissions the form says 「暫停收件」 and the lanterns stay.
+
+The street already holds nine of the makers' own memories (marked 本頁作者 · the makers of this page): 1962 and 1987 in the square, 1990, 1992 and 1994 in Ximending, 2008 and 2014 in Dadaocheng, 2020 and this year in Xinyi. Setup and moderation: [`docs/MEMORIES.md`](docs/MEMORIES.md).
 
 ## The photographs
 

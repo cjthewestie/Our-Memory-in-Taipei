@@ -1,0 +1,46 @@
+# keepalive.yml — keep the free Supabase project awake.
+#
+# 2026-11-03 (item #1 of research/similar-works/README.md §5): Supabase pauses a free project after
+# about a week with no activity, and a paused project means no lanterns and no new memories. Every
+# three days this asks the project for one approved memory id over its public REST endpoint, which
+# counts as activity. It is a schedule in the repo, not a build step: the site is still plain files.
+#
+# It reads two repository secrets (Settings → Secrets and variables → Actions → New repository secret):
+#   SUPABASE_URL       the project URL, e.g. https://abcdefghijkl.supabase.co
+#   SUPABASE_ANON_KEY  the "anon public" key (the same one in memories-config.js; never the service_role key)
+# Until both are set it does nothing and passes. Steps for CJ: docs/MEMORIES.md.
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: '17 3 */3 * *'   # 03:17 UTC (11:17 in Taipei) every third day
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ask the memories table for one approved id
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "SUPABASE_URL / SUPABASE_ANON_KEY are not set: nothing to keep awake yet (see docs/MEMORIES.md)."
+            exit 0
+          fi
+          url="${SUPABASE_URL%/}/rest/v1/memories?select=id&status=eq.approved&limit=1"
+          for i in 1 2 3; do
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 30 \
+              -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" "$url" || true)
+            code=${code:-000}; echo "attempt $i: HTTP $code"
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then exit 0; fi
+            sleep $((i * 20))
+          done
+          echo "::error::The Supabase project did not answer (HTTP $code). If it says paused, restore it in the dashboard."
+          head -c 300 /tmp/body || true
+          exit 1
