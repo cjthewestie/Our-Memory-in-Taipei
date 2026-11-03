@@ -114,8 +114,8 @@
 
   // the credits: a small caps button top-right under the title, and the block it opens
   const credBtn = document.createElement('button');
-  credBtn.type = 'button'; credBtn.id = 'photoCreditsBtn'; credBtn.textContent = 'Photo credits';
-  credBtn.setAttribute('aria-label', 'Photo credits: every photograph, its rights holder and its licence');
+  credBtn.type = 'button'; credBtn.id = 'photoCreditsBtn'; credBtn.textContent = 'Credits';
+  credBtn.setAttribute('aria-label', 'Credits: every photograph, piece of music and recorded sound, its author and its licence');
   document.body.appendChild(credBtn);
   const credits = document.createElement('aside');
   credits.id = 'photoCredits'; credits.hidden = true;
@@ -129,9 +129,27 @@
       '<ol class="pc-list">' + SPOTS.map(s =>
         '<li><span class="pc-place">' + esc(s.en) + ' <span class="pc-zh">' + esc(s.zh) + '</span></span>' +
         '<span class="pc-line">' + esc(s.when) + ' · ' + esc(s.by) + ' · ' + esc(s.holder) + ' · <a href="' + esc(s.licenceUrl) + '" target="_blank" rel="noopener license">' + esc(s.licence) + '</a> · <a href="' + esc(s.src) + '" target="_blank" rel="noopener">source</a></span></li>'
-      ).join('') + '</ol>' +
+      ).join('') + '</ol>' + soundCredits() +
     '</div>';
   document.body.appendChild(credits);
+  // the music and the sounds (music.js, ambience.js; 2026-11-03, CJ: 「不要用youtube了選適合的無版權音樂」). All public
+  // domain or CC0, so no credit is required; it is given anyway, as a courtesy and so anyone can find the originals.
+  function soundCredits() {
+    const M = window.__music, A = window.__ambience;
+    const mus = M && M.credits ? M.credits : [], amb = A && A.credits ? A.credits : [];
+    if (!mus.length && !amb.length) return '';
+    const link = (href, text, rel) => href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener' + (rel ? ' license' : '') + '">' + esc(text) + '</a>' : esc(text);
+    return '<h2 class="pp-name pc-h">The music and the sounds</h2>' +
+      '<p class="pc-intro">Every piece is public domain or CC0: free to use with no credit required, credited here anyway. The music is from FreePD, chosen by its title, length and loudness; the street sounds are CC0 field recordings from freesound.org, and the rest of the square is synthesised in the page.</p>' +
+      '<ol class="pc-list">' +
+      mus.map(d => d.tracks.map(t =>
+        '<li><span class="pc-place">' + esc(t.title) + ' <span class="pc-zh">' + esc(d.label) + '</span></span>' +
+        '<span class="pc-line">' + esc(t.by) + ' · ' + link(t.page, t.licence, true) + '</span></li>').join('')).join('') +
+      amb.map(a =>
+        '<li><span class="pc-place">' + esc(a.what) + '</span>' +
+        '<span class="pc-line">' + esc(a.title ? a.title + ' · ' + a.by : a.by) + ' · ' + (a.page ? link(a.page, a.licence, true) : esc(a.licence)) + '</span></li>').join('') +
+      '</ol>';
+  }
 
   function esc(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 

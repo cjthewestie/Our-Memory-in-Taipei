@@ -905,7 +905,7 @@
   let kNear = false;
   function sing() {
     const m = window.__music; if (!m) return;
-    if (m.playing && !m.muted) { if (m.mode === 'youtube') m.nextVideo(); else m.nextLocal(); return; }
+    if (m.playing && !m.muted) { m.next(); return; }
     if (m.muted) m.setMuted(false);
     if (!m.playing) m.playPause();
   }
@@ -940,5 +940,13 @@
     { x: BOARD.x, z: BOARD.z, r: 1.5 },
   ].concat(pillarRoots);
 
-  window.SQUARE = { SQ, group, board, makeLantern, obstacles, karaoke: K, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
+  // where the square's sounds come from, for ambience.js (item #8, 2026-11-03): world x / z of each thing that makes one
+  const sources = {
+    tree: { x: SQ.x, z: SQ.z }, chess: { x: CHESS.x, z: CHESS.z }, tea: { x: TEA.x, z: TEA.z }, shrine: { x: SHRINE.x, z: SHRINE.z },
+    burner: { x: BURNER.x, z: BURNER.z }, cart: { x: CART.x, z: CART.z }, karaoke: { x: K.x, z: K.z },
+    pigeons: pigeons.map(p => ({ x: p.userData.home.x, z: p.userData.home.z })),
+    terrazzo: 10.5,                      // the terrazzo circle round the tree; red brick beyond it
+  };
+
+  window.SQUARE = { SQ, group, board, makeLantern, obstacles, karaoke: K, sources, update, SIDES, leave() { kNear = false; kBubble.hidden = true; } };
 })();

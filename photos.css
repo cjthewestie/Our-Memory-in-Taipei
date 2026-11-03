@@ -126,3 +126,5 @@
   .pc-body { padding: 18px 16px 20px; }
   #photoCreditsBtn { top: auto; bottom: 72px; right: 20px; }   /* bottom-right on a phone, on the music button's row (style.css .hud-music bottom 72px); the title and the year share the row below */
 }
+/* the music and the sounds, under the photographs in the same panel (2026-11-03) */
+#photoCredits .pc-h { margin-top: 26px; }

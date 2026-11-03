@@ -130,4 +130,4 @@ body.walk .hud-music:not(.open) .mus-play svg { fill: var(--bone); }
 .wk-sq-line span { white-space: nowrap; }
 body.wk-welcome .wk-square { visibility: hidden; }
 body.walk .hud-music:not(.open) .mus-mute { opacity: 1; color: var(--bone); }
-body.walk .hud-music:not(.open) .mus-mute[aria-pressed="true"] { color: var(--ink); }
+body.walk .hud-music:not(.open) .mus-mute[aria-pressed="true"] { color: var(--ink); background: var(--bone); border-color: var(--bone); }   /* sound on: a lit pill (the chrome rule above paints it dark-on-dark here) */

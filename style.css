@@ -110,9 +110,8 @@ html, body {
   vertical-align: middle;
 }
 
-/* the music player, bottom-left: the same rule-and-caps language as the chapter column. music.js drives it;
-   the YouTube API replaces #musEmbed with its iframe inside .mus-hide, a box clipped to a pixel (the bar rules
-   sit at the end of this file, after the chrome system they belong to). */
+/* the music player, bottom-left: the same rule-and-caps language as the chapter column. music.js drives it
+   (the bar rules sit at the end of this file, after the chrome system they belong to). */
 .hud-music {
   position: absolute;
   left: clamp(20px, 4vw, 56px);
@@ -154,7 +153,7 @@ html, body {
 
 @media (max-width: 480px) {
   .hud-music { left: 20px; bottom: 72px; width: calc(100vw - 40px); }   /* above the year, which owns the bottom-left corner on a phone */
-  .hud-music .mus-k, .hud-music .mus-decades { display: none; }   /* the track line, the bar and the sound toggle only (CJ, 2026-09-24: 「youtube畫面太大都擋住了」, now a bar) */
+  .hud-music .mus-k, .hud-music .mus-decades { display: none; }   /* the track line, the bar and the sound toggle only (CJ, 2026-09-24: the video box was too big, now a bar) */
   .hud-music button { font-size: 10px; padding: 5px 9px 4px 11px; }
   .hud-title { font-size: 10px; letter-spacing: 0.24em; top: auto; bottom: 28px; }   /* bottom-right on a phone: the chapter column owns the top */
   .hud-chapter { gap: 12px; }
@@ -327,13 +326,11 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
 .hud-title  { font-size: 11.5px; font-weight: 600; letter-spacing: 0.16em; }
 .mus-k      { font-size: 10.5px; font-weight: 500; letter-spacing: 0.14em; }
 
-/* The audio bar (CJ, 2026-09-24: 「左下角youtube 變成音訊條可以拉就好」). The MV box is gone; what plays is heard,
-   not seen. The bar is the same hand as the rest of the chrome: a hairline rule for the track, ink for the part
+/* The audio bar (CJ, 2026-09-24: 「左下角...變成音訊條可以拉就好」; the page's own public-domain files since
+   2026-11-03). What plays is heard, not seen. The bar is the same hand as the rest of the chrome: a hairline rule for the track, ink for the part
    already played (the one filled state), a 2 px tick for the head, dim tabular digits either side, and the play
    button a plain outlined square like the pills. music.js sets --p (the fraction) through the fill width and the
    tick's left, on a 250 ms timer. */
-.mus-hide { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
-.mus-hide iframe, #musEmbed { display: block; width: 200px; height: 200px; border: 0; }   /* the player keeps the size its script expects; the box clips it away */
 .mus-bar { display: flex; align-items: center; gap: 10px; min-height: 22px; }
 .hud-music .mus-play { flex: none; width: 24px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .mus-play svg { width: 9px; height: 9px; fill: currentColor; display: block; }
@@ -349,3 +346,14 @@ body.in-fog .ph-credits-btn { background: rgba(43, 47, 58, 0.10); border-color: 
 .mus-scrub:focus-visible::before { background: var(--hud-fg); }
 .hud-music.scrubbing { user-select: none; -webkit-user-select: none; }
 @media (max-width: 480px) { .mus-bar { gap: 8px; } .mus-track { font-size: 12px; } }
+
+/* ambience.js: the one-time note on an iPhone whose Safari cannot tell the ringer switch the page is playback
+   (item #8, 2026-11-03). The same pill hand as the music control, above it, and gone after six seconds. */
+.amb-hint {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 150px); transform: translateX(-50%);
+  max-width: min(420px, calc(100vw - 32px)); padding: 8px 14px; border-radius: 14px; z-index: 30;
+  background: color-mix(in srgb, var(--ink) 78%, transparent); color: var(--bone);
+  font-size: 12px; line-height: 1.5; letter-spacing: 0.04em; text-align: center; pointer-events: none;
+  transition: opacity 500ms ease;
+}
+.amb-hint.gone { opacity: 0; }

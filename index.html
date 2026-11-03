@@ -40,11 +40,11 @@
     <!-- the opening title (issue #16): waits in the fog at scroll 0, app.js fades and recolours it -->
     <div class="hud-opening" id="opening"><div class="op-big"><span>Our Memory</span> <span>in Taipei</span></div><div class="op-sub">Three generations. One street.</div></div>
     <div class="hud-year"><span class="hud-year-k">YEAR</span><span id="year">1853</span></div>
-    <!-- the decade music player (music.js): an audio bar over an unseen YouTube player per decade, local loops when YouTube cannot play.
-         CJ, 2026-09-24: 「左下角youtube 變成音訊條可以拉就好」 -->
+    <!-- the decade music player (music.js): an audio bar over two public-domain tracks per decade and two for the square,
+         all the page's own files (CJ, 2026-11-03: 「不要用youtube了選適合的無版權音樂」; the bar itself, 2026-09-24) -->
     <div class="hud-music" id="music" role="group" aria-label="Music">
       <div class="mus-body">
-        <div class="mus-k">MUSIC · <span id="musDecade">1980s</span> · <span id="musStatus">connecting to YouTube…</span></div>
+        <div class="mus-k">MUSIC · <span id="musDecade">1980s</span> · <span id="musStatus">public domain</span></div>
         <div class="mus-track" id="musTrack"></div>
         <div class="mus-bar">
           <button class="mus-play" id="musPlay" type="button" aria-label="Play" aria-pressed="false">
@@ -57,15 +57,14 @@
         </div>
         <div class="mus-row">
           <div class="mus-decades">
-            <button type="button" data-decade="1980s" aria-label="Play the 1980s videos">80s</button>
-            <button type="button" data-decade="1990s" aria-label="Play the 1990s videos">90s</button>
-            <button type="button" data-decade="2000s" aria-label="Play the 2000s videos">00s</button>
-            <button type="button" data-decade="2010s" aria-label="Play the 2010s videos">10s</button>
+            <button type="button" data-decade="1980s" aria-label="Play the 1980s music">80s</button>
+            <button type="button" data-decade="1990s" aria-label="Play the 1990s music">90s</button>
+            <button type="button" data-decade="2000s" aria-label="Play the 2000s music">00s</button>
+            <button type="button" data-decade="2010s" aria-label="Play the 2010s music">10s</button>
+            <button type="button" data-decade="square" aria-label="Play the square's music">廣場</button>
           </div>
           <button class="mus-mute" id="musMute" type="button" title="Sound (m)" aria-pressed="false">Click to play</button>
         </div>
-        <!-- the player lives here, clipped to nothing and transparent; never display: none, or some browsers stop the audio -->
-        <div class="mus-hide" id="musBox" aria-hidden="true"><div id="musEmbed"></div></div>
       </div>
     </div>
   </div>
@@ -87,6 +86,7 @@
   <script src="scene-dadao.js"></script>
   <script src="scene-tower.js"></script>
   <script src="music.js"></script>
+  <script src="ambience.js"></script>            <!-- item #8: the square's sounds, the street beds, her footsteps; the same mute as the music -->
   <script src="photos.js"></script>   <!-- issue #17: clickable points that show the real place -->
   <script src="square.js"></script>              <!-- the square: the banyan, the arcades, the three gates, the karaoke stand -->
   <script src="walk.js"></script>                <!-- the square, the gates, free walking; ?tour=1 for the scroll film -->

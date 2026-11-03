@@ -43,5 +43,7 @@ Every photograph is licensed, and every one is credited on the page. Some carry 
 
 ## Sound
 
-Four songs, one per decade, chosen for the years they belong to. The player sits bottom-left and starts muted — nothing plays until you ask for it.
+Two pieces of music for each decade and two for the square at golden hour, all public domain (from FreePD), and all the page's own files — nothing streams from anywhere else. The player sits bottom-left: play and pause, a bar you can drag, the decade buttons, and the sound switch. On a phone the sound always starts off, and only the sound switch turns it on.
+
+With the sound on you also hear the place itself: cicadas in the banyan, chess pieces and tea cups, the shrine's bell, the sausage cart, pigeons and the karaoke stand's little tune in the square; a crowd in 西門町, a New Year market with firecrackers a few streets away in 大稻埕, the metro passing under 信義; and her footsteps on brick, terrazzo and asphalt. Every track and recording is listed in the Credits panel and in [`asset/music/CREDITS.md`](asset/music/CREDITS.md). On an iPhone with an older Safari the ringer switch can silence the street sounds while the music plays; the page says so once.
 

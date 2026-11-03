@@ -1590,6 +1590,9 @@
   // mapping, and the portrait fov lift. Read-only from their side except the camera and the girl.
   window.RIG = { camera, girl, poseGirl, uAtZ, BOUNDS, eraAtU, yearAtU, renderer, canvas, IS_PHONE, PORTRAIT,
                  get progress() { return progress; }, get eraIdx() { return eraIdx; }, maxScroll,
+                 // her gait, for ambience.js's footsteps (item #8, 2026-11-03): stride is the phase poseGirl swings the
+                 // legs by (a foot lands each time sin(stride) crosses zero), move 0 standing … 1 in motion, run 0 walk … 1 run
+                 gait: { get stride() { return stride; }, get move() { return move; }, get run() { return Math.min(1, run * 1.4); } },
                  jumpToU(u) { window.scrollTo(0, u * maxScroll()); progress = u; placeCamera(u); setEra(eraAtU(u), true); } };
 
   // a tiny probe for testing; harmless in the demo
