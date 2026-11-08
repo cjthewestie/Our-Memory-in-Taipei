@@ -1,0 +1,25 @@
+{
+  "errors": [
+    "404 http://127.0.0.1:8951/asset/music/private/manifest.js"
+  ],
+  "off": {
+    "calls": 1,
+    "tris": 2
+  },
+  "on": {
+    "calls": 1,
+    "tris": 2
+  },
+  "stats": {
+    "aoDecals": 16,
+    "spills": 22,
+    "sunBox": [
+      -60,
+      60,
+      60,
+      -60
+    ],
+    "covered": true,
+    "drawCalls": 5
+  }
+}

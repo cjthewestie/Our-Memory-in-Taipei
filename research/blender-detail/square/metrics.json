@@ -1,132 +1,328 @@
 {
+ "before": {
+  "label": "before",
+  "when": "2026-10-31T19:11:31.311Z",
+  "viewport": "1440x900",
+  "console": [
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x10c00484a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+   },
+   {
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+   },
+   {
+    "type": "warning",
+    "text": "Unrecognized feature: 'web-share'."
+   }
+  ],
+  "errors": [],
+  "httpErrors": [
+   {
+    "status": 404,
+    "url": "http://127.0.0.1:8933/asset/music/private/manifest.js"
+   }
+  ],
+  "views": {
+   "1": "arrival",
+   "2": "west-gate",
+   "3": "north-gate"
+  },
+  "squareReady": true,
+  "frame": {
+   "frames": 2,
+   "meanMs": 2724.9,
+   "p95Ms": 5433.2
+  },
+  "render": {
+   "calls": 1,
+   "triangles": 2,
+   "geometries": 1356,
+   "textures": 218
+  }
+ },
+ "after": {
+  "label": "after",
+  "when": "2026-10-31T19:43:04.957Z",
+  "viewport": "1440x900",
+  "console": [
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1340043f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+   },
+   {
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+   },
+   {
+    "type": "warning",
+    "text": "Unrecognized feature: 'web-share'."
+   }
+  ],
+  "errors": [],
+  "httpErrors": [
+   {
+    "status": 404,
+    "url": "http://127.0.0.1:8933/asset/music/private/manifest.js"
+   }
+  ],
+  "views": {
+   "1": "arrival",
+   "2": "west-gate",
+   "3": "north-gate"
+  },
+  "squareReady": true,
+  "frame": {
+   "frames": 3,
+   "meanMs": 1583.27,
+   "p95Ms": 2333.3
+  },
+  "render": {
+   "calls": 1,
+   "triangles": 2,
+   "geometries": 1267,
+   "textures": 236
+  }
+ },
+ "renderTiming": {
+  "how": "scratchpad rtime.cjs: 12 synchronous renderer.render(scene, camera) from the arrival view (SQ.z+SQ.h-12) at 1440x900, each closed by a 1-px readPixels, first 2 dropped; headless SwiftShader, same machine, back to back (load average ~35-60, 20 agents running)",
   "before": {
-    "label": "before",
-    "when": "2026-10-31T19:11:31.311Z",
-    "viewport": "1440x900",
-    "console": [
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x10c00484a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
-      },
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
-      },
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
-      },
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x10c00480e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
-      },
-      {
-        "type": "error",
-        "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
-      },
-      {
-        "type": "warning",
-        "text": "Unrecognized feature: 'web-share'."
-      }
-    ],
-    "errors": [],
-    "httpErrors": [
-      {
-        "status": 404,
-        "url": "http://127.0.0.1:8933/asset/music/private/manifest.js"
-      }
-    ],
-    "views": {
-      "1": "arrival",
-      "2": "west-gate",
-      "3": "north-gate"
-    },
-    "squareReady": true,
-    "frame": {
-      "frames": 2,
-      "meanMs": 2724.9,
-      "p95Ms": 5433.2
-    },
-    "render": {
-      "calls": 1,
-      "triangles": 2,
-      "geometries": 1356,
-      "textures": 218
-    }
+   "page": "index.html without the three square script tags",
+   "medianMs": 389.7,
+   "meanMs": 745.2,
+   "minMs": 286.4,
+   "drawCalls": 1399,
+   "triangles": 1045374
   },
   "after": {
-    "label": "after",
-    "when": "2026-10-31T19:43:04.957Z",
-    "viewport": "1440x900",
-    "console": [
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x1340043f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
-      },
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
-      },
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
-      },
-      {
-        "type": "warning",
-        "text": "[.WebGL-0x1340043e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
-      },
-      {
-        "type": "error",
-        "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
-      },
-      {
-        "type": "warning",
-        "text": "Unrecognized feature: 'web-share'."
-      }
-    ],
-    "errors": [],
-    "httpErrors": [
-      {
-        "status": 404,
-        "url": "http://127.0.0.1:8933/asset/music/private/manifest.js"
-      }
-    ],
-    "views": {
-      "1": "arrival",
-      "2": "west-gate",
-      "3": "north-gate"
-    },
-    "squareReady": true,
-    "frame": {
-      "frames": 3,
-      "meanMs": 1583.27,
-      "p95Ms": 2333.3
-    },
-    "render": {
-      "calls": 1,
-      "triangles": 2,
-      "geometries": 1267,
-      "textures": 236
-    }
+   "page": "index.html",
+   "medianMs": 347.8,
+   "meanMs": 370.4,
+   "minMs": 323.6,
+   "drawCalls": 1401,
+   "triangles": 1216620
   },
-  "renderTiming": {
-    "how": "scratchpad rtime.cjs: 12 synchronous renderer.render(scene, camera) from the arrival view (SQ.z+SQ.h-12) at 1440x900, each closed by a 1-px readPixels, first 2 dropped; headless SwiftShader, same machine, back to back (load average ~35-60, 20 agents running)",
-    "before": {
-      "page": "index.html without the three square script tags",
-      "medianMs": 389.7,
-      "meanMs": 745.2,
-      "minMs": 286.4,
-      "drawCalls": 1399,
-      "triangles": 1045374
-    },
-    "after": {
-      "page": "index.html",
-      "medianMs": 347.8,
-      "meanMs": 370.4,
-      "minMs": 323.6,
-      "drawCalls": 1401,
-      "triangles": 1216620
-    },
-    "note": "rAF frame time under this load is 1-3 frames per 3 s on both pages, so it is noise; the forced-render minimum (+13%) and the triangle count (+16.4%) are the comparable numbers."
+  "note": "rAF frame time under this load is 1-3 frames per 3 s on both pages, so it is noise; the forced-render minimum (+13%) and the triangle count (+16.4%) are the comparable numbers."
+ },
+ "paving-fix": {
+  "label": "paving-fix",
+  "when": "2026-10-31T19:52:24.474Z",
+  "viewport": "1440x900",
+  "console": [
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1240043a800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x12400438400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x12400438400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x12400438400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+   },
+   {
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+   },
+   {
+    "type": "warning",
+    "text": "Unrecognized feature: 'web-share'."
+   }
+  ],
+  "errors": [],
+  "httpErrors": [
+   {
+    "status": 404,
+    "url": "http://127.0.0.1:8957/asset/music/private/manifest.js"
+   }
+  ],
+  "views": {
+   "1": "arrival",
+   "2": "west-gate",
+   "3": "north-gate"
+  },
+  "squareReady": true,
+  "frame": {
+   "frames": 3,
+   "meanMs": 1016.6,
+   "p95Ms": 1450
+  },
+  "render": {
+   "calls": 1,
+   "triangles": 2,
+   "geometries": 1267,
+   "textures": 236
   }
+ },
+ "quiet-before": {
+  "label": "quiet-before",
+  "when": "2026-11-08T20:37:33.509Z",
+  "viewport": "1440x900",
+  "console": [
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x12400440400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1240043f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1240043f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1240043f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+   },
+   {
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+   },
+   {
+    "type": "warning",
+    "text": "Unrecognized feature: 'web-share'."
+   }
+  ],
+  "errors": [],
+  "httpErrors": [
+   {
+    "status": 404,
+    "url": "http://127.0.0.1:8961/asset/music/private/manifest.js"
+   }
+  ],
+  "views": {
+   "1": "arrival",
+   "2": "west-gate",
+   "3": "north-gate"
+  },
+  "squareReady": true,
+  "frame": {
+   "frames": 3,
+   "meanMs": 1711.03,
+   "p95Ms": 2233.3
+  },
+  "render": {
+   "calls": 1,
+   "triangles": 2,
+   "geometries": 1325,
+   "textures": 218
+  }
+ },
+ "quiet-after": {
+  "label": "quiet-after",
+  "when": "2026-11-08T20:40:16.917Z",
+  "viewport": "1440x900",
+  "console": [
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x10400442600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1040043f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1040043f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+   },
+   {
+    "type": "warning",
+    "text": "[.WebGL-0x1040043f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+   },
+   {
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+   },
+   {
+    "type": "warning",
+    "text": "Unrecognized feature: 'web-share'."
+   }
+  ],
+  "errors": [],
+  "httpErrors": [
+   {
+    "status": 404,
+    "url": "http://127.0.0.1:8961/asset/music/private/manifest.js"
+   }
+  ],
+  "views": {
+   "1": "arrival",
+   "2": "west-gate",
+   "3": "north-gate"
+  },
+  "squareReady": true,
+  "frame": {
+   "frames": 2,
+   "meanMs": 3699.85,
+   "p95Ms": 4916.6
+  },
+  "render": {
+   "calls": 1,
+   "triangles": 2,
+   "geometries": 1267,
+   "textures": 236
+  }
+ },
+ "contrast-2026-11-09": {
+  "ink": "#2b2f3a",
+  "method": "WCAG ratio of ink vs pavement pixels under each HUD block, quiet-after shots",
+  "desktopMusicBar": {
+   "mean": 6.92,
+   "p10": 5.26
+  },
+  "desktopTitle": {
+   "mean": 8.62,
+   "p10": 6.8
+  },
+  "phoneMusicBar": {
+   "mean": 7.34,
+   "p10": 4.64
+  },
+  "phoneCredits": {
+   "mean": 7.1,
+   "p10": 5.79
+  },
+  "beforeFix": {
+   "desktopMusicBar": {
+    "mean": 3.81,
+    "p10": 2.25
+   },
+   "phoneMusicBar": {
+    "mean": 5.46,
+    "p10": 2.55
+   }
+  }
+ },
+ "frameNote-2026-11-09": "Headless Chromium renders with SwiftShader (CPU), 2-4 frames per 3 s on both pages, and load rose from 4.5 to 65 during the run as other sessions started. Not a usable frame-time number; needs a visible-window run on CJ's machine."
 }

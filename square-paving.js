@@ -99,10 +99,11 @@
   // d 2|3 the upper|lower halves of a vertical one (d 2 pairs with the cell above it, d 3 below).
   // The pattern repeats every 4 cells, so a 32-cell canvas tiles.
   const BRICK_M = 3.2, BRICK_CELLS = 32;
-  // tones from the 紅樓 plaza and Minsheng East Road photos: dusty sun-faded brick red, with burnt-brown and faded-pink outliers
-  const BRICK_TONES = ['#a46a5a', '#9a6253', '#ad7464', '#93594b', '#a66d5c', '#b37e6e', '#8d5649', '#a87060'].map(hex);
-  const BRICK_ODD = { burnt: hex('#7d4a3e'), faded: hex('#b8958a'), fresh: hex('#b8644c') };
-  const JOINT = hex('#5a5045');
+  // tones from the 紅樓 plaza photos: pale sun-faded pink brick (the plaza's pavers read pink-grey, not deep red),
+  // kept light and close together so the HUD's ink text holds 4.5:1 over it (taipei-orch qa, 2026-11-01)
+  const BRICK_TONES = ['#c99a8c', '#c4948a', '#cfa293', '#c09086', '#cb9d8f', '#d2a898', '#c39488', '#cc9e90'].map(hex);
+  const BRICK_ODD = { burnt: hex('#b4877b'), faded: hex('#d8bfb4'), fresh: hex('#d09482') };
+  const JOINT = hex('#a8988a');
   function paintBrick(N, rand) {
     const F = field(N, N), c = N / BRICK_CELLS, dirt = fbm(rand, N, N, 4, 4), grain = noise(rand, N, N, N / 4), polish = noise(rand, N, N, 3);
     const jw = Math.max(0.8, c * 0.09);   // joint half-width in px (about 1 cm)
@@ -129,7 +130,7 @@
       if (r1 > 0.965) t = BRICK_ODD.burnt; else if (r1 < 0.03) t = BRICK_ODD.faded; else if (r1 > 0.94) t = BRICK_ODD.fresh;
       const bevel = sstep(0, c * 0.22, e - jw);                         // rounded arris
       const wear = 0.9 + 0.1 * bevel;                                   // grime caught along the edges
-      const v = (0.95 + r2 * 0.08) * wear * (0.86 + dirt[p] * 0.2) * (0.96 + grain[p] * 0.08);
+      const v = (0.97 + r2 * 0.05) * wear * (0.93 + dirt[p] * 0.1) * (0.97 + grain[p] * 0.06);
       F.col[o] = t[0] * v; F.col[o + 1] = t[1] * v; F.col[o + 2] = t[2] * v;
       F.hgt[p] = 0.35 + 0.6 * bevel + (grain[p] - 0.5) * 0.08;
       F.rgh[p] = 0.84 + (grain[p] - 0.5) * 0.1 - polish[p] * 0.14;     // foot-polished patches read a little glossier
