@@ -440,6 +440,7 @@ function frame(now) {
   if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
   heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);
   heroPos.x = Math.max(-21, Math.min(21, heroPos.x + Math.sin(heroHead) * heroSpeed * dt)); heroPos.z = Math.max(11, Math.min(60, heroPos.z + Math.cos(heroHead) * heroSpeed * dt));
+  if (heroPos.z > 59.5 && !window.__leaving) { window.__leaving = true; location.href = 'square.html'; }                 // out of the south end, back to the square
   if (hero) { hero.group.position.copy(heroPos); hero.group.rotation.y = heroHead; hero.update(dt, heroSpeed, heroTurn); }
   if (mode === 'follow') {
     camTarget.lerp(new T.Vector3(heroPos.x, 0.72, heroPos.z), Math.min(1, dt * 7));
