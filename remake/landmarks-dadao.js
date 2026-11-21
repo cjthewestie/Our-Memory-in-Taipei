@@ -13,6 +13,30 @@
   const F = 0.85, AB = -1.75, BACK = -9.5, PI = Math.PI;
   const FONT = '"PingFang TC","Heiti TC","Noto Sans TC",system-ui,sans-serif';
 
+  // ── the designed pieces of 大稻埕's own furniture (kind B): one per event, plus the street's exhibit board. Every field is a
+  // DESIGN kit option (docs/signage/kit.md); why each form, and its reference: docs/signage/designs-dadao.md. Neighbours never
+  // share form + layout: archway booth · street news case · forecourt banners and statue · film billboard · deco column · food booth · quay installation · container stage.
+  const DADAO_DESIGNS = {
+    'new-year-goods-street': { form: 'booth', booth: 'market', layout: 'market', palette: 'market', head: '迪化街年貨大街', big: '迪化年貨', kicker: '試吃 · 南北貨', kicker2: '一九九六起',
+      en: 'Dihua Street Lunar New Year Market', date: '1996', venue: '迪化街一段 · 永樂市場至民生西路' },
+    'dihua-shophouse-rows': { form: 'poster', mount: 'case', layout: 'news', palette: 'news', head: '搶救迪化街', big: '迪化街保住了', kicker: '77 棟歷史街屋',
+      en: 'The street that was not widened: 77 historic shophouses kept under the 1995 plan', date: '1995', venue: '大稻埕歷史風貌特定專用區' },
+    'city-god-procession': { form: 'poster', mount: 'banner', layout: 'lantern', palette: ['#7a1410', '#4a0c08', '#ffe9b0', '#c4201a', '#f0c75a', '#1f6b5a'], motif: 'parade', head: '霞海城隍遶境', big: '五月十三', kicker: '人看人',
+      en: 'Xiahai City God Procession', date: '農曆五月十三', venue: '霞海城隍廟出發' },
+    'yuelao-matchmaker-crowds': { form: 'statue', motif: 'thread', plinth: 'drum', palette: 'temple', head: '月下老人', story: '一條紅線，排到騎樓外的人潮',
+      en: 'Yue Lao, the matchmaker of Xiahai temple', date: '1971 起' },
+    'film-twa-tiu-tiann-2014': { form: 'poster', mount: 'billboard', layout: 'painted', palette: ['#2a1f3d', '#e86a3a', '#fff1d0', '#f3c14b', '#c8283a', '#2a8f86'], head: '大稻埕', big: '大稻埕',
+      kicker: '穿越回到一九二〇', en: 'Twa-Tiu-Tiann (2014)', date: '2014', venue: '2014.1.30 春節檔 全台上映' },
+    'tttifa-arts-festival': { form: 'poster', mount: 'column', layouts: ['deco', 'premiere', 'memory', 'deco'], layout: 'deco', palette: 'deco', head: '大稻埕國際藝術節', big: '一九二〇',
+      kicker: 'COSTUME PARADE', kicker2: '變裝遊行', en: 'Twatutia International Festival of Arts', date: '2015', venue: '永樂廣場 · 十月' },
+    'solitary-gourmet-yongle': { form: 'booth', booth: 'food', layout: 'memory', motif: 'bowl', palette: ['#f4efe4', '#e3dccb', '#1a1410', '#b3261e', '#d9a13a', '#2f5a3a'], head: '孤獨的美食家', big: '一人份',
+      kicker: '雞肉飯 · 旗魚米粉', en: 'The Solitary Gourmet, season 5', date: '2015', venue: '永樂市場' },
+    'dadaocheng-fireworks': { form: 'installation', piece: 'burst', layout: 'nightart', palette: 'river', head: '大稻埕情人節煙火', big: '七夕', kicker: '夏日節',
+      en: 'Dadaocheng Summer Festival fireworks', date: '2006 起', venue: '大稻埕碼頭 · 三、五號水門' },
+    'pier5-container-market': { form: 'booth', booth: 'container', layout: 'concert', motif: 'mic', palette: ['#f2f2ee', '#dfe3e6', '#14202c', '#ff6b3d', '#f2c14e', '#1f5e8c'], head: 'PIER5 貨櫃市集', big: 'PIER 5',
+      kicker: 'LIVE · SUNSET', en: 'Dadaocheng Wharf Container Market', date: '2018.4.1', venue: '大稻埕碼頭 五號水門', props: ['speakers'] },
+  };
+
   window.LANDMARKS_DADAO = function (E, ctx) {
     const { T, scene, triMat, TEX, MATS, GLOW, col } = E, FX = ctx.FX, BLOCKS = ctx.BLOCKS;
     const std = (c, rough = 0.7, metal = 0) => new T.MeshStandardMaterial({ color: col(c), roughness: rough, metalness: metal });
@@ -55,13 +79,21 @@
     const at = (g, mesh, x, y, z, ry = 0) => { mesh.position.set(x, y, z); mesh.rotation.y = ry; g.add(mesh); return mesh; };
 
     // ── text and pictures on canvas ──
-    function canvasMat(w, h, draw, glow = 0.2, ppm = 220) {
-      const cv = document.createElement('canvas'); cv.width = Math.max(32, Math.min(1024, Math.round(w * ppm))); cv.height = Math.max(32, Math.min(1024, Math.round(h * ppm)));
-      draw(cv.getContext('2d'), cv.width, cv.height); const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
-      return new T.MeshStandardMaterial({ map: t, roughness: 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow });
+    // mat: one of DESIGN.MATERIALS. Then the board is that material (the Midjourney texture under asset/textures/signs/ once it lands,
+    // a code-drawn one until then, repainted when it lands) and `draw` only letters it. key: what makes this canvas unique.
+    function canvasMat(w, h, draw, glow = 0.2, ppm = 220, mat = null, key = '') {
+      const cw = Math.max(32, Math.min(1024, Math.round(w * ppm))), ch = Math.max(32, Math.min(1024, Math.round(h * ppm))); let t;
+      if (mat && window.DESIGN && DESIGN.signTexture) t = DESIGN.signTexture(E, mat, cw, ch, draw, 'dadao|' + key);
+      else { const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch; draw(cv.getContext('2d'), cw, ch); t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8; }
+      return new T.MeshStandardMaterial({ map: t, roughness: mat === 'brass' || mat === 'enamel' || mat === 'lacquer' || mat === 'redlacquer' ? 0.35 : 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow });
     }
+    // the real shops' and temples' own boards (kind A) are made of something: a board's flat colour names its material
+    const MAT_OF = { '#1c1712': 'lacquer', '#2a2420': 'lacquer', '#3a3a3e': 'stone', '#b3241a': 'redlacquer', '#7a1c14': 'redlacquer', '#6a1d14': 'redlacquer', '#22392f': 'weathered',
+      '#cfc7b4': 'stone', '#c9c4b6': 'stone', '#a8a59b': 'stone', '#b3aea2': 'stone', '#f7ecd0': 'paper', '#e9dcc0': 'paper', '#f0eadd': 'paper', '#1f4f7a': 'enamel', '#1f2a44': 'enamel' };
+    const matOf = o => (o.mat === false ? null : o.mat || MAT_OF[String(o.bg || '#2a2420').toLowerCase()] || null);
     function drawText(g, cw, ch, text, o) {
-      g.fillStyle = o.bg || '#2a2420'; g.fillRect(0, 0, cw, ch);
+      if (!o.noBg) { g.fillStyle = o.bg || '#2a2420'; g.fillRect(0, 0, cw, ch); }
+      else if (!o.relief) o = Object.assign({}, o, { relief: 'rgba(0,0,0,.5)' });   // lettering on a material: cut or raised, so it casts a little shadow
       if (o.border) { g.strokeStyle = o.border; g.lineWidth = Math.max(3, Math.min(cw, ch) * 0.05); const k = g.lineWidth; g.strokeRect(k, k, cw - 2 * k, ch - 2 * k); }
       g.textAlign = 'center'; g.textBaseline = 'middle'; const chars = [...text], pad = Math.min(cw, ch) * 0.12, wgt = o.weight || 700;
       const fill = (txt, x, y) => { if (o.relief) { g.fillStyle = o.relief; g.fillText(txt, x + 2, y + 3); } g.fillStyle = o.fg || '#f3d27a'; g.fillText(txt, x, y); };
@@ -70,9 +102,11 @@
       else { let size = (ch - sub) * 0.7; g.font = `${wgt} ${Math.round(size)}px ${FONT}`; const mw = g.measureText(text).width; if (mw > cw - 2 * pad) { size *= (cw - 2 * pad) / mw; g.font = `${wgt} ${Math.round(size)}px ${FONT}`; } fill(text, cw / 2, (ch - sub) / 2 + (sub ? pad * 0.4 : 0)); }
       if (sub) { let size = sub * 0.62; g.font = `600 ${Math.round(size)}px ${FONT}`; const mw = g.measureText(o.sub).width; if (mw > cw - 2 * pad) g.font = `600 ${Math.round(size * (cw - 2 * pad) / mw)}px ${FONT}`; g.fillStyle = o.fg || '#f3d27a'; g.fillText(o.sub, cw / 2, ch - sub * 0.62); }
     }
-    const label = (text, w, h, o = {}) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), canvasMat(w, h, (g, cw, ch) => drawText(g, cw, ch, text, o), o.glow == null ? 0.2 : o.glow)); return m; };
+    const signFace = (text, w, h, o, glow) => { const mt = matOf(o), oo = mt ? Object.assign({}, o, { noBg: true }) : o;
+      return canvasMat(w, h, (g, cw, ch) => drawText(g, cw, ch, text, oo), glow, 220, mt, [text, w, h, o.bg, o.fg, o.sub || '', o.vertical ? 'v' : 'h', o.border || ''].join('|')); };
+    const label = (text, w, h, o = {}) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), signFace(text, w, h, o, o.glow == null ? 0.2 : o.glow)); return m; };
     const edgeMat = std('#2a2420', 0.6);
-    const hang = (text, w, h, o = {}) => { const f = canvasMat(w, h, (g, cw, ch) => drawText(g, cw, ch, text, o), o.glow == null ? 0.3 : o.glow); const m = new T.Mesh(new T.BoxGeometry(w, h, o.thick || 0.07), [edgeMat, edgeMat, edgeMat, edgeMat, f, f]); m.castShadow = true; return m; };
+    const hang = (text, w, h, o = {}) => { const f = signFace(text, w, h, o, o.glow == null ? 0.3 : o.glow); const m = new T.Mesh(new T.BoxGeometry(w, h, o.thick || 0.07), [edgeMat, edgeMat, edgeMat, edgeMat, f, f]); m.castShadow = true; return m; };
     const pic = (w, h, draw, glow = 0.45) => new T.Mesh(new T.PlaneGeometry(w, h), canvasMat(w, h, draw, glow));
     // a board over the arcade, and a sign standing out from a pier so it reads as you walk the street
     const nameBoard = (g, text, w, h, x, y, o = {}) => { const b = hang(text, w, h, Object.assign({ border: o.fg || '#f3d27a' }, o)); at(g, b, x, y, F + 0.21); return b; };
@@ -418,7 +452,7 @@
     PLACES.add(E, P('yongle-market'), { target: ctx.yongle, plaque: { position: [9.15, 1.5, -20.8], rotation: -HP, size: 0.24 }, near: [8.0, -20.8], radius: 3.2 });
     PLACES.add(E, P('dadaocheng-theatre'), { target: OUT.theatre, plaque: { position: [7.72, 1.5, -30.2], rotation: -HP }, near: [7.2, -28.4], radius: 3 });
     PLACES.add(E, P('lin-he-fa-oil-rice'), { target: OUT.linhefa, plaque: { position: [9.05, 1.5, -12.3], rotation: PI }, near: [7.4, -12.6], radius: 2.6 });
-    PLACES.add(E, P('dihua-shophouse-rows'), { type: 'board', position: [3.45, 20.2], rotation: -HP });
+    PLACES.add(E, P('dihua-shophouse-rows'), { position: [3.45, 20.2], rotation: -HP, design: DADAO_DESIGNS['dihua-shophouse-rows'] });   // the street's own exhibit: the 1988 fight that saved it, as a front page
     PLACES.add(E, P('dihua-shophouse-rows'), { target: [H['1:1'], H['1:2'], H['1:4'], H['-1:0'], H['-1:4']].filter(Boolean) });
     PLACES.add(E, P('watsons-pharmacy-artyard'), { target: OUT.watsons, plaque: { position: [-4.4, 1.5, -11.05], rotation: HP }, near: [-3.6, -6.4], radius: 4.2 });
     PLACES.add(E, P('dadaocheng-wharf'), { target: OUT.wharf, plaque: { position: [-18.38, 1.5, -10.05], rotation: HP, size: 0.26 }, near: [-17.5, -13.6], radius: 5 });
@@ -433,18 +467,100 @@
     if (P('tianma-tea-house')) PLACES.add(E, P('tianma-tea-house'), { target: OUT.tianma, plaque: { position: [4.4, 1.5, 17.38], rotation: -HP }, near: [3.6, 15.2], radius: 2.8 });
     PLACES.add(E, P('qianyuan-herb-shop'), { target: OUT.qianyuan, plaque: { position: [-4.4, 1.5, 2.98], rotation: HP }, near: [-3.6, 0.8], radius: 2.8 });
     PLACES.add(E, P('i-mei-original-shop'), { target: OUT.imei, plaque: { position: [4.4, 1.5, 31.78], rotation: -HP }, near: [3.6, 29.6], radius: 2.8 });
-    // events: each stands where it happened in this layout
-    PLACES.add(E, P('new-year-goods-street'), { position: [-3.45, 33.0], rotation: HP });                         // just inside the archway
-    PLACES.add(E, P('yuelao-matchmaker-crowds'), { position: [7.0, 6.35], rotation: PI });                        // in the temple forecourt, where the queue for 月老 forms
-    //   // the saved street; the road line runs across the forecourt beside it
-    if (P('228-flash-point-1947')) PLACES.add(E, P('228-flash-point-1947'), { position: [3.3, 12.2], rotation: -HP });                           // on the kerb a little way from 天馬茶房's door
-    PLACES.add(E, P('city-god-procession'), { position: [5.3, 3.4], rotation: -HP });                             // setting out from the temple forecourt
-    PLACES.add(E, P('dadaocheng-fireworks'), { position: [-25.4, -13.6], rotation: HP });                         // on the quay, the river behind it
-    PLACES.add(E, P('tttifa-arts-festival'), { position: [-3.45, -20.8], rotation: HP });                         // the costume parade's route, between the café and the puppet museum
-    PLACES.add(E, P('film-twa-tiu-tiann-2014'), { position: [-3.45, -1.75], rotation: HP });                      // on the street the film was named for
-    PLACES.add(E, P('solitary-gourmet-yongle'), { position: [3.45, -17.2], rotation: -HP });                       // on the kerb by 永樂市場, where 五郎 ate
-    PLACES.add(E, P('pier5-container-market'), { position: [-25.4, -8.6], rotation: HP });                         // on the quay beside the fireworks stand
-    //                 // beside the pharmacy
+    // events: each stands where it happened in this layout, each a designed piece (kind B), never a name plate.
+    // CJ, 2026-11-22: 「反正這些招牌 字都是要設計過的可以是海報雕像或是裝置藝術攤位 ... 這種無聊的招牌絕對不能出現就對了」.
+    // Why each form, and the reference behind it: docs/signage/designs-dadao.md. The painting under each poster is
+    // asset/textures/posters/events/<key>.jpg (DESIGN picks it up; the code-drawn poster shows until it lands).
+    const D = DADAO_DESIGNS;
+    PLACES.add(E, P('new-year-goods-street'), { position: [-3.45, 33.0], rotation: HP, design: D['new-year-goods-street'] });          // just inside the archway
+    PLACES.add(E, P('yuelao-matchmaker-crowds'), { position: [7.0, 6.35], rotation: PI, design: D['yuelao-matchmaker-crowds'] });     // in the temple forecourt, where the queue for 月老 forms
+    if (P('228-flash-point-1947')) PLACES.add(E, P('228-flash-point-1947'), { position: [3.3, 12.2], rotation: -HP });                           // held out of the data for good (see above); never built
+    PLACES.add(E, P('city-god-procession'), { position: [5.3, 2.5], rotation: -HP, design: D['city-god-procession'] });               // setting out from the temple forecourt
+    PLACES.add(E, P('dadaocheng-fireworks'), { position: [-25.4, -13.6], rotation: HP, design: D['dadaocheng-fireworks'] });          // on the quay, the river behind it
+    PLACES.add(E, P('tttifa-arts-festival'), { position: [-3.45, -20.6], rotation: HP, design: D['tttifa-arts-festival'] });          // the costume parade's route, between the café and the puppet museum
+    PLACES.add(E, P('film-twa-tiu-tiann-2014'), { position: [-3.45, -1.75], rotation: HP, design: D['film-twa-tiu-tiann-2014'] });    // on the street the film was named for
+    PLACES.add(E, P('solitary-gourmet-yongle'), { position: [3.45, -17.2], rotation: -HP, design: D['solitary-gourmet-yongle'] });    // on the kerb by 永樂市場, where 五郎 ate
+    PLACES.add(E, P('pier5-container-market'), { position: [-25.4, -8.6], rotation: HP, design: D['pier5-container-market'] });       // on the quay beside the fireworks stand
+    eventProps();
     return OUT;
+
+    // ── the second layer round each event piece: the things people remember from it, standing beside the poster or statue ──
+    function eventProps() {
+      const K = { red: std('#c4201a', 0.85), redP: std('#d8352a', 0.9), rope: std('#a3142b', 0.8), brass: std('#c9a13c', 0.3, 0.8), skin: std('#e9d2b0', 0.8), drum: std('#b3241a', 0.5), hide: std('#e9dcc0', 0.7),
+        mat1: std('#2f7f9a', 0.95), mat2: std('#e9b53a', 0.95), cool: std('#f0eadd', 0.6), can: std('#d9d9d9', 0.3, 0.8), black: std('#151515', 0.5, 0.2), alu: std('#b9bec4', 0.3, 0.8) };
+      // 迎城隍: the procession's drum on its cart, a gong, and the red paper of spent firecrackers all over the forecourt
+      { const g = free(5.3, 2.5, -HP), B = Bag(), R = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+        B.bx(M.timberD, -3.05, -2.25, 0.3, 0.42, 0.55, 1.35); [[-3.0, 0.6], [-2.3, 0.6], [-3.0, 1.3], [-2.3, 1.3]].forEach(([x, z]) => B.cyl(M.timberD, 0.03, 0.03, 0.3, x, 0, z, 6));
+        B.put(K.drum, new T.CylinderGeometry(0.42, 0.42, 0.5, 20), -2.65, 0.95, 0.95, 0, 0, PI / 2); [-1, 1].forEach(k => B.put(K.hide, new T.CylinderGeometry(0.4, 0.4, 0.02, 20), -2.65 + k * 0.255, 0.95, 0.95, 0, 0, PI / 2));
+        B.bx(M.timber, -3.05, -2.95, 0.42, 1.35, 0.9, 1.0); B.bx(M.timber, -2.35, -2.25, 0.42, 1.35, 0.9, 1.0);
+        B.cyl(M.timberD, 0.02, 0.02, 1.5, -3.4, 0, 1.6, 6); B.cyl(M.timberD, 0.02, 0.02, 1.5, -1.9, 0, 1.6, 6); B.put(K.brass, new T.CylinderGeometry(0.32, 0.32, 0.04, 24), -2.65, 1.15, 1.62, 0, PI / 2); B.bx(M.timberD, -3.4, -1.9, 1.48, 1.52, 1.58, 1.62);
+        for (let i = 0; i < 70; i++) { const x = -3.4 + R() * 6.4, z = -0.6 + R() * 2.6; B.put(i % 3 ? K.redP : K.red, new T.BoxGeometry(0.05 + R() * 0.06, 0.004, 0.03 + R() * 0.04), x, 0.01, z, R() * 3); }
+        B.build(g); BLOCKS.push([5.3 - 0.95, 2.5 - 2.65, 0.6]); }
+      // 月老: a queue of brass posts and red rope leading up to Him, and a tray of red-thread packets on a low table
+      { const g = free(7.0, 6.35, PI), B = Bag();
+        [[-0.75, 1.5], [-0.75, 2.4], [-0.75, 3.3], [0.75, 1.5], [0.75, 2.4], [0.75, 3.3]].forEach(([x, z]) => { B.cyl(K.brass, 0.13, 0.15, 0.04, x, 0, z, 14); B.cyl(K.brass, 0.025, 0.025, 0.92, x, 0.04, z, 8); B.ball(K.brass, 0.05, x, 0.98, z); });
+        [-0.75, 0.75].forEach(x => [[1.5, 2.4], [2.4, 3.3]].forEach(([a, b]) => { const mid = (a + b) / 2; B.put(K.rope, new T.CylinderGeometry(0.018, 0.018, 0.5, 6), x, 0.85, (a + mid) / 2, 0, -1.25 - 0.08); B.put(K.rope, new T.CylinderGeometry(0.018, 0.018, 0.5, 6), x, 0.85, (mid + b) / 2, 0, 1.25 + 0.08); }));
+        B.bx(M.timberD, 1.05, 1.65, 0.0, 0.62, -0.3, 0.3); B.bx(M.cloth, 1.03, 1.67, 0.62, 0.66, -0.32, 0.32); for (let i = 0; i < 12; i++) B.bx(i % 2 ? K.red : M.paper, 1.1 + (i % 4) * 0.13, 1.1 + (i % 4) * 0.13 + 0.1, 0.66, 0.68 + (i % 3) * 0.01, -0.22 + ((i / 4) | 0) * 0.15, -0.12 + ((i / 4) | 0) * 0.15);
+        B.build(g); BLOCKS.push([7.0 - 1.35, 6.35, 0.45]); }
+      // 1920 變裝遊行: a face-in-hole board of two paraders in 1920s dress, for the photo everyone took
+      { const g = free(-3.45, -20.6, HP), w = 1.5, h = 1.95;
+        const fm = canvasMat(w, h, (c, W, H) => faceHole(c, W, H), 0.25, 300, 'paper', 'tttifa-facehole'); fm.transparent = true; fm.alphaTest = 0.5; fm.side = T.DoubleSide;
+        at(g, new T.Mesh(new T.PlaneGeometry(w, h), fm), -1.75, h / 2 + 0.05, 0.1); const B = Bag(); [-2.42, -1.08].forEach(x => { B.bx(M.timberD, x - 0.03, x + 0.03, 0, 1.9, 0.02, 0.08); B.bx(M.timberD, x - 0.03, x + 0.03, 0, 0.06, 0.08, -0.6); });
+        B.bx(M.timber, -2.4, -1.1, 0, 0.18, -0.2, -0.7); B.build(g); BLOCKS.push([-3.45, -20.6 + 1.75, 0.8]); }
+      // 電影《大稻埕》: a clapperboard leant on the billboard's foot, and a film camera on its tripod pointed at the street
+      { const g = free(-3.45, -1.75, HP), B = Bag();
+        const slate = canvasMat(0.5, 0.42, (c, W, H) => clapper(c, W, H), 0.2, 600, 'lacquer', 'film-slate'); const sm = at(g, new T.Mesh(new T.BoxGeometry(0.5, 0.42, 0.02), [edgeMat, edgeMat, edgeMat, edgeMat, slate, edgeMat]), -1.2, 0.24, 0.5); sm.rotation.x = -0.25;
+        const cx = 2.45, cz = 0.9; const tl = Math.atan(0.32 / 1.38); [0.3, 2.4, 4.5].forEach(a => B.put(K.black, new T.CylinderGeometry(0.015, 0.022, 1.42, 6), cx + Math.cos(a) * 0.16, 0.69, cz + Math.sin(a) * 0.16, 0, -tl * Math.sin(a), tl * Math.cos(a)));   // legs leaning in to the head
+        B.bx(K.black, cx - 0.08, cx + 0.08, 1.36, 1.42, cz - 0.08, cz + 0.08); B.bx(K.black, cx - 0.16, cx + 0.16, 1.42, 1.74, cz - 0.3, cz + 0.22); B.put(K.alu, new T.CylinderGeometry(0.08, 0.1, 0.24, 14), cx, 1.56, cz + 0.34, 0, PI / 2);   // body and lens, toward the street
+        [-0.16, 0.12].forEach(dz => B.put(K.black, new T.CylinderGeometry(0.19, 0.19, 0.06, 20), cx, 1.98, cz + dz, 0, 0, PI / 2)); B.bx(K.black, cx - 0.02, cx + 0.02, 1.74, 1.82, cz - 0.2, cz + 0.16);   // the two film reels on top
+        B.build(g); BLOCKS.push([-3.45 + 0.9, -1.75 - 2.45, 0.45]); }
+      // 情人節煙火: picnic mats and a cool box on the quay, where people wait for dark
+      { const g = free(-25.4, -13.6, HP), B = Bag();
+        B.put(K.mat1, new T.BoxGeometry(1.4, 0.01, 1.1), -0.9, 0.006, 2.3, 0.2); B.put(K.mat2, new T.BoxGeometry(1.3, 0.01, 1.0), 0.9, 0.006, 2.4, -0.15);
+        for (let x = -1.55; x < -0.2; x += 0.2) B.put(M.white, new T.BoxGeometry(0.06, 0.012, 1.05), x, 0.008, 2.3 + (x + 0.9) * 0.2, 0.2);
+        B.bx(K.cool, 0.4, 0.85, 0.0, 0.36, 2.0, 2.3); B.bx(M.tealC, 0.38, 0.87, 0.36, 0.42, 1.98, 2.32); [-0.5, -0.38, 1.1].forEach((x, i) => B.cyl(K.can, 0.03, 0.03, 0.11, x, 0.01, 2.2 + i * 0.1, 8));
+        B.build(g); }
+      // 年貨大街: the seller's sample tray held out over the counter
+      { const g = free(-3.45, 33.0, HP), B = Bag(); B.put(M.timber, new T.CylinderGeometry(0.3, 0.3, 0.03, 20), 0.95, 0.99, 0.62); for (let i = 0; i < 7; i++) B.ball(GOODS[i], 0.05, 0.95 + Math.cos(i * 0.9) * 0.17, 1.04, 0.62 + Math.sin(i * 0.9) * 0.17, 0.6);
+        for (let i = 0; i < 5; i++) B.bx(M.paper, 0.45 + i * 0.07, 0.5 + i * 0.07, 0.99, 1.05, 0.7, 0.75); B.build(g); }
+    }
+    // the face-in-hole board: a gentleman in a three-piece suit and boater, a lady in a cloche hat with a parasol, both faces cut out
+    function faceHole(c, W, H) {
+      const ink = '#1c1a20', gold = '#c39a3e', u = W / 100; c.save();
+      const sky = c.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, 'rgba(241,230,207,0.35)'); sky.addColorStop(1, 'rgba(195,154,62,0.25)'); c.fillStyle = sky; c.fillRect(0, 0, W, H);
+      c.strokeStyle = gold; c.lineWidth = u * 0.8; for (let i = 0; i < 13; i++) { const a = Math.PI * (1.05 + i * 0.07); c.beginPath(); c.moveTo(W / 2, H * 0.62); c.lineTo(W / 2 + Math.cos(a) * W, H * 0.62 + Math.sin(a) * W); c.stroke(); }
+      c.strokeStyle = ink; c.lineWidth = u * 1.6; c.strokeRect(u * 3, u * 3, W - u * 6, H - u * 6); c.lineWidth = u * 0.6; c.strokeRect(u * 5, u * 5, W - u * 10, H - u * 10);
+      // him: boater, suit, waistcoat, bow tie, cane
+      const hx = W * 0.3; c.fillStyle = '#2a2f3a'; c.beginPath(); c.moveTo(hx - u * 13, H * 0.36); c.lineTo(hx + u * 13, H * 0.36); c.lineTo(hx + u * 16, H * 0.86); c.lineTo(hx - u * 16, H * 0.86); c.fill();
+      c.fillStyle = '#f1e6cf'; c.beginPath(); c.moveTo(hx - u * 4, H * 0.36); c.lineTo(hx + u * 4, H * 0.36); c.lineTo(hx, H * 0.5); c.fill(); c.fillStyle = '#9c2a2a'; c.fillRect(hx - u * 4, H * 0.355, u * 8, u * 2.4);
+      c.fillStyle = '#7a5a2a'; c.fillRect(hx - u * 6, H * 0.46, u * 12, H * 0.14); c.fillStyle = gold; for (let k = 0; k < 4; k++) { c.beginPath(); c.arc(hx, H * 0.48 + k * H * 0.03, u * 0.9, 0, 7); c.fill(); }
+      c.fillStyle = ink; c.fillRect(hx - u * 14, H * 0.86, u * 11, H * 0.08); c.fillRect(hx + u * 3, H * 0.86, u * 11, H * 0.08); c.strokeStyle = ink; c.lineWidth = u * 1.2; c.beginPath(); c.moveTo(hx + u * 17, H * 0.6); c.lineTo(hx + u * 20, H * 0.93); c.stroke();
+      c.fillStyle = '#e6d2a6'; c.beginPath(); c.ellipse(hx, H * 0.21, u * 16, u * 3, 0, 0, 7); c.fill(); c.fillRect(hx - u * 9, H * 0.15, u * 18, H * 0.06); c.fillStyle = ink; c.fillRect(hx - u * 9, H * 0.19, u * 18, u * 2);
+      // her: cloche hat, a drop-waist dress with a fringe, beads, a parasol over her shoulder
+      const sx = W * 0.7; c.fillStyle = '#1f4e5a'; c.beginPath(); c.moveTo(sx - u * 11, H * 0.37); c.lineTo(sx + u * 11, H * 0.37); c.lineTo(sx + u * 17, H * 0.84); c.lineTo(sx - u * 17, H * 0.84); c.fill();
+      c.fillStyle = gold; for (let k = 0; k < 18; k++) c.fillRect(sx - u * 17 + k * u * 1.9, H * 0.84, u * 0.8, H * 0.05); c.fillRect(sx - u * 13, H * 0.6, u * 26, u * 1.5);
+      c.fillStyle = '#f1e6cf'; for (let k = 0; k < 9; k++) { c.beginPath(); c.arc(sx - u * 6 + k * u * 1.5, H * 0.4 + Math.sin(k / 8 * Math.PI) * u * 5, u * 0.9, 0, 7); c.fill(); }
+      c.fillStyle = '#e9d2b0'; c.fillRect(sx - u * 4, H * 0.89, u * 3, H * 0.06); c.fillRect(sx + u * 2, H * 0.89, u * 3, H * 0.06);
+      c.fillStyle = '#9c2a2a'; c.beginPath(); c.ellipse(sx, H * 0.17, u * 11, u * 9, 0, Math.PI, 0); c.fill(); c.fillRect(sx - u * 12, H * 0.165, u * 24, u * 2.5); c.fillStyle = gold; c.fillRect(sx - u * 11, H * 0.155, u * 22, u * 1.2);
+      c.strokeStyle = ink; c.lineWidth = u * 0.9; c.beginPath(); c.moveTo(sx + u * 10, H * 0.55); c.lineTo(sx + u * 26, H * 0.1); c.stroke(); c.fillStyle = '#e8b4c4'; c.beginPath(); c.moveTo(sx + u * 26, H * 0.1);
+      for (let k = 0; k <= 8; k++) { const a = Math.PI * (0.95 + k * 0.1); c.lineTo(sx + u * 26 + Math.cos(a) * u * 22, H * 0.1 - Math.sin(a) * u * 14 + (k % 2) * u * 2); } c.closePath(); c.fill();
+      // the lettering: a deco title band, the year big, the call to step in
+      c.fillStyle = ink; c.fillRect(u * 5, H * 0.66, W - u * 10, H * 0.12); c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = gold; c.font = `900 ${Math.round(H * 0.07)}px Futura,"Avenir Next","PingFang TC",sans-serif`; c.fillText('1920', W / 2, H * 0.695);
+      c.fillStyle = '#f1e6cf'; c.font = `700 ${Math.round(H * 0.03)}px "PingFang TC","Heiti TC",sans-serif`; c.fillText('變裝遊行 · 探出頭來拍一張', W / 2, H * 0.755);
+      c.fillStyle = ink; c.font = `700 ${Math.round(H * 0.022)}px Futura,"Avenir Next",sans-serif`; c.fillText('T W A T U T I A   ·   C O S T U M E   P A R A D E', W / 2, H * 0.975);
+      c.globalCompositeOperation = 'destination-out'; [[hx, H * 0.285], [sx, H * 0.285]].forEach(([x, y]) => { c.beginPath(); c.ellipse(x, y, u * 7.5, u * 9.5, 0, 0, 7); c.fill(); });
+      c.restore();
+    }
+    // the slate: striped clapper sticks, the chalk fields of a real slate, the film's name and release date
+    function clapper(c, W, H) {
+      c.save(); const bar = H * 0.2; for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#f4f1ea' : '#111'; c.beginPath(); c.moveTo(i * W / 7 - bar, bar); c.lineTo(i * W / 7, 0); c.lineTo((i + 0.5) * W / 7, 0); c.lineTo((i + 0.5) * W / 7 - bar, bar); c.fill(); }
+      c.strokeStyle = 'rgba(244,241,234,.85)'; c.lineWidth = Math.max(2, W * 0.008); c.strokeRect(W * 0.04, bar + H * 0.04, W * 0.92, H * 0.72); [0.47, 0.7].forEach(y => { c.beginPath(); c.moveTo(W * 0.04, H * y); c.lineTo(W * 0.96, H * y); c.stroke(); });
+      [0.36, 0.66].forEach(x => { c.beginPath(); c.moveTo(W * x, H * 0.47); c.lineTo(W * x, H * 0.96); c.stroke(); }); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = 'rgba(244,241,234,.92)';
+      c.font = `600 ${Math.round(H * 0.06)}px "American Typewriter","Courier New",monospace`; c.fillText('PROD.', W * 0.06, H * 0.29); c.fillText('ROLL', W * 0.06, H * 0.52); c.fillText('SCENE', W * 0.38, H * 0.52); c.fillText('TAKE', W * 0.68, H * 0.52); c.fillText('DATE', W * 0.06, H * 0.76);
+      c.font = `800 ${Math.round(H * 0.15)}px "Kaiti TC","BiauKai","PingFang TC",serif`; c.fillText('大稻埕', W * 0.26, H * 0.36);
+      c.font = `700 ${Math.round(H * 0.12)}px "Chalkboard SE","Marker Felt","Comic Sans MS",sans-serif`; c.fillText('A7', W * 0.12, H * 0.62); c.fillText('1920', W * 0.4, H * 0.62); c.fillText('3', W * 0.78, H * 0.62);
+      c.font = `700 ${Math.round(H * 0.09)}px "Chalkboard SE","Marker Felt",sans-serif`; c.fillText('2014.01.30  春節檔', W * 0.06, H * 0.87); c.restore();
+    }
   };
 })();

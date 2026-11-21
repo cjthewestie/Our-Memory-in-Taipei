@@ -20,7 +20,11 @@
 //
 // ── PLACES.add(E, item, options) -> entry ────────────────────────────────────────────────────
 //   item      an item of PLACE_DATA (or its key as a string, with options.district)
-//   type      'stand' | 'board' | 'statue' | 'wall': the marker to build. Left out: the item's own marker.type
+//   design    { form: 'poster'|'statue'|'installation'|'booth', layout, mount, palette, motif, piece, booth, plinth, head, big, ... }:
+//             the designed piece to build, from design-kit.js (load it before this file). Left out: DESIGN.choose(item)
+//             picks one (the curated design for the key, else one read from its kind, years and wording). See docs/signage/kit.md.
+//   legacy    true: the old plain builders below instead (only for a before/after check)
+//   type      'stand' | 'board' | 'statue' | 'wall': a hint to the design's form (statue, booth, poster, poster wall). Left out: the item's own marker.type
 //             (events carry one), or 'board'. With `target` and no `type`, nothing is built.
 //   position  [x, z] or [x, y, z] in metres · rotation  the angle about Y the front looks along (0 looks toward +Z)
 //   shape     the pictogram / bronze of the marker: climber, crane, train, firework, tower, damper, stone, parade,
@@ -460,12 +464,18 @@
     if (!e) { e = { item: it, key: it.key, district: it.district, type: null, group: null, targets: [], boxes: [], pos: null, near: null, radius: 3, height: 2.2, shelf: null }; reg.push(e); }
     if (o.radius) e.radius = o.radius; if (o.near) e.near = new T.Vector3(o.near[0], 0, o.near[1]);
     const type = o.type || (o.target ? null : (it.marker && it.marker.type) || 'board');
-    if (type && BUILD[type]) {
-      const g = BUILD[type](E, it, o), p = o.position || [0, 0], s = o.scale || 1;
+    // CJ, 2026-11-22: 「這種無聊的招牌絕對不能出現」. Every marker this module builds now comes from design-kit.js: a poster on a
+    // real mount, a statue, an installation or a booth, chosen per item (o.design) or by DESIGN.choose(). `type` and `shape` are
+    // only hints to that choice. The old builders run only when design-kit.js is not loaded, or with legacy: true.
+    const designed = (type || o.design) && window.DESIGN && !o.legacy;
+    if (designed || (type && BUILD[type])) {
+      const g = designed ? DESIGN.build(E, it, Object.assign({ type, shape: o.shape }, o.design || {})) : BUILD[type](E, it, o), p = o.position || [0, 0], s = o.scale || 1;
+      if (designed && g.userData.plaqueAt) { const q = plaque(E, 0.13), a = g.userData.plaqueAt; q.position.set(a[0], a[1], a[2]); g.add(q); }
       if (p.isVector3) g.position.copy(p); else g.position.set(p[0], p.length > 2 ? p[1] : 0, p[p.length > 2 ? 2 : 1]);
       g.rotation.y = o.rotation || 0; g.scale.setScalar(s); E.scene.add(g); g.userData.place = e;
-      e.type = type; e.group = g; e.targets.push(g); e.pos = g.position.clone(); e.height = g.position.y + g.userData.height * s;
-      const f = g.userData.foot; if (o.solid !== false && window.PHOTOWALL && PHOTOWALL.block) PHOTOWALL.block({ x: g.position.x, z: g.position.z, facing: g.rotation.y, u0: f[0] * s, u1: f[1] * s, v0: f[2] * s, v1: f[3] * s });
+      const dz = g.userData.design; e.type = dz ? dz.form + ':' + (dz.mount || dz.piece || dz.booth || dz.plinth || dz.layout) : type; e.design = dz || null;
+      e.group = g; e.targets.push(g); e.pos = g.position.clone(); e.height = g.position.y + g.userData.height * s;
+      if (o.solid !== false && window.PHOTOWALL && PHOTOWALL.block) (g.userData.feet || [g.userData.foot]).forEach(f => PHOTOWALL.block({ x: g.position.x, z: g.position.z, facing: g.rotation.y, u0: f[0] * s, u1: f[1] * s, v0: f[2] * s, v1: f[3] * s }));
     } else if (type) console.warn('[places] add(): unknown marker type "' + type + '"');
     if (o.target) (Array.isArray(o.target) ? o.target : [o.target]).forEach(t => { if (!t || !t.isObject3D) return; t.userData.place = e; e.targets.push(t); e.boxes.push({ o: t, box: null }); if (!e.type) e.type = 'target'; });
     if (o.plaque) { const q = o.plaque, pl = plaque(E, q.size || 0.2); pl.position.set(q.position[0], q.position[1], q.position[2]); pl.rotation.y = q.rotation || 0; pl.userData.place = e; E.scene.add(pl); e.targets.push(pl);
@@ -637,6 +647,7 @@
     return window.__places;
   }
 
-  window.PLACES = { add, mount, item, items: itemsOf, stand, board, statue, wall, plaque, figure, shortYears,
+  window.PLACES = { add, mount, item, items: itemsOf, stand, board, statue, wall, plaque, figure, shortYears, picto,
+    design: (E, it, d) => (window.DESIGN ? DESIGN.build(E, typeof it === 'string' ? item(null, it) : it, d) : null),
     keepOut: (p, m) => (window.PHOTOWALL && PHOTOWALL.keepOut ? PHOTOWALL.keepOut(p, m) : p) };
 })();

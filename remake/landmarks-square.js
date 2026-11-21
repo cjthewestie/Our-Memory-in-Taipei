@@ -104,10 +104,6 @@ function label(lines, w, h, o = {}) { const bg = o.bg || '#f1e7d2'; if (lum(bg) 
     if (o.border) { g.strokeStyle = o.border; g.lineWidth = Math.max(2, H * 0.03); g.strokeRect(g.lineWidth, g.lineWidth, W - 2 * g.lineWidth, H - 2 * g.lineWidth); }
     g.textAlign = 'center'; g.textBaseline = 'middle';
     lines.forEach(([t, sz, y, wt, c, f, x]) => { fit(g, t, H * sz, W * 0.9, wt || 700, f || FONT); g.fillStyle = c || '#2a2420'; g.fillText(t, W * (x == null ? 0.5 : x), H * y); }); }, o); }
-// an event's own name board on two short legs: the name in brush lettering, the date under it (accent = the band colour)
-function eventSign(K, zh, date, x, z, ry, accent, w = 1.5) { K.push(x, 0, z, ry);
-  [-1, 1].forEach(k => { K.box(M.steelDk, 0.05, 0.86, 0.05, k * (w / 2 - 0.08), 0.43, 0); K.box(M.steelDk, 0.07, 0.03, 0.4, k * (w / 2 - 0.08), 0.015, 0); });
-  K.add(label([[zh, 0.36, 0.33, 800, '#fff3d6', KAI], [date, 0.24, 0.76, 700, '#2a2420']], w, 0.56, { bg: '#f1e7d2', band: accent, bandH: 0.58, border: '#2a2420', glow: 0.35 }), 0, 0.82, 0, 0, -0.18); K.pop(); }
 // a round sign plate, the same picture on both faces
 function disc(dia, draw) { const cv = document.createElement('canvas'); cv.width = cv.height = 384; draw(cv.getContext('2d'), 384, 384); const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
   const m = new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.16 }), g = new T.Group(); [0, PI].forEach(ry => { const f = new T.Mesh(new T.CircleGeometry(dia / 2, 32), m); f.rotation.y = ry; f.position.z = ry ? -0.012 : 0.012; f.castShadow = true; g.add(f); });
@@ -149,6 +145,39 @@ function reg(key, g, o = {}) {
   PLACES.add(E, it, a); count++; return g;
 }
 const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7a4a', game: '#2f6f8c' };
+// ── the designed pieces that replace the old name boards (eventSign) ────────────────────────────
+// CJ, 2026-11-22: 「反正這些招牌 字都是要設計過的可以是海報雕像或是裝置藝術攤位 … 這種無聊的招牌絕對不能出現」. Each event keeps the
+// object that tells its story (the court, the podium, the stage) and gets one piece from design-kit.js in place of its plate: a
+// poster on a real mount, a statue on a plinth, an installation or the booth itself dressed in the kit's graphics. The painting
+// under each poster is posters/events/<key>.jpg (DESIGN loads it, falls back to the code-drawn version). Why each one, and its
+// sources: docs/signage/designs-square.md. No neighbours share a form and a layout.
+const D = {
+  golden: { form: 'poster', mount: 'column', layout: 'award', layouts: ['award', 'premiere', 'award'], palette: 'award', head: '第十七屆 金曲獎', big: '金曲', kicker: 'GOLDEN MELODY AWARDS', kicker2: '第十七屆', venue: '臺北小巨蛋 TAIPEI ARENA', date: '2006.6.10', en: '17th Golden Melody Awards' },
+  dome: { form: 'poster', mount: 'standee', layout: 'concert', palette: ['#f2e8d5', '#e9dcc2', '#1b1430', '#ff2e63', '#7a2bff', '#2a1050'], head: '嘉年華 大巨蛋首演', big: '嘉年華', kicker: 'CARNIVAL WORLD TOUR', kicker2: '周杰倫', venue: '臺北大巨蛋 TAIPEI DOME', date: '2024.12.5', en: 'First concert in the Taipei Dome' },
+  ff: { layout: 'anime', palette: 'anime', head: '開拓動漫祭', big: 'FF', kicker: 'FANCY FRONTIER', kicker2: '同人誌販售會', venue: '花博爭艷館', en: 'Fancy Frontier doujin fair' },
+  nba: { form: 'statue', motif: 'ball', plinth: 'drum', palette: 'sport', head: 'NBA 來到臺北', story: '小巨蛋裡一萬人一起尖叫', date: '2013.10.13', en: 'NBA Global Games Taipei' },
+  yuanzai: { form: 'poster', mount: 'case', layout: 'news', palette: 'news', head: '圓仔 首次亮相', big: '圓仔', kicker: '號外', kicker2: '排隊看小貓熊', story: '排隊看一隻小貓熊', venue: '臺北市立動物園 新光特展館', date: '2014.1.6', en: 'Yuan Zai meets the public' },
+  universiade: { form: 'poster', mount: 'banner', layout: 'games', palette: 'games', head: '臺北世大運', big: '2017', kicker: '我的主場', venue: '臺北田徑場', date: '2017.8.19 – 8.30', en: 'Taipei 2017 Summer Universiade' },
+  flora: { form: 'poster', mount: 'standee', layout: 'expo', palette: 'expo', head: '臺北國際花卉博覽會', big: '花博', kicker: '彩花 · 流水 · 新視界', venue: '圓山 · 美術 · 新生 · 大佳河濱', date: '2010.11.6 – 2011.4.25', en: 'Taipei International Flora Exposition' },
+  lantern: { form: 'installation', piece: 'canopy', obj: 'lantern', layout: 'lantern', palette: 'lantern', head: '台北燈節 士林', big: '士林燈節', kicker: '2022 燈節', date: '2022.2.11 – 2.20', en: 'Taipei Lantern Festival, Shilin' },
+  nuit: { form: 'poster', mount: 'case', layout: 'nightart', palette: ['#1a0b3a', '#0b1e5b', '#ffffff', '#ff7a59', '#9be7ff', '#ffe66d'], head: '白晝之夜 公館', big: '公館之夜', kicker: 'NUIT BLANCHE TAIPEI', kicker2: '18:00 → 06:00', venue: '公館 · 臺大 · 寶藏巖', date: '2017.10.7 – 10.8', en: 'Nuit Blanche Taipei 2017' },
+  msi: { form: 'poster', mount: 'column', layout: 'esports', layouts: ['esports', 'esports', 'countdown'], palette: 'esports', head: '季中邀請賽 決賽', big: '決賽之夜', kicker: 'MID-SEASON INVITATIONAL', kicker2: '英雄聯盟', venue: '臺北和平籃球館', date: '2019.5.17 – 5.19', en: 'Mid-Season Invitational finals' },
+  pokemon: { form: 'installation', piece: 'phones', layout: 'news', palette: ['#0f1a2a', '#16304a', '#ffffff', '#a8f0ff', '#ffd23f', '#ff5a5f'], head: '北投公園 像跨年夜', big: '抓寶人潮', motif: 'pin', date: '2016.8', en: 'The crowds of Beitou Park' },
+};
+const DESIGNED = {};
+// piece(K, key, design, x, z, ry, sc): DESIGN.build(item, design) set into the kit's group at (x, z) of its frame, turned ry.
+// Returns { foot: footprints in the group's frame for reg, plaque: [x, y, z, ry, size] where the kit puts its "i" }
+function piece(K, key, d, x, z, ry = 0, sc = 1) {
+  if (!window.DESIGN) return { foot: [] };
+  const g = DESIGN.build(E, P(key), d); K.push(x, 0, z, ry, sc); K.add(g, 0, 0, 0); K.pop(); DESIGNED[key] = g.userData.design;
+  const c = Math.cos(ry), sn = Math.sin(ry), at = (u, v) => [x + (u * c + v * sn) * sc, z + (-u * sn + v * c) * sc];
+  const foot = (g.userData.feet || [g.userData.foot]).filter(Boolean).map(([u0, u1, v0, v1]) => { const q = [at(u0, v0), at(u1, v0), at(u0, v1), at(u1, v1)];
+    return [Math.min(...q.map(a => a[0])), Math.max(...q.map(a => a[0])), Math.min(...q.map(a => a[1])), Math.max(...q.map(a => a[1]))]; });
+  const pa = g.userData.plaqueAt, pw = pa ? at(pa[0], pa[2]) : null;
+  return { foot, plaque: pw ? [pw[0], pa[1] * sc, pw[1], ry, 0.13] : null };
+}
+// a printed face from the kit's canvases, on its own plane (front along +Z)
+const kitFace = (tex, w, h, glow = 0.35) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshStandardMaterial({ map: tex, roughness: 0.6, emissiveMap: tex, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow, side: T.DoubleSide })); m.castShadow = true; return m; };
 
 // ══ north-west: 捷運木柵線, the bicycle dock under it, the NBA half court ═══════════════════════
 // The elevated line runs along the north arcade's west half: three hammerhead piers, a deck with two running strips, a small
@@ -216,8 +245,8 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   K.push(-1.75, 0, 1.6, PI / 2); K.box(M.wood, 1.5, 0.05, 0.34, 0, 0.44, 0); [-0.6, 0.6].forEach(x => K.box(M.steelDk, 0.05, 0.44, 0.3, x, 0.22, 0)); K.box(M.whiteP, 0.3, 0.03, 0.2, -0.4, 0.48, 0); K.cyl(M.teal, 0.04, 0.04, 0.2, 0.1, 0.57, 0.05, 8); ball(0.5, 0.59, 0);
   K.add(label([['林書豪', 0.4, 0.3, 800, '#c22d22', KAI], ['歡迎回來 加油', 0.2, 0.72, 700, '#1c2f5c', KAI]], 0.9, 0.62, { bg: '#f6f0d8', border: '#1c2f5c', glow: 0.3 }), 0.1, 0.36, 0.28, 0, -0.22); K.pop();
   K.push(1.75, 0, 0.5); K.box(M.steelDk, 0.5, 0.04, 0.4, 0, 0.02, 0); [0, 1, 2].forEach(i => { ball(0, 0.2 + i * 0.25, 0); }); [[-0.16, -0.16], [0.16, -0.16], [-0.16, 0.16], [0.16, 0.16]].forEach(([x, z]) => K.rod(M.steelDk, [x, 0, z], [x, 0.9, z], 0.012)); K.pop();
-  eventSign(K, 'NBA 臺北賽', '2013.10.13 · 臺北小巨蛋', 1.3, 3.2, -0.3, ACC.sport);
-  reg('nba-taipei-game-2013', K.done(-5.2, -13.4, 0), { foot: [[-0.5, 0.5, -0.7, 0.4], [-2.0, -1.5, 0.8, 2.4], [1.5, 2.0, 0.2, 0.8], [0.5, 2.1, 3.0, 3.4]], near: [0, 2.6], radius: 3.2, plaque: [0.45, 1.25, 0.33] }); }
+  const pc = piece(K, 'nba-taipei-game-2013', D.nba, 1.55, 3.0, -0.3);                                    // a bronze ball on a drum at the court's edge, a cast plate on its lectern
+  reg('nba-taipei-game-2013', K.done(-5.2, -13.4, 0), { foot: [[-0.5, 0.5, -0.7, 0.4], [-2.0, -1.5, 0.8, 2.4], [1.5, 2.0, 0.2, 0.8]].concat(pc.foot), near: [0, 2.6], radius: 3.2, plaque: pc.plaque || [0.45, 1.25, 0.33] }); }
 
 // ══ west side, north half: 動物園大門 and 圓仔 ═══════════════════════════════════════════════════
 // two stone pylons under a long flat canopy with the name, a ticket booth, turnstiles, painted hills behind, an elephant and a giraffe at the gate
@@ -247,8 +276,8 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   K.rod(M.black, [-0.26, 0.9, 0.06], [-0.34, 0.62, 0.2], 0.085, 8); K.rod(M.black, [0.26, 0.9, 0.06], [0.44, 1.12, 0.16], 0.085, 8); K.sph(M.black, 0.09, 0.46, 1.15, 0.18); K.box(M.black, 0.5, 0.16, 0.3, 0, 0.93, -0.02);
   [[-0.95, 0.75], [0.95, 0.75]].forEach(([x, z]) => { K.cyl(M.gold, 0.03, 0.03, 0.9, x, 0.45, z, 10); K.cyl(M.gold, 0.13, 0.15, 0.04, x, 0.02, z, 14); K.sph(M.gold, 0.05, x, 0.93, z); }); for (let i = 0; i < 8; i++) { const t0 = i / 8, t1 = (i + 1) / 8, sag = t => 0.86 - 0.22 * Math.sin(t * PI); K.rod(M.red, [-0.95 + 1.9 * t0, sag(t0), 0.75], [-0.95 + 1.9 * t1, sag(t1), 0.75], 0.022); }
   K.cyl(M.brown, 0.2, 0.15, 0.3, -0.85, 0.15, -0.3, 12); [0, 1, 2, 3].forEach(i => { const x = -0.85 + (i - 1.5) * 0.07, z = -0.3 + (i % 2) * 0.08; K.rod(M.green, [x, 0.3, z], [x + (i - 1.5) * 0.05, 1.5 + i * 0.12, z], 0.02); [0.7, 1.0, 1.3].forEach(y => K.sph(M.leaf, 0.12, x + (i - 1.5) * 0.04 + 0.08, y + i * 0.06, z, 1.2, 0.25, 0.5)); });
-  eventSign(K, '圓仔 首次亮相', '2014.1.6 · 臺北市立動物園', 0.95, -0.25, 0.5, ACC.green, 1.3);
-  reg('yuanzai-first-day-2014', K.done(-14.4, -6.6, 1.0), { foot: [[-1.1, 1.6, -0.6, 0.85]], near: [0.2, 2.0], plaque: [0.95, 1.2, 0.8, 0, 0.14] }); }
+  const pc = piece(K, 'yuanzai-first-day-2014', D.yuanzai, 1.75, -0.45, 0.55);                              // the day's front page in a lit case beside the cub
+  reg('yuanzai-first-day-2014', K.done(-14.4, -6.6, 1.0), { foot: [[-1.1, 0.9, -0.6, 0.85]].concat(pc.foot), near: [0.2, 2.0], plaque: pc.plaque || [0.95, 1.2, 0.8, 0, 0.14] }); }
 
 // ══ north side, east half: the night-market row, and the 2022 lantern over it ═════════════════════
 // four steel pushcarts under one striped canopy, each with a glass food case, a gas ring, a light-box sign and a hand-written price board;
@@ -285,9 +314,8 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   K.rod(M.yellow, [-0.7, 5.05, 0], [1.9, 5.05, 0], 0.045); K.rod(M.yellow, [0, 5.55, 0], [1.9, 5.05, 0], 0.02); K.rod(M.yellow, [0, 5.55, 0], [-0.7, 5.05, 0], 0.02); K.rod(M.yellow, [0, 5.0, 0], [0, 5.55, 0], 0.04); K.box(M.concDk, 0.4, 0.3, 0.4, -0.7, 4.85, 0); K.rod(M.dark, [1.6, 5.05, 0], [1.6, 4.3, 0], 0.012, 4);
   K.geo(M.red, HALF, 1.6, 3.95, 0, null, 0.42); K.sph(M.whiteP, 0.7, 1.6, 3.9, 0, 1, 0.22, 1); K.geo(M.lantern, TORUS, 1.6, 3.9, 0, [PI / 2, 0, 0], 0.72); K.cyl(M.warm, 0.3, 0.16, 0.14, 1.6, 3.72, 0, 16); for (let i = 0; i < 10; i++) { const a = i / 10 * PI * 2; K.sph(M.bulb, 0.035, 1.6 + Math.cos(a) * 0.52, 3.82, Math.sin(a) * 0.52); }
   for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2, x = 1.6 + Math.cos(a) * 0.62, z = Math.sin(a) * 0.62; K.rod(M.dark, [x, 3.85, z], [x, 3.3, z], 0.005, 4); K.sph(i % 2 ? M.lantern : M.moon, 0.1, x, 3.2, z, 1, 0.9, 1); }
-  K.add(sign('台北燈節', 0.42, 1.2, { kind: 'box', bg: '#b3271e', fg: '#f3d27a', vertical: true, sub: '2022 士林', glow: 0.7 }), 0, 1.6, 0.2);
-  eventSign(K, '2022 台北燈節 · 士林', '2022.2.11 – 2.20', 0.2, 0.95, 0, '#b3271e', 1.5);
-  reg('lantern-fest-shilin-2022', K.done(5.6, -15.4, 0), { foot: [[-0.6, 1.0, -0.6, 1.2]], near: [0.4, 2.6], plaque: [-0.3, 1.5, 0.24, 0, 0.14] }); }
+  const pc = piece(K, 'lantern-fest-shilin-2022', D.lantern, 0.5, 2.45, 0);                                  // a canopy of lanterns to walk under, in front of the crane
+  reg('lantern-fest-shilin-2022', K.done(5.6, -15.4, 0), { foot: [[-0.6, 0.6, -0.6, 0.6]].concat(pc.foot), near: [0.4, 2.6], plaque: pc.plaque || [-0.3, 1.5, 0.24, 0, 0.14] }); }
 
 // ══ east side, north half: 會唱歌的垃圾車 ═════════════════════════════════════════════════════════
 // a yellow rear-loading compactor truck with its hopper open, a horn on the cab roof (and three notes of the tune in the air),
@@ -369,8 +397,8 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
     g.fillStyle = '#8fc7e0'; g.beginPath(); g.ellipse(W * 0.84, H * 0.52, W * 0.12, H * 0.05, 0.3, 0, 7); g.fill(); g.fillStyle = '#c22d22'; g.beginPath(); g.arc(W * 0.46, H * 0.44, W * 0.09, PI, 0); g.lineTo(W * 0.46, H * 0.56); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(W * 0.46, H * 0.44, W * 0.035, 0, 7); g.fill();
     g.fillStyle = 'rgba(40,40,60,.85)'; g.beginPath(); g.arc(W * 0.5, H * 0.26, W * 0.13, 0, 7); g.fill(); g.fillStyle = '#fff'; g.font = `800 ${W * 0.2}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', W * 0.5, H * 0.265); g.fillStyle = '#1c2f5c'; g.fillRect(0, H * 0.86, W, H * 0.14); g.fillStyle = '#fff'; g.font = `700 ${W * 0.1}px ${FONT}`; g.fillText('北投公園 · 附近有東西', W / 2, H * 0.93); g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(0, 0, W, H * 0.045); }, { glow: 1.0, depth: 0.02, oneSide: true, light: true }), 0, 2.0, 0.125, 0, -0.06);
   K.box(M.whiteP, 0.3, 0.5, 0.12, 0.75, 0.3, 0.4, 0.4); K.rod(M.whiteP, [0.75, 0.5, 0.4], [0.42, 1.3, 0.1], 0.01, 4);                                                    // a power bank on its cable
-  eventSign(K, '北投公園 抓寶人潮', '2016.8 · 寶可夢 GO', -1.0, 0.85, 0.35, ACC.game, 1.5);
-  reg('pokemon-go-beitou-2016', K.done(8.6, 12.2, -1.9), { foot: [[-0.7, 0.95, -0.5, 0.6], [-1.8, -0.2, 0.6, 1.1]], near: [0, 2.2], plaque: [0.5, 1.0, 0.35, 0, 0.14] }); }
+  const pc = piece(K, 'pokemon-go-beitou-2016', D.pokemon, -0.4, 2.2, 0, 0.85);                             // a field of phone glows round a map pin, the crowd as light
+  reg('pokemon-go-beitou-2016', K.done(8.6, 12.2, -1.9), { foot: [[-0.7, 0.95, -0.5, 0.6]].concat(pc.foot), near: [0, 2.2], plaque: pc.plaque || [0.5, 1.0, 0.35, 0, 0.14] }); }
 
 // ══ west side, south half: 早餐店 ═════════════════════════════════════════════════════════════════
 // a fully open front under a long red sign board with yellow stripes and a blue-and-white awning; the steel griddle at the pavement edge with
@@ -406,12 +434,12 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
 
 // 開拓動漫祭 FF: a fair table under a cloth, stacks of thin self-published books, a 新刊 card, a poster stand, a tote bag, the queue's 最後尾 sign
 { const K = Kit('fancy-frontier-ff');
-  K.box(M.navy, 1.9, 0.72, 0.8, 0, 0.38, 0); K.box(M.whiteP, 1.96, 0.03, 0.86, 0, 0.75, 0); K.add(sign('開拓動漫祭 FF', 1.7, 0.42, { kind: 'cloth', bg: '#f2a0b4', fg: '#1c2f5c', font: YUAN, sub: 'FANCY FRONTIER · 同人誌販售會', glow: 0.35, depth: 0.02 }), 0, 0.42, 0.412);
+  K.box(M.navy, 1.9, 0.72, 0.8, 0, 0.38, 0); K.box(M.whiteP, 1.96, 0.03, 0.86, 0, 0.75, 0); K.add(kitFace(DESIGN.wideTexture(E, P('fancy-frontier-ff'), D.ff, 1024, 0.31, 'skirt'), 1.9, 0.6, 0.3), 0, 0.42, 0.412);   // the table cloth printed with the fair's art
   [[-0.7, 7, 0], [-0.42, 4, 2], [-0.1, 9, 4], [0.25, 5, 1], [0.55, 6, 3]].forEach(([x, n, c]) => { for (let i = 0; i < n; i++) K.box(i === n - 1 ? FLOWER[c] : M.whiteP, 0.22, 0.012, 0.3, x + (i % 2) * 0.005, 0.772 + i * 0.012, 0.05, (i % 3 - 1) * 0.03); });
   K.box(FLOWER[2], 0.22, 0.3, 0.012, 0.2, 0.94, -0.22, 0, -0.25); K.box(FLOWER[4], 0.22, 0.3, 0.012, -0.5, 0.94, -0.22, 0, -0.25); K.add(label([['新刊', 0.4, 0.3, 800, '#c22d22', YUAN], ['一本 100', 0.26, 0.74, 700, '#2a2420']], 0.26, 0.2, { bg: '#fffdf2', border: '#c22d22', glow: 0.5, ppm: 400 }), 0.82, 0.88, 0.2, -0.2, -0.2); K.box(M.steel, 0.14, 0.08, 0.1, -0.86, 0.81, 0.25);
   [-0.7, 0.7].forEach(x => K.rod(M.steelDk, [x, 0, -0.75], [x, 2.3, -0.75], 0.018)); K.rod(M.steelDk, [-0.7, 2.3, -0.75], [0.7, 2.3, -0.75], 0.018);
-  K.add(paint(1.3, 1.5, (g, W, H) => { const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#2b2f6a'); gr.addColorStop(1, '#c2457a'); g.fillStyle = gr; g.fillRect(0, 0, W, H); for (let i = 0; i < 26; i++) { g.fillStyle = `hsla(${(i * 47) % 360},80%,70%,.55)`; g.beginPath(); const x = rnd() * W, y = rnd() * H, s = W * (0.03 + rnd() * 0.07); if (i % 2) g.arc(x, y, s, 0, 7); else { g.moveTo(x, y - s); g.lineTo(x + s * 0.3, y - s * 0.3); g.lineTo(x + s, y); g.lineTo(x + s * 0.3, y + s * 0.3); g.lineTo(x, y + s); g.lineTo(x - s * 0.3, y + s * 0.3); g.lineTo(x - s, y); g.lineTo(x - s * 0.3, y - s * 0.3); } g.fill(); }
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff'; g.font = `800 ${H * 0.2}px ${YUAN}`; g.fillText('原創', W / 2, H * 0.36); g.font = `700 ${H * 0.1}px ${YUAN}`; g.fillText('新刊 · 既刊 · 周邊', W / 2, H * 0.58); g.fillStyle = '#f2c12e'; g.fillRect(W * 0.2, H * 0.72, W * 0.6, H * 0.13); g.fillStyle = '#2b2f6a'; g.font = `800 ${H * 0.08}px ${FONT}`; g.fillText('攤位 A-12', W / 2, H * 0.79); }, { glow: 0.5, oneSide: true, depth: 0.02 }), 0, 1.5, -0.74);
+  K.add(kitFace(DESIGN.posterTexture(E, P('fancy-frontier-ff'), D.ff, 640), 1.3, 1.84, 0.45), 0, 1.38, -0.74);                                  // the circle's own poster on the back frame (kit layout anime, its painting from posters/events/)
+  K.add(kitFace(DESIGN.posterTexture(E, P('fancy-frontier-ff'), Object.assign({}, D.ff, { variant: 1, big: '新刊', kicker: 'NEW RELEASE' }), 384, 2.6), 0.6, 1.56, 0.4), -1.45, 0.86, -0.3, 0.35);   // an X-banner by the chair
   K.box(FLOWER[3], 0.34, 0.38, 0.03, 1.02, 0.5, 0.3, PI / 2); K.rod(M.navy, [1.0, 0.76, 0.2], [1.02, 0.68, 0.3], 0.01, 4); K.rod(M.navy, [1.0, 0.76, 0.4], [1.02, 0.68, 0.3], 0.01, 4);
   [-0.4, 0.4].forEach(x => { K.box(M.steelDk, 0.4, 0.04, 0.4, x, 0.45, -0.45); K.box(M.steelDk, 0.4, 0.4, 0.03, x, 0.68, -0.64); [[-0.17, -0.17], [0.17, -0.17], [-0.17, 0.17], [0.17, 0.17]].forEach(([a, b]) => K.rod(M.steelDk, [x + a, 0, -0.45 + b], [x + a, 0.45, -0.45 + b], 0.012, 4)); }); person(K, -0.4, -0.5, 0, { sit: true, shirt: SHIRT[5] });
   K.push(1.75, 0, 0.5, -0.3); K.cyl(M.concDk, 0.2, 0.22, 0.06, 0, 0.03, 0, 12); K.rod(M.steelDk, [0, 0.06, 0], [0, 1.7, 0], 0.02); K.add(label([['最後尾', 0.44, 0.34, 800, '#c22d22', YUAN], ['隊伍由此排起 · END OF LINE', 0.15, 0.78, 700, '#2a2420']], 0.7, 0.44, { bg: '#fffdf2', border: '#c22d22', glow: 0.45 }), 0, 1.75, 0.02); K.pop();
@@ -472,10 +500,9 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   for (let ring = 0; ring < 4; ring++) { const r = 0.3 + ring * 0.29, n = 7 + ring * 6; for (let i = 0; i < n; i++) { const a = i / n * PI * 2 + ring * 0.4, x = Math.cos(a) * r, z = Math.sin(a) * r; K.sph(M.leaf, 0.09, x, 0.4, z, 1, 0.7, 1); K.sph(FLOWER[(ring + (Math.floor(i / 3) % 2)) % 6], 0.062, x, 0.5 + (i % 2) * 0.03, z, 1, 0.8, 1); } }
   K.rod(M.green, [0, 0.34, 0], [0.05, 2.5, 0], 0.07, 8); [[0.9, 1], [1.5, -1]].forEach(([y, k]) => K.sph(M.green, 0.3, k * 0.3, y, 0, 1, 0.22, 0.5));
   ['#e8463c', '#f2c12e', '#f08ab0', '#8a5ad0', '#f2843a'].forEach((c, i) => { const a = i / 5 * PI * 2 + PI / 2; K.sph(lit(c, c, 0.25), 0.4, 0.05 + Math.cos(a) * 0.5, 2.6 + Math.sin(a) * 0.5, 0, 1, 1, 0.18); }); K.sph(lit('#f6e27a', '#c8a020', 0.4), 0.26, 0.05, 2.6, 0.03, 1, 1, 0.4);
-  K.add(label([['臺北花博', 0.36, 0.3, 800, '#fff', KAI], ['2010.11.6 – 2011.4.25', 0.24, 0.74, 700, '#fff']], 0.9, 0.42, { bg: '#3d8a4f', glow: 0.5 }), 0.03, 1.2, 0.09);
   [[-0.9, 1.3], [0.95, 1.25]].forEach(([x, z], i) => { K.rod(M.steelDk, [x, 0, z], [x, 0.6, z], 0.012, 4); K.box(FLOWER[i + 1], 0.24, 0.18, 0.01, x, 0.66, z, i ? -0.3 : 0.3); });                         // small bed labels
-  eventSign(K, '臺北國際花卉博覽會', '2010.11.6 – 2011.4.25', 0, 1.7, 0, ACC.green, 1.7);
-  reg('flora-expo-2010', K.done(5.0, -5.6, -0.73), { foot: [[-1.4, 1.4, -1.4, 1.4], [-0.9, 0.9, 1.4, 1.95]], near: [0, 2.8], plaque: [1.1, 0.75, 1.72, 0, 0.13] }); }
+  const pc = piece(K, 'flora-expo-2010', D.flora, 0, 2.15, 0);                                              // the expo's poster on an A-frame at the bed's edge
+  reg('flora-expo-2010', K.done(5.0, -5.6, -0.73), { foot: [[-1.4, 1.4, -1.4, 1.4]].concat(pc.foot), near: [0, 2.8], radius: 3.2, plaque: pc.plaque || [1.1, 0.75, 1.72, 0, 0.13] }); }
 
 // 2017, 世大運: a three-step podium, a javelin planted beside it, a barbell on the top step, a strip of red track on the paving
 { const K = Kit('universiade-2017');
@@ -484,8 +511,8 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   [-1, 1].forEach(k => { K.cyl(M.red, 0.2, 0.2, 0.05, k * 0.4, 0.97, 0, 18, [0, 0, PI / 2]); K.cyl(M.blue, 0.2, 0.2, 0.04, k * 0.46, 0.97, 0, 18, [0, 0, PI / 2]); K.cyl(M.yellow, 0.15, 0.15, 0.03, k * 0.51, 0.97, 0, 16, [0, 0, PI / 2]); }); K.rod(M.chrome, [-0.62, 0.97, 0], [0.62, 0.97, 0], 0.016, 8);
   K.rod(M.yellow, [1.55, 0, -0.3], [1.5, 2.3, -0.3], 0.016, 8); K.rod(M.chrome, [1.5, 2.3, -0.3], [1.495, 2.55, -0.3], 0.012, 6); K.rod(M.dark, [1.53, 1.0, -0.3], [1.525, 1.25, -0.3], 0.02, 8);
   K.cyl(M.steelDk, 0.016, 0.016, 1.1, -1.5, 0.55, -0.3, 6); K.box(M.red, 0.5, 0.3, 0.01, -1.24, 0.94, -0.3); K.box(M.whiteP, 0.5, 0.1, 0.012, -1.24, 0.94, -0.3);
-  eventSign(K, '2017 臺北世大運', '2017.8.19 – 8.30 · 臺北田徑場', 0, 1.15, 0, ACC.sport, 1.6);
-  reg('universiade-2017', K.done(-5.0, -5.6, 0.73), { foot: [[-1.25, 1.25, -0.45, 0.45], [-0.85, 0.85, 0.9, 1.4]], near: [0, 2.3], plaque: [1.0, 0.75, 1.17, 0, 0.13] }); }
+  const pc = piece(K, 'universiade-2017', D.universiade, -0.25, -1.05, 0);                                    // a row of street-pole banners behind the podium spelling 2017
+  reg('universiade-2017', K.done(-5.0, -5.6, 0.73), { foot: [[-1.25, 1.25, -0.45, 0.45]].concat(pc.foot), near: [0, 2.3], plaque: pc.plaque || [1.0, 0.75, 1.17, 0, 0.13] }); }
 
 // 2017, 白晝之夜: a lamp post with a glowing white moon tied to it, a clock whose hands run from six to six, a row of paper-cut palms for 椰林大道
 { const K = Kit('nuit-blanche-gongguan-2017');
@@ -494,8 +521,8 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   K.add(paint(0.7, 0.7, (g, W, H) => { g.fillStyle = '#1c2f5c'; g.fillRect(0, 0, W, H); g.fillStyle = '#fdfdf5'; g.beginPath(); g.arc(W / 2, H / 2, W * 0.46, 0, 7); g.fill(); g.fillStyle = 'rgba(28,47,92,.2)'; g.beginPath(); g.moveTo(W / 2, H / 2); g.arc(W / 2, H / 2, W * 0.42, PI / 2, PI / 2 + PI * 2 * 0.999); g.fill(); g.fillStyle = '#1c2f5c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${W * 0.12}px ${FONT}`; [['12', 0.5, 0.14], ['3', 0.86, 0.5], ['6', 0.5, 0.86], ['9', 0.14, 0.5]].forEach(([t, x, y]) => g.fillText(t, W * x, H * y));
     g.strokeStyle = '#1c2f5c'; g.lineCap = 'round'; g.lineWidth = W * 0.045; g.beginPath(); g.moveTo(W / 2, H / 2); g.lineTo(W / 2, H * 0.76); g.stroke(); g.lineWidth = W * 0.03; g.beginPath(); g.moveTo(W / 2, H / 2); g.lineTo(W / 2, H * 0.17); g.stroke(); g.font = `700 ${W * 0.07}px ${FONT}`; g.fillStyle = '#c22d22'; g.fillText('18:00 → 06:00', W / 2, H * 0.64); }, { glow: 0.8, light: true }), 0, 2.5, 0.1);
   for (let i = 0; i < 5; i++) { const x = -1.0 + i * 0.5, h = 0.8 + (i % 2) * 0.2; K.box(M.cream2, 0.05, h, 0.012, x, 0.16 + h / 2, 0.35); for (let j = 0; j < 6; j++) { const a = -1.3 + j * 0.52; K.box(M.green, 0.3, 0.05, 0.012, x + Math.sin(a) * 0.14, 0.16 + h + Math.cos(a) * 0.1 - Math.abs(a) * 0.05, 0.35, 0, 0, -a * 0.75 + PI / 2); } } K.box(M.woodDk, 2.5, 0.16, 0.14, 0, 0.08, 0.35);
-  eventSign(K, '白晝之夜 2017 · 公館', '2017.10.7 18:00 – 10.8 06:00', 0, 0.95, 0, ACC.night, 1.7);
-  reg('nuit-blanche-gongguan-2017', K.done(6.6, 3.5, -0.9), { foot: [[-1.3, 1.3, -0.4, 1.2]], near: [0, 2.3], plaque: [1.02, 0.75, 0.97, 0, 0.13] }); }
+  const pc = piece(K, 'nuit-blanche-gongguan-2017', D.nuit, 1.75, 0.9, -0.35);                               // the night's poster glowing in a lit case beside the moon
+  reg('nuit-blanche-gongguan-2017', K.done(6.6, 3.5, -0.9), { foot: [[-1.3, 1.3, -0.4, 0.5]].concat(pc.foot), near: [0, 2.3], plaque: pc.plaque || [1.02, 0.75, 0.97, 0, 0.13] }); }
 
 // 2019, MSI 決賽: a stage riser, two facing rows of five seats and screens, a plain silver cup between them, the big screen behind
 { const K = Kit('msi-2019-heping');
@@ -504,20 +531,28 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
     K.pop(); });
   K.cyl(M.dark, 0.2, 0.24, 0.6, 0, 0.6, 0.55, 14); K.cyl(M.silver, 0.05, 0.1, 0.08, 0, 0.94, 0.55, 12); K.cyl(M.silver, 0.02, 0.03, 0.12, 0, 1.04, 0.55, 8); K.cyl(M.silver, 0.13, 0.05, 0.22, 0, 1.21, 0.55, 14); [-1, 1].forEach(k => K.geo(M.silver, TORUS, k * 0.14, 1.2, 0.55, [0, 0, 0], 0.07));
   [-1.7, 1.7].forEach(x => K.box(M.steelDk, 0.08, 2.9, 0.08, x, 1.75, -1.0)); K.add(paint(3.3, 1.5, (g, W, H) => { const gr = g.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, '#0e2a5c'); gr.addColorStop(0.5, '#0a1024'); gr.addColorStop(1, '#6a4a10'); g.fillStyle = gr; g.fillRect(0, 0, W, H); for (let i = 0; i < 9; i++) { g.strokeStyle = `rgba(${i % 2 ? '90,160,255' : '240,190,80'},.22)`; g.lineWidth = 6; g.beginPath(); g.moveTo(W / 2, H * 1.2); g.lineTo(W * (i / 8), 0); g.stroke(); }
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3d27a'; g.font = `800 ${H * 0.24}px ${FONT}`; g.fillText('季中邀請賽 決賽', W / 2, H * 0.36); g.fillStyle = '#fff'; g.font = `700 ${H * 0.13}px ${FONT}`; g.fillText('2019 · 臺北和平籃球館', W / 2, H * 0.62); g.font = `700 ${H * 0.1}px ${FONT}`; g.fillStyle = '#9fd0ff'; g.fillText('藍方　3 : 0　紅方', W / 2, H * 0.84); }, { glow: 1.0, oneSide: true }), 0, 2.4, -0.98);
+    // the broadcast's score frame, not a name plate (checker 2026-11-22): a GRAND FINAL chip, two team bars in their colours with
+    // pick slots, the score set huge in a hexagon, a game-time clock and a lower third with the venue
+    g.textAlign = 'center'; g.textBaseline = 'middle'; const hex = (cx, cy, r) => { g.beginPath(); for (let i = 0; i < 6; i++) { const a = PI / 6 + i * PI / 3; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); };
+    g.fillStyle = '#f3d27a'; g.beginPath(); g.moveTo(W * 0.36, 0); g.lineTo(W * 0.64, 0); g.lineTo(W * 0.6, H * 0.12); g.lineTo(W * 0.4, H * 0.12); g.fill(); g.fillStyle = '#0a1024'; g.font = `900 ${H * 0.075}px ${FONT}`; g.fillText('GRAND FINAL · 季中邀請賽', W / 2, H * 0.06);
+    [[-1, '#2f7bff', '藍方'], [1, '#e0473a', '紅方']].forEach(([k, c, name]) => { const x0 = k < 0 ? W * 0.03 : W * 0.6; g.fillStyle = c; g.beginPath(); g.moveTo(x0, H * 0.22); g.lineTo(x0 + W * 0.37, H * 0.22); g.lineTo(x0 + W * 0.37 - k * W * 0.03, H * 0.42); g.lineTo(x0, H * 0.42); g.fill();
+      g.fillStyle = '#ffffff'; g.font = `900 ${H * 0.13}px ${FONT}`; g.fillText(name, x0 + W * 0.185, H * 0.32); for (let i = 0; i < 5; i++) { const sx = x0 + W * (0.02 + i * 0.07); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(sx, H * 0.47, W * 0.06, H * 0.2); g.strokeStyle = c; g.lineWidth = 3; g.strokeRect(sx, H * 0.47, W * 0.06, H * 0.2); g.fillStyle = c; g.fillRect(sx, H * 0.63, W * 0.06, H * 0.04); }
+      for (let i = 0; i < 3; i++) { g.fillStyle = k < 0 ? '#f3d27a' : 'rgba(255,255,255,.18)'; g.beginPath(); g.arc(x0 + W * (0.12 + i * 0.065), H * 0.75, H * 0.025, 0, 6.2832); g.fill(); } });
+    g.fillStyle = '#0a1024'; hex(W / 2, H * 0.42, H * 0.26); g.fill(); g.strokeStyle = '#f3d27a'; g.lineWidth = 5; g.stroke(); g.fillStyle = '#ffffff'; g.font = `900 ${H * 0.2}px ${FONT}`; g.fillText('3 : 0', W / 2, H * 0.4); g.fillStyle = '#9fd0ff'; g.font = `700 ${H * 0.06}px ${FONT}`; g.fillText('BO5 · 34:12', W / 2, H * 0.58);
+    g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(0, H * 0.84, W, H * 0.16); g.fillStyle = '#f3d27a'; g.fillRect(0, H * 0.84, W * 0.012, H * 0.16); g.textAlign = 'left'; g.fillStyle = '#ffffff'; g.font = `800 ${H * 0.07}px ${FONT}`; g.fillText('決賽之夜  2019.5.19', W * 0.04, H * 0.92); g.textAlign = 'right'; g.fillStyle = '#9fd0ff'; g.font = `700 ${H * 0.055}px ${FONT}`; g.fillText('臺北和平籃球館 · TAIPEI HEPING ARENA', W * 0.97, H * 0.92); }, { glow: 1.0, oneSide: true }), 0, 2.4, -0.98);
   [[-1.5, M.neonB], [1.5, M.amber]].forEach(([x, m]) => { K.rod(M.steelDk, [x, 3.2, -1.0], [x * 0.6, 3.2, -0.4], 0.02); K.sph(m, 0.08, x * 0.6, 3.16, -0.4); }); [[-1.2, 1.35, M.neonB], [1.3, 1.4, M.amber]].forEach(([x, z, m]) => { K.rod(m, [x, 0, z], [x + 0.1, 0.5, z], 0.035, 8); K.rod(m, [x + 0.2, 0, z + 0.1], [x + 0.25, 0.5, z + 0.05], 0.035, 8); });   // cheering sticks left at the edge
-  eventSign(K, '英雄聯盟 季中邀請賽決賽', '2019.5.17 – 5.19 · 和平籃球館', 0, 1.6, 0, ACC.game, 1.9);
-  reg('msi-2019-heping', K.done(12.8, 4.9, -PI / 2), { foot: [[-1.85, 1.85, -1.2, 1.2], [-1.0, 1.0, 1.2, 1.85]], near: [0, 2.8], radius: 3.2, plaque: [1.2, 0.75, 1.62, 0, 0.13] }); }
+  const pc = piece(K, 'msi-2019-heping', D.msi, 2.55, 1.15, 0);                                               // an arena column wrapped in the finals' key art at the stage's corner
+  reg('msi-2019-heping', K.done(12.8, 4.9, -PI / 2), { foot: [[-1.85, 1.85, -1.2, 1.2]].concat(pc.foot), near: [0, 2.8], radius: 3.2, plaque: pc.plaque || [1.2, 0.75, 1.62, 0, 0.13] }); }
 
 // 2006, 金曲獎: a short red carpet between crowd barriers up to a small gold stage arch, a plain golden note on a base under it
 { const K = Kit('golden-melody-arena-2006');
   K.box(M.red, 1.0, 0.03, 2.4, 0, 0.02, 0.3); K.box(M.dark, 1.8, 0.16, 0.9, 0, 0.08, -0.9); [-0.75, 0.75].forEach(x => { K.box(M.gold, 0.14, 2.3, 0.14, x, 1.31, -0.9); }); for (let i = 0; i <= 8; i++) { const a = i / 8 * PI, b = (i + 1) / 8 * PI; if (i < 8) K.rod(M.gold, [Math.cos(a) * 0.75, 2.46 + Math.sin(a) * 0.45, -0.9], [Math.cos(b) * 0.75, 2.46 + Math.sin(b) * 0.45, -0.9], 0.07, 8); }
-  for (let i = 0; i < 7; i++) K.sph(M.bulb, 0.04, -0.6 + i * 0.2, 2.42, -0.86); K.add(label([['金曲獎', 0.62, 0.5, 800, '#f3d27a', WEI]], 1.2, 0.3, { bg: '#3a0f14', glow: 0.7 }), 0, 2.25, -0.86);
+  for (let i = 0; i < 7; i++) K.sph(M.bulb, 0.04, -0.6 + i * 0.2, 2.42, -0.86); K.add(kitFace(DESIGN.wideTexture(E, P('golden-melody-arena-2006'), Object.assign({}, D.golden, { layout: 'award' }), 1024, 0.25, 'band'), 1.2, 0.3, 0.7), 0, 2.25, -0.84);
   K.cyl(M.dark, 0.26, 0.3, 0.5, 0, 0.41, -0.9, 16); K.cyl(M.gold, 0.2, 0.24, 0.06, 0, 0.69, -0.9, 16); K.sph(M.gold, 0.15, -0.06, 0.86, -0.9, 1.2, 0.85, 1); K.rod(M.gold, [0.08, 0.88, -0.9], [0.08, 1.6, -0.9], 0.028, 8); K.rod(M.gold, [0.08, 1.6, -0.9], [0.32, 1.38, -0.9], 0.045, 8); K.rod(M.gold, [0.08, 1.42, -0.9], [0.3, 1.22, -0.9], 0.035, 8);
   [-1, 1].forEach(k => { K.push(k * 0.72, 0, 0.5); [-0.8, 0.8].forEach(z => { K.rod(M.chrome, [0, 0, z], [0, 0.95, z], 0.02); K.box(M.chrome, 0.3, 0.02, 0.04, 0, 0.01, z); }); K.rod(M.chrome, [0, 0.95, -0.8], [0, 0.95, 0.8], 0.02); K.rod(M.chrome, [0, 0.3, -0.8], [0, 0.3, 0.8], 0.016); for (let i = 1; i < 8; i++) K.rod(M.chrome, [0, 0.3, -0.8 + i * 0.2], [0, 0.95, -0.8 + i * 0.2], 0.009, 4); K.pop(); });
   [-1, 1].forEach(k => { K.rod(M.dark, [k * 1.0, 0, -0.5], [k * 0.95, 1.5, -0.5], 0.02); K.box(M.dark, 0.2, 0.14, 0.16, k * 0.95, 1.56, -0.46); K.sph(M.headlamp, 0.05, k * 0.95, 1.56, -0.37); });                    // two press lights
-  eventSign(K, '金曲獎 登上小巨蛋', '2006.6.10 · 第 17 屆', 0, 1.75, 0, ACC.music, 1.6);
-  reg('golden-melody-arena-2006', K.done(-4.6, 12.3, 1.76), { foot: [[-1.1, 1.1, -1.4, 1.4], [-0.85, 0.85, 1.4, 2.0]], near: [0, 2.6], radius: 1.9, plaque: [1.0, 0.75, 1.77, 0, 0.13] }); }   // a small radius: the E prompt must not already be up where she starts
+  const pc = piece(K, 'golden-melody-arena-2006', D.golden, 1.45, 2.3, 0, 0.9);                             // an arena column wrapped in the night's black-and-gold posters at the carpet's mouth, just past the exhibition wall's end (clear of viewpoints 1 and 6)
+  reg('golden-melody-arena-2006', K.done(-4.6, 12.3, 1.76), { foot: [[-1.1, 1.1, -1.4, 1.4]].concat(pc.foot), near: [0, 2.6], radius: 1.9, plaque: pc.plaque || [1.0, 0.75, 1.77, 0, 0.13] }); }   // a small radius: the E prompt must not already be up where she starts
 
 // 2024, 大巨蛋首場演唱會: the Dome's silver shell with its roof lifted like a lid, a piano on a round stage inside, stage light and confetti coming out
 { const K = Kit('jay-chou-taipei-dome-2024');
@@ -527,9 +562,9 @@ const ACC = { music: '#8a2f6a', sport: '#b7372a', night: '#1c2f5c', green: '#3d7
   { const lid = HALF.clone().scale(0.98, 0.42, 0.73); lid.translate(0, 0, 0.72); const m = new T.Mesh(lid, M.silver); m.castShadow = true; K.add(m, 0, 1.12, -0.72, 0, -1.2); const inner = lit('#2a2f6a', '#3a3f9a', 0.6); inner.side = T.BackSide; K.add(new T.Mesh(lid, inner), 0, 1.12, -0.72, 0, -1.2); const rib = new T.Mesh(new T.TorusGeometry(1, 0.03, 6, 28).rotateX(PI / 2).scale(0.98, 1, 0.73).translate(0, 0.02, 0.72), M.steelDk); K.add(rib, 0, 1.12, -0.72, 0, -1.2); }
   [[-0.3, 0.2, 0.1], [0.25, -0.15, -0.05], [0, 0, 0.25]].forEach(([x, rz, rx]) => { const c = new T.Mesh(new T.ConeGeometry(0.34, 2.6, 16, 1, true), Object.assign(M.beam.clone(), { opacity: 0.07 })); c.rotation.set(PI + rx, 0, rz); K.add(c, x + rz * 1.2, 2.2, 0.1 - rx); c.rotation.set(PI + rx, 0, rz); });
   for (let i = 0; i < 40; i++) K.box(FLOWER[i % 6], 0.035, 0.035, 0.004, rr(-0.9, 0.9), rr(1.5, 3.3), rr(-0.3, 0.6), rr(0, 3), rr(0, 3));
-  K.add(label([['大巨蛋首場演唱會', 0.4, 0.32, 800, '#fff3d6', KAI], ['周杰倫「嘉年華」 · 2024.12.5', 0.24, 0.76, 700, '#f3d27a']], 1.5, 0.4, { bg: '#2a1a3a', glow: 0.5 }), 0, 0.36, 1.045);
-  reg('jay-chou-taipei-dome-2024', K.done(-8.9, 12.9, 1.3), { foot: [[-1.1, 1.1, -1.1, 1.1]], near: [0, 2.3], plaque: [0.9, 0.6, 0.72, 0.6, 0.13] }); }
+  const pc = piece(K, 'jay-chou-taipei-dome-2024', D.dome, 1.75, 0.55, -0.4);                                // the tour poster on an A-frame beside the model
+  reg('jay-chou-taipei-dome-2024', K.done(-8.9, 12.9, 1.3), { foot: [[-1.1, 1.1, -1.1, 1.1]].concat(pc.foot), near: [0, 2.3], plaque: pc.plaque || [0.9, 0.6, 0.72, 0.6, 0.13] }); }
 
-return { groups: out, count };
+return { groups: out, count, designs: DESIGNED };
 };
 })();

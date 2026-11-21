@@ -856,8 +856,14 @@
     const L = KINDS[kind](E, K, box, Object.assign({}, o, { g }), accent);
     const [tx, ty, tz, tw, th] = L.title;
     // the header: the sign this topic really carries, in its case or frame (a light box stands proud of the wall, a 匾額 leans out from the top)
-    const S = signFor(o.topic, info), sg = new T.Group(); sg.position.set(tx, ty, tz); if (S.tilt) { sg.rotation.x = S.tilt; sg.position.z += Math.sin(S.tilt) * th / 2; } g.add(sg);
-    const title = signPlate(T, S, info, tw, th); sg.add(title);
+    // CJ, 2026-11-22: 「這種無聊的招牌絕對不能出現」. A showcase is the site's own exhibition piece, not a shop, so its header is an
+    // exhibition graphic from design-kit.js (each topic its own: a drawn panel of the subject, the name set huge, an exhibit number),
+    // standing off the wall in a deep frame with a light bar. Without design-kit.js the older sign faces below are used.
+    const DK = window.DESIGN && DESIGN.headerTexture && !o.legacySign;
+    const S = DK ? Object.assign({}, signFor(o.topic, info), { rim: 'dark', deep: true, tilt: 0 }) : signFor(o.topic, info), sg = new T.Group(); sg.position.set(tx, ty, tz); if (S.tilt) { sg.rotation.x = S.tilt; sg.position.z += Math.sin(S.tilt) * th / 2; } g.add(sg);
+    const title = DK ? new T.Mesh(new T.PlaneGeometry(tw, th), new T.MeshStandardMaterial({ map: DESIGN.headerTexture(E, o.topic, info, tw, th), roughness: 0.55, emissiveMap: DESIGN.headerTexture(E, o.topic, info, tw, th), emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.45 })) : signPlate(T, S, info, tw, th); sg.add(title);
+    if (DK) { const bar = new T.Mesh(new T.BoxGeometry(tw, 0.03, 0.05), E.GLOW(3.6, 2.6, 1.3)); bar.position.set(0, th / 2 + 0.07, 0.16); sg.add(bar);
+      [-1, 1].forEach(k => { const arm = new T.Mesh(new T.BoxGeometry(0.03, 0.03, 0.2), K.dark); arm.position.set(k * tw * 0.4, th / 2 + 0.07, 0.08); sg.add(arm); }); }
     const rimMat = { steel: K.steel, wood: K.frame, dark: K.dark, gilt: K.gilt, stone: K.stone }[S.rim];
     if (rimMat) { const d = S.deep ? 0.16 : 0.07, r = 0.05; title.position.z = S.deep ? 0.07 : 0;
       [[tw + 2 * r, r, 0, th / 2 + r / 2], [tw + 2 * r, r, 0, -th / 2 - r / 2], [r, th, -tw / 2 - r / 2, 0], [r, th, tw / 2 + r / 2, 0]].forEach(([w, h, x, y]) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), rimMat); m.position.set(x, y, d / 2 - 0.045); m.castShadow = true; sg.add(m); }); }

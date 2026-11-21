@@ -15,6 +15,7 @@
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
 <script src="place-data.js"></script>
+<script src="design-kit.js"></script>
 <script src="places.js"></script>
 <script src="noticeboard.js"></script>
 <script src="landmarks-square.js"></script>
@@ -75,48 +76,43 @@ function titleStand() { const grp = new T.Group();
   plane(grp, brass, 4.6, 0.26, 0, 3.2, 0.156, 0); plane(grp, brass, 4.6, 0.26, 0, 3.2, -0.156, PI);
   const p = plaque('台北記憶', 6.6, 2.0, { right: '三門四十年', seal: ['台', '北'], glow: 0.42, ppm: 155 }); p.position.y = 4.55; grp.add(p); scene.add(grp); return grp; }
 
-// 西門町: a cinema marquee. A steel case, the name in cream 魏碑 with a red neon edge on a dark red ground, a white letter board
-// with black slide-in letters under it, a ring of bulbs, and a small 電影街 light box as its crown
-function marquee(zh, en) { const w = 6.6, h = 2.5, d = 0.5, grp = new T.Group(), split = 0.66;
-  const t = tex(w, h, (g, W, H) => { const hh = H * split, gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, '#3a0b0a'); gr.addColorStop(1, '#6a1410'); g.fillStyle = gr; g.fillRect(0, 0, W, hh);
-    g.save(); g.beginPath(); g.rect(0, 0, W, hh); g.clip(); g.translate(W / 2, hh * 1.05); g.fillStyle = 'rgba(255,190,80,.07)'; for (let i = 0; i < 24; i++) { g.rotate(PI / 12); g.beginPath(); g.moveTo(0, 0); g.lineTo(-W * 0.03, -W); g.lineTo(W * 0.03, -W); g.fill(); } g.restore();
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; const ch = [...zh], s = Math.min(hh * 0.76, W * 0.6 / ch.length); g.font = `400 ${s}px ${WEI}`;
-    ch.forEach((c, i) => { const x = W / 2 + (i - (ch.length - 1) / 2) * s * 1.12, y = hh * 0.53; g.shadowColor = '#ff3a20'; g.shadowBlur = s * 0.18; g.strokeStyle = '#ff4a30'; g.lineWidth = s * 0.085; g.strokeText(c, x, y); g.shadowBlur = 0; g.fillStyle = '#ffe9a0'; g.fillText(c, x, y); });
-    [W * 0.09, W * 0.91].forEach(x => { g.save(); g.translate(x, hh * 0.5); g.shadowColor = '#ffb020'; g.shadowBlur = hh * 0.1; g.fillStyle = '#ffd24a'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * PI / 5 - PI / 2, rr = hh * (i % 2 ? 0.07 : 0.17); g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } g.fill(); g.restore(); });
-    g.shadowColor = '#40d0ff'; g.shadowBlur = H * 0.03; g.fillStyle = '#9fe8ff'; g.fillRect(W * 0.03, hh - H * 0.022, W * 0.94, H * 0.012); g.shadowBlur = 0;
-    g.fillStyle = '#1c1210'; g.fillRect(0, hh, W, H - hh); g.fillStyle = '#f4efdc'; g.fillRect(W * 0.025, hh + H * 0.035, W * 0.95, H - hh - H * 0.075);
-    g.fillStyle = 'rgba(0,0,0,.16)'; for (let i = 1; i < 3; i++) g.fillRect(W * 0.025, hh + H * 0.035 + (H - hh - H * 0.075) * i / 3, W * 0.95, Math.max(1, H * 0.004));
-    g.fillStyle = '#1a1614'; sp(g, H * 0.02); fit(g, en, (H - hh) * 0.5, W * 0.84, '"Arial Narrow","Helvetica Neue",Arial,sans-serif', 700); g.fillText(en, W / 2, hh + (H - hh) * 0.52); sp(g, 0); }, 150);
-  bx(grp, MAT.red, w + 0.16, h + 0.16, d, 0, 0, 0); plane(grp, faceMat(t, 1.0), w, h, 0, 0, d / 2 + 0.005, 0);
-  const pts = []; for (let x = -w / 2 + 0.06; x <= w / 2 - 0.04; x += 0.3) pts.push([x, h / 2 + 0.03], [x, -h / 2 - 0.03]); for (let y = -h / 2 + 0.3; y < h / 2 - 0.2; y += 0.3) pts.push([-w / 2 - 0.03, y], [w / 2 + 0.03, y]);
-  const im = new T.InstancedMesh(new T.SphereGeometry(0.055, 8, 6), MAT.bulb, pts.length), M4 = new T.Matrix4(); pts.forEach(([x, y], i) => im.setMatrixAt(i, M4.makeTranslation(x, y, d / 2 + 0.03))); grp.add(im);
-  const crown = lightbox('電影街', { vertical: false, w: 2.4, h: 0.56, bg: '#f2c832', fg: '#b3271e', font: WEI, weight: 400, oneSide: true, d: 0.3 }); crown.position.set(0, h / 2 + 0.44, 0.06); grp.add(crown);
-  [-1, 1].forEach(k => { const c = cloth(k < 0 ? '冷氣開放' : '隆重獻映', 0.8, 3.4, { vertical: true, bg: k < 0 ? '#b3271e' : '#f3ecd9', fg: k < 0 ? '#ffe14a' : '#b3271e' }); c.position.set(k * 5.0, -3.3, -0.5); grp.add(c); });   // hand-painted cloth banners down the piers
-  return grp; }
-
-// 大稻埕: a carved shop 匾額 hung on iron straps, its English and years on a small wooden tablet on chains under it, and two
-// upright light boxes off the piers in the red-and-white and yellow-and-red of the Dihua Street shop signs
-function shopGate(zh, en) { const grp = new T.Group();
-  const p = plaque(zh, 6.0, 1.8, { font: KAI, weight: 700, span: 0.6, right: '迪化街', seal: ['稻', '埕'], bg: '#1a120c', hang: 0.5, oneSide: true, glow: 0.5, ppm: 160 }); p.position.y = 0.2; grp.add(p);
-  const tb = faceMat(tex(3.6, 0.46, (g, W, H) => { g.fillStyle = '#3a2416'; g.fillRect(0, 0, W, H); grain(g, W, H, 120, '255,214,150', 0.06); g.strokeStyle = '#d9b25a'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.12, H * 0.12, W - H * 0.24, H - H * 0.24);
-    g.fillStyle = '#e8c060'; g.textAlign = 'center'; g.textBaseline = 'middle'; sp(g, H * 0.1); fit(g, en, H * 0.5, W * 0.84, 'Georgia,"Times New Roman",serif', 700); g.fillText(en, W / 2, H * 0.54); sp(g, 0); }, 200), 0.5);
-  bx(grp, MAT.wood, 3.7, 0.56, 0.08, 0, -1.25, 0); plane(grp, tb, 3.6, 0.46, 0, -1.25, 0.045, 0); [-1, 1].forEach(k => bx(grp, MAT.iron, 0.025, 0.36, 0.025, k * 1.5, -0.85, 0));
-  [[-1, '南北貨', '#c4261d', '#ffffff'], [1, '茶行', '#f2c12e', '#b3271e']].forEach(([k, txt, bg, fg]) => { const lb = lightbox(txt, { bg, fg, arm: 0.5, w: 0.66, h: txt.length * 0.7 + 0.2 }); lb.rotation.y = -PI / 2; lb.position.set(k * 5.0, -2.4, 0.5 + lb.userData.size[0] / 2 - 0.55); grp.add(lb); });
-  return grp; }
-
-// 信義: a backlit sign. Brushed dark aluminium panels on steel stand-offs, white halo-lit letters in a modern sans, a hairline
-// rule, LED lines along the top and bottom edges and a glass fin at each end
-function backlit(zh, en) { const w = 6.4, h = 2.0, grp = new T.Group();
-  const t = tex(w, h, (g, W, H) => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#2b3138'); gr.addColorStop(1, '#1a1e23'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
-    for (let i = 0; i < 500; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.035})`; g.fillRect(Math.random() * W, Math.random() * H, 30 + Math.random() * W * 0.3, 1); }
-    g.fillStyle = 'rgba(0,0,0,.5)'; [1 / 3, 2 / 3].forEach(k => g.fillRect(W * k, 0, Math.max(1, W * 0.0015), H));
-    g.textAlign = 'center'; g.textBaseline = 'middle'; const s = H * 0.5; g.font = `600 ${s}px ${SANS}`; sp(g, s * 0.2);
-    g.shadowColor = '#9fd8ff'; g.shadowBlur = s * 0.4; g.fillStyle = '#eaf6ff'; g.fillText(zh, W / 2 + s * 0.1, H * 0.4); g.shadowBlur = s * 0.12; g.fillText(zh, W / 2 + s * 0.1, H * 0.4); g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.fillText(zh, W / 2 + s * 0.1, H * 0.4);
-    g.fillStyle = '#8fd3ff'; g.fillRect(W * 0.32, H * 0.7, W * 0.36, Math.max(2, H * 0.008));
-    g.font = `300 ${H * 0.13}px "Helvetica Neue","Avenir Next",${SANS}`; sp(g, H * 0.07); g.fillStyle = '#dfeaf2'; g.fillText(en, W / 2 + H * 0.035, H * 0.84); sp(g, 0); }, 150);
-  bx(grp, MAT.alu, w, h, 0.14, 0, 0, 0); plane(grp, faceMat(t, 0.95), w, h, 0, 0, 0.075, 0);
-  [1, -1].forEach(k => { bx(grp, MAT.led, w, 0.035, 0.05, 0, k * (h / 2 + 0.05), 0.03).castShadow = false; bx(grp, MAT.glass, 0.05, h + 0.6, 0.6, k * (w / 2 + 0.12), 0, 0.12).castShadow = false; });
-  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => bx(grp, MAT.steel, 0.08, 0.08, 0.6, a * w * 0.42, b * h * 0.34, -0.36));
+// The three district gateways (kind B: the site's own furniture, never a name board on two posts). CJ, 2026-11-22: 「反正這些招牌
+// 字都是要設計過的 … 這種無聊的招牌絕對不能出現」, 「招牌可以用midjourney生成紋理 或海報更換所有的招牌」. Each gate carries its era as
+// three posters in the frame its district would use: the middle one is the district's painting (DESIGN.gateTexture ->
+// asset/textures/posters/gates/<district>.jpg) under code lettering, the two beside it are posters of that district's own events
+// (their paintings from posters/events/). Until a painting lands the kit's code-drawn poster shows. Sources: docs/signage/designs-square.md.
+const GATE = {
+  ximen: [{ layout: 'premiere', palette: 'premiere', head: '電影街', big: '首輪', kicker: 'NOW SHOWING', kicker2: '隆重獻映', venue: '武昌街二段', date: '1985', art: 'posters/events/golden-horse-outdoor-2018.jpg' },
+    { layout: 'painted', palette: 'painted', head: '西門町', big: '西門町', kicker: 'XIMENDING', kicker2: '電影 · 徒步 · 青春', en: 'XIMENDING  1985–1999', venue: '萬年 · 獅子林 · 紅樓', date: '1985–1999' },
+    { layout: 'street', palette: 'street', head: '徒步區', big: '1999', kicker: 'PEDESTRIAN ZONE', kicker2: '假日封街', venue: '漢中街 · 峨嵋街', date: '1999', art: 'posters/events/backstreet-fest-2020.jpg' }],
+  dadao: [{ layout: 'deco', palette: 'deco', head: '迪化街', big: '一九二〇', kicker: 'DIHUA STREET', kicker2: '南北貨 · 茶 · 布', venue: '永樂町', date: '2000', art: 'posters/events/tttifa-arts-festival.jpg' },
+    { layout: 'market', palette: 'market', head: '大稻埕', big: '大稻埕', kicker: 'DADAOCHENG', kicker2: '年貨 · 碼頭 · 煙火', en: 'DADAOCHENG  2000–2019', venue: '迪化街 · 永樂市場 · 碼頭', date: '2000–2019' },
+    { layout: 'memory', palette: 'temple', head: '霞海城隍', big: '迎城隍', kicker: 'CITY GOD', kicker2: '五月十三', venue: '迪化街一段', date: '2019', art: 'posters/events/city-god-procession.jpg' }],
+  xinyi: [{ layout: 'nightart', palette: 'nightart', head: '白晝之夜 信義', big: '徹夜', kicker: 'NUIT BLANCHE', kicker2: '18:00 → 06:00', venue: '國父紀念館', date: '2023', art: 'posters/events/nuit-blanche-xinyi-2023.jpg' },
+    { layout: 'countdown', palette: 'countdown', head: '信義', big: '2020–', kicker: 'XINYI', kicker2: '倒數 · 夜景 · 天際線', en: 'XINYI  2020–', venue: '市府 · 101 · 信義商圈', date: '2020–' },
+    { layout: 'memory', palette: 'memory', head: '誠品信義 最後一夜', big: '最後一夜', kicker: 'LAST NIGHT', kicker2: '書店不打烊', venue: '松高路', date: '2023', art: 'posters/events/eslite-xinyi-last-night-2023.jpg' }],
+};
+const bulbRow = (grp, pts, r, mat) => { const im = new T.InstancedMesh(new T.SphereGeometry(r, 8, 6), mat, pts.length), M4 = new T.Matrix4(); pts.forEach(([x, y, z], i) => im.setMatrixAt(i, M4.makeTranslation(x, y, z))); grp.add(im); return im; };
+function gateway(kind) { const grp = new T.Group(), P = GATE[kind], pw = 1.9, ph = 2.69, gap = kind === 'dadao' ? 0.36 : 0.2, xs = [-(pw + gap), 0, pw + gap], W = 3 * pw + 2 * gap;
+  const tex = P.map((d, i) => (window.DESIGN ? (i === 1 ? DESIGN.gateTexture(E, kind, d, 768) : DESIGN.posterTexture(E, null, d, 640)) : null));
+  const face = (i, x, z, glow) => { if (tex[i]) plane(grp, faceMat(tex[i], glow), pw, ph, x, 0, z, 0); };
+  if (kind === 'ximen') {   // a 1985 cinema front: a red steel case, three hand-painted boards side by side as over the doors, ringed and divided by chaser bulbs
+    bx(grp, MAT.red, W + 0.56, ph + 0.56, 0.5, 0, 0, 0); xs.forEach((x, i) => { bx(grp, MAT.case, pw + 0.1, ph + 0.1, 0.04, x, 0, 0.26); face(i, x, 0.285, 0.75); });
+    const pts = [], hw = W / 2 + 0.15, hh = ph / 2 + 0.15; for (let x = -hw; x <= hw + 1e-3; x += 0.25) pts.push([x, hh, 0.27], [x, -hh, 0.27]); for (let y = -hh + 0.25; y < hh - 0.1; y += 0.25) pts.push([-hw, y, 0.27], [hw, y, 0.27]);
+    [-1, 1].forEach(k => { for (let y = -ph / 2 + 0.1; y < ph / 2; y += 0.22) pts.push([k * (pw / 2 + gap / 2), y, 0.27]); }); bulbRow(grp, pts, 0.05, MAT.bulb);
+    bx(grp, MAT.steel, W + 0.7, 0.06, 0.6, 0, ph / 2 + 0.31, 0.05);
+    [-1, 1].forEach(k => { const c = cloth(k < 0 ? '冷氣開放' : '隆重獻映', 0.8, 3.4, { vertical: true, bg: k < 0 ? '#b3271e' : '#f3ecd9', fg: k < 0 ? '#ffe14a' : '#b3271e' }); c.position.set(k * 5.0, -3.6, -0.5); grp.add(c); }); }   // hand-painted cloth banners down the piers
+  else if (kind === 'dadao') {   // a timber beam strung with red lanterns, the three boards hung under it in red-lacquer frames on iron straps
+    const by = ph / 2 + 0.55; bx(grp, MAT.wood, W + 1.2, 0.34, 0.34, 0, by, 0); [-1, 1].forEach(k => bx(grp, MAT.gilt, 0.22, 0.42, 0.42, k * (W / 2 + 0.6), by, 0));
+    xs.forEach((x, i) => { const f = 0.09; [[0, ph / 2 + f / 2, pw + 2 * f, f], [0, -ph / 2 - f / 2, pw + 2 * f, f], [-pw / 2 - f / 2, 0, f, ph], [pw / 2 + f / 2, 0, f, ph]].forEach(([fx, fy, w, h]) => bx(grp, MAT.lacquer, w, h, 0.12, x + fx, fy, 0));
+      bx(grp, MAT.wood, pw, ph, 0.06, x, 0, -0.01); face(i, x, 0.035, 0.55); [-1, 1].forEach(k => bx(grp, MAT.iron, 0.035, 0.44, 0.035, x + k * pw * 0.36, ph / 2 + 0.3, 0)); });
+    const lam = new T.MeshStandardMaterial({ color: E.col('#c8102e'), roughness: 0.7, emissive: E.col('#ff3a1a'), emissiveIntensity: 1.3 }), cap = MAT.gilt;
+    for (let i = 0; i < 9; i++) { const x = -W / 2 - 0.4 + i * (W + 0.8) / 8, l = new T.Mesh(new T.SphereGeometry(0.2, 14, 10), lam); l.scale.set(1, 0.85, 1); l.position.set(x, by - 0.42, 0.32); grp.add(l); bx(grp, cap, 0.18, 0.05, 0.18, x, by - 0.24, 0.32); bx(grp, cap, 0.14, 0.04, 0.14, x, by - 0.6, 0.32); bx(grp, MAT.rope, 0.02, 0.2, 0.02, x, by - 0.72, 0.32); }
+    [[-1, '南北貨', '#c4261d', '#ffffff'], [1, '茶行', '#f2c12e', '#b3271e']].forEach(([k, txt, bg, fg]) => { const lb = lightbox(txt, { bg, fg, arm: 0.5, w: 0.66, h: txt.length * 0.7 + 0.2 }); lb.rotation.y = -PI / 2; lb.position.set(k * 5.0, -2.6, 0.5 + lb.userData.size[0] / 2 - 0.55); grp.add(lb); }); }
+  else {   // 信義: three LED-lit panels in a brushed aluminium frame on steel stand-offs, light lines between them and round the edge, a glass fin at each end
+    bx(grp, MAT.alu, W + 0.3, ph + 0.3, 0.14, 0, 0, 0); xs.forEach((x, i) => face(i, x, 0.075, 0.95));
+    [1, -1].forEach(k => { bx(grp, MAT.led, W + 0.3, 0.035, 0.05, 0, k * (ph / 2 + 0.17), 0.03).castShadow = false; bx(grp, MAT.led, 0.03, ph, 0.05, k * (pw / 2 + gap / 2), 0, 0.06).castShadow = false; bx(grp, MAT.glass, 0.05, ph + 0.9, 0.6, k * (W / 2 + 0.3), 0, 0.12).castShadow = false; });
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => bx(grp, MAT.steel, 0.08, 0.08, 0.6, a * W * 0.42, b * ph * 0.34, -0.36)); }
   return grp; }
 
 // an acrylic light box: a lit face on both sides of a metal case with a rain cap; upright (直招) or lying (橫招); o.arm hangs it
@@ -160,14 +156,11 @@ function barberPole() { const grp = new T.Group(), t = tex(0.4, 0.8, (g, W, H) =
   const c = new T.Mesh(new T.CylinderGeometry(0.09, 0.09, 0.7, 16, 1, true), faceMat(t, 0.8)); grp.add(c); [-1, 1].forEach(k => { const s = new T.Mesh(new T.SphereGeometry(0.11, 12, 8), MAT.steel); s.position.y = k * 0.4; s.scale.y = 0.6; grp.add(s); });
   bx(grp, MAT.iron, 0.5, 0.03, 0.03, -0.3, 0.42, 0); bx(grp, MAT.iron, 0.5, 0.03, 0.03, -0.3, -0.42, 0); return tag(grp, 0.2, 0.9, 0.45); }
 
-// the exhibition's title strip: a printed panel on round stand-offs, the title in 明體 and thin capitals as a gallery sets it
-function exhibitHeader(w, h, zh, en, sub) { const grp = new T.Group();
-  const t = tex(w, h, (g, W, H) => { g.fillStyle = '#1f2a44'; g.fillRect(0, 0, W, H); grain(g, W, H, 120, '255,255,255', 0.03); g.fillStyle = '#b7372a'; g.fillRect(H * 0.3, H * 0.2, H * 0.09, H * 0.6);
-    g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillStyle = '#f6efdc'; g.font = `900 ${H * 0.5}px ${SONG}`; sp(g, H * 0.06); g.fillText(zh, H * 0.6, H * 0.52); const x1 = H * 0.6 + g.measureText(zh).width + H * 0.35;
-    g.font = `300 ${H * 0.3}px "Helvetica Neue","Avenir Next",${SANS}`; sp(g, H * 0.07); g.fillText(en, x1, H * 0.4); sp(g, 0); g.fillStyle = '#b9c2d6'; g.font = `400 ${H * 0.17}px "Helvetica Neue",${SANS}`; g.fillText(sub, x1, H * 0.74);
-    g.fillStyle = 'rgba(246,239,220,.5)'; g.fillRect(H * 0.3, H * 0.93, W - H * 0.6, Math.max(1, H * 0.012)); }, 230);
-  bx(grp, MAT.alu, w, h, 0.07, 0, 0, 0); faces(grp, faceMat(t, 0.45), w, h, 0.07); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { bx(grp, MAT.steel, 0.07, 0.07, 0.11, a * (w / 2 - 0.14), b * (h / 2 - 0.12), 0); });
-  [-1, 1].forEach(k => bx(grp, MAT.alu, 0.07, 0.5, 0.07, k * (w / 2 - 0.6), -h / 2 - 0.2, 0)); return grp; }
+// the exhibition's header (kind B): the kit's exhibition band (a pictogram disc, the name huge with its shadow, the Latin
+// tracked, a date chip) in the 'memory' palette, printed on both faces of an aluminium light box hung on two rods, with a light bar
+function exhibitHeader(w, h, design) { const grp = new T.Group();
+  if (window.DESIGN) { const t = DESIGN.wideTexture(E, null, design, 1536, h / w, 'band'); bx(grp, MAT.alu, w + 0.12, h + 0.12, 0.12, 0, 0, 0); faces(grp, faceMat(t, 0.5), w, h, 0.12); }
+  [-1, 1].forEach(k => bx(grp, MAT.alu, 0.05, 0.6, 0.05, k * (w / 2 - 0.6), -h / 2 - 0.3, 0)); bx(grp, MAT.lamp, w * 0.9, 0.03, 0.05, 0, -h / 2 - 0.07, 0.1).castShadow = false; return grp; }
 // a gallery caption card, and a picture light on an arm over a frame
 function caption(text, w, h) { const t = tex(w, h, (g, W, H) => { g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H); g.strokeStyle = 'rgba(40,30,20,.35)'; g.lineWidth = Math.max(1, H * 0.03); g.strokeRect(H * 0.08, H * 0.08, W - H * 0.16, H - H * 0.16); g.fillStyle = '#2a2420'; g.textAlign = 'center'; g.textBaseline = 'middle'; fit(g, text, H * 0.56, W * 0.86, SONG, 700); g.fillText(text, W / 2, H * 0.54); }, 260);
   const grp = new T.Group(); bx(grp, MAT.steel, w + 0.03, h + 0.03, 0.02, 0, 0, 0); plane(grp, faceMat(t, 0.15), w, h, 0, 0, 0.012, 0); return grp; }
@@ -188,7 +181,7 @@ const EMB = {
   clock: (g, x, y, r) => { g.fillStyle = '#fffdf4'; g.strokeStyle = '#2a2420'; g.lineWidth = r * 0.14; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.stroke(); for (let i = 0; i < 12; i++) { const a = i * PI / 6; g.fillStyle = '#2a2420'; g.beginPath(); g.arc(x + Math.sin(a) * r * 0.78, y - Math.cos(a) * r * 0.78, r * (i % 3 ? 0.035 : 0.07), 0, 7); g.fill(); } g.lineCap = 'round'; g.lineWidth = r * 0.1; g.beginPath(); g.moveTo(x, y); g.lineTo(x - r * 0.42, y - r * 0.3); g.moveTo(x, y); g.lineTo(x + r * 0.2, y - r * 0.62); g.stroke(); },
   glasses: (g, x, y, r) => { g.strokeStyle = '#1c2f5c'; g.lineWidth = r * 0.16; [-1, 1].forEach(k => { g.beginPath(); g.arc(x + k * r * 0.56, y, r * 0.42, 0, 7); g.stroke(); }); g.beginPath(); g.arc(x, y - r * 0.02, r * 0.16, PI, 0); g.stroke(); },
   disc: (ch, c) => (g, x, y, r) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${r * 1.3}px ${KAI}`; g.fillText(ch, x, y + r * 0.04); } };
-return { plaque, titleStand, marquee, shopGate, backlit, lightbox, tinPlate, cloth, barberPole, exhibitHeader, caption, pictureLight, stallSigns, mount, EMB, MAT, fonts: { KAI, WEI, LI, YUAN, SONG, SANS } };
+return { plaque, titleStand, gateway, lightbox, tinPlate, cloth, barberPole, exhibitHeader, caption, pictureLight, stallSigns, mount, EMB, MAT, fonts: { KAI, WEI, LI, YUAN, SONG, SANS } };
 };
 </script>
 <script>
@@ -227,8 +220,8 @@ ENGINE.create({
   const gates = get(sq, 'sq-gate');
   [['ximen', -1, 0, Math.PI / 2, '西門町', 'XIMENDING', '1985–1999', '#b7372a', [3.0, 0.9, 0.4]], ['dadao', 0, -1, 0, '大稻埕', 'DADAOCHENG', '2000–2019', '#8a5a34', [3.0, 1.9, 0.6]], ['xinyi', 1, 0, -Math.PI / 2, '信義', 'XINYI', '2020–', '#1f5e8c', [0.6, 1.9, 3.0]]].forEach(([node, nx, nz, ry, zh, en, years, bg, glow]) => {
     const g = dress(get(gates, node).clone()); g.position.set(nx * (H - 1.2), 0, nz * (H - 1.2)); g.rotation.y = ry; scene.add(g);
-    const b = node === 'ximen' ? S.marquee(zh, en + '  ' + years) : node === 'dadao' ? S.shopGate(zh, en + ' · ' + years) : S.backlit(zh, en + '  ' + years);   // each gate's board is its district's own sign: a cinema marquee, a carved shop 匾額, a backlit panel
-    b.position.set(nx * (H - 2.4), 8.6, nz * (H - 2.4)); b.rotation.y = ry; scene.add(b);
+    const b = S.gateway(node);   // each gateway carries its era as three posters in its district's own frame: a cinema front of bulbs, a lantern beam with lacquer boards, an LED-lit panel
+    b.position.set(nx * (H - 2.4), 8.9, nz * (H - 2.4)); b.rotation.y = ry; scene.add(b);
     const portal = new T.Mesh(new T.PlaneGeometry(7.4, 6.8), new T.ShaderMaterial({ transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, uniforms: { uTime, uCol: { value: new T.Color(...glow) } },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: 'uniform float uTime; uniform vec3 uCol; varying vec2 vUv; void main(){ float e = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x) * smoothstep(1.0, 0.25, vUv.y); gl_FragColor = vec4(uCol * e * (0.32 + 0.12 * sin(uTime * 1.3)), 1.0); }' }));
@@ -243,7 +236,7 @@ ENGINE.create({
   const wall = (x, ry, head, sub, frames) => { const faces = [];
     const g = new T.Group(); g.position.set(x, 0, 8.6); g.rotation.y = -ry;
     const w = new T.Mesh(new T.BoxGeometry(8.4, 3.3, 0.32), triMat({ color: '#e9dfca', tex: TEX.plaster, scale: 0.5, rough: 0.9 })); w.position.y = 1.65; w.castShadow = w.receiveShadow = true; g.add(w);
-    const hd = S.exhibitHeader(8.0, 0.8, '開幕展', head, sub); hd.position.set(0, 3.95, 0); g.add(hd);   // a printed title panel on posts above the wall, as a gallery sets its title
+    const hd = S.exhibitHeader(8.0, 1.1, { layout: 'memory', palette: 'memory', head: '開幕展', big: '開幕展', en: head + ' · ' + sub, kicker: 'OPENING', motif: 'cinema', date: '1961 – 2012' }); hd.position.set(0, 4.1, 0); g.add(hd);   // the kit's exhibition band on a light box above the wall
     frames.forEach((f, i) => { const fx = (i - (frames.length - 1) / 2) * 2.6;
       const fr = new T.Mesh(new T.BoxGeometry(2.25, 1.95, 0.08), new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 })); fr.position.set(fx, 1.8, 0.19); fr.castShadow = true; g.add(fr); S.pictureLight(g, fx, 3.05, 0.16);
       let face;

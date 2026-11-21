@@ -45,6 +45,15 @@ function label(lines, w, h, o) { o = o || {}; const W = o.px || 512, H = Math.ma
   const m = new T.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: o.glow == null ? 0.35 : o.glow, roughness: 0.6, transparent: !o.bg, alphaTest: o.bg ? 0 : 0.3, side: T.FrontSide });
   const mesh = new T.Mesh(new T.PlaneGeometry(w, h), m); if (!o.both) return mesh;
   const pair = new T.Group(), back = new T.Mesh(mesh.geometry, m); back.rotation.y = PI; mesh.position.z = 0.012; back.position.z = -0.012; pair.add(mesh, back); return pair; }   // readable from both sides, never mirrored
+// drawn(w, h, px, draw): a flat face from a canvas this file paints itself (lettering always in code)
+const drawn = (w, h, px, draw, o) => label([], w, h, Object.assign({ px, bg: '#000', draw, glow: 0.45 }, o || {}));
+const SERIF = '"Songti TC","STSong","Noto Serif TC",serif', MONO = '"SF Mono","Menlo",monospace';
+const txt = (g, s, x, y, size, o) => { o = o || {}; g.font = `${o.w || 800} ${Math.round(size)}px ${o.f || FONT}`; g.fillStyle = o.c || '#fff'; g.textAlign = o.a || 'center'; g.textBaseline = 'middle';
+  if (o.track) { g.letterSpacing = o.track + 'px'; } const tw = g.measureText(s).width; g.save(); g.translate(x, y); if (o.max && tw > o.max) g.scale(o.max / tw, 1); g.fillText(s, 0, 0); g.restore(); g.letterSpacing = '0px'; };
+const burst = (B, mat, x, y, z, r, n) => { for (let i = 0; i < n; i++) { const a = i / n * PI * 2, k = 0.55 + (i % 3) * 0.2; B.rod(mat, [x + Math.cos(a) * r * 0.18, y + Math.sin(a) * r * 0.18, z], [x + Math.cos(a) * r * k, y + Math.sin(a) * r * k, z], 0.012); B.sph(mat, 0.035, x + Math.cos(a) * r * k, y + Math.sin(a) * r * k, z); } };
+// face(tex, w, h, glow, both): a plane carrying a texture from the kit (a real sign's material plus lettering)
+const face = (tex, w, h, glow, both) => { const m = new T.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow == null ? 0.3 : glow, roughness: 0.7 }), mesh = new T.Mesh(new T.PlaneGeometry(w, h), m);
+  if (!both) return mesh; const pair = new T.Group(), back = new T.Mesh(mesh.geometry, m); back.rotation.y = PI; mesh.position.z = 0.012; back.position.z = -0.012; pair.add(mesh, back); return pair; };
 // a curtain wall drawn pane by pane: cols x rows, sky colour up top, the warm street lower down, some panes lit
 function glass(cols, rows, o) { o = o || {}; const lit = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) lit.push([rnd() < (o.litFn ? o.litFn(r, c) : (o.lit == null ? 0.16 : o.lit)), rnd()]);
   const a = o.top || [62, 108, 140], b = o.bot || [150, 122, 100], gx = o.gx == null ? 1.5 : o.gx, gy = o.gy == null ? 0.2 : o.gy;
@@ -338,13 +347,18 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   S.cyl(M.steel, 0.012, 0.012, 1.5, -0.1, 0.75, 0.45, 6); S.sph(M.dark, 0.045, -0.1, 1.5, 0.43); S.cyl(M.steel, 0.16, 0.16, 0.02, -0.1, 0.01, 0.45, 10);
   S.box(M.dark, 0.5, 0.46, 0.3, 0.9, 0.23, -0.2, 0.3); S.box(M.char, 0.4, 0.34, 0.02, 0.86, 0.25, -0.04, 0.3); S.box(M.woodD, 0.9, 0.08, 0.34, -0.55, 0.04, 1.0, 0.2); S.box(M.red, 0.84, 0.02, 0.28, -0.55, 0.085, 1.0, 0.2);
   for (let i = 0; i < 5; i++) S.cyl(M.gold, 0.02, 0.02, 0.01, -0.8 + i * 0.12, 0.1, 0.95 + (i % 2) * 0.08, 8);
-  S.box(M.woodD, 0.04, 0.9, 0.04, 1.3, 0.45, 0.9); S.add(label([['街頭藝人', 0.36, 0.3, 800, '#2a2420'], ['香堤大道 · Xiangti Ave', 0.16, 0.62, 600, '#3a3028'], ['Street performer', 0.16, 0.84, 600, '#3a3028']], 0.7, 0.5, { bg: '#f0e2c0', border: '#5b4433', glow: 0.3, both: true, px: 256 }), 1.3, 0.95, 0.9, -0.3);
+  S.box(M.woodD, 0.04, 0.9, 0.04, 1.3, 0.45, 0.9); S.add(drawn(0.7, 0.5, 384, (g, W, H) => { g.fillStyle = '#1f2a24'; g.fillRect(0, 0, W, H); g.strokeStyle = '#8a6a44'; g.lineWidth = 14; g.strokeRect(7, 7, W - 14, H - 14);   // the busker's own chalkboard, chalk lettering
+    g.globalAlpha = 0.08; g.fillStyle = '#fff'; for (let i = 0; i < 40; i++) g.fillRect(rr(0, W), rr(0, H), rr(20, 90), 3); g.globalAlpha = 1;
+    txt(g, '今晚', W * 0.22, H * 0.22, H * 0.13, { c: '#ffd24a', f: SERIF }); txt(g, '街頭演唱', W * 0.58, H * 0.4, H * 0.24, { c: '#f4efe4', w: 900, max: W * 0.7 });
+    g.strokeStyle = '#ff8fa3'; g.lineWidth = 4; g.beginPath(); g.moveTo(W * 0.26, H * 0.55); g.quadraticCurveTo(W * 0.58, H * 0.62, W * 0.9, H * 0.53); g.stroke();
+    g.strokeStyle = '#f4efe4'; g.lineWidth = 3; g.beginPath(); g.ellipse(W * 0.14, H * 0.66, W * 0.06, H * 0.1, 0, 0, PI * 2); g.ellipse(W * 0.14, H * 0.48, W * 0.045, H * 0.07, 0, 0, PI * 2); g.moveTo(W * 0.14, H * 0.41); g.lineTo(W * 0.14, H * 0.12); g.stroke();
+    txt(g, 'LIVE · 19:00 – 21:30', W * 0.58, H * 0.7, H * 0.08, { c: '#9be7ff', track: 2 }); txt(g, '香堤大道 · 歡迎點歌 · 打賞隨意', W * 0.58, H * 0.86, H * 0.075, { c: '#f4efe4', w: 600, max: W * 0.66 }); }, { both: true, glow: 0.35 }), 1.3, 0.95, 0.9, -0.3);
   person(S, -1.3, 0, 2.3, { top: M.cloth[1], ry: PI * 0.85, s: 0.96 }); person(S, 0.3, 0, 2.6, { top: M.cloth[2], ry: PI, s: 1.02, arms: [[0.12, -0.2, 0.25], [-0.12, -0.2, 0.25]] }); person(S, 0.9, 0, 2.4, { top: M.cloth[4], ry: PI * 1.1, s: 0.68 });
   out.busker = S.done(5.4, 8.6, PI * 0.9); solid(5.4, 8.6, 0.6, 0.5); solid(5.3, 6.2, 1.1, 0.4);
   PLACES.add(E, P('skm-xinyi-place'), { target: [find('a11'), out.busker], near: [-16.4, 4], radius: 5.5, plaque: { position: [-18.5, 1.7, 9.6], rotation: PI / 2 } }); }
 
 // ══ 12. 台北市政府: the model stands far off down the gap to the north-west; a board on the plaza points at it ══
-PLACES.add(E, P('taipei-city-hall'), { type: 'board', position: [-12.6, -16.5], rotation: 0.35, target: find('cityhall') });
+// (its pointing board is a designed poster, built with the events below)
 { const B = maker('cityhall-model'), y0 = 0.9, H = 0.46, zc = -0.28;
   B.box(M.stone, 2.6, 0.8, 1.7, 0, 0.4, 0); B.box(M.dark, 2.72, 0.07, 1.82, 0, 0.835, 0); B.box(M.beige, 2.56, 0.03, 1.66, 0, 0.885, 0); B.box(M.stone, 2.8, 0.12, 1.9, 0, 0.06, 0);
   const bar = (w, d, x, z) => { B.box(M.pale, w, H, d, x, y0 + H / 2, z); for (let f = 1; f < 12; f++) B.box(M.win, w + 0.012, 0.016, d + 0.012, x, y0 + (f + 0.45) * H / 12.6, z);          // 12 storeys: eleven dark window bands and the door floor
@@ -355,24 +369,109 @@ PLACES.add(E, P('taipei-city-hall'), { type: 'board', position: [-12.6, -16.5], 
   B.box(M.stone, 2.3, 0.008, 0.62, 0, y0 + 0.004, 0.45); for (let i = 0; i < 9; i++) { const x = -0.8 + i * 0.2; B.cyl(M.steel, 0.005, 0.005, 0.3, x, y0 + 0.15, 0.3, 5); B.box(i % 2 ? M.cloth[1] : M.red, 0.07, 0.045, 0.004, x + 0.04, y0 + 0.27, 0.3); }   // the paved plaza in front, a row of flagpoles
   for (let i = 0; i < 8; i++) for (const k of [-1, 1]) B.sph(M.leaf, 0.045, k * (1.12 - (i % 2) * 0.08), y0 + 0.05, -0.62 + i * 0.17, 1, 1.2, 1);
   for (let i = 0; i < 7; i++) B.sph(M.leaf, 0.04, -0.9 + i * 0.3, y0 + 0.045, 0.72, 1, 1.2, 1);
-  B.add(label([['臺北市政府', 0.36, 0.3, 800, '#2a2420'], ['Taipei City Hall · scale model 模型', 0.17, 0.62, 600, '#3a3028'], ['12 層 · 雙十字平面 · 12 storeys, two joined crosses in plan', 0.13, 0.85, 600, '#3a3028']], 1.9, 0.5, { bg: '#d9c9a0', border: '#5b4433', glow: 0.3 }), 0, 0.45, 0.862);
+  B.add(drawn(1.9, 0.5, 1024, (g, W, H) => { g.fillStyle = '#efe9dc'; g.fillRect(0, 0, W, H); g.fillStyle = '#1d3a5c'; g.fillRect(0, 0, W * 0.24, H);   // an architecture-exhibition caption: plan drawing, number, name, scale bar
+    const cx = W * 0.12, cy = H * 0.5, u = H * 0.09; g.strokeStyle = '#f2d98b'; g.lineWidth = 4; for (const k of [-1, 1]) { const x = cx + k * u * 1.7; g.strokeRect(x - u * 1.6, cy - u * 0.5, u * 3.2, u); g.strokeRect(x - u * 0.5, cy - u * 1.6, u, u * 3.2); }
+    txt(g, '雙十字平面 · PLAN', cx, H * 0.88, H * 0.07, { c: '#f2d98b', w: 600 }); txt(g, 'No. 07', cx, H * 0.11, H * 0.08, { c: '#ffffff', track: 3 });
+    txt(g, '臺北市政府', W * 0.27, H * 0.3, H * 0.3, { c: '#1d3a5c', f: SERIF, w: 900, a: 'left' }); txt(g, 'TAIPEI CITY HALL · SCALE MODEL', W * 0.275, H * 0.56, H * 0.075, { c: '#9c2a2a', a: 'left', track: 6 });
+    txt(g, '1986 動工 — 1994 落成 · 地上 12 層 · 市民廣場在前', W * 0.275, H * 0.72, H * 0.075, { c: '#2a2420', w: 600, a: 'left' });
+    g.fillStyle = '#c39a3e'; g.fillRect(W * 0.76, H * 0.12, W * 0.2, H * 0.42); txt(g, '1994', W * 0.86, H * 0.33, H * 0.22, { c: '#1d3a5c', f: SERIF, w: 900 });
+    for (let i = 0; i < 5; i++) { g.fillStyle = i % 2 ? '#efe9dc' : '#1d3a5c'; g.fillRect(W * 0.275 + i * W * 0.05, H * 0.86, W * 0.05, H * 0.035); } g.strokeStyle = '#1d3a5c'; g.lineWidth = 2; g.strokeRect(W * 0.275, H * 0.86, W * 0.25, H * 0.035);
+    txt(g, '0     10     20     40 m', W * 0.4, H * 0.94, H * 0.045, { c: '#1d3a5c', w: 600 }); }, { glow: 0.3 }), 0, 0.45, 0.862);
   out.cityModel = B.done(-13.3, -11.0, PI / 2); solid(-13.3, -11.0, 0.95, 1.4);
   PLACES.add(E, P('taipei-city-hall'), { target: out.cityModel }); }
 
-// ══ the events: a marker each, near where it happened in this layout ═══════════════════════════════════
-PLACES.add(E, P('taipei-101-opening-2004'), { position: [-2.4, -41.7], rotation: 0 });
-PLACES.add(E, P('alain-robert-climb-2004'), { position: [0.6, -41.7], rotation: 0 });
-PLACES.add(E, P('alex-honnold-free-solo-2026'), { position: [3.9, -41.4], rotation: 0 });
-PLACES.add(E, P('taipei-101-run-up-2005'), { position: [25.6, -41.6], rotation: 0 });                    // at the tower's foot, where the stair race starts
-PLACES.add(E, P('first-nye-fireworks-2005'), { position: [29.2, -41.6], rotation: 0 });
-// CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」
-PLACES.add(E, P('deadpool-reynolds-2016'), { position: [-14.3, -7.9], rotation: PI / 2 });                     // the red carpet outside 信義威秀
-PLACES.add(E, P('weekend-in-taipei-2024'), { position: [-14.3, -12.6], rotation: PI / 2 });
-PLACES.add(E, P('taipei-nye-party-2020'), { position: [-8.6, -18.2], rotation: 0.35 });                        // toward 市府廣場
-PLACES.add(E, P('taiwan-pride-city-hall-2024'), { position: [-16.2, -20.4], rotation: 0.35 });
-PLACES.add(E, P('nuit-blanche-xinyi-2023'), { position: [-14.3, 1.6], rotation: PI / 2 });                     // on 香堤大道
-PLACES.add(E, P('simple-life-urban-2019'), { position: [6.4, 17.6], rotation: PI });
-PLACES.add(E, P('eslite-xinyi-last-night-2023'), { position: [-6.3, 17.6], rotation: PI });
+// ══ the events: each one a designed piece (design-kit.js), never a name plate ═══════════════════════════
+// CJ, 2026-11-22: 「反正這些招牌 字都是要設計過的可以是海報雕像或是裝置藝術攤位 可以去做大量研究要非常豐富就對了這種無聊的招牌絕對不能出現就對了」.
+// Each design below is argued, with its reference, in docs/signage/designs-xinyi.md. Neighbours never share form + layout.
+// A painted artwork lands at asset/textures/posters/events/<key>.jpg and is picked up by the kit; until then the code-drawn poster shows.
+
+// ── the forecourt, west of the entrance: the opening, the two climbs ──
+// 2004.12.31, the opening: the tower in bronze on a stepped granite block, and in front of it the opening-day ribbon, cut, on two gold posts
+PLACES.add(E, P('taipei-101-opening-2004'), { position: [-2.4, -41.7], rotation: 0, design: { form: 'statue', motif: 'tower', plinth: 'block', palette: 'award',
+  head: '台北101 正式啟用', story: '508 公尺，世界第一高樓開幕的那一夜', en: 'TAIPEI 101 OPENS · 508 M · THE WORLD\'S TALLEST', date: '2004.12.31' } });
+{ const B = maker('opening-ribbon'); for (const k of [-1, 1]) { B.cyl(M.gold, 0.035, 0.035, 0.95, k * 0.95, 0.475, 0, 10); B.sph(M.gold, 0.06, k * 0.95, 0.97, 0); B.cyl(M.gold, 0.13, 0.15, 0.04, k * 0.95, 0.02, 0, 14); }
+  B.box(M.red, 0.62, 0.07, 0.012, -0.62, 0.86, 0, 0, 0, -0.32); B.box(M.red, 0.62, 0.07, 0.012, 0.62, 0.86, 0, 0, 0, 0.32);              // the ribbon, cut in the middle, its two ends hanging
+  B.sph(M.red, 0.12, -0.95, 0.92, 0.03, 1, 0.8, 0.5); B.sph(M.red, 0.12, 0.95, 0.92, 0.03, 1, 0.8, 0.5);                                   // a rosette on each post
+  B.box(M.silver, 0.24, 0.02, 0.05, 0.05, 0.62, 0.15, 0.4); B.box(M.dark, 0.08, 0.03, 0.05, -0.08, 0.62, 0.2, 0.4);                        // the scissors, left on the rope
+  B.done(-2.4, -40.25, 0); }
+// 2004.12.25, Alain Robert in the rain: a newspaper EXTRA in a lit case, the next morning's bundles tied with string at its foot
+PLACES.add(E, P('alain-robert-climb-2004'), { position: [0.75, -41.7], rotation: 0, design: { form: 'poster', layout: 'news', mount: 'case', palette: 'news',
+  head: '法國蜘蛛人 雨中攀上101', kicker: '號外', kicker2: '聖誕節', big: '4小時', en: 'SPIDERMAN IN THE RAIN · ROPED · 4 HOURS TO THE SPIRE', venue: '台北101 · 信義區', date: '2004.12.25' } });
+{ const B = maker('news-bundles'), paper = triMat({ color: '#e6e1d4', tex: TEX.plaster, scale: 2, rough: 0.95 }), str = triMat({ color: '#a07a4a', rough: 0.9 });
+  [[0, 0, 0.0], [0.05, 0.16, 0.25], [0.62, 0, -0.2]].forEach(([x, y, r]) => { B.box(paper, 0.46, 0.15, 0.32, x, 0.075 + y, 0, r); B.box(str, 0.47, 0.155, 0.015, x, 0.075 + y, 0, r); B.box(str, 0.015, 0.155, 0.33, x, 0.075 + y, 0, r); });
+  B.add(drawn(0.42, 0.28, 256, (g, W, H) => { g.fillStyle = '#efeadf'; g.fillRect(0, 0, W, H); g.fillStyle = '#b3261e'; g.fillRect(0, 0, W * 0.3, H * 0.5); txt(g, '號外', W * 0.15, H * 0.25, H * 0.3, { c: '#fff', f: SERIF });
+    txt(g, '蜘蛛人攻頂', W * 0.64, H * 0.24, H * 0.24, { c: '#1a1a1a', f: SERIF, w: 900, max: W * 0.62 }); for (let i = 0; i < 9; i++) { g.fillStyle = '#9a9a9a'; g.fillRect(W * 0.05 + (i % 3) * W * 0.31, H * 0.6 + ((i / 3) | 0) * H * 0.12, W * 0.27, H * 0.05); } }, { glow: 0.15 }), 0.62, 0.155, 0.17, -0.2).rotation.x = -PI / 2;
+  B.done(1.35, -40.9, 0.15); }
+// 2026.01.25, Alex Honnold, no rope: a small bronze climber on a drum, the life-size storey of the corner stands just east of it (below)
+PLACES.add(E, P('alex-honnold-free-solo-2026'), { position: [4.0, -41.4], rotation: 0, design: { form: 'statue', motif: 'climber', plinth: 'drum', palette: 'sport',
+  head: '無繩攀登101', story: '沒有繩子，一層一層往上，1:31:43', en: 'FREE SOLO · NO ROPE · 1 H 31 M 43 S', date: '2026.01.25' } });
+
+// ── the forecourt, east, at the tower's foot: the stair race and the first fireworks ──
+// 2005.11.20, the first Run Up: a bronze runner on the race podium, a chequered start line and a race clock on a pylon
+PLACES.add(E, P('taipei-101-run-up-2005'), { position: [25.4, -41.6], rotation: 0, design: { form: 'statue', motif: 'runner', plinth: 'podium', palette: 'sport',
+  head: '101 國際登高賽', story: '2,046 級台階，91 層，一口氣跑上去', en: 'TAIPEI 101 RUN UP · 2,046 STEPS · 91 FLOORS', date: '2005.11.20' } });
+{ const B = maker('runup-start'); B.add(drawn(2.6, 0.4, 512, (g, W, H) => { const n = 26; for (let i = 0; i < n; i++) for (let r = 0; r < 2; r++) { g.fillStyle = (i + r) % 2 ? '#f4f1ea' : '#15171b'; g.fillRect(i * W / n, r * H / 2, W / n + 1, H / 2 + 1); } }, { glow: 0.2 }), 0, 0.012, 1.55).rotation.x = -PI / 2;
+  B.box(M.dark, 0.32, 1.9, 0.32, 1.75, 0.95, 1.2); B.box(M.steel, 0.36, 0.06, 0.36, 1.75, 1.93, 1.2);
+  B.add(drawn(0.3, 0.86, 256, (g, W, H) => { g.fillStyle = '#0d3b66'; g.fillRect(0, 0, W, H); g.fillStyle = '#f95738'; g.fillRect(0, 0, W, H * 0.16); txt(g, 'RUN UP', W / 2, H * 0.08, H * 0.07, { c: '#fff', track: 4 });
+    g.fillStyle = '#050505'; g.fillRect(W * 0.08, H * 0.22, W * 0.84, H * 0.2); txt(g, '10:29', W / 2, H * 0.32, H * 0.13, { c: '#ff3b2f', f: MONO, w: 700 }); txt(g, '大會紀錄 RECORD', W / 2, H * 0.47, H * 0.045, { c: '#faf0ca' });
+    for (let f = 0; f < 10; f++) { const y = H * (0.94 - f * 0.042); g.fillStyle = f % 2 ? '#ee964b' : '#faf0ca'; g.fillRect(W * 0.2, y, W * (0.1 + f * 0.05), H * 0.028); }
+    txt(g, '91F', W * 0.82, H * 0.56, H * 0.06, { c: '#fff' }); txt(g, '1F', W * 0.82, H * 0.94, H * 0.05, { c: '#fff' }); }, { glow: 0.55 }), 1.75, 1.05, 1.365);
+  B.done(25.4, -41.6, 0); solid(27.15, -40.4, 0.2, 0.2); }
+// 2005.01.01 00:00, the first fireworks: the year in bulbs, three bursts on rods above it, and the countdown clock stopped at 00:00
+PLACES.add(E, P('first-nye-fireworks-2005'), { position: [29.6, -41.6], rotation: 0, design: { form: 'installation', piece: 'digits', big: '2005', palette: 'countdown',
+  head: '第一場 101 跨年煙火', kicker: 'COUNTDOWN', en: 'FIRST TAIPEI 101 NEW YEAR FIREWORKS · 00:00', date: '2005.01.01' } });
+{ const B = maker('fireworks-bursts'), C = [GLOW(3.4, 0.9, 1.9), GLOW(0.9, 2.8, 3.4), GLOW(3.6, 2.8, 0.9)];
+  [[-1.6, 3.3, 0.55, 3], [0.2, 3.7, 0.7, 1], [1.8, 3.2, 0.5, 2]].forEach(([x, y, r, c], i) => { B.cyl(M.dark, 0.012, 0.012, y - 2.3, x, 2.3 + (y - 2.3) / 2, -0.25, 5); burst(B, C[i], x, y, -0.25, r, 14 + i * 2); });
+  B.box(M.dark, 0.9, 0.42, 0.14, 0, 2.95, -0.32); B.add(drawn(0.84, 0.36, 256, (g, W, H) => { g.fillStyle = '#050818'; g.fillRect(0, 0, W, H); txt(g, '00:00', W / 2, H * 0.48, H * 0.62, { c: '#ff3d7f', f: MONO, w: 700 }); txt(g, '2004 → 2005', W / 2, H * 0.9, H * 0.12, { c: '#3ddcff' }); }, { glow: 1.2 }), 0, 2.95, -0.245);
+  B.done(29.6, -41.6, 0); }
+
+// ── 信義威秀's red carpets ──
+// 2016.01.21: the premiere's carpet booth, with fans' placards and the crowd barrier added to the step-and-repeat and flashes
+PLACES.add(E, P('deadpool-reynolds-2016'), { position: [-14.3, -7.9], rotation: PI / 2, design: { form: 'booth', booth: 'carpet', layout: 'premiere', palette: ['#1a0a0c', '#3a0a10', '#ffffff', '#c81d25', '#f3e2b0', '#111111'],
+  head: '紅毯之夜', big: 'RED CARPET', kicker: 'PREMIERE', kicker2: '01.21', venue: '信義威秀', en: 'RYAN REYNOLDS ON THE CARPET · VIESHOW XINYI', date: '2016.01.21', props: ['placards', 'barrier'] } });
+// 2024.09.01, Weekend in Taipei: a pasted advertising column, the hand-painted cinema poster in a neon-noir palette, the morning paper beside it
+PLACES.add(E, P('weekend-in-taipei-2024'), { position: [-14.9, -14.3], rotation: PI / 2, design: { form: 'poster', layout: 'painted', mount: 'column', layouts: ['painted', 'news', 'painted'],
+  palette: ['#0d1b2a', '#1b263b', '#fff4d6', '#ff2e63', '#00d1c1', '#f1c453'], head: '台北追緝令', big: '台北追緝令', kicker: 'WORLD PREMIERE', venue: '信義威秀 · 世界首映', en: 'WEEKEND IN TAIPEI · WORLD PREMIERE', date: '2024.09.01' } });
+
+// ── 市府前廣場: the countdown party, the parade, the board that points at City Hall ──
+// 2019.12.31, 最HIGH新年城: a small stage with its LED screen, speakers and a sea of light sticks, set like the real stage in front of City Hall
+PLACES.add(E, P('taipei-nye-party-2020'), { position: [-8.4, -18.4], rotation: 0.35, design: { form: 'booth', booth: 'stage', mount: null, layouts: null, layout: 'countdown', palette: 'countdown',
+  head: '臺北最HIGH新年城', big: '2020', kicker: 'COUNTDOWN PARTY', kicker2: '12.31', venue: '市府前廣場', en: 'TAIPEI NEW YEAR\'S EVE PARTY · CITY HALL PLAZA', date: '2019.12.31' } });
+// 2024.10.26, Pride: rainbow umbrellas hung over the plaza, and under them the long six-stripe flag carried by a line of marchers
+PLACES.add(E, P('taiwan-pride-city-hall-2024'), { position: [-16.0, -20.6], rotation: 0.35, design: { form: 'installation', piece: 'canopy', obj: 'umbrella', layout: 'street', palette: 'rainbow', motif: 'rainbow',
+  head: '臺灣同志遊行', big: '彩虹', kicker: 'TAIWAN PRIDE', en: 'TAIWAN PRIDE · FROM CITY HALL PLAZA · 180,000 MARCHING', date: '2024.10.26' } });
+{ const B = maker('pride-flag'), S6 = ['#e2342c', '#f08a24', '#f4d23c', '#3a9a4a', '#2a6ac0', '#7a3a9a'].map(c => triMat({ color: c, rough: 0.85, emissive: c, eI: 0.25 })), L = 4.6;
+  for (let i = 0; i < 6; i++) for (let k = 0; k < 8; k++) { const x = -L / 2 + (k + 0.5) * L / 8, y = 1.95 - i * 0.075 + Math.sin(k * 1.3) * 0.05; B.box(S6[i], L / 8 + 0.01, 0.075, 0.012, x, y, Math.sin(k * 0.9) * 0.06); }
+  [-2.0, -0.7, 0.6, 1.9].forEach((x, i) => { B.rod(M.steel, [x, 0.95, 0.12], [x, 2.02, 0.05], 0.012); person(B, x, 0, 0.32, { top: M.cloth[[5, 1, 0, 4][i]], ry: -0.1, s: 0.95 + (i % 2) * 0.05, arms: [[0.12, 0.35, -0.1], [-0.12, 0.35, -0.1]] }); });
+  B.done(-15.2, -18.2, 0.35); solid(-15.2, -18.2, 2.4, 0.4); }
+// 台北市政府: the board that points down the gap at the model, an architecture-exhibition poster on an A-frame
+PLACES.add(E, P('taipei-city-hall'), { position: [-12.4, -16.2], rotation: 0.35, target: find('cityhall'), design: { form: 'poster', layout: 'deco', mount: 'standee',
+  palette: ['#e9e4d6', '#1d3a5c', '#1d3a5c', '#c39a3e', '#2a6ac0', '#9c2a2a'], head: '臺北市政府', big: '1994', kicker: 'CITY HALL', kicker2: '市民廣場', en: 'TAIPEI CITY HALL & CITIZENS PLAZA · BUILT 1986 – 1994', venue: '信義計畫區 · 雙十字平面', date: '1986–1994' } });
+
+// ── 香堤大道: 白晝之夜 2023, a tunnel of cut rings to walk through, a moon hung over its far end ──
+PLACES.add(E, P('nuit-blanche-xinyi-2023'), { position: [-14.3, 1.6], rotation: PI / 2, design: { form: 'installation', piece: 'rings', layout: 'nightart', palette: 'nightart',
+  head: '白晝之夜', big: '白晝之夜', kicker: 'NUIT BLANCHE TAIPEI', kicker2: '18:00→06:00', en: 'NUIT BLANCHE · XINYI · ALL NIGHT LONG', date: '2023.10.07' } });
+{ const B = maker('nuit-moon'); B.cyl(M.dark, 0.02, 0.02, 1.8, 0, 3.6, 0, 5); B.sph(M.white, 0.55, 0, 4.4, 0, 1, 1, 0.25); B.sph(GLOW(0.9, 1.6, 2.6), 0.62, 0, 4.4, -0.03, 1, 1, 0.12);
+  B.done(-16.0, 1.6, PI / 2); }
+
+// ── the south end, either side of the gate ──
+// 2019, Simple Life Urban+ at the fountain plaza: a canvas market tent with festoon lights, and the busker's guitar on a stand beside it
+PLACES.add(E, P('simple-life-urban-2019'), { position: [6.4, 17.6], rotation: PI, design: { form: 'booth', booth: 'craft', layout: 'market', palette: ['#f3ede2', '#e6dccb', '#2f4f4f', '#c65d3b', '#e8b04b', '#2f6b3a'],
+  head: '簡單生活節', big: 'URBAN+', kicker: 'SIMPLE LIFE', kicker2: '2019', venue: '台北101 噴水池廣場', en: 'SIMPLE LIFE FESTIVAL · URBAN+ · NINE DAYS', date: '2019.11.30–12.08', props: ['books'] } });
+{ const B = maker('simple-guitar'), body = triMat({ color: '#c9893a', tex: TEX.bark, scale: 3, rough: 0.45 });
+  B.sph(body, 0.2, 0, 0.42, 0, 1, 1.15, 0.28); B.sph(body, 0.16, 0, 0.7, 0, 1, 1, 0.28); B.cyl(M.dark, 0.06, 0.06, 0.02, 0, 0.5, 0.06, 14, PI / 2); B.box(M.woodD, 0.06, 0.5, 0.04, 0, 1.05, 0); B.box(M.woodD, 0.09, 0.14, 0.05, 0, 1.36, 0);
+  B.rod(M.dark, [-0.18, 0, -0.12], [0, 0.4, -0.08], 0.012); B.rod(M.dark, [0.18, 0, -0.12], [0, 0.4, -0.08], 0.012); B.rod(M.dark, [0, 0, 0.18], [0, 0.4, -0.08], 0.012);
+  B.done(3.9, 17.9, PI + 0.3); }
+// 2023.12.24, Eslite Xinyi's last night: an arch of books, a reading lamp still lit, a clock stopped at 22:30
+PLACES.add(E, P('eslite-xinyi-last-night-2023'), { position: [-6.3, 17.6], rotation: PI, design: { form: 'installation', piece: 'books', palette: 'memory',
+  head: '誠品信義 最後一夜', big: '22:30', kicker: 'LAST NIGHT', en: 'ESLITE XINYI · 2006.01.01 – 2023.12.24 · LIGHTS OUT 22:30', date: '2023.12.24' } });
+{ const B = maker('eslite-lamp'); B.cyl(M.dark, 0.16, 0.18, 0.03, 0, 0.015, 0, 16); B.cyl(M.dark, 0.015, 0.015, 1.45, 0, 0.74, 0, 6); B.rod(M.dark, [0, 1.45, 0], [0.3, 1.58, 0], 0.012);
+  B.cyl(triMat({ color: '#2f5a3a', rough: 0.5 }), 0.06, 0.16, 0.14, 0.32, 1.52, 0, 16); B.sph(M.warm, 0.07, 0.32, 1.45, 0);
+  B.cyl(M.woodD, 0.2, 0.2, 0.05, 0, 1.92, 0.0, 24, PI / 2); B.add(drawn(0.34, 0.34, 256, (g, W, H) => { g.fillStyle = '#f2ead6'; g.beginPath(); g.arc(W / 2, H / 2, W * 0.48, 0, PI * 2); g.fill();
+    for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; g.fillStyle = '#3b2a1a'; g.fillRect(W / 2 + Math.cos(a) * W * 0.4 - 3, H / 2 + Math.sin(a) * H * 0.4 - 3, 6, 6); }
+    g.strokeStyle = '#3b2a1a'; g.lineCap = 'round'; g.lineWidth = 10; g.beginPath(); g.moveTo(W / 2, H / 2); g.lineTo(W / 2 + Math.cos(-PI / 2 + 10.5 / 12 * PI * 2) * W * 0.22, H / 2 + Math.sin(-PI / 2 + 10.5 / 12 * PI * 2) * H * 0.22); g.stroke();
+    g.lineWidth = 6; g.beginPath(); g.moveTo(W / 2, H / 2); g.lineTo(W / 2, H / 2 + H * 0.34); g.stroke(); txt(g, '22:30', W / 2, H * 0.3, H * 0.09, { c: '#9a3b26', f: SERIF }); }, { glow: 0.5, bg: null }), 0, 1.92, 0.03);
+  B.done(-3.7, 17.9, PI); solid(-3.7, 17.9, 0.25, 0.25); }
 // the 2026 climb, life size: one storey of a flared corner of the tower with a plain figure on it, no rope
 { const B = maker('climb-slice'), h = 3.4, rb = 1.2, rt = 1.62;
   B.box(M.stone, 2.8, 0.3, 2.8, 0, 0.15, 0); B.cyl(M.g101, rt, rb, h, 0, 0.3 + h / 2, 0, 4, 0, PI / 4);
@@ -387,13 +486,22 @@ PLACES.add(E, P('eslite-xinyi-last-night-2023'), { position: [-6.3, 17.6], rotat
     F.rod(red, [-0.16, 0.55, 0], [-0.3, 1.12, -0.1], 0.045); F.rod(red, [0.16, 0.55, 0], [0.42, 0.72, -0.1], 0.045); F.rod(M.dark, [-0.08, 0, 0], [-0.3, -0.5, -0.08], 0.06); F.rod(M.dark, [-0.3, -0.5, -0.08], [-0.24, -0.86, -0.1], 0.05);
     F.rod(M.dark, [0.08, 0, 0], [0.26, -0.3, -0.06], 0.06); F.rod(M.dark, [0.26, -0.3, -0.06], [0.3, -0.72, -0.1], 0.05); F.box(M.pale, 0.14, 0.16, 0.1, 0, 0.02, 0.16);
     const fg = F.done(0.15, z0, 0, B.g, y0 + 0.3); fg.rotation.x = -tilt; }
-  B.add(label([['2026.01.25', 0.36, 0.3, 800, '#2a2420'], ['1 : 31 : 43', 0.36, 0.7, 800, '#7a1f2a']], 1.2, 0.5, { bg: '#e8dcc0', border: '#2a2420', glow: 0.3 }), -0.72, 0.16, 1.41);
+  B.add(drawn(1.2, 0.5, 768, (g, W, H) => { g.fillStyle = '#121418'; g.fillRect(0, 0, W, H); g.fillStyle = '#c9a24a'; g.fillRect(0, 0, W * 0.012, H); g.fillRect(W * 0.988, 0, W * 0.012, H);   // a chronograph plate: the time in red LED, the climb as an altitude bar
+    txt(g, 'FREE SOLO · 無繩攀登', W * 0.05, H * 0.15, H * 0.1, { c: '#c9a24a', a: 'left', track: 4 }); g.fillStyle = '#050505'; g.fillRect(W * 0.05, H * 0.27, W * 0.62, H * 0.44);
+    g.shadowColor = '#ff2a1a'; g.shadowBlur = 18; txt(g, '1:31:43', W * 0.36, H * 0.5, H * 0.36, { c: '#ff3b2f', f: MONO, w: 700, max: W * 0.58 }); g.shadowBlur = 0;
+    txt(g, '2026.01.25 · 508 M · NO ROPE', W * 0.05, H * 0.85, H * 0.085, { c: '#e8e2d4', a: 'left', w: 600, track: 2 });
+    for (let f = 0; f <= 10; f++) { const y = H * (0.9 - f * 0.075); g.fillStyle = f === 10 ? '#ff3b2f' : '#3a3e46'; g.fillRect(W * 0.76, y, W * 0.1, H * 0.05); }
+    g.fillStyle = '#c9a24a'; g.fillRect(W * 0.78, H * 0.12, W * 0.06, H * 0.78); txt(g, '101F', W * 0.93, H * 0.14, H * 0.08, { c: '#fff' }); txt(g, '1F', W * 0.93, H * 0.88, H * 0.08, { c: '#fff' }); }, { glow: 0.6 }), -0.72, 0.16, 1.41);
   out.slice = B.done(7.4, -42.0, 0); solid(7.4, -42.0, 1.45, 1.45);
   PLACES.add(E, P('alex-honnold-free-solo-2026'), { target: out.slice }); }
 // 2021: beside the notice board, the door furniture of that summer, a temperature stand and a bottle of sanitiser
 { const B = maker('covid-props'); B.cyl(M.steel, 0.03, 0.03, 1.1, 0, 0.55, 0, 8); B.cyl(M.steel, 0.2, 0.2, 0.03, 0, 0.015, 0, 12); B.box(M.steel, 0.3, 0.03, 0.24, 0, 1.1, 0); B.cyl(M.pale, 0.05, 0.05, 0.18, 0, 1.2, 0, 10); B.cyl(M.cloth[1], 0.02, 0.03, 0.07, 0, 1.32, 0, 8);
-  B.box(M.dark, 0.06, 1.5, 0.06, 0.7, 0.75, 0); B.add(label([['營業時間', 0.2, 0.2, 800, '#7a1f2a'], ['12:00 – 20:00', 0.2, 0.46, 800, '#2a2420'], ['請配戴口罩 · 量體溫', 0.11, 0.7, 600, '#2a2420'], ['Masks on · temperature check', 0.08, 0.86, 600, '#2a2420']], 0.7, 0.75, { bg: '#f4efe4', border: '#7a1f2a', glow: 0.3, both: true, px: 256 }), 0.7, 1.45, 0.04);
-  B.done(-14.3, -5.1, PI / 2); }
+  B.box(M.dark, 0.06, 1.5, 0.06, 0.7, 0.75, 0); B.add(face(DESIGN.signTexture(E, 'paper', 384, 412, (g, W, H) => { g.fillStyle = 'rgba(246,242,232,0.9)'; g.fillRect(W * 0.03, H * 0.03, W * 0.94, H * 0.94); g.fillStyle = 'rgba(200,190,150,0.55)'; [[W * 0.1, H * 0.02, -0.3], [W * 0.78, H * 0.02, 0.3]].forEach(([x, y, r]) => { g.save(); g.translate(x, y); g.rotate(r); g.fillRect(0, 0, W * 0.14, H * 0.05); g.restore(); });   // a printed A4 notice, taped on
+    g.fillStyle = '#7a1f2a'; g.fillRect(W * 0.08, H * 0.1, W * 0.84, H * 0.16); txt(g, '營業時間', W / 2, H * 0.18, H * 0.1, { c: '#fff' }); txt(g, '12:00 – 20:00', W / 2, H * 0.37, H * 0.11, { c: '#2a2420', f: MONO, w: 700 });
+    g.strokeStyle = '#2a2420'; g.lineWidth = 4; g.beginPath(); g.arc(W * 0.26, H * 0.6, H * 0.08, 0, PI * 2); g.stroke(); g.beginPath(); g.moveTo(W * 0.2, H * 0.62); g.quadraticCurveTo(W * 0.26, H * 0.69, W * 0.32, H * 0.62); g.stroke();
+    txt(g, '請配戴口罩', W * 0.62, H * 0.56, H * 0.075, { c: '#2a2420' }); txt(g, '入場量體溫', W * 0.62, H * 0.66, H * 0.075, { c: '#2a2420' });
+    txt(g, 'Masks on · temperature check', W / 2, H * 0.82, H * 0.05, { c: '#555', w: 600 }); txt(g, '2021.07', W / 2, H * 0.92, H * 0.045, { c: '#7a1f2a', w: 600 }); }, 'xinyi-covid-notice'), 0.7, 0.75, 0.3, true), 0.7, 1.45, 0.04);
+  B.done(-14.3, -3.9, PI / 2); }
 return out;
 };
 })();

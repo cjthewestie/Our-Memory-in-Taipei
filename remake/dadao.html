@@ -15,6 +15,7 @@
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
 <script src="place-data.js"></script>
+<script src="design-kit.js"></script>
 <script src="places.js"></script>
 <script src="landmarks-dadao.js"></script>
 <script>
@@ -28,6 +29,61 @@ const WEST = ['yang2', 'min1', 'L', 'L', 'yang2', 'min1', 'L', 'L', 'L', null, '
 const EAST = ['L', 'bar2', 'yang3', 'L', 'bar2', null, null, null, 'yang2', null, null, null, null, null, null, 'min3', 'bar2', 'yang3'];             // gaps: temple forecourt, market front, 慈聖宮's yard
 const AREAS = [[-4.0, 4.0, -39.4, 38.5], [4.0, 10.6, -5.4, 7.0], [4.0, 9.6, -29.4, -12.9], [-27.5, -4.0, -15.3, -11.9], [4.0, 8.2, -39.2, -31.4]];   // street, forecourt, market front, lane, 慈聖宮's yard: [minX, maxX, minZ, maxZ]
 const BLOCKS = [];                                                 // things she walks round: [x, z, radius]
+// ── the lettering of this street's own boards, drawn on top of a DESIGN material (signTexture repaints when the painting lands) ──
+const DADAO_BOARDS = (() => {
+  const KAI = '"Weibei TC","Kaiti TC","BiauKai","PingFang TC",serif', SONG = '"Songti TC","LiSong Pro","PMingLiU",serif', LAT = 'Futura,"Avenir Next","Helvetica Neue",sans-serif';
+  const txt = (g, t, x, y, px, face, wt, fill, maxW, align) => { g.font = `${wt} ${px}px ${face}`; const w = g.measureText(t).width; if (maxW && w > maxW) g.font = `${wt} ${px * maxW / w}px ${face}`; g.textAlign = align || 'center'; g.textBaseline = 'middle'; g.fillStyle = fill; g.fillText(t, x, y); };
+  const tracked = (g, t, x, y, px, face, fill, sp) => { g.font = `600 ${px}px ${face}`; const ch = [...t], ws = ch.map(c => g.measureText(c).width), tot = ws.reduce((a, b) => a + b, 0) + sp * (ch.length - 1); let cx = x - tot / 2; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = fill; ch.forEach((c, i) => { g.fillText(c, cx, y); cx += ws[i] + sp; }); };
+  const cover = (g, im, x, y, w, h, fy) => { const k = Math.max(w / im.width, h / im.height), cw = w / k, ch = h / k; g.drawImage(im, (im.width - cw) / 2, Math.max(0, Math.min(im.height - ch, im.height * (fy || 0.5) - ch / 2)), cw, ch, x, y, w, h); };
+  const seal = (g, t, x, y, r, fill, ink) => { g.save(); g.fillStyle = fill; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.strokeStyle = ink; g.lineWidth = r * 0.1; g.beginPath(); g.arc(x, y, r * 0.82, 0, 7); g.stroke(); txt(g, t, x, y + r * 0.04, r * (t.length > 1 ? 0.62 : 1.0), KAI, 900, ink, r * 1.5); g.restore(); };
+  const lanternRow = (g, x0, x1, y, r, n) => { for (let i = 0; i < n; i++) { const x = x0 + (i + 0.5) * (x1 - x0) / n, yy = y + Math.sin(i * 1.7) * r * 0.3, gr = g.createRadialGradient(x, yy, 1, x, yy, r * 1.8);
+    gr.addColorStop(0, 'rgba(255,190,90,.55)'); gr.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = gr; g.beginPath(); g.arc(x, yy, r * 1.8, 0, 7); g.fill(); g.fillStyle = '#e8402a'; g.beginPath(); g.ellipse(x, yy, r, r * 0.85, 0, 0, 7); g.fill(); g.fillStyle = '#f2c14e'; g.fillRect(x - r * 0.45, yy - r * 0.95, r * 0.9, r * 0.2); g.fillRect(x - r * 0.45, yy + r * 0.75, r * 0.9, r * 0.2); } };
+  return {
+    // 年貨大街 archway: side panels with couplet words, the gate painting in the middle, the name in carved gold over it
+    gate(g, W, H) {
+      const im = window.DESIGN && DESIGN.art('posters/gates/dadao.jpg'), px = W * 0.15, b = H * 0.07;
+      g.save(); g.beginPath(); g.rect(px, b, W - 2 * px, H - 2 * b); g.clip();
+      if (im) { cover(g, im, px, b, W - 2 * px, H - 2 * b, 0.45); g.globalCompositeOperation = 'multiply'; g.fillStyle = 'rgba(190,40,30,.35)'; g.fillRect(px, b, W - 2 * px, H - 2 * b); g.globalCompositeOperation = 'source-over'; }
+      else { const sky = g.createLinearGradient(0, b, 0, H - b); sky.addColorStop(0, '#2a0f2a'); sky.addColorStop(0.6, '#8a1f1c'); sky.addColorStop(1, '#e0733a'); g.fillStyle = sky; g.fillRect(px, b, W - 2 * px, H - 2 * b);
+        g.fillStyle = 'rgba(30,8,8,.75)'; for (let x = px; x < W - px; x += 46) { const h = H * (0.28 + ((x * 7) % 5) * 0.03); g.fillRect(x, H - b - h, 42, h); g.beginPath(); g.moveTo(x - 3, H - b - h); g.quadraticCurveTo(x + 21, H - b - h - 18, x + 45, H - b - h); g.fill(); }
+        lanternRow(g, px, W - px, H * 0.24, H * 0.06, 14); lanternRow(g, px + 20, W - px, H * 0.42, H * 0.045, 11); }
+      const vg = g.createLinearGradient(0, b, 0, H - b); vg.addColorStop(0, 'rgba(0,0,0,.35)'); vg.addColorStop(0.5, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)'); g.fillStyle = vg; g.fillRect(px, b, W - 2 * px, H - 2 * b); g.restore();
+      // the side panels: couplet words in a frame
+      [[px * 0.5, '恭賀新禧'], [W - px * 0.5, '大吉大利']].forEach(([x, t]) => { g.strokeStyle = '#e9c46a'; g.lineWidth = 3; g.strokeRect(x - px * 0.36, b + 6, px * 0.72, H - 2 * b - 12);
+        [...t].forEach((c, k) => txt(g, c, x, b + 26 + k * (H - 2 * b - 52) / 3, H * 0.15, KAI, 900, '#f3d27a')); });
+      // the title: tracked Latin over it, the name in gold with a carved shadow, the year ribbon under it
+      tracked(g, 'DIHUA STREET  ·  LUNAR NEW YEAR MARKET', W / 2, H * 0.17, H * 0.055, LAT, '#ffe9b0', 5);
+      g.save(); g.shadowColor = 'rgba(40,0,0,.85)'; g.shadowOffsetX = 4; g.shadowOffsetY = 5; g.shadowBlur = 4; const gold = g.createLinearGradient(0, H * 0.3, 0, H * 0.72); gold.addColorStop(0, '#fff1b8'); gold.addColorStop(0.5, '#e9b440'); gold.addColorStop(1, '#a8701a');
+      g.font = `900 ${H * 0.46}px ${KAI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 7; g.strokeStyle = '#4a0c08'; g.strokeText('年貨大街', W / 2, H * 0.5); g.fillStyle = gold; g.fillText('年貨大街', W / 2, H * 0.5); g.restore();
+      g.fillStyle = '#f3d27a'; g.beginPath(); g.moveTo(W * 0.33, H * 0.76); g.lineTo(W * 0.67, H * 0.76); g.lineTo(W * 0.65, H * 0.82); g.lineTo(W * 0.67, H * 0.88); g.lineTo(W * 0.33, H * 0.88); g.lineTo(W * 0.35, H * 0.82); g.closePath(); g.fill();
+      txt(g, '大稻埕 · 一九九六起 · 春節前十五天', W / 2, H * 0.82, H * 0.07, KAI, 800, '#7a1410', W * 0.3);
+      seal(g, '迪化', W * 0.24, H * 0.5, H * 0.13, '#c4201a', '#ffe9b0'); seal(g, '春', W * 0.76, H * 0.5, H * 0.13, '#f3d27a', '#7a1410');
+      g.strokeStyle = '#e9c46a'; g.lineWidth = 6; g.strokeRect(5, 5, W - 10, H - 10); g.lineWidth = 2; g.strokeRect(b * 0.6, b * 0.6, W - b * 1.2, H - b * 1.2);
+      [[b * 0.6, b * 0.6], [W - b * 0.6, b * 0.6], [b * 0.6, H - b * 0.6], [W - b * 0.6, H - b * 0.6]].forEach(([x, y]) => { g.fillStyle = '#e9c46a'; g.beginPath(); g.arc(x, y, b * 0.55, 0, 7); g.fill(); g.fillStyle = '#7a1410'; g.beginPath(); g.arc(x, y, b * 0.25, 0, 7); g.fill(); });
+    },
+    // 永樂市場: the market's own enamel plate (kind A), white letters, the trade under it
+    market(g, W, H) {
+      g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 5; g.strokeRect(14, 14, W - 28, H - 28); g.save(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowOffsetY = 4; g.shadowBlur = 3;
+      txt(g, '永樂市場', W / 2, H * 0.42, H * 0.5, SONG, 900, '#f4f0e4', W * 0.86); g.restore();
+      tracked(g, 'YONGLE MARKET', W / 2, H * 0.78, H * 0.1, LAT, '#f4f0e4', 14); txt(g, '布業商場 · 1908', W * 0.88, H * 0.78, H * 0.06, SONG, 700, 'rgba(244,240,228,.75)', W * 0.2);
+    },
+    // 大稻埕碼頭 on the quay (kind B): the river at sunset, the tea junks that sailed from here, the name set big
+    quay(g, W, H) {
+      const im = window.DESIGN && DESIGN.art('posters/topics/wharf.jpg'), sx = W * 0.42;
+      const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#3a1f4a'); sky.addColorStop(0.55, '#e86a3a'); sky.addColorStop(1, '#f3c14b'); g.fillStyle = sky; g.fillRect(sx, 0, W - sx, H);
+      if (im) { cover(g, im, sx, 0, W - sx, H, 0.5); g.globalCompositeOperation = 'soft-light'; g.fillStyle = 'rgba(255,140,60,.5)'; g.fillRect(sx, 0, W - sx, H); g.globalCompositeOperation = 'source-over'; }
+      else { g.fillStyle = '#ffe3a0'; g.beginPath(); g.arc(W * 0.8, H * 0.52, H * 0.18, 0, 7); g.fill(); g.fillStyle = 'rgba(40,20,40,.8)'; for (let x = sx; x < W; x += 24) { const h = H * (0.08 + ((x * 13) % 7) * 0.02); g.fillRect(x, H * 0.62 - h, 20, h); }
+        ['#1d4e6e', '#2f7f9a', '#0d2a44'].forEach((c, k) => { g.fillStyle = c; g.beginPath(); g.moveTo(sx, H); for (let x = sx; x <= W; x += 10) g.lineTo(x, H * (0.62 + k * 0.12) + Math.sin(x / 30 + k) * 3); g.lineTo(W, H); g.fill(); });
+        g.fillStyle = '#1a1018'; g.beginPath(); g.moveTo(W * 0.55, H * 0.7); g.lineTo(W * 0.66, H * 0.7); g.lineTo(W * 0.64, H * 0.76); g.lineTo(W * 0.57, H * 0.76); g.fill(); g.beginPath(); g.moveTo(W * 0.6, H * 0.68); g.lineTo(W * 0.6, H * 0.3); g.quadraticCurveTo(W * 0.65, H * 0.45, W * 0.66, H * 0.66); g.fill(); }
+      g.fillStyle = '#efe6d0'; g.fillRect(0, 0, sx, H); g.fillStyle = '#0d2a44'; g.fillRect(0, H * 0.86, sx, H * 0.14); g.fillStyle = '#c4201a'; g.fillRect(sx - 10, 0, 10, H);
+      g.fillStyle = '#c4201a'; g.fillRect(W * 0.02, H * 0.1, H * 0.2, H * 0.66); [...'淡水河'].forEach((c, k) => txt(g, c, W * 0.02 + H * 0.1, H * 0.22 + k * H * 0.21, H * 0.16, KAI, 900, '#fff1d0'));
+      const mx = W * 0.04 + H * 0.24 + (sx - W * 0.04 - H * 0.24) / 2;
+      txt(g, '大稻埕碼頭', mx, H * 0.42, H * 0.4, KAI, 900, '#0d2a44', sx - W * 0.06 - H * 0.24); tracked(g, 'DADAOCHENG WHARF', mx, H * 0.7, H * 0.08, LAT, '#0d2a44', 6);
+      txt(g, '1860s 茶葉出港  ─  2005 親水碼頭  ─  五號水門', sx / 2, H * 0.93, H * 0.075, '"PingFang TC",sans-serif', 700, '#efe6d0', sx * 0.92);
+      g.strokeStyle = '#0d2a44'; g.lineWidth = 4; g.strokeRect(3, 3, W - 6, H - 6);
+    },
+  };
+})();
 const camQ = new URLSearchParams(location.search).get('cam');      // ?view=1&cam=px,py,pz,tx,ty,tz : a free camera for checking
 ENGINE.create({
   title: '大稻埕 · 迪化街年貨大街', subtitle: 'Dihua Street at Lunar New Year, 2000–2019', loading: 'Hanging the lanterns…',
@@ -95,7 +151,7 @@ ENGINE.create({
 
   // ── red New Year banners on wires across the street ──
   const cloth = (text, w, h, wide) => { const cv = document.createElement('canvas'); cv.width = wide ? 1024 : 128; cv.height = wide ? Math.round(1024 * h / w) : Math.round(128 * h / w); const g = cv.getContext('2d');
-    g.fillStyle = '#b3241a'; g.fillRect(0, 0, cv.width, cv.height); g.strokeStyle = '#e9c46a'; g.lineWidth = wide ? 10 : 5; g.strokeRect(7, 7, cv.width - 14, cv.height - 14);
+    if (!(window.DESIGN && DESIGN.drawMaterial(g, cv.width, cv.height, 'cloth', () => 0.5))) { g.fillStyle = '#b3241a'; g.fillRect(0, 0, cv.width, cv.height); } g.strokeStyle = '#e9c46a'; g.lineWidth = wide ? 10 : 5; g.strokeRect(7, 7, cv.width - 14, cv.height - 14);
     g.fillStyle = '#f3d27a'; g.textAlign = 'center'; g.textBaseline = 'middle'; const n = [...text].length;
     if (wide) { g.font = `700 ${Math.round(cv.height * 0.62)}px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif`; g.fillText(text, cv.width / 2, cv.height * 0.53); }
     else { const step = (cv.height - 30) / n; g.font = `700 ${Math.round(Math.min(92, step * 0.82))}px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif`; [...text].forEach((ch, i) => g.fillText(ch, 64, 15 + step * (i + 0.5))); }
@@ -147,8 +203,14 @@ ENGINE.create({
   let wi = 0; [[WEST, -1], [EAST, 1]].forEach(([row, side]) => row.forEach((kind, i) => { if (!kind || kind === 'L' || kind === 'min1' || i > 15) return; const w = words[wi % words.length];
     sign(w, side * 4.16, 5.3 + (wi % 3) * 0.35, ZC(i) + (wi % 2 ? 1.75 : -1.75), 0, [4, 38, 210, 150, 350, 28][wi % 6], wi % 3 === 0); wi++; }));
   const nameBoard = (lines, w, h, x, y, z, ry, bg, fg) => { const b = board(lines, w, h, bg, fg, 0.45); b.position.set(x, y, z); b.rotation.y = ry; scene.add(b); return b; };
-  nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a');
-  nameBoard([['永樂市場', 170, 0.42], ['YONGLE MARKET', 60, 0.8, 600]], 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, '#1f2a44', '#f1e7d2');
+  // the archway's board is the site's own gate (kind B), never a plate: the painted gate art (asset/textures/posters/gates/dadao.jpg,
+  // a code-drawn street of lanterns until it lands) under designed lettering. CJ, 2026-11-22: 「招牌可以用midjourney生成紋理 或海報更換所有的招牌或有字的牌子直到他們有質感跟好看」
+  const twoSided = (tex, w, h, x, y, z, ry, glow) => { const f = new T.MeshStandardMaterial({ map: tex, roughness: 0.45, emissiveMap: tex, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow }), e = new T.MeshStandardMaterial({ color: E.col('#3a120e'), roughness: 0.6 });
+    const m = new T.Mesh(new T.BoxGeometry(w, h, 0.09), [e, e, e, e, f, f]); m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; scene.add(m); return m; };
+  if (window.DESIGN) {
+    twoSided(DESIGN.signTexture(E, 'redlacquer', 1024, 246, (g, W, H) => DADAO_BOARDS.gate(g, W, H), 'dadao-gate'), 5.2, 1.25, 0, 7.35, 35.16, 0, 0.42);
+    twoSided(DESIGN.signTexture(E, 'enamel', 1024, 284, (g, W, H) => DADAO_BOARDS.market(g, W, H), 'dadao-yongle'), 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, 0.35);
+  } else { nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a'); nameBoard([['永樂市場', 170, 0.42], ['YONGLE MARKET', 60, 0.8, 600]], 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, '#1f2a44', '#f1e7d2'); }
 
   // ── one showcase per topic of this scene (the list is PHOTO_TOPICS, in photo-topics.js): topic key -> [x, z, facing, kind]. A click opens the topic's gallery ──
   PHOTOWALL.showcases(E, { section: 'dadao', topics: PHOTO_TOPICS.dadao, spots: {
@@ -173,7 +235,8 @@ ENGINE.create({
     for (let z = -64; z <= 44; z += 2.4) add(new T.BoxGeometry(0.09, 1.1, 0.09), MATS.ink, -29.6, 0.55, z);
     [[-28.4, -9.5], [-28.4, -18.5], [-28.4, 8], [-28.4, -36]].forEach(([x, z]) => { const l = dress(get(core, 'lamp').clone()); l.position.set(x, 0, z); l.rotation.y = Math.PI / 2; scene.add(l); });
     [[-26.6, -15.9], [-26.6, -11.4]].forEach(([x, z]) => { const b = dress(get(core, 'bollard').clone()); b.position.set(x, 0, z); scene.add(b); });
-    nameBoard([['大稻埕碼頭', 150, 0.5]], 3.4, 0.8, -27.6, 3.9, -13.6, Math.PI / 2, '#1f2a44', '#f1e7d2');
+    if (window.DESIGN) twoSided(DESIGN.signTexture(E, 'paper', 1024, 241, (g, W, H) => DADAO_BOARDS.quay(g, W, H), 'dadao-quay'), 3.4, 0.8, -27.6, 3.9, -13.6, Math.PI / 2, 0.4);   // the quay's own board (kind B): a river-sunset print
+    else nameBoard([['大稻埕碼頭', 150, 0.5]], 3.4, 0.8, -27.6, 3.9, -13.6, Math.PI / 2, '#1f2a44', '#f1e7d2');
     [-15.1, -12.1].forEach(z => add(new T.CylinderGeometry(0.05, 0.05, 3.6, 8), MATS.ink, -27.6, 1.8, z));
     const hull = triMat({ color: '#3d5c6e', tex: TEX.bark, scale: 2, rough: 0.7 }), deck = triMat({ color: '#e6dcc6', tex: TEX.plaster, scale: 1, rough: 0.8 });   // a ferry at the wharf
     const boat = new T.Group(); boat.position.set(-35.4, 0, -14.6); boat.rotation.y = 0.06;

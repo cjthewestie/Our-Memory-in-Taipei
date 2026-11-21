@@ -677,18 +677,50 @@ if (window.PLACES) {
   tgt('lions-plaza', -3.3, 1.6, 0.06, { near: [10.5, 58], radius: 4 }); tgt('lai-lai', 1.95, 1.6, 0.06, { near: [-15, 58.2], radius: 3.2 }); tgt('pedestrian-zone-exit6', -3.0, 1.2, 2.72, { near: [-11, 49.6], radius: 3 });
   if (G['red-house']) { PLACES.add(E, P('red-house'), { target: G['red-house'], plaque: { position: [2.6, 1.6, 8.75], rotation: 0, size: 0.24 }, near: [0, 11.6], radius: 4 }); count++; }
   // the events, each near where it happened in this layout
-  const ev = (key, o) => { const it = P(key); if (!it) { console.warn('[landmarks-ximen] no event', key); return; } PLACES.add(E, it, o); count++; };
-  // CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」: concerts, signings, festivals and fan meets
-  ev('orange-carnival-2024', { position: [-4.8, 15.4], rotation: 0.22 });                      // in front of the octagon, where the stage stood
-  ev('drag-festival-2025', { position: [-12.6, 13.6], rotation: 0.3 });                        // beside the Red House
-  ev('jay-chou-signing-2004', { position: [-18.6, 22], rotation: L });
-  ev('lantern-festival-2017', { position: [-17.6, 45.2], rotation: L - 0.25 });                // on the 中華路 side, where the lanterns ran
-  ev('backstreet-fest-2020', { position: [15.2, 38.6], rotation: -L });                        // toward 美國街 and the back streets
-  ev('golden-horse-outdoor-2018', { position: [16.5, 47.5], rotation: -L });                   // on the 電影街 side
-  ev('rainbow-crossing-2019', { position: [-6.6, 50.6], rotation: Math.PI + 0.3 });            // at Exit 6
-  ev('mayday-5th-anniv-2004', { position: [4.6, 55.6], rotation: Math.PI - 0.15 });            // at the mouth of the car-free streets
-  ev('gatao-fanmeet-2025', { position: [12.8, 56.4], rotation: Math.PI - 0.3 });
-  ev('play-now-concert-2021', { position: [-17.6, 56.6], rotation: Math.PI - 0.35 });
+  // ev(key, o, extras): o.design is this event's own piece (docs/signage/designs-ximen.md holds each decision, its reference and its label).
+  // extras are companion pieces of the same event (a line-up standee, a hand-painted billboard, a row of pole banners): built by the kit,
+  // set at [dx, dz] in the main piece's own frame (front along +z), blocked for walking, and clickable as the same item. They are not new
+  // items, so __places.list() keeps its count.
+  const ev = (key, o, extras) => { const it = P(key); if (!it) { console.warn('[landmarks-ximen] no event', key); return; } const e = PLACES.add(E, it, o); count++;
+    if (!extras || !window.DESIGN || !e) return; const [x0, z0] = o.position, r0 = o.rotation || 0;
+    extras.forEach(x => { const g = DESIGN.build(E, it, x.design), c = Math.cos(r0), s = Math.sin(r0); g.position.set(x0 + x.at[0] * c + x.at[1] * s, 0, z0 - x.at[0] * s + x.at[1] * c); g.rotation.y = r0 + (x.turn || 0); scene.add(g);
+      g.userData.place = e; e.targets.push(g); e.boxes.push({ o: g, box: null });
+      if (window.PHOTOWALL && PHOTOWALL.block) (g.userData.feet || [g.userData.foot]).forEach(f => f && PHOTOWALL.block({ x: g.position.x, z: g.position.z, facing: g.rotation.y, u0: f[0], u1: f[1], v0: f[2], v1: f[3] })); }); };
+  // CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」: concerts, signings, festivals and fan meets.
+  // CJ, 2026-11-22: 「這種無聊的招牌絕對不能出現就對了」: every one is a poster on a real mount, a statue, an installation or a booth, never a plate.
+  const SUMMER = ['#eef3df', '#d3e6b8', '#1d2a1c', '#6b3fa8', '#2f8a4a', '#f2c94e'];       // 七里香, 2004: a summer-green, white-shirt, violet-titled sleeve (inferred from the album's 2004 campaign)
+  const GANG = ['#110b09', '#2b0e0b', '#f2e2c0', '#c9a24a', '#b3121a', '#e8d6a8'];         // 角頭 posters: near-black, blood red, worn gold (inferred from the series' one-sheets)
+  const NEON = ['#0c0c10', '#1e1a2c', '#f6f6f6', '#c6ff00', '#ff2bd6', '#3ddcff'];        // a 2021 hip-hop flyer: black, acid green, hot pink, cyan
+  const DRAG = ['#1a0e2a', '#3a1450', '#fff3fb', '#ff4fa3', '#ffd23f', '#3ddcff'];        // drag night: violet black, hot pink, gold sequins
+  ev('orange-carnival-2024', { position: [-4.8, 15.4], rotation: 0.22,                        // in front of the octagon, where the stage stood
+    design: { form: 'booth', booth: 'carnival', layout: 'games', palette: 'orange', head: '春季橘子嘉年華', big: '紅樓夜嗨祭', kicker: 'SPRING CARNIVAL', kicker2: '橘子嘉年華', en: 'Gamania Spring Orange Carnival · Night Show from 6 p.m.', date: '2024.2.4', venue: '西門紅樓北廣場 13:00–21:00', props: ['festoon', 'speakers'] } },
+    [{ at: [2.85, 0.9], turn: -0.35, design: { form: 'poster', mount: 'standee', layout: 'concert', palette: ['#1a0f05', '#3a1a05', '#fff4e0', '#ff7a00', '#7a1fa2', '#00b3a6'], head: '怕胖團 · 幽靈水晶 CRYXTAL · 林潔心 · 忒修斯', big: '夜嗨', kicker: 'NIGHT SHOW LINE-UP', kicker2: '18:00 開唱', date: '2024.2.4', venue: '紅樓北廣場 舞台' } }]);
+  ev('drag-festival-2025', { position: [-12.6, 13.6], rotation: 0.3,                          // beside the Red House
+    design: { form: 'statue', motif: 'heel', plinth: 'drum', palette: DRAG, head: '國際變裝藝術節', big: '變裝', kicker: 'DRAG ARTS FESTIVAL', kicker2: 'Color Taipei', en: 'International Drag Arts Festival × Color Taipei', date: '2025.10.25', venue: '河岸留言 西門紅樓展演館', story: '遊行那一夜，亞洲各地的變裝皇后在紅樓登台：一雙厚底高跟鞋與一圈羽毛，記住那晚的舞台燈' } },
+    [{ at: [-4.3, -0.4], turn: 0.25, design: { form: 'poster', mount: 'banner', layout: 'nightart', palette: DRAG, head: '國際變裝藝術節', big: 'DRAG', kicker: 'COLOR TAIPEI', date: '2025.10.22–26', venue: '西門紅樓' } },
+     { at: [2.3, 0.2], turn: -0.3, design: { form: 'poster', mount: 'case', layout: 'nightart', palette: DRAG, variant: 1, head: '亞洲變裝皇后 紅樓之夜', big: 'QUEENS', kicker: 'LIVE AT THE RED HOUSE', kicker2: '遊行當晚', date: '2025.10.25', venue: '河岸留言 西門紅樓展演館' } }]);
+  ev('jay-chou-signing-2004', { position: [-18.6, 22], rotation: L,
+    design: { form: 'booth', booth: 'signing', layout: 'concert', palette: SUMMER, head: '七里香 新專輯簽唱會', big: '七里香', kicker: 'ALBUM SIGNING', kicker2: '新歌首唱', en: 'Jay Chou · new album signing and first live 七里香', date: '2004.8.14', venue: '西門町徒步區 · 下午', props: ['speakers', 'flashes'] } },
+    [{ at: [-2.9, 0.7], turn: 0.3, design: { form: 'poster', mount: 'column', layouts: ['concert', 'news', 'concert', 'street'], layout: 'concert', palette: SUMMER, head: '七里香 數千歌迷擠爆西門町', big: '2004', kicker: 'SUMMER 2004', kicker2: '交通打結', date: '2004.8.14', venue: '西門町' } }]);
+  ev('lantern-festival-2017', { position: [-17.6, 45.2], rotation: L - 0.25,                  // on the 中華路 side, where the lanterns ran
+    design: { form: 'installation', piece: 'lantern', layout: 'lantern', palette: 'lantern', head: '2017 台北燈節', big: '西區燈節', kicker: 'TAIPEI LANTERN FESTIVAL', kicker2: '雞年 小奇雞家族', en: 'The lantern festival comes west for the first time: 西門 · 中華路 · 北門', date: '2017.2.4–2.12', venue: '中華路一段 → 北門' } },
+    [{ at: [4.0, 0.4], turn: -0.3, design: { form: 'poster', mount: 'case', layout: 'lantern', palette: 'lantern', variant: 1, head: '燈節首度移師西區', big: '雞年', kicker: 'YEAR OF THE ROOSTER', kicker2: '主燈 小奇雞家族', date: '2017.2.4', venue: '西門 · 中華路 · 北門' } }]);
+  ev('backstreet-fest-2020', { position: [15.2, 38.6], rotation: -L,                          // toward 美國街 and the back streets
+    design: { form: 'booth', booth: 'container', layout: 'street', palette: 'hiphop', head: '西門町後街文化祭', big: '後街製造', kicker: 'BACK STREET MADE', kicker2: 'DJ · 塗鴉 · 街舞 · 滑板', en: 'Vinyl DJ sets, graffiti, breaking, skate lessons, Saturday open-air films', date: '2020.8.3–8.29', venue: '台北市電影主題公園', props: ['speakers', 'balloons'] } },
+    [{ at: [-4.4, 0.2], turn: 0.15, design: { form: 'poster', mount: 'wall', layouts: ['street', 'anime', 'street', 'concert'], layout: 'street', palette: ['#f2ede2', '#e3dccb', '#151515', '#ff2bd6', '#c6ff00', '#ff7f11'], head: '後街製造', big: 'BACK ST.', kicker: 'DJ CHICANO · VASTAR · 90\'S BBOYZ', kicker2: '每週六 露天電影', date: '2020.8', venue: '電影主題公園' } }]);
+  ev('golden-horse-outdoor-2018', { position: [16.5, 47.5], rotation: -L,                     // on the 電影街 side
+    design: { form: 'installation', piece: 'screen', layout: 'premiere', palette: 'river', head: '金馬影展 電影公園露天放映', big: '露天電影夜', kicker: 'GOLDEN HORSE · OPEN-AIR', kicker2: '致敬 高畑勳', en: 'Grave of the Fireflies and My Neighbor Totoro back to back, 30 years on', date: '2018.11.10–11', venue: '台北市電影主題公園' } },
+    [{ at: [4.7, -0.6], turn: -0.45, design: { form: 'poster', mount: 'billboard', layout: 'painted', palette: 'painted', head: '螢火蟲之墓 · 龍貓 雙片連映', big: '雙片連映', kicker: 'DOUBLE BILL', kicker2: '三十年後 再一次', date: '2018.11.10', venue: '電影公園 露天' } }]);
+  ev('rainbow-crossing-2019', { position: [-5.2, 50.2], rotation: Math.PI + 0.3,              // at Exit 6
+    design: { form: 'installation', piece: 'arch', layout: 'street', palette: 'rainbow', motif: 'rainbow', head: '西門 彩虹地景', big: 'TAIPEI', kicker: 'EXIT 6 RAINBOW', kicker2: '六色 TAIPEI', en: 'Six colours and the word TAIPEI on the Exit 6 plaza', date: '2019.9.25', venue: '捷運西門站 6號出口' } });
+  ev('mayday-5th-anniv-2004', { position: [4.6, 55.6], rotation: Math.PI - 0.15,              // at the mouth of the car-free streets
+    design: { form: 'poster', mount: 'wall', layouts: ['concert', 'news', 'concert', 'street'], layout: 'concert', palette: 'concert', head: '五月天 成軍五週年', big: 'MAYDAY 5', kicker: 'LIVE · 5TH ANNIVERSARY', kicker2: '歌迷擠爆紅樓', en: 'Five years a band, one small show before the Asian tour', date: '2004.4', venue: '西門紅樓' } });
+  ev('gatao-fanmeet-2025', { position: [12.8, 56.4], rotation: Math.PI - 0.3,
+    design: { form: 'booth', booth: 'fanmeet', layout: 'premiere', palette: GANG, head: '《角頭－鬥陣欸》封街見面會', big: '鬥陣欸', kicker: 'FAN MEET', kicker2: '8.21 全台上映', en: 'The cast closes Movie Street two days before the release', date: '2025.8.19', venue: '西門町電影街', props: ['flashes', 'barrier'] } },
+    [{ at: [-2.9, 0.7], turn: 0.3, design: { form: 'poster', mount: 'case', layout: 'premiere', palette: GANG, variant: 1, head: '角頭－鬥陣欸', big: '鬥陣', kicker: 'IN CINEMAS 8.21', kicker2: '台北見面會', date: '2025.8.19', venue: '西門町電影街', carpet: false } }]);
+  ev('play-now-concert-2021', { position: [-17.6, 56.6], rotation: Math.PI - 0.35,
+    design: { form: 'booth', booth: 'stage', layout: 'concert', palette: NEON, head: 'PLAY NOW EP2 嘻嘻哈哈', big: '嘻嘻哈哈', kicker: 'FREE HIP-HOP SHOW', kicker2: '西門PLAY樂購町', en: 'OSN, 婁峻碩, 陳零九, 呂士軒, 王豔薇, 陳忻玥 · over ten thousand visits', date: '2021.2.28', venue: '捷運西門站 6號出口廣場', props: ['barrier', 'flashes'] } },
+    [{ at: [2.9, 0.8], turn: -0.3, design: { form: 'poster', mount: 'standee', layout: 'street', palette: NEON, head: 'OSN · 婁峻碩 · 陳零九 · 呂士軒 · 王豔薇 · 陳忻玥', big: 'PLAY', kicker: 'LINE-UP', kicker2: '免費入場', date: '2021.2.28', venue: '六號出口廣場' } }]);
 }
 return { groups, count };
 };

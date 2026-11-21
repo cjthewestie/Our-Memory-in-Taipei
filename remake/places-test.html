@@ -15,6 +15,7 @@
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
 <script src="place-data.js"></script>
+<script src="design-kit.js"></script>
 <script src="places.js"></script>
 <script>
 // A test page for places.js: one marker of each type, every statue shape, and one "existing building" target,
@@ -28,36 +29,40 @@ const QS = new URLSearchParams(location.search);
 if (QS.get('debug') === '1') { const st = document.createElement('style'); st.textContent = '#load { transition: none !important; }'; document.head.appendChild(st); }   // headless shots: no half-faded loading cover
 const E0 = ENGINE.create({
   title: '地點與事件 · Place markers test', subtitle: 'Click a marker, or walk up to one and press E.',
-  sunDir: [-26, 30, 34], shadowCenter: [0, 0, 0], start: { x: 0, z: 6, heading: Math.PI },   // the sun stands behind the camera here, so the fronts of the markers are lit
-  clamp(p) { p.x = Math.max(-16, Math.min(16, p.x)); p.z = Math.max(-9, Math.min(12, p.z)); PHOTOWALL.keepOut(p); },
-  views: [[0, 2.6, 10.5, 0, 1.5, 0], [-7.5, 1.7, 4.4, -5.6, 1.5, 0], [-0.8, 1.7, 4.6, -1.9, 1.4, 0], [3.2, 1.9, 4.6, 2.1, 1.3, 0], [8.6, 1.7, 4.8, 6.4, 1.1, 0], [0, 3.2, -1.5, 0, 1.6, -8]],
-  ground: { strips: [{ w: 3, len: 30, turn: true, z: 3.4 }], puddles: 3, puddle: (rr) => [rr(-8, 8), rr(4, 9), rr(0, 3)] },
-  dust: { x: [-14, 14], y: [0.3, 6], z: [-8, 10] },
+  sunDir: [-26, 30, 34], shadowCenter: [0, 0, 0], start: { x: 0, z: 7, heading: Math.PI },   // the sun stands behind the camera here, so the fronts of the markers are lit
+  clamp(p) { p.x = Math.max(-40, Math.min(40, p.x)); p.z = Math.max(-50, Math.min(12, p.z)); PHOTOWALL.keepOut(p); },
+  views: [[0, 3.2, 12, 0, 1.6, 0], [0, 3.2, 2, 0, 1.4, -10], [0, 3.6, -9, 0, 1.8, -20], [0, 3.6, -21, 0, 1.6, -32], [0, 3.0, -35, 0, 1.4, -44], [0, 3.2, -1.5, 0, 1.6, -8]],
+  ground: { strips: [{ w: 3, len: 90, turn: true, z: 3.4 }], puddles: 3, puddle: (rr) => [rr(-8, 8), rr(4, 9), rr(0, 3)] },
+  dust: { x: [-30, 30], y: [0.3, 6], z: [-46, 10] },
   models: [],
   build(E) {
     const { T, scene, TEX, triMat, MATS, board } = E;
-    const X = k => PLACES.item('xinyi', k), M = k => PLACES.item('ximen', k), D = k => PLACES.item('dadao', k);
-    // front row: one marker of each type
-    PLACES.add(E, D('dadaocheng-fireworks'), { type: 'stand', position: [-5.6, 0], rotation: 0 });
-    PLACES.add(E, X('alain-robert-climb-2004'), { type: 'board', position: [-1.9, 0.4], rotation: 0.12 });
-    PLACES.add(E, X('alex-honnold-free-solo-2026'), { type: 'statue', position: [2.1, 0], rotation: -0.1 });
-    PLACES.add(E, M('railway-underground-1989'), { type: 'wall', position: [6.4, 0.2], rotation: -0.18 });
-    // back row: the other bronzes and boards
-    PLACES.add(E, M('zhonghua-market-1992'), { type: 'statue', position: [-9, -8], rotation: 0.3 });
-    PLACES.add(E, X('first-nye-fireworks-2005'), { type: 'statue', shape: 'firework', position: [-6, -8.4] });
-    PLACES.add(E, X('hualien-earthquake-2024'), { type: 'statue', shape: 'damper', position: [-3, -8.4] });
-    PLACES.add(E, X('taipei-101-opening-2004'), { type: 'statue', shape: 'tower', position: [0, -8.4] });
-    PLACES.add(E, D('city-god-procession'), { type: 'statue', position: [3, -8.4] });
-    PLACES.add(E, D('228-flash-point-1947'), { type: 'statue', position: [6, -8] });
-    PLACES.add(E, D('new-year-goods-street'), { type: 'board', position: [9, -7.6], rotation: -0.3 });
-    PLACES.add(E, X('eslite-xinyi-last-night-2023'), { type: 'wall', position: [12.4, -4], rotation: -1.1 });
-    PLACES.add(E, M('lai-lai-closes-2003'), { position: [-12, -5], rotation: 0.9 });               // no type: the item's own marker type
+    const X = k => PLACES.item('xinyi', k), M = k => PLACES.item('ximen', k), D = k => PLACES.item('dadao', k), Q = k => PLACES.item('square', k);
+    // CJ, 2026-11-22: 「這種無聊的招牌絕對不能出現」. One of each designed form from design-kit.js, on real items. ?cam=... frames a row.
+    const row = (z, list, gap) => list.forEach(([it, design], i) => PLACES.add(E, it, { position: [(i - (list.length - 1) / 2) * gap, z], rotation: 0, design }));
+    // row A, z = 0: the six poster mounts (each item's own curated design)
+    row(0, [[D('tttifa-arts-festival')], [Q('golden-melody-arena-2006')], [Q('jay-chou-taipei-dome-2024')], [Q('universiade-2017')], [M('mayday-5th-anniv-2004')], [D('film-twa-tiu-tiann-2014')]], 7);
+    // row B, z = -10: statues on block, drum and podium plinths
+    row(-10, [[X('taipei-101-opening-2004')], [X('alex-honnold-free-solo-2026')], [M('drag-festival-2025')], [D('yuelao-matchmaker-crowds')], [X('taipei-101-run-up-2005')], [Q('nba-taipei-game-2013')], [Q('yuanzai-first-day-2014')], [D('city-god-procession')], [Q('golden-melody-arena-2006'), { form: 'statue', motif: 'record', plinth: 'drum' }], [Q('universiade-2017'), { form: 'statue', motif: 'rings', plinth: 'podium' }], [M('play-now-concert-2021'), { form: 'statue', motif: 'mic', plinth: 'block' }]], 4.2);
+    // row C, z = -20: installations
+    row(-20, [[X('nuit-blanche-xinyi-2023')], [M('rainbow-crossing-2019')], [M('lantern-festival-2017')], [X('first-nye-fireworks-2005')], [X('taiwan-pride-city-hall-2024')], [Q('lantern-fest-shilin-2022')], [Q('flora-expo-2010')], [Q('pokemon-go-beitou-2016')], [X('eslite-xinyi-last-night-2023')], [M('golden-horse-outdoor-2018')], [D('dadaocheng-fireworks')]], 7);
+    // row D, z = -32: booths
+    row(-32, [[M('jay-chou-signing-2004')], [M('play-now-concert-2021')], [M('orange-carnival-2024')], [M('gatao-fanmeet-2025')], [X('deadpool-reynolds-2016')], [D('new-year-goods-street')], [D('solitary-gourmet-yongle')], [D('pier5-container-market')], [X('simple-life-urban-2019')], [Q('msi-2019-heping')], [Q('fancy-frontier-ff')]], 5);
+    // row E, z = -44: every poster layout once, each in a lit case
+    const L = DESIGN.LAYOUTS, src = [Q('golden-melody-arena-2006'), Q('flora-expo-2010'), Q('universiade-2017'), Q('msi-2019-heping'), Q('jay-chou-taipei-dome-2024'), Q('nuit-blanche-gongguan-2017'), M('lantern-festival-2017'), Q('fancy-frontier-ff'), X('weekend-in-taipei-2024'), D('film-twa-tiu-tiann-2014'), M('backstreet-fest-2020'), X('taipei-nye-party-2020'), X('alain-robert-climb-2004'), D('tttifa-arts-festival'), D('new-year-goods-street'), M('lai-lai-closes-2003') || X('eslite-xinyi')];
+    row(-44, L.map((lay, i) => [src[i % src.length], { form: 'poster', mount: 'case', layout: lay, palette: lay }]), 2.3);
+    // left of row A, x = -24 ... -32: the three district gate posters (posters/gates/<district>.jpg once the painting lands, code-drawn until then),
+    // and behind them the real-sign material boards (signs/<material>.jpg) with lettering set in code
+    [['ximen', '西門町', '西門', 'XIMENDING', 'anime'], ['dadao', '大稻埕', '大稻埕', 'DADAOCHENG', 'painted'], ['xinyi', '信義區', '信義', 'XINYI', 'award']].forEach(([d, head, big, en, layout], i) => {
+      const g = DESIGN.build(E, null, { form: 'poster', mount: 'case', layout, palette: layout, head, big, en, art: 'posters/gates/' + d + '.jpg', kicker: 'GATEWAY · 入口' }); g.position.set(-24 - i * 4, 0, 0); scene.add(g); });
+    DESIGN.MATERIALS.forEach((m, i) => { const t = DESIGN.signTexture(E, m, 512, 160, (g, W, H) => { g.fillStyle = /lightbox|paper|brass/.test(m) ? '#1a1410' : '#f4e8c8'; g.font = `900 ${H * 0.5}px "Kaiti TC",serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(m, W / 2, H / 2); }, 'test');
+      const s = new T.Mesh(new T.PlaneGeometry(2.4, 0.75), new T.MeshStandardMaterial({ map: t, roughness: 0.6 })); s.position.set(-22 - (i % 6) * 2.6, 1.0 + ((i / 6) | 0) * 0.9, -4); scene.add(s); });
     // an existing building registered as a target, with a plaque on its wall
-    const shop = new T.Group(); shop.position.set(11.5, 0, 3); shop.rotation.y = -Math.PI / 2;
+    const shop = new T.Group(); shop.position.set(30, 0, 3); shop.rotation.y = -Math.PI / 2;
     const body = new T.Mesh(new T.BoxGeometry(4.2, 3.4, 2.6), MATS.brick); body.position.y = 1.7; body.castShadow = body.receiveShadow = true; shop.add(body);
     const sg = board([['蜂大咖啡', 150, 0.5]], 3.2, 0.7, '#1f2a44', '#f1e7d2', 0.5); sg.position.set(0, 2.9, 1.37); shop.add(sg); scene.add(shop);
-    PLACES.add(E, M('fong-da'), { target: shop, plaque: { position: [10.14, 1.5, 4.6], rotation: -Math.PI / 2 } });
-    PHOTOWALL.block({ x: 11.5, z: 3, facing: -Math.PI / 2, hw: 2.1, hd: 1.3 });
+    PLACES.add(E, M('fong-da'), { target: shop, plaque: { position: [28.64, 1.5, 4.6], rotation: -Math.PI / 2 } });
+    PHOTOWALL.block({ x: 30, z: 3, facing: -Math.PI / 2, hw: 2.1, hd: 1.3 });
     window.PL = PLACES.mount(E, { district: 'xinyi' });
   },
 });
