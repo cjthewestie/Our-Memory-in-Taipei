@@ -290,9 +290,10 @@
     // ── which photo hangs where: its own topic's wall; no topic (or one no wall here has) → the section's first wall ──
     function collate() {
       const bySec = {}; addable().forEach(w => (bySec[w.section] = bySec[w.section] || []).push(w));
-      const home = r => { const ws = bySec[r.section]; return ws ? ws.find(w => w.topic && w.topic === r.topic) || ws[0] : null; };
+      const home = r => { const ws = bySec[r.section]; if (!ws) return null; const own = ws.find(w => w.topic && w.topic === r.topic); if (own) return own;
+        return /^place:/.test(r.topic || '') ? null : ws.find(w => !w.shelf) || null; };   // a shelf never takes another topic's photo, and a place's photo never falls back onto a wall
       walls.forEach(w => { w.items = w.fixed.slice(); }); extra = [];
-      const put = (r, it) => { const w = home(r); it.section = r.section; it.topic = r.topic || null; it.info = topicInfo(r.section, r.topic); it.place = PLACE[r.section] || (w && w.placeName) || '';
+      const put = (r, it) => { const w = home(r); it.section = r.section; it.topic = r.topic || null; it.info = topicInfo(r.section, r.topic) || (w && w.shelf && w.topic === r.topic ? w.info : null); it.place = PLACE[r.section] || (w && w.placeName) || '';
         if (w) { it.wall = w; w.items.push(it); } else if (it.key === wanted) extra.push(it); };   // a photo of another place shows only when a link asks for it
       const sharedKeys = new Set(shared.map(r => r.photo_path.replace(/\.\w+$/, '')));
       own.filter(r => r.blob && !(r.mine && sharedKeys.has(r.key)))             // once approved, the shared one replaces the visitor's copy
@@ -319,10 +320,11 @@
             img.onerror = () => console.warn('[photowall] a photo did not load'); img.src = it.url; }
         });
       });
-      const n = items.length, cases = walls.some(w => w.showcase), one = addable().length === 1 && !cases;
+      const n = items.length, cases = walls.some(w => w.showcase), one = addable().filter(w => !w.shelf).length === 1 && !cases;
       bar.hidden = !walls.some(w => w.buttons !== false);
       bPhotos.textContent = n ? 'Photos · ' + n : 'Photos'; bPhotos.disabled = !n && !cases; bAdd.hidden = !one;
       if (!gBack.hidden) drawGallery();
+      walls.forEach(w => { if (w.onChange) { try { w.onChange(w.items.slice()); } catch (e) { console.warn('[photowall] onChange failed', e); } } });
     }
 
     // ── DOM ───────────────────────────────────────────────────────────────────────────────────
@@ -331,7 +333,7 @@
     const bPhotos = el('button', 'pw-btn', bar, 'Photos'); bPhotos.type = 'button'; bPhotos.disabled = true;
     const bAdd = el('button', 'pw-btn pw-primary', bar, '＋ Add your photo'); bAdd.type = 'button'; bAdd.hidden = true;
     bPhotos.addEventListener('click', () => { if (walls.some(w => w.showcase)) openGallery(null); else if (items.length) openView(items[0]); });
-    bAdd.addEventListener('click', () => openForm(addable()[0]));
+    bAdd.addEventListener('click', () => openForm(addable().find(w => !w.shelf)));
     const stopWalking = () => { if (keysMap) for (const k in keysMap) keysMap[k] = false; };
     const inDialog = a => vBack.contains(a) || fBack.contains(a) || gBack.contains(a);
     const remember = () => { const a = document.activeElement; if (a && a !== document.body && !inDialog(a)) opener = a; };
@@ -456,7 +458,7 @@
     const dropPrev = () => { if (prevURL) URL.revokeObjectURL(prevURL); prevURL = null; fPrev.hidden = true; fPrev.removeAttribute('src'); };
     fFile.addEventListener('change', () => { dropPrev(); const f = fFile.files && fFile.files[0]; if (f && /^image\//.test(f.type)) { prevURL = URL.createObjectURL(f); fPrev.src = prevURL; fPrev.hidden = false; } });
     function openForm(w) {
-      const ws = addable(); if (!w || !w.free.length) { if (ws.length !== 1) return openGallery(null); w = ws[0]; }   // no wall named and several to choose from: ask which topic first
+      const ws = addable().filter(x => !x.shelf); if (!w || !w.free.length) { if (ws.length !== 1) return openGallery(null); w = ws[0]; }   // no wall named and several to choose from: ask which topic first
       remember(); stopWalking(); leaveGallery(); vBack.hidden = true; current = null; setParam(null); fWall = w;
       fK.textContent = w.placeName; const i = w.info;
       fTopic.textContent = i ? [topicName(i), i.years].filter(Boolean).join(' · ') : (w.label || ''); fTopic.hidden = !fTopic.textContent;
@@ -590,11 +592,33 @@
       open: key => openView(items.find(x => x.key === key)), records: idbAll, setKeys(k) { if (k) keysMap = k; }, get ready() { return schedule(); } };
   }
 
+  function page(o) { if (!P) { P = makePage(o); const og = P.openGallery; window.__photowall = Object.assign(P, { ONLINE, openGallery: t => og(typeof t === 'string' ? P.walls.find(w => w.topic === t) : t) }); } else P.setKeys(o.keys); return P; }
+
+  // ── shelf: a topic that keeps photos but hangs no frames in the scene (added 2026-11-21 for places.js) ──
+  // The caller shows the photos itself (a place's information panel does) and reuses this file's storage, form
+  // and large view. Options: THREE, scene, camera, canvas, keys, section as for attach(), plus
+  //   topic     the key stored with each photo, at most 40 characters (e.g. 'place:dadao:yongle-market')
+  //   info      { zh, en, years, ask }: the title and question the form and the large view show
+  //   place     the place name shown under a photo · spot [x, z] stored with a new photo
+  //   onChange  called with the topic's photos ([{ key, kind, body, year, name, url }]) whenever they change
+  // Returns { ONLINE, ready, topic, section, items(), view(key), openForm(), add(input), wall }.
+  function shelf(o) {
+    const T = o.THREE || window.THREE;
+    if (!T || !o.scene || !o.camera || !o.canvas || !o.topic) throw new Error('PHOTOWALL.shelf needs THREE, scene, camera, canvas and topic');
+    page(o);
+    const section = PLACE[o.section] ? o.section : 'square', info = Object.assign({ key: o.topic }, o.info || {});
+    const w = { section, topic: String(o.topic), info, label: o.label || '', placeName: o.place || PLACE[section], buttons: false, showcase: null, shelf: true, onChange: o.onChange || null,
+      items: [], fixed: [], frames: [], free: [{ f: {}, shelf: true }], spot: o.spot || [0, 0] };   // one frameless slot: it is what lets the form and add() accept a photo
+    const ready = P.addWall(w);
+    return { ONLINE, ready, topic: w.topic, section, wall: w, items: () => w.items.slice(), view: key => P.openView(w.items.find(x => x.key === key)), openForm: () => P.openForm(w), add: input => P.add(w, input),
+      dispose() { P.removeWall(w); } };
+  }
+
   // ── attach: one wall or showcase joins the page ─────────────────────────────────────────────
   function attach(o) {
     const T = o.THREE || window.THREE, scene = o.scene, camera = o.camera, canvas = o.canvas;
     if (!T || !scene || !camera || !canvas || !Array.isArray(o.frames) || !o.frames.length) throw new Error('PHOTOWALL.attach needs THREE, scene, camera, canvas and frames');
-    if (!P) { P = makePage(o); const og = P.openGallery; window.__photowall = Object.assign(P, { ONLINE, openGallery: t => og(typeof t === 'string' ? P.walls.find(w => w.topic === t) : t) }); } else P.setKeys(o.keys);
+    page(o);
     const section = PLACE[o.section] ? o.section : 'square';
     const w = { section, topic: o.topic || null, info: topicInfo(section, o.topic), label: o.label || '', placeName: o.place || PLACE[section], buttons: o.buttons, showcase: o.showcase || null, items: [], fixed: [], frames: [], free: [] };
     const first = o.frames[0].position || [0, 0, 0]; w.spot = o.spot || [first[0], first[2]];
@@ -705,5 +729,5 @@
       return showcase(E, Object.assign({ section: o.section, topic: t.key, place: o.place, at: [s[0], s[1]], facing: s[2] || 0, kind: s[3] }, s[4] || {})); }).filter(Boolean);
   }
 
-  window.PHOTOWALL = { attach, row, showcase, showcases, block, keepOut, topics: topicsOf, ONLINE };
+  window.PHOTOWALL = { attach, shelf, row, showcase, showcases, block, keepOut, topics: topicsOf, ONLINE };
 })();

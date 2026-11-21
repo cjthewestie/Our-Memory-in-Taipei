@@ -1,0 +1,542 @@
+{
+  "district": "ximen",
+  "researched": "2026-11-21",
+  "label_key": {
+    "measured": "Read on the cited page during this research run.",
+    "inferred": "Not read on a cited page: general knowledge of the area, a search-result summary, or a reading of the evidence. Check before it goes on the public site.",
+    "unknown": "Written as (unknown — needs CJ)."
+  },
+  "notes": [
+    "Photo licences were read from the Wikimedia Commons API (LicenseShortName) on 2026-11-21. The photos themselves were not opened, so every visual detail that is not quoted from a page is labelled inferred and should be checked against the photo before modelling.",
+    "Compass layout used in 'location' fields (inferred, general geography): 中華路 runs north-south along the east edge; 成都路 runs east-west along the south; 武昌街二段 runs east-west in the north; going west from 中華路 the north-south streets are 漢中街, 西寧南路, 昆明街, 康定路."
+  ],
+  "places": [
+    {
+      "id": "red-house",
+      "zh": "西門紅樓",
+      "en": "The Red House (Ximen Red House)",
+      "kind": "place",
+      "years": "Built 1908 as 西門市場; cinema 1958–1997; reopened 2002-07-26",
+      "history_en": "Built in 1908 as the Ximen public market, designed by Kondo Juro, it joins an octagonal entrance hall to a cross-shaped market hall. After the war the octagon became a stage, the 滬園劇場 opened in 1949, and in 1958 it turned into a cinema, renamed 紅樓戲院 in 1959. From 1976 it showed second-run foreign films and the cinema closed in 1997, the same year the building was assessed as a city monument. A fire on 22 July 2000 destroyed the cross-shaped hall. The octagon reopened on 26 July 2002.",
+      "history_zh": "1908年落成的西門市場，由近藤十郎設計，八角樓連接十字樓。戰後八角樓成為劇場，1958年改為電影院，隔年改名紅樓戲院，1997年歇業並列為市定古蹟。2000年大火燒毀十字樓，八角樓於2002年7月26日重新開放。",
+      "facts": [
+        {"text": "Built 1908, architect 近藤十郎; originally 西門市場 with 八角樓 and 十字樓.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"},
+        {"text": "Cinema from 1958, renamed 紅樓戲院 1959, second-run foreign films from 1976, closed 1997.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"},
+        {"text": "Assessed as a Taipei city monument on 1997-02-20.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"},
+        {"text": "Address 成都路10號.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"}
+      ],
+      "visual_details": [
+        {"text": "Octagonal red-brick entrance building (八角樓) in front, joined to a long cross-shaped hall (十字樓) behind.", "label": "measured"},
+        {"text": "Materials: red brick walls, steel roof trusses joined with rivets, iron columns; the octagon has a radial steel-truss roof.", "label": "measured"},
+        {"text": "Octagon is two storeys (the upper floor is used as a theatre).", "label": "measured"},
+        {"text": "Red brick with pale horizontal bands and arched windows; a grey octagonal pitched roof with small dormers. Check against the photo.", "label": "inferred"},
+        {"text": "For the 1985–1999 scene: a run-down cinema front with hand-painted film posters on the octagon and market stalls packed around the cross-shaped hall (about 200 stalls were lost in the 2000 fire).", "label": "inferred"},
+        {"text": "The cross-shaped hall today is a 2001–2004 rebuild with two storeys and a glass roof, so it should not appear in a pre-2000 scene in that form.", "label": "measured"}
+      ],
+      "location": "South side of 成都路 at 漢中街, beside MRT Exit 1; directly across 成都路 from the Exit 6 plaza (measured from the station page). South-east corner of the district (inferred).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/西門紅樓", "https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:西門紅樓八角樓.jpg", "licence": "CC BY-SA 4.0", "shows": "Front of the octagon"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Red-House-Theater-02.jpg", "licence": "CC BY-SA 3.0", "shows": "Cross-shaped hall"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Red_House_Theater_20231109.jpg", "licence": "CC BY-SA 4.0", "shows": "Night view"}
+      ],
+      "unknowns": ["What the cinema front and signboard looked like in the 1980s–90s: (unknown — needs CJ)"]
+    },
+    {
+      "id": "zhonghua-market",
+      "zh": "中華商場",
+      "en": "Zhonghua Market (Chunghwa Market)",
+      "kind": "place",
+      "years": "Opened 1961-04-22; demolished 1992-10-20 to 1992-10-30",
+      "history_en": "Opened on 22 April 1961 beside the railway on Zhonghua Road, the market was eight connected three-storey blocks named 忠, 孝, 仁, 愛, 信, 義, 和, 平, 1,171 metres long with 1,644 shop units. Each block had its trade: electronics and audio parts in 忠 and 孝, antiques in 仁 and 愛, record shops in 信, restaurants such as 點心世界 and 真北平 in 義, and uniforms and tailoring in 和 and 平. A giant National (國際牌) neon sign stood on the 信 block from 1964 to 1985. The whole row was pulled down in October 1992 for the MRT and the road rebuild.",
+      "history_zh": "1961年4月22日啟用，沿中華路鐵道旁興建，八棟三層連棟建築以忠孝仁愛信義和平命名，全長1171公尺、共1644間店鋪。信棟唱片行、義棟點心世界最為人熟知。1992年10月20日至30日因捷運與中華路拓寬而拆除。",
+      "facts": [
+        {"text": "Opened 1961-04-22; eight three-storey blocks named after the Eight Virtues; 1,171 m long; 1,644 units; ground-floor unit about 2 m wide and 4.5 m deep.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"},
+        {"text": "信 block held record shops including 哥倫比亞唱片行 and 佳佳唱片行; 義 block held 點心世界 and 真北平飯館.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"},
+        {"text": "Matsushita (National / 國際牌) neon sign on the south face of the 信 block, 1964–1985, removed for safety.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"},
+        {"text": "Footbridge over 中華路 at 武昌街 built 1969, linking 愛 and 信 blocks; more bridges from 1971 led straight to the second floor.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"},
+        {"text": "Demolition began 1992-10-20 with the 忠 block and ended 1992-10-30; ordered by mayor 黃大洲.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"}
+      ],
+      "visual_details": [
+        {"text": "Eight long, flat-roofed, three-storey concrete slabs in a single north-south line, with gaps at the cross streets.", "label": "measured"},
+        {"text": "Very narrow shopfronts, about 2 m wide each, repeated along the whole ground floor.", "label": "measured"},
+        {"text": "Open access corridors on the upper floors, reached from footbridges that cross 中華路 at second-floor level.", "label": "measured"},
+        {"text": "Roof line crowded with large brand neon signs; the biggest was the 國際牌 National sign on the south end of the 信 block (gone after 1985, so only its empty frame or nothing for a late-1980s scene).", "label": "measured"},
+        {"text": "Railway tracks ran at street level along one side of the row until trains went underground in 1989.", "label": "measured"},
+        {"text": "Weathered pale-grey concrete, dense hanging shop signs in red, yellow and white, laundry and clutter on upper corridors. Check against the photo.", "label": "inferred"}
+      ],
+      "location": "Along 中華路一段 from 忠孝西路 (north) to 愛國西路 (south) (measured). It forms the east edge of the scene; the 信 block sat near 武昌街 and the footbridge there (measured).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/中華商場"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:臺北市中華商場夜景.jpg", "licence": "CC BY 3.0", "shows": "1983 night view with the 國際牌 neon on the 信 block"},
+        {"url": "https://commons.wikimedia.org/wiki/File:中華商場落成啟用典禮.jpg", "licence": "Public domain", "shows": "1961 opening ceremony"},
+        {"url": "https://commons.wikimedia.org/wiki/File:1966台北市中華路圓環夜景.jpg", "licence": "Public domain", "shows": "1966 night view of the Ximen roundabout"}
+      ],
+      "unknowns": ["Which block stood exactly opposite 成都路 / the roundabout: (unknown — needs CJ)"]
+    },
+    {
+      "id": "movie-street",
+      "zh": "電影街（武昌街二段）",
+      "en": "Movie Street (Wuchang Street Section 2)",
+      "kind": "place",
+      "years": "Cinemas from the 1950s–60s; 豪華戲院 opened January 1965 and was scheduled to close 2026-05-31",
+      "history_en": "Wuchang Street Section 2 between Kunming Street and Kangding Road became Taipei's cinema row. In the 1950s more than ten theatres opened on this one stretch, and in the 1960s 樂聲, 豪華, 日新, 獅子林, 國王 and 皇后 lined both sides. 豪華戲院 at No. 89 opened in January 1965 with more than 1,500 seats in one hall with upper and lower sections, and showed The Last Emperor in 1988 and Farewell My Concubine in 1993, the year its hall was split in two. As audiences moved east the theatres closed one by one.",
+      "history_zh": "武昌街二段昆明街至康定路一帶是台北的電影街，1960年代樂聲、豪華、日新、國王、皇后等戲院沿街林立。豪華戲院1965年1月開幕，大廳逾1500席，曾首映《末代皇帝》與《霸王別姬》。",
+      "facts": [
+        {"text": "武昌街二段 between 昆明街 and 康定路 was the densest stretch, with cinemas on both sides; 樂聲, 豪華, 日新, 獅子林, 國王, 皇后 were added in the 1960s.", "label": "measured", "source": "https://edh.tw/article/9757"},
+        {"text": "More than ten theatres on 武昌街二段 in the 1950s.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"},
+        {"text": "豪華戲院, 武昌街2段89號, opened January 1965, over 1,500 seats, split into upper and lower halls in 1993, premiered 末代皇帝 (April 1988) and 霸王別姬 (late 1993).", "label": "measured", "source": "https://www.nownews.com/news/6838291"},
+        {"text": "In 1965 樂聲戲院 already stood in front of 豪華, 日新戲院 was being built between them, and 台北戲院 stood diagonally across the street.", "label": "measured", "source": "https://www.nownews.com/news/6838291"},
+        {"text": "豪華 (in89) was scheduled to close on 2026-05-31; whether it did close that day was not confirmed.", "label": "measured", "source": "https://www.nownews.com/news/6838291"}
+      ],
+      "visual_details": [
+        {"text": "A straight street with cinema fronts on both sides; three named in a row on one side: 樂聲, then 日新, then 豪華 (order read from the article; which end is east is not stated).", "label": "measured"},
+        {"text": "Huge hand-painted film billboards and cloth banners covering the upper facades in the 1980s (the edh article shows photos of these).", "label": "measured"},
+        {"text": "Ticket windows at street level with rope queues, snack carts and ticket touts at the doors.", "label": "inferred"},
+        {"text": "Box-like 4–6 storey concrete cinema blocks, each with a deep canopy over the pavement and the theatre name in large vertical neon characters. Check against photos.", "label": "inferred"}
+      ],
+      "location": "武昌街二段, running east-west across the north part of the district, between 昆明街 and 康定路 (measured). 來來百貨 (No. 77) and 豪華戲院 (No. 89) are on the same street (measured).",
+      "sources": ["https://edh.tw/article/9757", "https://www.nownews.com/news/6838291", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:No_people_on_Sec.2,_Wuchang_Street,_Taipei_City_20070310.jpg", "licence": "Public domain", "shows": "武昌街二段 empty at dawn, 2007"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Big_advertisements_on_Central_Pictures_New_World_Building_19700811.jpg", "licence": "No restrictions (as stated on Commons)", "shows": "1970 giant film advertisements on the 新世界 building"},
+        {"url": "https://edh.tw/article/9757", "licence": "not stated", "shows": "張哲生 article with 1978 crowd and 1980s hand-painted banner photos"}
+      ],
+      "unknowns": ["Opening and closing years of 樂聲, 日新, 國王, 皇后: (unknown — needs CJ)", "Facade colours and sign colours of each theatre: (unknown — needs CJ)"]
+    },
+    {
+      "id": "wannian",
+      "zh": "萬年商業大樓",
+      "en": "Wan Nian Commercial Building",
+      "kind": "place",
+      "years": "Construction began 1970; opened 1973-10-06; still open",
+      "history_en": "Wan Nian stands on the site of the 國際館 cinema, opened in 1936 and renamed 國際戲院 in 1945, which was sold in 1970 and pulled down. The new building, designed by 蔡柏鋒, opened on 6 October 1973 with about 200 shops. Its lower floors sell accessories, clothes, shoes, toys, models and comics, the basement is a food court of long-running stalls, and the fifth floor holds a Tom's World arcade. It once had the 萬年冰宮 skating rink, with a roller-skate area and an ice-skate area.",
+      "history_zh": "原址為1936年開幕的國際館（戰後改名國際戲院）。1970年動工，1973年10月6日開幕，約200家店鋪。樓下賣服飾、鞋子、玩具模型與漫畫，地下室是小吃街，曾有萬年冰宮，是許多台北學生的共同回憶。",
+      "facts": [
+        {"text": "Opened 1973-10-06 with about 200 shops; construction began 1970; architect 蔡柏鋒; on the former 國際戲院 site.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/萬年商業大樓"},
+        {"text": "Address 西寧南路70號; 10 floors above ground, basement B1 food court.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/萬年商業大樓"},
+        {"text": "At the corner of 峨眉街 and 西寧南路.", "label": "measured", "source": "https://edh.tw/article/9757"},
+        {"text": "萬年冰宮 skating rink once operated in the building; 5F is 湯姆熊歡樂世界.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/萬年商業大樓"}
+      ],
+      "visual_details": [
+        {"text": "Ten-storey block on a corner site; the exterior is green.", "label": "measured"},
+        {"text": "At the triangular corner a neon sign with the building name runs vertically down the floors.", "label": "measured"},
+        {"text": "Two named street doors: 西寧門 on 西寧南路 and 峨嵋門 on 峨眉街.", "label": "measured"},
+        {"text": "Inside: narrow aisles of small glass-fronted stalls, a central escalator well, model kits and toys stacked to the ceiling. Check against photos.", "label": "inferred"},
+        {"text": "Which floor the ice rink was on and the years it ran: (unknown — needs CJ)", "label": "inferred"}
+      ],
+      "location": "西寧南路70號, corner of 峨眉街 and 西寧南路 (measured). Middle of the district, south of 獅子林 on the same street (inferred from the street numbers 70 and 36).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/萬年商業大樓", "https://edh.tw/article/9757"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Wan_Nian_Commercial_Building_20201213.jpg", "licence": "CC BY-SA 4.0", "shows": "Exterior, 2020"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Xining_Gate,_Wan_Nian_Commercial_Building_20180616.jpg", "licence": "not checked", "shows": "西寧門 entrance"}
+      ],
+      "unknowns": ["萬年冰宮 floor and years: (unknown — needs CJ)"]
+    },
+    {
+      "id": "lions-plaza",
+      "zh": "獅子林商業大樓",
+      "en": "Lions' Plaza Commercial Building",
+      "kind": "place",
+      "years": "Construction began 1977-02-02; opened 1979-03-30; still open",
+      "history_en": "The block stands where the Higashi Hongan-ji temple once stood. After the war the site was used by the Taiwan Provincial Security Command; the land was put up for sale in 1967 and won by a consortium that included Shin Kong Life. Building work began on 2 February 1977 and the ten-storey Lions' Plaza opened on 30 March 1979, alongside the 六福西門大樓 and the first Lai Lai Department Store. Its cinemas on the fourth and fifth floors, the game arcade on the third and the 金獅大酒樓 dim sum hall on the tenth made it a teenage meeting place.",
+      "history_zh": "原址為日治時期東本願寺，戰後曾由台灣省保安司令部使用。1967年標售，1977年2月2日動工，1979年3月30日開幕，樓高十層。四、五樓戲院、三樓電玩場與十樓金獅樓港式飲茶，是西門町青少年的聚集地。",
+      "facts": [
+        {"text": "Opened 1979-03-30; construction began 1977-02-02; ten floors; architects 蔡正義 and 楊錫文; address 西寧南路36號.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/獅子林商業大樓"},
+        {"text": "Site was 東本願寺, then the Taiwan Provincial Security Command (台灣省保安司令部); sold by tender 1967-06-24 for NT$111.26 million.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/獅子林商業大樓"},
+        {"text": "Floors: 1F phones, 2F formal and wedding dresses, 3F game arcade, 4–5F 新光影城, 10F 金獅大酒樓.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/獅子林商業大樓"},
+        {"text": "Street portrait artists used to set up between 來來百貨 and 獅子林.", "label": "measured", "source": "https://edh.tw/article/9757"}
+      ],
+      "visual_details": [
+        {"text": "Ten-storey commercial block.", "label": "measured"},
+        {"text": "Portrait artists with easels and stools on the pavement between this building and 來來百貨.", "label": "measured"},
+        {"text": "Large film posters for the upstairs cinemas hung on the facade; a wide street-level entrance with escalators visible inside. Check against the photo.", "label": "inferred"},
+        {"text": "Exterior colour, cladding and the wording and colour of the main sign: (unknown — needs CJ)", "label": "inferred"}
+      ],
+      "location": "西寧南路36號 (measured), in the north part of the district close to 武昌街 and next to 來來百貨 (inferred from the shared former temple site and the edh article).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/獅子林商業大樓", "https://edh.tw/article/9757"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Lions%27_Plaza_Commercial_Building_20171111.jpg", "licence": "CC BY-SA 4.0", "shows": "Exterior, 2017"}
+      ],
+      "unknowns": ["Exterior appearance in the 1980s–90s: (unknown — needs CJ)"]
+    },
+    {
+      "id": "lai-lai",
+      "zh": "來來百貨",
+      "en": "Lai Lai Department Store",
+      "kind": "place",
+      "years": "Opened 1978-11-25; closed 2003-02-10",
+      "history_en": "Lai Lai's Taipei store opened on 25 November 1978 at No. 77, Wuchang Street Section 2, run by the Cathay group, with eight floors above ground and one below. Management passed to the 豐群 group in 1985. It was the big department store of the movie street years, on the same former temple site as Lions' Plaza. Closing was planned for 25 December 2002, but the closing sale sold so well that the last day was pushed back to 10 February 2003. The building now holds an Eslite store and a hotel.",
+      "history_zh": "1978年11月25日開幕，位於武昌街二段77號，地上八層、地下一層，原由國泰集團經營，1985年轉由豐群集團接手。原訂2002年底結束，因封館拍賣業績極佳延至2003年2月10日熄燈，現為誠品生活武昌店與旅館。",
+      "facts": [
+        {"text": "Opened 1978-11-25; 武昌街二段77號; eight floors above ground, one basement; run by 國泰集團, then 豐群 from 1985.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/來來百貨"},
+        {"text": "Closed 2003-02-10 (planned 2002-12-25, delayed because the closing sale did very well).", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/來來百貨"},
+        {"text": "At 武昌街 and 昆明街; now 誠品武昌店 on B1–4 and a hotel above.", "label": "measured", "source": "https://edh.tw/article/9757"}
+      ],
+      "visual_details": [
+        {"text": "Eight-storey department store block on a street corner.", "label": "measured"},
+        {"text": "Large '來來百貨' name sign on the facade and sale banners hung down the front. Check against a period photo.", "label": "inferred"},
+        {"text": "Facade colour, sign colour and logo: (unknown — needs CJ)", "label": "inferred"}
+      ],
+      "location": "武昌街二段77號, at the corner of 武昌街 and 昆明街, on movie street and beside 獅子林 (measured).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/來來百貨", "https://edh.tw/article/9757"],
+      "photos": [
+        {"url": "https://zh.wikipedia.org/zh-tw/來來百貨", "licence": "not stated (the infobox image Lailai.jpg is not on Commons)", "shows": "Infobox photo"}
+      ],
+      "unknowns": ["A free-licence period photo of the storefront: (unknown — needs CJ)"]
+    },
+    {
+      "id": "ay-chung",
+      "zh": "阿宗麵線",
+      "en": "Ay-Chung Flour-Rice Noodle",
+      "kind": "shop",
+      "years": "Founded 1975; still open",
+      "history_en": "Ay-Chung began in 1975 as a small street stall selling thick rice-flour noodle soup and grew into a shopfront in Ximending. It is known for having no seats and no air conditioning: customers take a bowl and eat it standing in the arcade and the lane outside. Search summaries name the founder as 林明宗 and the address as 峨眉街8-1號, but those two points were not read on a primary page in this research and should be checked.",
+      "history_zh": "1975年（民國64年）由小攤販起家，後來成為西門町的店面。店內沒有座位也沒有冷氣，客人端著碗站在騎樓吃，是西門町最具代表性的小吃風景。",
+      "facts": [
+        {"text": "Founded 民國64年 (1975) as a small stall that grew into a shop; no seats and no air conditioning; people eat standing in the arcade.", "label": "measured", "source": "https://udn.com/news/story/120912/8068547"},
+        {"text": "Founder 林明宗; address 峨眉街8-1號; began with a push cart.", "label": "inferred", "source": "search-result summaries of uptogo.com.tw pages, not read directly"}
+      ],
+      "visual_details": [
+        {"text": "Open shopfront with no seats; a crowd of people standing outside holding bowls and spoons.", "label": "measured"},
+        {"text": "A serving counter at the front with large steel pots; self-serve sauce station (chilli, garlic, vinegar) beside it. Check against the photo.", "label": "inferred"},
+        {"text": "Signboard with '阿宗麵線' in large characters; colours: (unknown — needs CJ)", "label": "inferred"}
+      ],
+      "location": "峨眉街, near the 漢中街 pedestrian area in the centre of the district (inferred; address not read on a primary page).",
+      "sources": ["https://udn.com/news/story/120912/8068547", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Ay-Chung_Flour-Rice_Noodle_20070513.jpg", "licence": "CC BY-SA 3.0", "shows": "Shopfront, 2007"}
+      ],
+      "unknowns": ["Founder name and exact address confirmed on a primary source: (unknown — needs CJ)", "Where the stall stood before the shop: (unknown — needs CJ)"]
+    },
+    {
+      "id": "fong-da",
+      "zh": "蜂大咖啡",
+      "en": "Fong Da Coffee",
+      "kind": "shop",
+      "years": "Founded 1956; still open",
+      "history_en": "Fong Da opened in 1956 at No. 42, Chengdu Road. It began as 蜂蜜大王, a honey seller, and moved into tea and coffee sweetened with honey before becoming a coffee house; the present owner 曹世華 took it over from his father. Big glass jars of handmade biscuits stand at the door, the walnut cookie (合桃酥) is its best-known snack, and a German Probat roaster at the back is said to date from the opening. The upstairs once had high-backed lovers' seats. Next door is 南美咖啡, founded the same year.",
+      "history_zh": "1956年創立於成都路42號，前身是賣蜂蜜的「蜂蜜大王」，後來專營咖啡。門口擺著裝滿手工餅乾的大玻璃罐，合桃酥是招牌，店內有一台開業沿用至今的德國烘豆機，二樓曾是情人雅座。",
+      "facts": [
+        {"text": "Founded 1956; formerly 蜂蜜大王 selling honey; current owner 曹世華 took over from his father; address 成都路42號.", "label": "measured", "source": "https://today.line.me/tw/v2/article/9RKwDV"},
+        {"text": "Large glass jars of handmade biscuits at the door; German Probat roaster inside said to be in use since opening; second floor once had high-backed lovers' seats with canopies.", "label": "measured", "source": "https://today.line.me/tw/v2/article/9RKwDV"},
+        {"text": "蜂大咖啡 and 南美咖啡 were both founded in 1956 and stand side by side.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"}
+      ],
+      "visual_details": [
+        {"text": "Narrow arcade shopfront; a row of big glass jars full of biscuits at the entrance, like an old grocery.", "label": "measured"},
+        {"text": "A German Probat coffee roaster deep inside the shop.", "label": "measured"},
+        {"text": "Upstairs booths with high seat backs and overhead canopies.", "label": "measured"},
+        {"text": "Next-door neighbour is 南美咖啡, so the two signs sit side by side.", "label": "measured"},
+        {"text": "Sign wording '蜂大咖啡' and its colours, counter with siphon brewers and coffee bean bins. Check against the photo.", "label": "inferred"}
+      ],
+      "location": "成都路42號 (measured). On 成都路 west of the Red House and close to 天后宮 (51號), which a Commons photo title places on the same stretch (measured from the file title); on the opposite side of the road from the temple (inferred from even and odd numbers).",
+      "sources": ["https://today.line.me/tw/v2/article/9RKwDV", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Ximending-2023.12.27.jpg", "licence": "CC BY-SA 4.0", "shows": "蜂大咖啡 and 南美咖啡 side by side, 2023"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Chengdu_Road_between_Fong_Da_Coffee_and_Taipei_Mazu_Temple_20080712.jpg", "licence": "CC BY-SA 2.0", "shows": "成都路 between Fong Da and the temple, 2008"},
+        {"url": "https://commons.wikimedia.org/wiki/File:01203.jpg", "licence": "CC BY-SA 3.0", "shows": "Shopfront"}
+      ],
+      "unknowns": ["Founder's name: (unknown — needs CJ)"]
+    },
+    {
+      "id": "chengdu-starfruit",
+      "zh": "成都楊桃冰",
+      "en": "Chengdu Star Fruit Ice",
+      "kind": "shop",
+      "years": "Sign states 1966; still open (moved, date unknown)",
+      "history_en": "A small stand selling iced star fruit juice, pineapple ice and salted plum ice, listed by Wikipedia among Ximending's old shops as a store decades old. Its sign and cups carry the year 1966. A 2025 blog visit found it at No. 144-1, Zhonghua Road Section 1, run by 鄭佩華 and 鄭為仁, with each ice at NT$50, and said it had moved from an earlier spot. The original address and the founder were not confirmed.",
+      "history_zh": "賣楊桃冰、鳳梨冰與李鹽冰的小店，招牌與杯子上印著「1966」，是西門町數十年的老店。現址在中華路一段144-1號，曾經搬遷，原址與創辦人尚待確認。",
+      "facts": [
+        {"text": "Named as a decades-old shop (數十年老店成都楊桃冰) in a photo caption.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"},
+        {"text": "Sign and cups read 'Star Fruits Ice' and '1966'; current address 中華路一段144-1號; owners 鄭佩華 and 鄭為仁; 楊桃冰, 鳳梨冰, 綜合冰 at NT$50; shop has relocated.", "label": "measured", "source": "https://vocus.cc/article/68706217fd89780001bd0fac"},
+        {"text": "Founded in 1966.", "label": "inferred", "source": "the year on the sign, reported by a blog"}
+      ],
+      "visual_details": [
+        {"text": "Current shopfront is mainly white with green accents, with drawings on the wall showing how the ice is made.", "label": "measured"},
+        {"text": "Sign text: '成都楊桃冰', 'Star Fruits Ice', '1966'.", "label": "measured"},
+        {"text": "A standing sign at the door reading '懷舊風梨冰，輕飄飄真夏日！'.", "label": "measured"},
+        {"text": "Old shop for the 1985–1999 scene: an open counter stand with large jars or vats of amber star fruit juice and stacked cups. Check against the Commons photo.", "label": "inferred"}
+      ],
+      "location": "Today at 中華路一段144-1號, on the east edge of the district near the 成都路 junction (measured address, inferred position). Old location: (unknown — needs CJ).",
+      "sources": ["https://vocus.cc/article/68706217fd89780001bd0fac", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:CHENGDU_Starfruit_Juice_Shop.JPG", "licence": "CC BY-SA 3.0", "shows": "Shopfront (older location, date not checked)"}
+      ],
+      "unknowns": ["Founder, original address and move date: (unknown — needs CJ)"]
+    },
+    {
+      "id": "tianhou-temple",
+      "zh": "台北天后宮",
+      "en": "Taipei Tianhou Temple (Ximending Mazu Temple)",
+      "kind": "place",
+      "years": "Founded 1746 as 艋舺新興宮; at the 成都路 site since 1948; main hall rebuilt 1959-11-29",
+      "history_en": "The temple began in 1746 as 艋舺新興宮 near today's Guiyang Street and Xiyuan Road. In 1943 the Japanese government took the land for a road, and the statues were kept at Longshan Temple. On 7 July 1948 worshippers moved them into the former Kobo-ji, a Shingon Buddhist temple in Ximending. A fire that started in a nearby restaurant later burned the old buildings, a wooden shelter was put up, and the main hall was rebuilt on 29 November 1959. It still keeps a statue of Kobo Daishi beside Mazu. The name 臺北天后宮 dates from 1967.",
+      "history_zh": "1746年創建於艋舺，原名新興宮。1943年因闢路被拆，神像暫奉龍山寺，1948年遷入西門町原日本弘法寺。後遭大火，1959年11月29日重建正殿。廟內至今供奉弘法大師，是台日信仰並存的少見例子。",
+      "facts": [
+        {"text": "Founded 1746 as 艋舺新興宮; removed 1943 for a road; deities moved to the former 弘法寺 on 1948-07-07; address 成都路51號.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/台北天后宮"},
+        {"text": "Main hall rebuilt 1959-11-29; renamed 臺北天后宮 in 1967.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/台北天后宮"},
+        {"text": "Fire dated 1952-12-20 on the page, which also calls it 'the following year' after a 1952 renaming, so the fire year is inconsistent on the source and is left out of the public text.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/台北天后宮"},
+        {"text": "A seated 弘法大師 statue is in the left side hall and a standing stone statue of him is outside by the pond.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/台北天后宮"}
+      ],
+      "visual_details": [
+        {"text": "Entrance opens straight onto the busy 成都路 shopping street, squeezed between shops.", "label": "measured"},
+        {"text": "Inside the gate: a courtyard with a pond and a standing stone statue of 弘法大師; main hall with Mazu, side halls, and a separate 玉皇殿 building.", "label": "measured"},
+        {"text": "Narrow gateway with a tiled swallow-tail roof, red lanterns and a gold-on-black name plaque reading '台北天后宮'. Check against the photo.", "label": "inferred"},
+        {"text": "Main hall with red columns, carved and painted eaves, incense burner in front. Check against the photo.", "label": "inferred"}
+      ],
+      "location": "成都路51號 (measured), on 成都路 west of the Red House, near 蜂大咖啡 (measured from the Commons photo title).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/台北天后宮"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Taipei_Mazu_Temple_20060214.jpg", "licence": "CC BY-SA 3.0", "shows": "Temple, 2006"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Chengdu_Rd,_Taipei_-_Tianhou_Temple_-_exterior_(2025)_-_img_01.jpg", "licence": "not checked", "shows": "Street entrance, 2025"}
+      ],
+      "unknowns": ["Correct year of the fire (1952 or 1953): (unknown — needs CJ)"]
+    },
+    {
+      "id": "pedestrian-zone-exit6",
+      "zh": "西門町徒步區與捷運6號出口廣場",
+      "en": "Ximending Pedestrian Zone and MRT Exit 6 plaza",
+      "kind": "place",
+      "years": "Pedestrian zone created 1999; MRT Exit 6 opened 1999-12-24; rainbow crossing 2019-09-25",
+      "history_en": "The pedestrian zone was created in 1999 and a 2008 Taipei Times report called it the largest in the country, with more than three million shoppers a month. A two-weekend car-free trial had already been run in the mid-1980s. MRT Ximen Station opened on 24 December 1999, and Exit 6, on the north side of Chengdu Road at Hanzhong Street, became the station's busiest exit and the usual meeting point. The site was once the Ximen roundabout. Search results date the rainbow crossing in front of the exit to 25 September 2019; that date was not read on a primary page.",
+      "history_zh": "西門町徒步區於1999年設立，是全台最大的行人徒步區。同年12月24日捷運西門站通車，位於成都路與漢中街口的6號出口成為最熱鬧的出口，也是大家相約見面的地點，這裡原是西門圓環。",
+      "facts": [
+        {"text": "The pedestrian zone was created in 1999; it is the country's largest, with over 3 million shoppers a month (2008).", "label": "measured", "source": "https://taipeitimes.com/News/taiwan/archives/2008/06/18/2003415053"},
+        {"text": "Exit 6 is on the north side of 成都路 at 漢中街, has a lift and escalator, and is the station's busiest exit; the film 六號出口 is named after it.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)"},
+        {"text": "The 漢中街/成都路 junction is the former 西門圓環 site.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"},
+        {"text": "A two-weekend pedestrian trial was run in the mid-1980s (1985 article).", "label": "inferred", "source": "search-result summary of a 1985 聯合月刊 article by 瞿海源, not read directly"},
+        {"text": "Rainbow crossing '6號彩虹' set up 2019-09-25.", "label": "inferred", "source": "search-result summary, not read directly"}
+      ],
+      "visual_details": [
+        {"text": "An open paved plaza at the mouth of 漢中街 with the MRT exit canopy, escalator and lift.", "label": "measured"},
+        {"text": "Paved, car-free streets (漢中街, 峨眉街 and 武昌街 area) with street hawkers doing sales pitches.", "label": "measured"},
+        {"text": "Tall buildings around the plaza covered in giant advertising screens and billboards. Check against the photo.", "label": "inferred"},
+        {"text": "For a pre-2019 scene, leave out the rainbow crossing; for a pre-December-1999 scene, leave out the exit itself and show the MRT construction hoardings.", "label": "inferred"}
+      ],
+      "location": "North side of 成都路 at 漢中街, south-east entrance of the district, facing the Red House across 成都路 and 中華路 to the east (measured for the exit; compass position inferred).",
+      "sources": ["https://taipeitimes.com/News/taiwan/archives/2008/06/18/2003415053", "https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Exit_6,_Ximen_Station_20210323.jpg", "licence": "CC BY-SA 4.0", "shows": "Exit 6, 2021"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Ximenting_night_view2_201507.jpg", "licence": "CC BY 3.0", "shows": "Pedestrian zone at night, 2015"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Ximending_rainbow_crossing_20251011.png", "licence": "CC0", "shows": "Rainbow crossing in front of Exit 6, 2025"}
+      ],
+      "unknowns": ["Exact opening day of the pedestrian zone in 1999 and which mayor opened it: (unknown — needs CJ)"]
+    },
+    {
+      "id": "tattoo-street",
+      "zh": "刺青街（漢中街50巷）",
+      "en": "Tattoo Street (Lane 50, Hanzhong Street)",
+      "kind": "place",
+      "years": "(unknown — needs CJ)",
+      "history_en": "Lane 50 of Hanzhong Street is a short alley between the former sites of the 中國戲院 and 萬國戲院 cinemas, also called 紋身街. More than ten tattoo shops are packed into it. Writer 張哲生 described it in 2015 as the lane that took over from movie street as the symbol of Ximending once the cinemas faded. When the first tattoo shops opened there was not found.",
+      "history_zh": "漢中街50巷是位於昔日中國戲院與萬國戲院之間的短巷，又稱紋身街，短短一條巷子就有十幾家刺青店。電影院凋零後，它取代電影街成為西門町的新象徵。",
+      "facts": [
+        {"text": "漢中街50巷, between the former 中國戲院 and 萬國戲院, also called 紋身街, with more than ten tattoo shops (2015).", "label": "measured", "source": "https://edh.tw/article/9757"},
+        {"text": "紋身街 is on 漢中街50巷.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"},
+        {"text": "It is the only covered street in Ximending.", "label": "inferred", "source": "search-result summary, not read directly"}
+      ],
+      "visual_details": [
+        {"text": "A short, narrow alley lined on both sides with more than ten small tattoo shopfronts.", "label": "measured"},
+        {"text": "Covered overhead; shop windows filled with flash-art sheets and photos of tattoos, dark fronts with neon signs. Check against a photo.", "label": "inferred"}
+      ],
+      "location": "Off 漢中街, between the former 中國戲院 and 萬國戲院 sites (measured); in the south-centre of the district between 漢中街 and 西寧南路 (inferred).",
+      "sources": ["https://edh.tw/article/9757", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://edh.tw/article/9757", "licence": "not stated", "shows": "張哲生 article on Ximending sights"}
+      ],
+      "unknowns": ["Year the tattoo shops first gathered here: (unknown — needs CJ)", "A free-licence photo of the lane: (unknown — needs CJ)"]
+    },
+    {
+      "id": "american-street",
+      "zh": "美國街",
+      "en": "American Street",
+      "kind": "place",
+      "years": "(unknown — needs CJ)",
+      "history_en": "American Street is not one street but a small grid of back lanes: Lane 120 of Wuchang Street Section 2, Lanes 74 and 96 of Kunming Street, and Lane 90 of Hankou Street Section 2. It is known for shops selling American-style clothes and for graffiti on its walls. When and why it got the name was not found.",
+      "history_zh": "美國街由武昌街二段120巷、昆明街74巷與96巷、漢口街二段90巷組成，以美式服飾店與街頭塗鴉聞名。名稱由來與形成年代尚待確認。",
+      "facts": [
+        {"text": "Made up of 武昌街二段120巷, 昆明街74巷, 昆明街96巷 and 漢口街二段90巷; known for American-style clothing shops and graffiti.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"}
+      ],
+      "visual_details": [
+        {"text": "Narrow back lanes with walls and roller shutters covered in graffiti.", "label": "measured"},
+        {"text": "Small shops selling American-style clothes, caps and accessories.", "label": "measured"},
+        {"text": "Racks of jeans and T-shirts spilling onto the lane, sneakers displayed on walls. Check against a photo.", "label": "inferred"}
+      ],
+      "location": "North-west part of the district, in the lanes between 武昌街二段, 昆明街 and 漢口街二段 (measured), behind movie street (inferred).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://zh.wikipedia.org/zh-tw/西門町", "licence": "not stated", "shows": "No American Street photo was found; page lists the lanes"}
+      ],
+      "unknowns": ["Origin of the name and decade it formed: (unknown — needs CJ)", "Reference photo: (unknown — needs CJ)"]
+    }
+  ],
+  "events": [
+    {
+      "id": "national-neon-removed-1985",
+      "zh": "中華商場國際牌霓虹塔拆除",
+      "en": "The National neon sign comes down",
+      "kind": "event",
+      "years": "1985 (installed 1964)",
+      "history_en": "In 1964 Matsushita Electric put up a giant neon sign for its National brand (國際牌) on the south end of the 信 block of Zhonghua Market. For twenty-one years it was the market's landmark and the glow people saw when they arrived in Ximending at night. It was taken down in 1985 for safety reasons. The day and month were not found.",
+      "history_zh": "1964年松下電器在中華商場信棟南面架設巨幅國際牌霓虹招牌，是西門町夜景的代表。1985年因安全問題拆除，確切日期待查。",
+      "facts": [
+        {"text": "Neon sign installed 1964 on the south face of the 信 block; removed in 1985 for safety reasons.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"}
+      ],
+      "marker": {"type": "立牌", "depicts": "A standing sign board shaped like the neon tower, with the 國際牌 National sign lit up and a line saying it shone from 1964 to 1985."},
+      "location": "South end of the 信 block of 中華商場 on 中華路, near 武昌街 (measured for the block; exact spot inferred).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/中華商場"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:臺北市中華商場夜景.jpg", "licence": "CC BY 3.0", "shows": "1983 night view with the sign"}
+      ],
+      "unknowns": ["Day and month of removal: (unknown — needs CJ)"]
+    },
+    {
+      "id": "railway-underground-1989",
+      "zh": "台北鐵路地下化通車",
+      "en": "Taipei's railway goes underground",
+      "kind": "event",
+      "years": "1989-09-02 (groundbreaking 1983-07-12)",
+      "history_en": "Trains used to run at street level along Zhonghua Road, right beside Zhonghua Market, and people waited at level crossings to get into Ximending. The plan to put the tracks underground was approved on 26 July 1979 and work began on 12 July 1983. On 2 September 1989 the first phase opened and was handed to Taiwan Railways, with Premier 李煥 leading the ceremony. Zhonghua Road was widened afterwards.",
+      "history_zh": "過去火車沿中華路平面行駛，緊鄰中華商場。鐵路地下化1979年7月26日核定、1983年7月12日動工，1989年9月2日第一期完工通車，由行政院長李煥主持，中華路隨後拓寬。",
+      "facts": [
+        {"text": "Approved by the Executive Yuan 1979-07-26; groundbreaking 1983-07-12; first phase completed and opened 1989-09-02 with Premier 李煥 presiding.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/臺北鐵路地下化專案"},
+        {"text": "中華商場 stood alongside the railway on 中華路.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"},
+        {"text": "Date the surface tracks and level crossings on 中華路 were physically removed is not given on the page.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/臺北鐵路地下化專案"}
+      ],
+      "marker": {"type": "small wall", "depicts": "A short wall with a level-crossing gate and warning bell, a strip of old track set in the ground, and the date 1989-09-02."},
+      "location": "On 中華路 at the east edge of the scene, between 中華商場 and the road (inferred position).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/臺北鐵路地下化專案", "https://zh.wikipedia.org/zh-tw/中華商場"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:台北鐵路地下隧道演變.jpg", "licence": "CC BY 2.0", "shows": "Diagram of the stages of undergrounding"}
+      ],
+      "unknowns": ["A photo of the 中華路 level crossing beside the market: (unknown — needs CJ)"]
+    },
+    {
+      "id": "zhonghua-market-demolition-1992",
+      "zh": "中華商場拆除",
+      "en": "Demolition of Zhonghua Market",
+      "kind": "event",
+      "years": "1992-10-20 to 1992-10-30",
+      "history_en": "After thirty-one years the eight blocks of Zhonghua Market were pulled down in eleven days. Mayor 黃大洲 gave the order on 20 October 1992 and the 忠 block went first; the 義, 和 and 平 blocks fell on 30 October. The market had declined and the land was needed for the MRT's Ximen Station and the rebuilding of Zhonghua Road. For many Taipei people this is the day old Ximending ended.",
+      "history_zh": "1992年10月20日市長黃大洲下令拆除，忠棟最先動工，10月30日義、和、平三棟拆除完畢。啟用31年的中華商場因捷運西門站與中華路改建而走入歷史。",
+      "facts": [
+        {"text": "Demolition began 1992-10-20 (忠 block) on the order of mayor 黃大洲 and ended 1992-10-30 (義, 和, 平 blocks).", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"},
+        {"text": "Reasons: decline of the market, land needed for MRT Ximen Station and the 中華路 redevelopment.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"}
+      ],
+      "marker": {"type": "statue", "depicts": "A bronze group of a shopkeeper carrying a folded signboard in front of a half-demolished three-storey block with one of the eight block names (忠) still on the wall."},
+      "location": "On 中華路 on the market's footprint, east edge of the scene (measured for the market's line).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/中華商場"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:臺北市中華商場夜景.jpg", "licence": "CC BY 3.0", "shows": "The market in 1983, before demolition"}
+      ],
+      "unknowns": ["A free-licence photo of the demolition itself: (unknown — needs CJ)"]
+    },
+    {
+      "id": "red-house-cinema-closes-1997",
+      "zh": "紅樓戲院歇業並列為古蹟",
+      "en": "The Red House cinema closes and becomes a monument",
+      "kind": "event",
+      "years": "1997 (monument assessment 1997-02-20)",
+      "history_en": "The 紅樓戲院 had shown films in the octagon since 1958 and second-run foreign films since 1976. By the 1990s it was a faded back-street cinema. It closed in 1997, and on 20 February of that year the building was assessed as a Taipei city monument, which protected it from being torn down. Restoration of the octagon began on 9 June 1998.",
+      "history_zh": "紅樓戲院自1958年起在八角樓放映電影，1997年歇業。同年2月20日建築評定為市定古蹟，1998年6月9日八角樓開始整修。",
+      "facts": [
+        {"text": "Cinema closed in 1997; monument assessment dated 1997-02-20; octagon restoration began 1998-06-09.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"}
+      ],
+      "marker": {"type": "立牌", "depicts": "A standing board in the shape of an old cinema ticket window with a hand-painted 'last show' poster and the monument plaque date."},
+      "location": "In front of the Red House octagon, south side of 成都路 (measured).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/西門紅樓"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:西門紅樓八角樓.jpg", "licence": "CC BY-SA 4.0", "shows": "Front of the octagon"}
+      ],
+      "unknowns": ["Day and month the cinema closed: (unknown — needs CJ)"]
+    },
+    {
+      "id": "pedestrian-zone-1999",
+      "zh": "西門町行人徒步區設立",
+      "en": "The pedestrian zone is created",
+      "kind": "event",
+      "years": "1999 (day and month unknown)",
+      "history_en": "In 1999 the city closed the core streets of Ximending to cars and made them a pedestrian zone, described in 2008 as the largest in the country, with more than three million shoppers a month. Together with the new MRT station it brought young people back to a district that had lost ground to east Taipei since the 1980s. A three-month trial to extend the zone west to Kangding Road ran from 21 June 2008 and was dropped after shopkeepers protested.",
+      "history_zh": "1999年西門町核心街道設為行人徒步區，是全台最大的徒步區，每月逾三百萬人次。它與捷運通車一起，讓1980年代起被東區取代的西門町重新聚集年輕人。",
+      "facts": [
+        {"text": "The pedestrian zone was created in 1999; largest in the country; over 3 million shoppers a month.", "label": "measured", "source": "https://taipeitimes.com/News/taiwan/archives/2008/06/18/2003415053"},
+        {"text": "2008 trial: extended west from 昆明街 to 康定路 and south from 峨眉街 to 成都路, for three months, weekdays 6pm–11pm and weekends 11am–11pm.", "label": "measured", "source": "https://taipeitimes.com/News/taiwan/archives/2008/06/18/2003415053"},
+        {"text": "The 2008 trial ran 2008-06-21 to 2008-09-21 and was suspended after protests; Ximending lost its lead to 東區 in the 1980s and revived with the late-1990s pedestrian zone and the MRT.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門町"}
+      ],
+      "marker": {"type": "立牌", "depicts": "A standing board made like a 'pedestrians only' street sign with a no-cars symbol, the year 1999, and a small map of the car-free streets."},
+      "location": "At the 漢中街 entrance to the zone, just north of the Exit 6 plaza (inferred).",
+      "sources": ["https://taipeitimes.com/News/taiwan/archives/2008/06/18/2003415053", "https://zh.wikipedia.org/zh-tw/西門町"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Ximenting_night_view2_201507.jpg", "licence": "CC BY 3.0", "shows": "Pedestrian zone at night, 2015"}
+      ],
+      "unknowns": ["Exact date in 1999, the first streets included, and who opened it: (unknown — needs CJ)"]
+    },
+    {
+      "id": "mrt-ximen-opens-1999",
+      "zh": "捷運西門站通車",
+      "en": "MRT Ximen Station opens",
+      "kind": "event",
+      "years": "1999-12-24 (second pair of platforms 2000-08-31)",
+      "history_en": "MRT Ximen Station opened on Christmas Eve, 24 December 1999, when the Nangang line reached Ximen and the Banqiao line ran on to Longshan Temple. The station lies under Zhonghua Road, on land cleared when Zhonghua Market came down seven years earlier. The second pair of platforms opened on 31 August 2000 with the Xiaonanmen line. Exit 6 quickly became the station's busiest exit and the front door of Ximending.",
+      "history_zh": "捷運西門站於1999年12月24日通車，位於中華路下方，正是七年前拆除中華商場所騰出的土地。2000年8月31日小南門線通車。6號出口成為全站最繁忙的出口，也是西門町的大門。",
+      "facts": [
+        {"text": "Platforms 1 and 3 opened 1999-12-24 with the Nangang and Banqiao line segments; platforms 2 and 4 opened 2000-08-31 with the Xiaonanmen line.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)"},
+        {"text": "中華路 runs above the station; Exit 6 is the busiest exit.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)"},
+        {"text": "中華商場 was demolished partly to build Ximen Station.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/中華商場"}
+      ],
+      "marker": {"type": "stand", "depicts": "A stand shaped like the Exit 6 entrance canopy with the blue Bannan line colour, an old station name board reading 西門 Ximen, and the date 1999-12-24."},
+      "location": "At Exit 6, north side of 成都路 at 漢中街 (measured).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)", "https://zh.wikipedia.org/zh-tw/中華商場"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Exit_6,_Ximen_Station_20210323.jpg", "licence": "CC BY-SA 4.0", "shows": "Exit 6, 2021"},
+        {"url": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_MRT-Station-Ximen-03.jpg", "licence": "CC BY-SA 3.0", "shows": "Exit 1 beside the Red House"}
+      ],
+      "unknowns": []
+    },
+    {
+      "id": "red-house-fire-and-reopening",
+      "zh": "紅樓十字樓大火與八角樓重新開幕",
+      "en": "The Red House fire and reopening",
+      "kind": "event",
+      "years": "Fire 2000-07-22; octagon reopened 2002-07-26; cross-shaped hall reopened 2004-10-24",
+      "history_en": "In the early hours of 22 July 2000 a fire destroyed the cross-shaped market hall behind the Red House and about 200 stalls. The octagon, already under restoration, survived. It reopened on 26 July 2002 with the 紙風車 foundation running it as a theatre and tea house. Rebuilding of the cross-shaped hall began on 26 August 2001; it had a trial sale on 3 July 2003 and reopened on 24 October 2004.",
+      "history_zh": "2000年7月22日清晨大火燒毀紅樓後方的十字樓與約200個攤位，整修中的八角樓倖存。八角樓於2002年7月26日由紙風車接手重新開幕，十字樓重建後於2004年10月24日重新啟用。",
+      "facts": [
+        {"text": "Fire in the early morning of 2000-07-22 destroyed the 十字樓 and about 200 market stalls.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"},
+        {"text": "八角樓 reopened 2002-07-26 operated by 紙風車; 十字樓 groundbreaking 2001-08-26, trial sale 2003-07-03, reopened 2004-10-24.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/西門紅樓"}
+      ],
+      "marker": {"type": "small wall", "depicts": "A low wall of scorched red bricks on one half and clean new bricks on the other, with the two dates 2000-07-22 and 2002-07-26."},
+      "location": "Behind the Red House octagon, beside the cross-shaped hall, south of 成都路 (measured).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/西門紅樓"],
+      "photos": [
+        {"url": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Red-House-Theater-02.jpg", "licence": "CC BY-SA 3.0", "shows": "The rebuilt cross-shaped hall"}
+      ],
+      "unknowns": ["Cause of the fire and whether anyone was hurt: (unknown — needs CJ)"]
+    },
+    {
+      "id": "lai-lai-closes-2003",
+      "zh": "來來百貨熄燈",
+      "en": "Lai Lai Department Store's last day",
+      "kind": "event",
+      "years": "2003-02-10",
+      "history_en": "Lai Lai had stood on movie street since 25 November 1978. It planned to close on 25 December 2002, but so many people came to the closing sale that the last day was pushed back to 10 February 2003. Its end marked the close of the department-store era in Ximending; the building later became an Eslite store and a hotel.",
+      "history_zh": "1978年開幕的來來百貨原訂2002年12月25日結束營業，因封館拍賣人潮踴躍，延到2003年2月10日才熄燈，象徵西門町百貨時代的結束。",
+      "facts": [
+        {"text": "Opened 1978-11-25; closing planned for 2002-12-25 and delayed to 2003-02-10 because of strong closing-sale takings.", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/來來百貨"},
+        {"text": "Now 誠品武昌店 and a hotel.", "label": "measured", "source": "https://edh.tw/article/9757"}
+      ],
+      "marker": {"type": "立牌", "depicts": "A standing board shaped like a department-store shopping bag with a 'closing sale' banner and the dates 1978–2003."},
+      "location": "武昌街二段77號, corner of 武昌街 and 昆明街 (measured).",
+      "sources": ["https://zh.wikipedia.org/zh-tw/來來百貨", "https://edh.tw/article/9757"],
+      "photos": [
+        {"url": "https://zh.wikipedia.org/zh-tw/來來百貨", "licence": "not stated", "shows": "Infobox photo of a Lai Lai store"}
+      ],
+      "unknowns": ["A period photo of the closing sale: (unknown — needs CJ)"]
+    }
+  ],
+  "not_confirmed": [
+    "A famous Ximending fire of the 1980s (for example a hotel or cinema fire): one search found nothing citable. (unknown — needs CJ)",
+    "A specific dated record-signing or idol event in Ximending: one search found only general statements that signings were common; the well-known 1989 小虎隊 signing was at 國父紀念館, not Ximending, per a search summary. (unknown — needs CJ)",
+    "台北旅遊網 (travel.taipei) and 國家文化記憶庫 pages could not be read in this run (HTTP 403 or not reached), so no item cites them."
+  ]
+}

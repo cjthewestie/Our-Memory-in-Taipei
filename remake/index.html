@@ -14,14 +14,17 @@
 <script src="engine.js"></script>
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="places.js"></script>
+<script src="landmarks-ximen.js"></script>
 <script>
 // The 西門紅樓 front plaza (CJ, 2026-11-21: 「我要整個場景的重制達成風格的轉換 先做完整的一個小區塊讓我看看」).
 // Only this block's layout lives here. The light, sky, ground, builders, finishing chain, camera and
 // controls are in engine.js, shared with every other block page.
 ENGINE.create({
-  title: '西門紅樓 · golden hour', subtitle: 'Remake test: one block rebuilt for light and air',
+  title: '西門紅樓 · golden hour', subtitle: '西門町: click a building or a marker, or walk up and press E',
   shadowCenter: [0, 0, 22], start: { x: 0, z: 43, heading: Math.PI }, clamp(p) { p.x = Math.max(-21, Math.min(21, p.x)); p.z = Math.max(11, Math.min(60, p.z)); PHOTOWALL.keepOut(p); },   // the plaza's edge, and round the topic showcases
-  views: [[0, 1.6, 47, 0, 7.5, 0], [-9, 1.5, 33, 7, 6, 4], [15, 1.3, 36, -8, 6.5, 6], [0, 10, 56, 0, 5, 6], [-11, 1.5, 30, -22, 12, -8], [21, 1.7, 44, -12, 4.5, 14]],
+  views: [[0, 1.6, 47, 0, 7.5, 0], [-6, 2.2, 31, 23, 7, 37], [6, 2.4, 34, -23, 4.2, 27], [3.5, 11.5, 20, 0.5, 8, 62], [9, 1.7, 14.5, 24, 3.6, 14], [9.5, 2.4, 55.5, 24, 8, 48.5]],   // 1 the Red House · 2 萬年 and the west row · 3 中華商場 · 4 the whole plaza toward 獅子林 and 來來 · 5 天后宮, 楊桃冰, 蜂大 · 6 電影街 and 阿宗
   ground: { strips: [{ w: 3.2, len: 60, x: 0, z: 34 }],                                   // the terrazzo path to the door
     puddle: (rr) => { let x = rr(-19, 19); if (Math.abs(x) < 2.4) x += 5; const rot = rr(0, 3); return [x, rr(13, 56), rot]; } },
   dust: { x: [-24, 24], y: [0.3, 11], z: [4, 56] },
@@ -30,23 +33,18 @@ ENGINE.create({
   build(E, [core, sq]) {
   const { T, scene, rr, TEX, MATS, triMat, dress, get, place, board, sign, canopy, banyans, lanternString, stall, city, uTime } = E;
   // the Red House, front door facing the plaza (+z)
-  scene.add(dress(get(core, 'red-house').clone()));
-  // 騎樓 shophouse rows, left and right
-  const arcade = get(sq, 'sq-arcade'), tints = ['#d8c8ac', '#c9b08c', '#b9a99e', '#a9b5a2', '#c9a583', '#b3ada1'];
-  for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 11; i++) {
-    const a = arcade.clone(); a.position.set(side * 26.5, 0, 6 + i * 4.5); a.rotation.y = -side * Math.PI / 2;
-    dress(a, { swap: { bone: triMat({ color: tints[(i * 5 + (side > 0 ? 2 : 0)) % tints.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }) } });
-    a.scale.y = 1 + ((i * 7 + side) % 3) * 0.14; scene.add(a);
-  }
-  // what stands behind and beside: the tall 萬年大樓, the old cinema, a 中華商場 block
-  place(core, 'wannian', -44, -34, 0.4); place(core, 'lux', 46, -22, -0.5); place(core, 'chunghwa', -46, 22, Math.PI / 2, 1.2); place(core, 'chunghwa', 46, 34, -Math.PI / 2, 1.2);
+  const redHouse = dress(get(core, 'red-house').clone()); scene.add(redHouse);
+  // what stands round the plaza is built in landmarks-ximen.js from the research (docs/places/ximen.json): 中華商場 on the 中華路 side,
+  // 天后宮 to 阿宗麵線 on the other, 獅子林 and 來來百貨 at the far end. Only the old cinema stays as a distant model.
+  place(core, 'lux', 60, -22, -0.5);
   city(95, 210);                                                                          // a hazy city behind everything
   banyans(get(sq, 'sq-banyan'), [[-13.5, 21, 'banyanL', 1.0], [14.5, 25, 'banyanM', 1.05], [-16, 41, 'banyanM', 1.15], [16.5, 43, 'banyanL', 1.0]]);
   // street furniture
   const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter'), lampPost = get(core, 'lamp'), props = get(core, 'props');
   for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 9; i++) {
     if ((i + (side > 0 ? 1 : 0)) % 3 === 2) continue;
-    const s = dress(scooters.children[i % 3].clone()); s.position.set(side * (22.6 + rr(-0.3, 0.3)), 0, 9 + i * 4.6 + rr(-0.6, 0.6)); s.rotation.y = side * (Math.PI / 2 + rr(-0.35, 0.35)); scene.add(s);
+    const z = 9 + i * 4.6; if (side > 0 && (z < 14 || (z > 24 && z < 28) || (z > 30 && z < 36))) continue;                 // not across the temple gate, the alley mouth or the 萬年 doors
+    const s = dress(scooters.children[i % 3].clone()); s.position.set(side * (22.3 + rr(-0.2, 0.2)), 0, z + rr(-0.6, 0.6)); s.rotation.y = side * (Math.PI / 2 + rr(-0.35, 0.35)); scene.add(s);
   }
   [[-21, 12], [21, 16], [-21, 30], [21, 34], [-21, 48], [21, 50], [-7, 12], [7, 12]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
   [[-19, 18, 1], [19, 20, -1], [-19, 36, 1], [19, 38, -1]].forEach(([x, z, f]) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.rotation.y = f * Math.PI / 2; scene.add(l); });
@@ -58,13 +56,17 @@ ENGINE.create({
   // one showcase per topic of this scene (the list is PHOTO_TOPICS, in photo-topics.js): topic key -> [x, z, facing, kind, options]. A click opens the topic's gallery.
   PHOTOWALL.showcases(E, { section: 'red', topics: PHOTO_TOPICS.red, spots: {
     chunghwa: [-17.2, 30.5, Math.PI / 2, 'shop'],                // a shop front on the west edge, the side its old block stands on
-    cinema: [17.4, 33.5, -Math.PI / 2, 'poster'],                // a tall billboard on the east edge, the side the old cinema stands on
+    cinema: [18.2, 41.2, -Math.PI / 2, 'poster'],                // a tall billboard beside the cinema front of 電影街
     walk: [-10.5, 38.5, 0.45, 'wall'],                           // out in the open plaza, left of the path
     redhouse: [7.6, 15.5, -0.25, 'wall', { body: 'brick' }] } });   // a brick wall beside the path, right of the door
   // stalls and signs
-  stall(8.5, 30, -0.5, 8); stall(-9, 35, 0.6, 205); stall(12, 43, -1.0, 135); stall(-13, 46.5, 1.1, 28);
-  const words = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊'];
-  words.forEach((w, i) => { const side = i % 2 ? 1 : -1; sign(w, side * 23.9, 3.6 + (i % 3) * 0.5, 8.5 + Math.floor(i / 2) * 6.3, side > 0 ? -Math.PI / 2 : Math.PI / 2, [4, 210, 38, 150, 350, 28][i % 6], i % 3 === 0); });
+  stall(8.5, 30, -0.5, 8); stall(-9, 35, 0.6, 205); stall(11, 37.5, -1.0, 135); stall(-8.5, 44.5, 1.1, 28);
+  // the researched places and events: buildings you can click, and a marker for every event (landmarks-ximen.js)
+  LANDMARKS_XIMEN(E, { redHouse });
+  PLACES.mount(E, { district: 'ximen' });
+  // the poncho bear (CJ, 2026-11-21: "Yes, add it"): a Tripo model from his Midjourney views, shrunk for the web
+  // (asset/models/bear-poncho.glb, 394 KB). It has no rig yet, so it stands beside the path as a figure, not a playable hero.
+  E.loadGLB('bear-poncho').then(bear => { bear.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); bear.scale.setScalar(1.25); bear.position.set(2.6, 0, 39.5); bear.rotation.y = -0.35; scene.add(bear); window.__bear = bear; });
   },
 });
 </script>

@@ -14,6 +14,9 @@
 <script src="engine.js"></script>
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="places.js"></script>
+<script src="landmarks-xinyi.js"></script>
 <script>
 // 信義, the 2020s: a compact stone plaza at the foot of Taipei 101, the skywalk crossing overhead,
 // 新光三越 A11 to the west, glass towers to the east. Only this block's layout lives here; the light,
@@ -22,15 +25,19 @@
 // that crosses the plaza, with shade (and shafts in the air) on both sides.
 const SOLID = [];                                                 // [x, z, halfW, halfD] boxes she walks round
 const solid = (x, z, hx, hz) => SOLID.push([x, z, hx + 0.3, hz + 0.3]);
+const WALK = [[-17, 17, -17.5, 19], [-3.2, 3.2, 19, 23], [-4.6, 4.6, -35, -17.5], [-13, 36, -43.3, -34.8], [-37.5, -13, -44.6, -34.8]];
 ENGINE.create({
   title: '信義 · Xinyi, 2020s', subtitle: 'Glass, steel and height, at the foot of Taipei 101', loading: 'Raising the towers…',
   shadowCenter: [0, 0, -6], start: { x: 0, z: 10.5, heading: Math.PI },
-  views: [[0, 1.5, 17.6, 4, 21, -66], [7, 1.4, 5, -13, 9.5, -24], [13.5, 1.5, 9, -22, 8.5, 2], [3, 15, 19.5, 2, 9, -30], [-4, 1.3, -11, 9, 95, -68], [-3, 1.5, -14, 3, 4.5, 21]],
+  views: [[0, 1.5, 17.6, 4, 21, -66], [-13, 2.4, -34.6, 6, 4.5, -44], [-33, 2.6, -31.5, -17, 5, -44], [-12, 2.2, 3, 24, 15, 4], [9, 2, -9, -22, 8, -13.5], [0, 3.2, -3, 0, 13, 30]],   // 1 the tower through the skywalk · 2 its forecourt · 3 四四南村 · 4 the east side · 5 威秀 · 6 the south side
   ground: { strips: [], puddles: 0 },
   dust: { x: [-20, 20], y: [0.3, 13], z: [-20, 22] },
   clamp(p) {
-    const gate = Math.abs(p.x) < 3.2;
-    p.x = Math.max(-17, Math.min(17, p.x)); p.z = Math.max(-17.5, Math.min(gate ? 23 : 19, p.z)); if (p.z > 19) p.x = Math.max(-3.2, Math.min(3.2, p.x));
+    // the walkable ground is a set of boxes [minX, maxX, minZ, maxZ]: the plaza, the south gate, the zebra crossing,
+    // the forecourt of Taipei 101 and 四四南村's lane. Outside all of them she is put back on the nearest edge.
+    let best = null, bd = Infinity;
+    for (const [x0, x1, z0, z1] of WALK) { const cx = Math.max(x0, Math.min(x1, p.x)), cz = Math.max(z0, Math.min(z1, p.z)), d = (cx - p.x) ** 2 + (cz - p.z) ** 2; if (d < bd) { bd = d; best = [cx, cz]; } }
+    if (bd > 0) { p.x = best[0]; p.z = best[1]; }
     for (const [x, z, hx, hz] of SOLID) { const dx = p.x - x, dz = p.z - z; if (Math.abs(dx) < hx && Math.abs(dz) < hz) { if (hx - Math.abs(dx) < hz - Math.abs(dz)) p.x = x + (dx < 0 ? -hx : hx); else p.z = z + (dz < 0 ? -hz : hz); } }
     PHOTOWALL.keepOut(p);                                           // and round the topic showcases
   },
@@ -83,14 +90,13 @@ ENGINE.create({
     box(w * 0.2, 2.2, d * 0.2, roofM, x, h + (o.cap || 0) + 1.1, z, o.ry); const b = new T.Mesh(new T.SphereGeometry(0.35, 8, 6), GLOW(4, 0.5, 0.3)); b.position.set(x, h + (o.cap || 0) + 2.6, z); scene.add(b);
     if (o.shop) { const st = shopTex.clone(); st.needsUpdate = true; st.repeat.set(Math.round(w / 9), 1); const sm = new T.MeshStandardMaterial({ map: st, emissiveMap: st, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.95, roughness: 0.3 });
       box(w + 1.2, 6.4, d + 1.2, [sm, sm, stone, stone, sm, sm], x, 3.2, z, o.ry); box(w + 3, 0.3, d + 3, steel, x, 6.6, z, o.ry); } };
-  tower(31, -8, 20, 22, 84, { cap: 9, shop: true, lit: 0.22 });                       // east, the tall one that catches the last sun
-  tower(32, 18, 22, 20, 52, { tint: 0.9, shop: true, lit: 0.3 });                     // east, lower
-  tower(-23, -47, 16, 16, 66, { tint: 1.1, cap: 6, lit: 0.18 });                      // north-west: this one cuts the sun into a band
-  tower(-52, -14, 22, 26, 96, { tint: 0.85, cap: 12, lit: 0.15 }); tower(-27, 40, 22, 20, 44, { tint: 0.95, lit: 0.3, shop: true }); tower(27, 46, 20, 22, 62, { cap: 7, lit: 0.25, shop: true });
-  tower(62, -40, 24, 24, 120, { tint: 0.8, cap: 14, lit: 0.12 }); tower(70, 12, 26, 22, 74, { tint: 0.9, lit: 0.2 }); tower(-62, 30, 24, 24, 70, { tint: 0.9, lit: 0.2 });
+  // the east side (南山廣場, ATT 4 FUN), the south side (誠品, 市府轉運站) and 威秀 are built in landmarks-xinyi.js
+  tower(-26, -62, 16, 16, 66, { tint: 1.1, cap: 6, lit: 0.18 });                      // north-west: this one cuts the sun into a band
+  tower(-52, -14, 22, 26, 96, { tint: 0.85, cap: 12, lit: 0.15 });
+  tower(70, 12, 26, 22, 74, { tint: 0.9, lit: 0.2 }); tower(-62, 30, 24, 24, 70, { tint: 0.9, lit: 0.2 });
   // far towers, in the haze, and the low city behind them
   { const far = [facade(18, 30, 0.8, 0.12), facade(16, 36, 0.7, 0.1), facade(20, 24, 0.9, 0.16)]; let n = 0;
-    while (n < 24) { const a = rr(0, 6.283), r = rr(125, 215), x = Math.cos(a) * r, z = Math.sin(a) * r; if (x < -40 && z < -30) continue; if (Math.abs(x - 13) < 55 && z < -72) continue; tower(x, z, rr(18, 28), rr(18, 28), rr(46, 120), { f: far[n % 3], ry: rr(0, 1.5) }); n++; } }
+    while (n < 24) { const a = rr(0, 6.283), r = rr(125, 215), x = Math.cos(a) * r, z = Math.sin(a) * r; if (x < -40 && z < -30) continue; if (Math.abs(x - 13) < 55 && z < -72) continue; if (Math.hypot(x - 158, z + 92) < 95) continue; /* not behind the tower, not inside 象山 */ tower(x, z, rr(18, 28), rr(18, 28), rr(46, 120), { f: far[n % 3], ry: rr(0, 1.5) }); n++; } }
   tower(-54.5, -56, 36, 18, 30, { ry: 0.71, tint: 0.9, lit: 0.3, shop: true });    // a mid-rise across the gap the sun comes through: its shadow ends short of the plaza, and it keeps that gap from washing out
   city(115, 225);
   // 市政府 City Hall, low and wide on the horizon, seen down the gap the sun comes through
@@ -101,9 +107,7 @@ ENGINE.create({
   { const b = board([['新光三越', 170, 0.36], ['SHIN KONG MITSUKOSHI · A11', 54, 0.78, 600]], 9, 2.6, '#7a1f2a', '#fff0d2', 1.1); b.position.set(-18.2, 7.5, 4); b.rotation.y = Math.PI / 2; scene.add(b);
     const st = shopTex.clone(); st.needsUpdate = true; st.repeat.set(3, 1); const sm = new T.MeshStandardMaterial({ map: st, emissiveMap: st, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.95, roughness: 0.3 });
     box(0.5, 5.6, 20, [sm, sm, stone, stone, stone, stone], -18.85, 2.8, 4); box(3.4, 0.28, 21.5, steel, -17.9, 5.95, 4); }                          // its lit shop windows and the canopy over the doors
-  sign('百貨公司', -18.5, 8.4, -6.6, Math.PI / 2, 350, true); sign('美食街', -18.5, 8.0, 14.6, Math.PI / 2, 28, true); sign('咖啡', 19.9, 4.4, 8.6, Math.PI / 2, 190, true); sign('書店', 19.9, 4.4, -17.4, Math.PI / 2, 38, false);
-  // a screen on the east tower, the kind every corner of 信義 has
-  { const b = board([['信義', 300, 0.4], ['XINYI · 2020 –', 96, 0.8, 600]], 10, 6.2, '#0d2f44', '#ffe9c4', 1.25); b.position.set(20.25, 14, -8); b.rotation.y = -Math.PI / 2; scene.add(b); box(10.6, 6.8, 0.3, MATS.ink, 20.5, 14, -8, -Math.PI / 2); }
+  sign('百貨公司', -18.5, 8.4, -3.6, Math.PI / 2, 350, true); sign('美食街', -18.5, 8.0, 14.6, Math.PI / 2, 28, true);
 
   // ── the skywalk, crossing overhead from A11 to the east tower ──
   const skySwap = { swap: { sky: triMat({ color: '#9fcfe0', tex: TEX.metal, scale: 1, rough: 0.15, metal: 0.3 }) }, noCast: ['glass'] };
@@ -144,6 +148,10 @@ ENGINE.create({
     quiet: [-11, 18.7, Math.PI, 'wall', { body: '#cfd3d6' }],     // a pale wall tucked by the south gate's low wall
     skywalk: [-15.5, 12.3, Math.PI / 2, 'shop'],                  // a shop front along the department store's side
     lookup: [16.0, 10.5, -Math.PI / 2, 'stand'] } });             // a stand on the east side, looking back across the plaza
+
+  // ── the researched places and events: buildings, sculptures and markers, each one clickable (landmarks-xinyi.js) ──
+  LANDMARKS_XINYI(E, { solid });
+  PLACES.mount(E, { district: 'xinyi' });
 
   // ── the way back: the 信義 gate at the south end, glowing toward the square ──
   { const g = dress(get(get(sq, 'sq-gate'), 'xinyi').clone()); g.position.set(0, 0, 21); scene.add(g);

@@ -1,0 +1,566 @@
+{
+  "district": "xinyi",
+  "researched": "2026-11-21",
+  "label_key": {
+    "measured": "Read on the cited page during this research run (page fetched and read).",
+    "inferred": "Not read on a fetched page: either taken from a search-result summary whose page was not opened, worked out from addresses or coordinates, or the researcher's general knowledge. Check against the reference photos before it goes on the public site.",
+    "unknown": "Written as (unknown — needs CJ)."
+  },
+  "photo_licence_note": "Wikimedia Commons category pages hold many files, each with its own licence (mostly CC BY-SA or CC BY, some public domain). Check the licence on the individual file page before reusing a photo. News-site photos are copyrighted: use them to look at, not to republish.",
+  "places": [
+    {
+      "id": "taipei-101",
+      "zh": "台北101",
+      "en": "Taipei 101",
+      "kind": "place",
+      "years": "Groundbreaking 1999-01-31; mall completed 2003-11-14; tower opened 2004-12-31",
+      "history_en": "Taipei 101 is the 508-metre tower at the centre of Xinyi, with 101 floors above ground and five basements. Ground was broken in January 1999, the mall podium was completed in November 2003, and the tower officially opened on 31 December 2004. Architects C.Y. Lee and C.P. Wang stacked eight flared segments of eight floors each, a number tied to good fortune, and repeated curled ruyi shapes and coin discs on the outside. Indoor observatories are on floors 88 and 89, with outdoor decks on 91 and 101. It has hosted the city's New Year fireworks since the first seconds of 2005.",
+      "history_zh": "台北101高508公尺，地上101層、地下5層，由李祖原與王重平設計，2004年12月31日正式啟用。塔身由八節、每節八層的斗狀量體堆疊，外牆綴有如意與錢幣圖騰，是信義區跨年煙火的主角。",
+      "facts": [
+        {"claim": "Height 508 m to architectural top; 101 floors above ground, 5 basements", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Groundbreaking 31 January 1999; mall completed 14 November 2003; tower opened 31 December 2004", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Architects C.Y. Lee and C.P. Wang; eight segments of eight floors each", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Indoor observatory on floors 88 and 89; outdoor on 91 and 101 (101st opened 14 June 2019)", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Address No. 7, Section 5, Xinyi Road", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "The mall opened to shoppers in November 2003, about a year before the tower", "label": "inferred", "source": "The page gives a mall completion date, not an opening date"}
+      ],
+      "visual_details": [
+        {"detail": "Blue-green double-paned glass curtain wall over the whole tower", "label": "measured"},
+        {"detail": "Main shaft is eight identical segments stacked like a bamboo stalk or pagoda; each segment is eight floors and flares outward toward its top, so the silhouette is a column of eight upside-down truncated pyramids", "label": "measured (eight segments of eight floors) + inferred (outward flare, from general knowledge)"},
+        {"detail": "Curled ruyi ornaments recur on the facade, each at least 8 m tall; the mall roof ends in a large ruyi", "label": "measured"},
+        {"detail": "Four round coin discs on each face where the base meets the tower; entrance emblem of three gold coins with holes reading 1-0-1", "label": "measured"},
+        {"detail": "Tapered base section below the eight segments, a narrower block and a thin spire on top; a low mall podium of about six storeys with a glass roof on the east side", "label": "inferred"},
+        {"detail": "Metal ruyi-like corner ornaments (often called dragons) stick out at the corners of each segment in silver-grey", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "This is the reference point. It fills the block north of Xinyi Road Section 5, with Songlian Road also named as an adjacent street.", "label": "measured"},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_101"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Taipei_101", "licence": "Wikimedia Commons, per-file licence (mostly CC BY-SA / CC BY)"}
+      ]
+    },
+    {
+      "id": "taipei-101-damper",
+      "zh": "台北101風阻尼器與觀景台",
+      "en": "Taipei 101 tuned mass damper and observatory",
+      "kind": "place",
+      "years": "In service since the tower opened, 2004-12-31; 101st-floor outdoor deck opened 2019-06-14",
+      "history_en": "Near the top of Taipei 101 hangs a 660-tonne steel ball that visitors can walk up to. It is a tuned mass damper: a pendulum that swings against the tower's own sway in typhoons and earthquakes. The ball is 5.5 metres across, built from 41 stacked steel plates each 125 mm thick, and hangs between the 92nd and 88th floors, where the indoor observatory lets people look straight at it. Sanrio designed five Damper Baby mascots for it. After the April 2024 Hualien earthquake, news outlets worldwide pointed to this ball as the reason the tower came through.",
+      "history_zh": "台北101的風阻尼器是一顆重660公噸、直徑5.5公尺的鋼球，由41片鋼板疊成，懸吊於92樓至88樓之間，颱風與地震時反向擺動以減少大樓搖晃，遊客可在觀景台近距離觀看。",
+      "facts": [
+        {"claim": "660 metric tons, 5.5 m diameter, 41 steel plates each 125 mm thick, suspended from the 92nd to the 88th floor", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Five Sanrio Damper Baby mascots: Rich Gold, Cool Black, Smart Silver, Happy Green, Lucky Red", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Yellow steel ball held by steel cables, with eight hydraulic dampers beneath and a bumper ring limiting swing to 1.5 m; 92 cables about 42 m long", "label": "measured", "source": "https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper"},
+        {"claim": "Largest recorded swing was 100 cm on 2015-08-08 during Typhoon Soudelor", "label": "inferred", "source": "Search-result summary of https://www.taiwannews.com.tw/en/news/3760667 (page not opened)"}
+      ],
+      "visual_details": [
+        {"detail": "A golden-yellow sphere 5.5 m across that visibly reads as a stack of 41 horizontal discs, widest at the middle", "label": "measured (size, plates, yellow) "},
+        {"detail": "Hung by bundles of thick steel cables that run from the top of the shaft down and around under the ball like a cradle", "label": "measured (cables) + inferred (cradle arrangement)"},
+        {"detail": "Eight piston-like hydraulic arms angle from the floor up to the underside of the ball; a ring sits below it as a bumper", "label": "measured"},
+        {"detail": "Visitors view it from railed galleries around an open multi-storey shaft; walls are dark with spot lighting", "label": "inferred"},
+        {"detail": "Damper Baby mascots: round big-headed figures whose face is made of the digits 1-0-1, in gold, black, silver, green and red", "label": "measured (five colours) + inferred (face design)"}
+      ],
+      "location_vs_101": {"text": "Inside the tower, floors 88 to 92, about 380 m above the street. In a walkable scene it can be a cut-away room or a kiosk at the tower's foot.", "label": "measured (floors) + inferred (height above street)"},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_101", "https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Mass_damper_of_Taipei_101", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:Damper_Baby", "licence": "Wikimedia Commons, per-file licence; the mascot design itself is a Taipei 101 / Sanrio character, so do not copy it closely"}
+      ]
+    },
+    {
+      "id": "love-sculpture",
+      "zh": "LOVE 雕塑",
+      "en": "LOVE sculpture by Robert Indiana",
+      "kind": "place",
+      "years": "Installed around the 2004 opening (exact date unknown — needs CJ)",
+      "history_en": "The red LOVE sculpture outside Taipei 101 is one of the versions of American pop artist Robert Indiana's best-known work: the letters L and O stacked over V and E, with the O tilted. The original three-dimensional LOVE dates from about 1970 and was made in weathering steel; copies stand in cities around the world. One commentary says the Taipei piece arrived with the tower's opening in 2004. It became the default meeting point and photo spot at the foot of the tower, and news photos from 2026 still show tourists queueing to pose in front of it.",
+      "history_zh": "台北101旁的紅色LOVE雕塑出自美國普普藝術家羅伯特·印第安納，L、O疊在V、E之上，O字傾斜。據評論文章記載約於2004年大樓開幕時設置，是遊客在101腳下合照與相約的地標。",
+      "facts": [
+        {"claim": "A Robert Indiana LOVE sculpture stands by the Taipei 101 building; coordinates N 25° 01.989, E 121° 33.890; the original 3D LOVE dates from about 1970 in COR-TEN steel", "label": "measured", "source": "https://www.waymarking.com/waymarks/wmB55N_LOVE_by_Robert_Indiana_Taipei_Taiwan"},
+        {"claim": "It accompanied the tower's 2004 opening; aluminium with red-painted faces and gold-toned inner sides", "label": "inferred", "source": "Search-result summary of https://weburbanist.com/2016/02/14/3d-four-letter-words-robert-indianas-love-sculptures/2/ (page not opened)"},
+        {"claim": "Tourists still pose in front of it in November 2026", "label": "inferred", "source": "Search-result summary of https://focustaiwan.tw/photos/20261102ENP0001m (page not opened)"},
+        {"claim": "Exact installation date, size and plaque text", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "Four thick block capital letters in a 2 by 2 grid: L and O on top, V and E below; the O leans to the right", "label": "inferred"},
+        {"detail": "Front and back faces bright red; the inner side faces of the letters gold-toned", "label": "inferred (search summary)"},
+        {"detail": "Roughly as tall as two people, deep enough for someone to sit inside the V or the O (exact size unknown — needs CJ)", "label": "inferred"},
+        {"detail": "Stands on a low plinth on the paved plaza, with a queue of people taking photos in front", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "On the tower's own plaza. The Waymarking coordinates put it about 80–100 m south of the tower's centre, on the Xinyi Road side; which corner exactly is (unknown — needs CJ).", "label": "inferred from coordinates"},
+      "sources": ["https://www.waymarking.com/waymarks/wmB55N_LOVE_by_Robert_Indiana_Taipei_Taiwan", "https://en.wikipedia.org/wiki/List_of_Love_sculptures"],
+      "photo_refs": [
+        {"url": "https://www.waymarking.com/waymarks/wmB55N_LOVE_by_Robert_Indiana_Taipei_Taiwan", "licence": "Not stated; treat as copyrighted"},
+        {"url": "https://focustaiwan.tw/photos/20261102ENP0001m", "licence": "CNA news photo, copyrighted (URL from search results, page not opened)"}
+      ]
+    },
+    {
+      "id": "vieshow-xinyi",
+      "zh": "台北信義威秀影城",
+      "en": "Vieshow Cinemas Taipei Xinyi (formerly Warner Village)",
+      "kind": "shop",
+      "years": "Opened 1998-01-24 as 華納威秀; renamed 威秀影城 in 2006; still open",
+      "history_en": "Xinyi Vieshow opened on 24 January 1998 as Warner Village, a joint venture between Warner Bros. and Australia's Village Roadshow, when much of the Xinyi planning zone was still empty lots. Many Taipei people still call it by the old name. The two foreign partners left in 2004 and the company became Vieshow Cinemas in 2006. It is the chain's first site and its only stand-alone building, with 15 halls today, and Taiwan's first 4DX hall opened here in 2013. Film fans call it movie-lover's heaven because premieres, the Taipei Film Festival and the Golden Horse festival use it. A planned 2019 closure was replaced by a ten-year lease renewal.",
+      "history_zh": "信義威秀於1998年1月24日以「華納威秀」之名開幕，是威秀第一個據點，也是唯一的獨棟影城，2006年改名威秀影城。現有15廳，台北電影節與金馬影展常在此舉行，影迷稱它「影迷天堂」。",
+      "facts": [
+        {"claim": "Opened 24 January 1998 as 臺北信義華納威秀影城; Warner Bros. / Village Roadshow joint venture", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/信義威秀影城"},
+        {"claim": "Foreign partners withdrew in 2004; renamed 威秀影城 in 2006", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/信義威秀影城"},
+        {"claim": "15 halls (originally 17); first 4DX hall in Taiwan, 2013; first Vieshow site and only stand-alone one; address No. 20 Songshou Road; two buildings", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/信義威秀影城"},
+        {"claim": "Due to close December 2019, then lease renewed for ten years by landlord 宏泰集團", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/信義威秀影城"}
+      ],
+      "visual_details": [
+        {"detail": "Two low buildings, roughly three to four storeys, with shops and restaurants at street level and the cinema halls above", "label": "measured (two buildings, retail on floors 1–2) + inferred (height)"},
+        {"detail": "Large film posters and LED screens across the front; VIESHOW CINEMAS lettering with 威秀影城 beside it (exact logo colours unknown — needs CJ)", "label": "inferred"},
+        {"detail": "An open paved plaza in front, used for premieres and red carpets, with ticket booths at ground level and escalators up to the halls", "label": "inferred"},
+        {"detail": "A second-floor footbridge joins it to ATT 4 FUN next door", "label": "measured (ATT 4 FUN page)"}
+      ],
+      "location_vs_101": {"text": "No. 20 Songshou Road, on the south side of Songshou Road, about 250–300 m north-north-west of Taipei 101, with ATT 4 FUN between the two.", "label": "measured (address) + inferred (distance and bearing)"},
+      "sources": ["https://zh.wikipedia.org/zh-tw/信義威秀影城", "https://en.wikipedia.org/wiki/ATT_4_FUN"],
+      "photo_refs": [
+        {"url": "https://zh.wikipedia.org/zh-tw/信義威秀影城", "licence": "Wikipedia article images, per-file licence on Commons"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:Xinyi_District_Footbridge_System", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "skm-xinyi-place",
+      "zh": "新光三越台北信義新天地（A4、A8、A9、A11）與香堤大道",
+      "en": "Shin Kong Mitsukoshi Xinyi Place (A4, A8, A9, A11) and Xiangti Avenue",
+      "kind": "shop",
+      "years": "A11 opened 1997-11-08; A8 January 2002; A9 December 2003; A4 September 2005; all open",
+      "history_en": "Shin Kong Mitsukoshi's Xinyi Place is four department-store buildings that opened in stages: A11 in November 1997, A8 in January 2002, A9 in December 2003 and A4 in September 2005. A11 was the first big store in the planning zone, and the four together turned the area into Taipei's main shopping district. They are joined by skybridges and underground passages, with plazas between them. The pedestrian strip that runs between the buildings, Xiangti Avenue, is where the Christmas lights go up each winter and where the city licenses fixed pitches for street performers, including one between A8 and A9.",
+      "history_zh": "新光三越信義新天地由四棟百貨組成：A11（1997年11月）、A8（2002年1月）、A9（2003年12月）、A4（2005年9月），以空橋與地下道相連。館間的香堤大道徒步區是耶誕燈飾與街頭藝人表演的所在。",
+      "facts": [
+        {"claim": "A11: No. 11 Songshou Road, 6 floors above ground, opened 1997-11-08", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/新光三越"},
+        {"claim": "A9: No. 9 Songshou Road, 9 floors above ground, opened December 2003", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/新光三越"},
+        {"claim": "A8: No. 12 Songgao Road, 7 floors above ground, opened January 2002", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/新光三越"},
+        {"claim": "A4: No. 19 Songgao Road, 6 floors above ground, opened September 2005; each building has 5 basements", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/新光三越"},
+        {"claim": "Four buildings linked by skybridges and underground corridors with plazas between", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/新光三越"},
+        {"claim": "One source gives A8 as 2001 rather than January 2002", "label": "inferred", "source": "Search-result summary of https://www.foodnext.net/news/industry/paper/5593677172 (page not opened)"},
+        {"claim": "A licensed street-performer pitch sits between A8 and A9 beside 香堤廣場; the 香堤 pedestrian area carries the main Christmas decorations", "label": "inferred", "source": "Search-result summaries of https://www.laws.taipei.gov.tw/Law/File/0000318218 and https://news.ltn.com.tw/news/life/paper/1716151 (pages not opened)"}
+      ],
+      "visual_details": [
+        {"detail": "Four separate box-shaped department stores of 6, 7, 9 and 6 storeys (A11, A8, A9, A4), set in a north-south line across two streets", "label": "measured (storeys, addresses) + inferred (line-up)"},
+        {"detail": "Pale stone or tile facades with large advertising banners and screens; the Shin Kong Mitsukoshi name in Chinese and English on each roofline with the building code A4, A8, A9 or A11 (logo colours unknown — needs CJ)", "label": "inferred"},
+        {"detail": "Glass-sided skybridges at second-floor level join the buildings over the streets", "label": "measured (skybridges) + inferred (glass sides, level)"},
+        {"detail": "Xiangti Avenue: a tree-lined paved walkway between the buildings with benches, lamp posts, winter light strings and a small circle of people around a busker", "label": "inferred"},
+        {"detail": "At the doors: cosmetics-brand banners, a seasonal display such as a tall Christmas tree in December", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "North of Taipei 101. A11 and A9 are on Songshou Road about 350–450 m north-north-west; A8 and A4 are on Songgao Road about 550–700 m north.", "label": "measured (addresses) + inferred (distances)"},
+      "sources": ["https://zh.wikipedia.org/zh-tw/新光三越", "https://en.wikipedia.org/wiki/Shin_Kong_Mitsukoshi"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Shin_Kong_Mitsukoshi_Taipei_Xinyi_Place_A8", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:Shin_Kong_Mitsukoshi_Taipei_Xinyi_Place_A4", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "xinyi-skywalk",
+      "zh": "信義計畫區空橋系統",
+      "en": "Xinyi District footbridge (skywalk) system",
+      "kind": "place",
+      "years": "Built in stages alongside the malls (start year unknown — needs CJ); in use",
+      "history_en": "The Xinyi skywalk is a network of raised walkways at second-floor level that lets people cross the district without touching the road. One news report counts it as linking eleven department stores and one cinema over about 2.3 kilometres, and calls it the densest footbridge system in Taiwan. It runs from Taipei 101 north through ATT 4 FUN, Vieshow and the Shin Kong Mitsukoshi buildings, on past Breeze Songgao, and reaches Breeze Xinyi at Zhongxiao East Road. Most sections are open all day; the bridge into Taipei 101 passes through the building, so it follows metro hours, 6 a.m. to 1 a.m.",
+      "history_zh": "信義計畫區空橋系統在二樓高度串連台北101、ATT 4 FUN、威秀、新光三越各館，一路向北到忠孝東路旁的微風信義。報導指出全長約2.3公里，連接十一家百貨與一座影城，多數路段24小時開放。",
+      "facts": [
+        {"claim": "Links eleven department stores and one cinema, about 2.3 km, described as the densest footbridge system in Taiwan; the Taipei 101 bridge is open 6 a.m. to 1 a.m., most others 24 hours; reaches Breeze Xinyi at Zhongxiao East Road", "label": "inferred", "source": "Search-result summary of https://news.ltn.com.tw/news/life/paper/1716151 (page not opened)"},
+        {"claim": "Skybridges join ATT 4 FUN's 2nd floor to Vieshow, Taipei Nan Shan Plaza and Taipei 101", "label": "measured", "source": "https://en.wikipedia.org/wiki/ATT_4_FUN"},
+        {"claim": "A Wikimedia Commons category named Xinyi District Footbridge System exists", "label": "measured", "source": "https://commons.wikimedia.org/wiki/Category:Xinyi_District_Footbridge_System"},
+        {"claim": "Year the first bridge opened", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "Covered walkways one storey above the street, carried on round or square columns, crossing each road between mall second floors", "label": "measured (second floor) + inferred (structure)"},
+        {"detail": "Glass or metal-rail sides and a light canopy roof; grey paving; wayfinding signs naming the next mall", "label": "inferred"},
+        {"detail": "Stairs and escalators drop to the pavement at each mall plaza", "label": "inferred"},
+        {"detail": "From the bridges Taipei 101 is framed straight ahead looking south, a classic photo angle", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "Starts at the north side of Taipei 101 and runs north for roughly 1 km in a straight line to Zhongxiao East Road, with side branches east and west.", "label": "inferred"},
+      "sources": ["https://news.ltn.com.tw/news/life/paper/1716151", "https://en.wikipedia.org/wiki/ATT_4_FUN"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Xinyi_District_Footbridge_System", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "eslite-xinyi",
+      "zh": "誠品信義店（現為 Dream Plaza）",
+      "en": "Eslite Xinyi Store (now Dream Plaza)",
+      "kind": "shop",
+      "years": "Opened 2006-01-01 at midnight; closed 2023-12-24; site reopened as Dream Plaza 2025-07-25",
+      "history_en": "Eslite's Xinyi flagship opened at midnight on 1 January 2006 with about 8,000 square metres of floor space, then the largest bookstore in Taiwan. When the Dunnan store closed on 31 May 2020, Xinyi took over as the chain's only bookstore open 24 hours, and a generation of night readers sat on its floors. The landlord, Uni-President Group, did not renew the lease, and the store closed on Christmas Eve, 24 December 2023, after 18 years. The all-night bookstore moved to Eslite Spectrum Songyan on 20 January 2024. The building at No. 11 Songgao Road has since reopened as Uni-President's Dream Plaza mall.",
+      "history_zh": "誠品信義店於2006年1月1日零時開幕，曾是全台最大書店，2020年接替敦南店成為24小時書店。因租約到期，2023年12月24日平安夜熄燈，營運18年；原址松高路11號現為統一集團的Dream Plaza。",
+      "facts": [
+        {"claim": "Opened midnight 1 January 2006, about 8,000 m², then Taiwan's largest bookstore; closed 24 December 2023; landlord Uni-President Group did not renew the lease", "label": "measured", "source": "https://en.wikipedia.org/wiki/Eslite_Bookstore"},
+        {"claim": "Became the 24-hour store after Dunnan closed 31 May 2020; 24-hour operation moved to Eslite Spectrum Songyan on 20 January 2024", "label": "measured", "source": "https://en.wikipedia.org/wiki/Eslite_Bookstore"},
+        {"claim": "Operated 18 years in Xinyi; lights out at 10:30 p.m. on 24 December 2023", "label": "measured", "source": "https://news.pts.org.tw/article/672922"},
+        {"claim": "Eslite leased basement 2 to the 6th floor of the 統一國際大樓", "label": "inferred", "source": "Search-result summary of https://technews.tw/?p=1013143 (page not opened)"},
+        {"claim": "Dream Plaza opened 25 July 2025 at No. 11 Songgao Road, with a large Starbucks on the 6th floor", "label": "inferred", "source": "Search-result summary of https://www.tatlerasia.com/lifestyle/travel/dream-plaza-opening-zh-hant (page not opened)"},
+        {"claim": "Architect and facade material", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "A wide mid-rise block; the store filled basement 2 up to the 6th floor, with offices above", "label": "inferred (search summary)"},
+        {"detail": "Pale grey-beige facade with horizontal bands and large glass at street level; a small green-and-white eslite 誠品 sign rather than a loud billboard (exact facade unknown — needs CJ)", "label": "inferred"},
+        {"detail": "Inside: warm wood floors and long wooden shelves, readers sitting on steps and on the floor; the bookstore floors were the upper levels of the store", "label": "inferred"},
+        {"detail": "A broad paved forecourt on Songgao Road where weekend stalls and buskers set up", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "No. 11 Songgao Road, north side of Songgao Road, about 650 m north of Taipei 101 and a short walk south of City Hall metro station.", "label": "inferred (address from search summary; distance estimated)"},
+      "sources": ["https://en.wikipedia.org/wiki/Eslite_Bookstore", "https://news.pts.org.tw/article/672922"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Eslite_Xinyi_Store", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:Eslite_Xinyi_Store_at_night", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "four-four-south-village",
+      "zh": "四四南村（信義公民會館）",
+      "en": "Four Four South Village (Xinyi Assembly Hall)",
+      "kind": "place",
+      "years": "Built 1948 (infobox says 1949); fire 1999; relocation settled 2001; registered historic building 2003-12-23",
+      "history_en": "Four Four South Village was housing for the workers of the 44th Arsenal, who came to Taipei from the mainland in the late 1940s. It took its name from standing south of the arsenal. Families lived in joined single-storey rows laid out like fish bones, each home under ten ping, at first without running water or private toilets. A fire in 1999 led to clearance and the relocation was settled in 2001, but a few rows were kept and registered as a historic building on 23 December 2003. They now hold the Xinyi Assembly Hall and a village museum. The low tiled roofs with Taipei 101 rising behind them are one of the district's best-known contrasts.",
+      "history_zh": "四四南村建於1948年，是聯勤第四十四兵工廠廠工的眷村，因位於兵工廠南側得名。連棟平房呈魚骨狀排列，2003年12月23日登錄為歷史建築，現為信義公民會館，低矮瓦房與背後的台北101形成對比。",
+      "facts": [
+        {"claim": "Built 1948 per a preservation-alliance survey (infobox 1949); residents were workers of 聯勤第四十四兵工廠; named for lying south of the arsenal", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/四四南村"},
+        {"claim": "Fire in 1999, relocation settled 2001; registered as a historic building 23 December 2003", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/四四南村"},
+        {"claim": "Joined single-storey houses in a fishbone layout, built of wood, bamboo fencing, lime and roof tiles; each household under 10 ping", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/四四南村"},
+        {"claim": "Address No. 50 Songqin Street; coordinates 25°01′54″N 121°33′42″E", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/四四南村"},
+        {"claim": "好丘 (Good Cho's) opened here in 2011 and its Xinyi shop closed on 23 November 2025; Simple Market ran in the front plaza on Sundays 13:00–19:00", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/四四南村"},
+        {"claim": "Year the Xinyi Assembly Hall opened", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "Long single-storey row houses set parallel with narrow lanes between them, in a fishbone plan", "label": "measured"},
+        {"detail": "Low pitched roofs of dark grey tile; rough lime-plastered walls in off-white and grey", "label": "measured (tile, lime) + inferred (colours)"},
+        {"detail": "Small wooden doors and window frames painted in faded blue-green or red, with old house-number plates", "label": "inferred"},
+        {"detail": "A raised grass mound and open square in the middle where the weekend market set up stalls under canopies", "label": "inferred"},
+        {"detail": "Taipei 101 towers directly behind the rooflines when looking east", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "Between Songqin Street and Zhuangjing Road, about 300–350 m west-south-west of Taipei 101, across Xinyi Road and Songzhi Road.", "label": "measured (streets) + inferred from coordinates (distance and bearing)"},
+      "sources": ["https://zh.wikipedia.org/zh-tw/四四南村"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Four_Four_South_Village", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "xiangshan",
+      "zh": "象山步道與六巨石",
+      "en": "Xiangshan (Elephant Mountain) trail and Six Giant Rocks viewpoint",
+      "kind": "place",
+      "years": "Natural hill; trail in use (opening year unknown — needs CJ)",
+      "history_en": "Xiangshan, or Elephant Mountain, is the 184-metre sandstone hill just south-east of Taipei 101. A stepped trail climbs its western slope and ridge, and the walk to the top takes about half an hour. Partway up, a cluster of boulders known as the Six Giant Rocks gives the postcard view: the whole Xinyi skyline with Taipei 101 dead centre. Photographers line the platforms at dusk, and on New Year's Eve people claim spots hours ahead to watch the fireworks. The easiest way in is from Xiangshan metro station, Exit 2, then straight ahead to the trailhead off Xinyi Road Section 5.",
+      "history_zh": "象山海拔184公尺，位於台北101東南方，地質為砂岩。步道沿西側山坡與稜線而上，約半小時可登頂，途中的六巨石是俯瞰信義計畫區與台北101的經典拍攝點，可由捷運象山站2號出口步行前往。",
+      "facts": [
+        {"claim": "Summit 184 m; main trail 象山自然步道 loops the western slope and ridge; about half an hour to the summit; Middle Miocene sandstone with near-vertical cliffs on the north-west side", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/象山_(台北市)"},
+        {"claim": "Six Giant Rocks area gives a view over the Xinyi planning district; described as a good spot to photograph Taipei 101; a pavilion and toilets near the summit", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/象山_(台北市)"},
+        {"claim": "Access from Xiangshan Station Exit 2 to the trailhead at Xinyi Road Section 5, Lane 150, Alley 22", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/象山_(台北市)"},
+        {"claim": "Trail length about 1,450 m; 15–20 minutes from the trailhead to the Six Giant Rocks; steep steps", "label": "inferred", "source": "Search-result summaries of travel articles such as https://travel.yam.com/article/125073 (pages not opened); sources disagree on length"},
+        {"claim": "Crowds gather here for the New Year fireworks", "label": "inferred", "source": "General knowledge; the Wikipedia page only cites a 2017 article about fireworks-viewing spots"}
+      ],
+      "visual_details": [
+        {"detail": "A steep staircase of stone and concrete steps with metal handrails, climbing through dense green subtropical forest", "label": "inferred"},
+        {"detail": "Six rounded sandstone boulders, each a few metres tall, grey-brown, that people climb on for photos", "label": "measured (six rocks, sandstone) + inferred (size, colour)"},
+        {"detail": "Timber viewing decks with railings facing north-west toward the skyline; rows of tripods at dusk", "label": "inferred"},
+        {"detail": "A small pavilion near the top", "label": "measured"}
+      ],
+      "location_vs_101": {"text": "South-east of Taipei 101. The trailhead is roughly 700–800 m east-south-east of the tower and the Six Giant Rocks roughly 900 m to 1 km south-east, about 100 m or more above street level.", "label": "inferred"},
+      "sources": ["https://zh.wikipedia.org/zh-tw/象山_(台北市)"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Mount_Elephant_(Taipei)", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "taipei-city-hall",
+      "zh": "台北市政府大樓與市民廣場",
+      "en": "Taipei City Hall and Citizen Plaza",
+      "kind": "place",
+      "years": "Construction began 1986-06-06; completed 1994",
+      "history_en": "Taipei City Hall has anchored the north end of the Xinyi planning zone since 1994, years before the malls arrived. Construction began on 6 June 1986. The building has twelve floors above ground and two below, and from the air its plan forms two crosses side by side, the character for ten written twice, a nod to Double Ten day; the shape also lets light and air into the offices. It regularly hosts exhibitions, performances and public events. The open plaza in front is where the city stages its New Year's Eve countdown concert, with Taipei 101 as the backdrop to the south.",
+      "history_zh": "台北市政府大樓1986年6月6日動工、1994年落成，地上12層、地下2層，俯瞰呈「雙十」形。大樓常舉辦展覽與公共活動，前方的市民廣場是台北跨年晚會的舞台，南望即是台北101。",
+      "facts": [
+        {"claim": "Construction began 6 June 1986, completed 1994; 12 floors above ground and 2 below; plan forms a double ten (十十); hosts exhibitions, performances and public events; coordinates 25°2′15″N 121°33′52″E", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_City_Hall"},
+        {"claim": "The New Year's Eve countdown party is held on the plaza in front (市民廣場)", "label": "inferred", "source": "General knowledge; not on the fetched page"},
+        {"claim": "Architect and facade material", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "A broad, symmetrical 12-storey block, much wider than tall, whose plan is two plus-signs joined side by side", "label": "measured"},
+        {"detail": "Pale grey-white stone or tile cladding with regular rows of dark windows (material unknown — needs CJ)", "label": "inferred"},
+        {"detail": "A large flat paved plaza in front with flagpoles; on New Year's Eve a concert stage and a crowd fill it", "label": "inferred"},
+        {"detail": "臺北市政府 lettering over the central entrance", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "About 400 m due north of Taipei 101 by coordinates, at the top of the planning zone's central axis; City Hall metro station is just beyond it to the north.", "label": "inferred from coordinates"},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_City_Hall"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Taipei_City_Hall", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "city-hall-bus-station",
+      "zh": "市府轉運站（統一時代百貨、W飯店）",
+      "en": "Taipei City Hall Bus Station (Uni-President department store and W Taipei)",
+      "kind": "place",
+      "years": "Bus station opened 2010-08-05; W Taipei opened officially March 2011",
+      "history_en": "Taipei City Hall Bus Station opened on 5 August 2010 at the south-east corner of Keelung Road and Zhongxiao East Road. For many people this is where a day in Xinyi starts or ends: long-distance coaches to northern and central Taiwan leave from here, about 24,000 bus passengers pass through daily, and City Hall metro station on the Bannan Line is built into the basement. Above the bus bays is a mixed-use tower about 150 metres tall. A Uni-President department store fills nine levels, and the W Taipei hotel, which began trial operations in February 2011, takes floors 8 to 31 with 405 rooms.",
+      "history_zh": "市府轉運站2010年8月5日啟用，位於基隆路與忠孝東路口東南側，與捷運市政府站共構，每日約2.4萬人次搭乘客運。大樓高約150公尺，設有統一時代百貨，W飯店位於8至31樓。",
+      "facts": [
+        {"claim": "Opened 5 August 2010; No. 10, Section 5, Zhongxiao East Road, at the south-eastern side of the Keelung Road / Zhongxiao East Road junction", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_City_Hall_Bus_Station"},
+        {"claim": "About 150 m tall; 30 or 31 floors above ground (the page gives both) and 5 below; about 24,000 bus passengers a day", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_City_Hall_Bus_Station"},
+        {"claim": "Department store on nine levels (two underground), named on the page as Uni-President Hankyu; W Taipei on floors 8–31 with 405 rooms, trial February 2011, official March 2011", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_City_Hall_Bus_Station"},
+        {"claim": "The department store is now called 統一時代百貨 (Uni-Ustyle)", "label": "inferred", "source": "General knowledge plus a search summary naming 統一時代百貨 beside City Hall station"}
+      ],
+      "visual_details": [
+        {"detail": "A slim glass hotel tower of about 30 storeys rising from a wide shopping podium of about seven storeys", "label": "measured (floor counts) + inferred (massing)"},
+        {"detail": "Coach bays at ground level on one side with numbered platforms and bus company ticket counters", "label": "inferred"},
+        {"detail": "A large W logo near the top of the tower; department-store signage on the podium (colours unknown — needs CJ)", "label": "inferred"},
+        {"detail": "Escalators down to the metro concourse directly under the building", "label": "measured (station in basement) + inferred (escalators)"}
+      ],
+      "location_vs_101": {"text": "About 900 m north-north-west of Taipei 101, on Zhongxiao East Road at the district's northern edge, north-west of City Hall.", "label": "measured (address) + inferred (distance)"},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_City_Hall_Bus_Station"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Taipei_City_Hall_Bus_Station", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:W_Taipei", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "att-4-fun",
+      "zh": "ATT 4 FUN（前紐約紐約展覽購物中心）",
+      "en": "ATT 4 FUN (formerly New York New York)",
+      "kind": "shop",
+      "years": "Opened March 2000 as New York New York; closed August 2010; reopened 2011-08-29 as ATT 4 FUN",
+      "history_en": "The mall at No. 12 Songshou Road opened in March 2000 as New York New York, one of the first shopping centres in the planning zone. Its operator shut it in August 2010 after losing about NT$1.8 billion over nine years. It reopened on 29 August 2011 as ATT 4 FUN, aimed at a younger crowd, with street-fashion brands, themed restaurants, a sky lounge bar and a 2,000-seat show hall on the seventh floor. The building has ten floors above ground and three below. Second-floor skybridges tie it to Vieshow on one side and to Nan Shan Plaza and Taipei 101 on the other.",
+      "history_zh": "松壽路12號的商場2000年3月以「紐約紐約」開幕，2010年8月歇業，2011年8月29日改裝為ATT 4 FUN重新開幕。地上10層、地下3層，設有餐廳、酒吧與展演廳，二樓空橋連接威秀與台北101。",
+      "facts": [
+        {"claim": "New York New York opened March 2000 and closed August 2010 after losing about NT$1.8 billion over nine years; reopened 29 August 2011 as ATT 4 FUN", "label": "measured", "source": "https://en.wikipedia.org/wiki/ATT_4_FUN"},
+        {"claim": "10 floors above ground, 3 below; No. 12 Songshou Road; 7th-floor venue about 3,300 m² with over 2,000 seats; Sky Lounge Bar", "label": "measured", "source": "https://en.wikipedia.org/wiki/ATT_4_FUN"},
+        {"claim": "Skybridges from its 2nd floor to Vieshow, Taipei Nan Shan Plaza and Taipei 101", "label": "measured", "source": "https://en.wikipedia.org/wiki/ATT_4_FUN"},
+        {"claim": "A Statue of Liberty replica stood at the door in the New York New York years", "label": "inferred", "source": "General knowledge, not on the fetched page; confirm with photos before modelling"}
+      ],
+      "visual_details": [
+        {"detail": "A ten-storey box-shaped mall", "label": "measured"},
+        {"detail": "Dark glass-and-metal front with large LED screens and ATT 4 FUN lettering high on the facade (logo colours unknown — needs CJ)", "label": "inferred"},
+        {"detail": "Restaurant and bar terraces on the upper floors facing Taipei 101", "label": "inferred"},
+        {"detail": "Second-floor skybridge entrances on two sides", "label": "measured"}
+      ],
+      "location_vs_101": {"text": "No. 12 Songshou Road, about 200 m north of Taipei 101 and directly joined to it by skybridge; Vieshow is its neighbour to the west.", "label": "measured (address, bridge) + inferred (distance, bearing)"},
+      "sources": ["https://en.wikipedia.org/wiki/ATT_4_FUN"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:ATT_4_Fun_(Shopping_Mall)", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:ATT_4_Fun_(Shopping_Mall)_at_night", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "nan-shan-plaza",
+      "zh": "台北南山廣場與微風南山",
+      "en": "Taipei Nan Shan Plaza and Breeze Nan Shan",
+      "kind": "shop",
+      "years": "Construction began 2014-12-17; tower opened 2018-06-11; Breeze Nan Shan mall opening date (unknown — needs CJ)",
+      "history_en": "Taipei Nan Shan Plaza is the 272-metre, 48-storey tower that went up next door to Taipei 101 between December 2014 and June 2018, designed by the Japanese firm Mitsubishi Jisho Sekkei. It is the second tall shape in every recent skyline photo of Xinyi. The complex has three parts: the office tower, a seven-storey mall block run by Breeze Center as Breeze Nan Shan, and a diamond-shaped entrance building with about 1,600 square metres of public art space. It connects to Taipei 101, ATT 4 FUN and Vieshow by footbridge and underground passage. For people who came to Xinyi after 2019, its food floors are a regular stop.",
+      "history_zh": "台北南山廣場高272公尺、地上48層，由日本三菱地所設計，2014年12月動工、2018年6月11日啟用，緊鄰台北101。建築群包含辦公塔樓、微風南山商場與菱形入口藝文建築，並以空橋連通101與ATT 4 FUN。",
+      "facts": [
+        {"claim": "272 m, 48 floors above ground; architect Mitsubishi Jisho Sekkei; construction began 17 December 2014; opened 11 June 2018", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_Nan_Shan_Plaza"},
+        {"claim": "Three parts: 7-storey mall, 48-storey tower, diamond-shaped entrance building with about 1,600 m² of art space; the mall is run by Breeze Center; Songren Road on the east side; adjacent to Taipei 101", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_Nan_Shan_Plaza"},
+        {"claim": "Breeze Nan Shan opened to shoppers in January 2019", "label": "inferred", "source": "General knowledge, not confirmed on a fetched page; written as unknown in the years field"},
+        {"claim": "The Wikipedia article carries a needs-more-citations notice and disagrees with itself on basement count", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_Nan_Shan_Plaza"}
+      ],
+      "visual_details": [
+        {"detail": "A slender glass tower, 48 storeys, a little over half the height of Taipei 101, that narrows toward the top", "label": "measured (height, floors) + inferred (taper)"},
+        {"detail": "Silver-blue glass curtain wall with fine vertical lines", "label": "inferred"},
+        {"detail": "A separate seven-storey mall block beside the tower with a BREEZE sign", "label": "measured (seven storeys, Breeze) + inferred (sign)"},
+        {"detail": "A small faceted, diamond-shaped glass pavilion at the corner entrance", "label": "measured (diamond shape) + inferred (glass)"}
+      ],
+      "location_vs_101": {"text": "Immediately north of Taipei 101, about 150 m north-north-east of the tower, with Songren Road on its east side.", "label": "measured (adjacent, Songren Road) + inferred (distance, bearing)"},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_Nan_Shan_Plaza"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Taipei_Nan_Shan_Plaza", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:Breeze_Nanshan", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "taipei-101-opening-2004",
+      "zh": "台北101正式啟用",
+      "en": "Taipei 101 official opening",
+      "kind": "event",
+      "years": "2004-12-31",
+      "history_en": "Taipei 101 officially opened on 31 December 2004, five years after construction began and a little over a year after its mall was completed. At 508 metres it was the tallest building in the world at the time, a title it kept until Dubai's Burj Khalifa passed it. The opening week was treated as a festival: a French climber scaled the tower on Christmas Day as part of the programme, and a few hours after the ceremony the building fired its first New Year fireworks. For Xinyi, the opening fixed the district's centre for good; everything built since is measured against the tower.",
+      "history_zh": "台北101於2004年12月31日正式啟用，高508公尺，當時為世界第一高樓。啟用當週有攀登活動，典禮數小時後更首度施放跨年煙火，從此成為信義區的中心地標。",
+      "facts": [
+        {"claim": "Tower opened 31 December 2004; construction started 31 July 1999; mall completed 14 November 2003; height 508 m", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Alain Robert's climb on 25 December 2004 was part of the opening week's festivities", "label": "measured", "source": "https://en.wikipedia.org/wiki/Alain_Robert"},
+        {"claim": "World's tallest building at opening, until Burj Khalifa", "label": "inferred", "source": "General knowledge; in the unread half of the Wikipedia page"},
+        {"claim": "Who cut the ribbon at the ceremony", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "The tower lit at night against a dark sky, with a ribbon or banner across the main entrance", "label": "inferred"},
+        {"detail": "A date plate reading 2004.12.31", "label": "measured (date)"}
+      ],
+      "location_vs_101": {"text": "At the main entrance of Taipei 101 on the Xinyi Road side.", "label": "inferred"},
+      "marker": {"type": "立牌", "depicts": "A standing board shaped like the tower's silhouette, with the opening date and a height ruler comparing 508 m against the buildings around it."},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_101", "https://en.wikipedia.org/wiki/Alain_Robert"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:2004_at_Taipei_101", "licence": "Wikimedia Commons, per-file licence"}
+      ]
+    },
+    {
+      "id": "first-nye-fireworks-2005",
+      "zh": "台北101首次跨年煙火",
+      "en": "First Taipei 101 New Year fireworks",
+      "kind": "event",
+      "years": "2005-01-01 00:00 (night of 2004-12-31)",
+      "history_en": "The first Taipei 101 fireworks went off on the night of 31 December 2004, a few hours after the tower's opening ceremony, to welcome 2005. Reports say the show lasted only 35 seconds and that the building paid for it itself. The year before, with the tower unfinished, the countdown had been done with lights alone. From that short burst grew the yearly show that Taiwan watches on television and that fills Xinyi's streets, the City Hall plaza and the slopes of Xiangshan with people every 31 December; later shows ran for minutes rather than seconds.",
+      "history_zh": "台北101首次跨年煙火在2004年12月31日啟用典禮數小時後施放，迎接2005年。據報導全長僅35秒，由台北101自行出資，此後年年舉行，成為全台矚目的跨年傳統。",
+      "facts": [
+        {"claim": "First show on the night of 31 December 2004, a few hours after the opening ceremony", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Lasted 35 seconds from the first second of 2005; self-funded by Taipei 101 with a budget of about NT$3 million; 2004 countdown used lights only; 2006 show lengthened to 128 seconds", "label": "inferred", "source": "Search-result summaries of https://www.ettoday.net/news/20151223/618313.htm and https://udn.com/news/story/120910/9242252 (pages not opened)"}
+      ],
+      "visual_details": [
+        {"detail": "Fireworks shoot sideways from the edges of each of the eight segments, so the tower looks like a lit sparkler", "label": "inferred"},
+        {"detail": "A dense crowd in the streets below holding up phones and cameras", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "On the tower itself; best seen from the City Hall plaza about 400 m north and from Xiangshan to the south-east.", "label": "inferred"},
+      "marker": {"type": "stand", "depicts": "A small stand holding a model of the tower with sparks coming off each segment and a countdown clock stopped at 00:00, 2005."},
+      "sources": ["https://en.wikipedia.org/wiki/Taipei_101", "https://www.ettoday.net/news/20151223/618313.htm"],
+      "photo_refs": [
+        {"url": "https://www.ettoday.net/news/20151223/618313.htm", "licence": "News site, copyrighted (URL from search results, page not opened)"},
+        {"url": "https://commons.wikimedia.org/wiki/Category:Taipei_101", "licence": "Wikimedia Commons, per-file licence; look for a fireworks sub-category"}
+      ]
+    },
+    {
+      "id": "alain-robert-climb-2004",
+      "zh": "亞蘭·羅伯特攀登台北101",
+      "en": "Alain Robert climbs Taipei 101",
+      "kind": "event",
+      "years": "2004-12-25",
+      "history_en": "On Christmas Day 2004, six days before the official opening, French climber Alain Robert climbed the outside of Taipei 101. The climb was legal and invited, part of the opening week. He reached the top of the pinnacle in about four hours, double his own estimate, because heavy rain made the surface slick. A month earlier he had fallen two metres during a photo shoot and needed forty stitches in his elbow. A later news report says he used ropes on this climb. He was the first person to climb the tower, and for 21 years the only one widely remembered for it.",
+      "history_zh": "2004年12月25日，法國攀登家亞蘭·羅伯特受邀攀登台北101外牆，是啟用週活動之一。因大雨耗時約四小時，為原先預估的兩倍，並使用繩索確保，成為第一位攀上101的人。",
+      "facts": [
+        {"claim": "Authorized climb on 25 December 2004, top of the pinnacle in about four hours", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Legal, part of the opening week's festivities; four hours was double his estimate because of heavy rain; forty stitches in his elbow from a fall a month earlier", "label": "measured", "source": "https://en.wikipedia.org/wiki/Alain_Robert"},
+        {"claim": "He used ropes and took more than four hours", "label": "measured", "source": "https://www.cbsnews.com/news/alex-honnold-free-solo-climbs-taipei-101-skyscraper"}
+      ],
+      "visual_details": [
+        {"detail": "A small climber figure on the wet glass face with a safety rope running up above him; grey rain sky", "label": "inferred"},
+        {"detail": "Keep the figure generic: no face detail", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "On the tower's outer wall; place the marker at the foot of the tower.", "label": "inferred"},
+      "marker": {"type": "立牌", "depicts": "A standing board with a generic roped climber in the rain on a strip of the facade, dated 2004.12.25, standing next to the 2026 climb marker so the two can be compared."},
+      "sources": ["https://en.wikipedia.org/wiki/Alain_Robert", "https://en.wikipedia.org/wiki/Taipei_101", "https://www.cbsnews.com/news/alex-honnold-free-solo-climbs-taipei-101-skyscraper"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:2004_at_Taipei_101", "licence": "Wikimedia Commons, per-file licence; it may hold no photo of the climb itself"}
+      ]
+    },
+    {
+      "id": "alex-honnold-free-solo-2026",
+      "zh": "艾力克斯·霍諾德無繩攀登台北101",
+      "en": "Alex Honnold's rope-free climb of Taipei 101",
+      "kind": "event",
+      "years": "2026-01-25 (Sunday morning, Taipei time)",
+      "history_en": "On Sunday 25 January 2026, American climber Alex Honnold climbed the outside of Taipei 101 with no rope and no safety gear, and reached the top of the spire. Netflix streamed it live as Skyscraper Live. The climb had been set for the day before and was pushed back one day because of the weather. Wikipedia records his time as 1 hour, 31 minutes and 43 seconds. He paused after the stacked middle section, nicknamed the bamboo boxes, to wave at onlookers. On top he took a selfie and said it was windy, then roped up for the first time to come down. The climb was authorized; he is the first person to climb the tower without a rope.",
+      "history_zh": "2026年1月25日上午，美國攀岩家艾力克斯·霍諾德不用繩索與任何保護裝備，徒手攀上台北101塔尖，全程由Netflix直播。原訂前一日舉行，因天候延後一天，歷時約1小時31分。",
+      "facts": [
+        {"claim": "Authorized free solo climb on 25 January 2026, 1 hour 31 minutes 43 seconds, streamed by Netflix as Skyscraper Live", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "Sunday 25 January 2026; 1 hour 31 minutes for the 101 floors and spire; no ropes or safety gear; took a selfie at the top and said it was windy", "label": "measured", "source": "https://www.cbsnews.com/news/alex-honnold-free-solo-climbs-taipei-101-skyscraper"},
+        {"claim": "Climbed Sunday morning Taipei time, starting shortly after 8 p.m. ET Saturday; originally scheduled the day before, postponed a day for weather; paused after the bamboo boxes section; used a harness and rope only for the descent", "label": "measured", "source": "https://www.nbcnews.com/news/us-news/alex-honnolds-free-solo-climb-taipei-101-skyscraper-rcna255706"},
+        {"claim": "Local start time of about 9 a.m.", "label": "inferred", "source": "Converted from 8 p.m. ET; no fetched page states the Taipei clock time"},
+        {"claim": "Sources disagree on the original date: CBS says January 23, NBC says the day before the climb (Saturday January 24); this is likely a US-date versus Taipei-date difference", "label": "measured (the disagreement) + inferred (the reason)", "source": "CBS and NBC pages above"},
+        {"claim": "Sources disagree on the seconds: Wikipedia 1:31:43; a search summary of Bleacher Report gives 1:31:35", "label": "measured (Wikipedia) + inferred (Bleacher Report, page not opened)", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+        {"claim": "First person to climb the tower without a rope; stream ran on a 10-second delay", "label": "inferred", "source": "Search-result summaries of NPR / NBC local reports (pages not opened; the NPR page timed out)"},
+        {"claim": "Which corner or face he climbed, what he wore, crowd size at the base", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "A tiny lone climber figure with no rope on the outside of one of the eight flared segments, in daylight", "label": "measured (no rope, daytime) + inferred (pose)"},
+        {"detail": "A chalk bag at the waist; clothing colour (unknown — needs CJ); keep the figure generic with no face detail", "label": "inferred"},
+        {"detail": "People at the foot of the tower looking up", "label": "inferred"},
+        {"detail": "A timer plate reading 1:31:43 and the date 2026.01.25", "label": "measured"}
+      ],
+      "location_vs_101": {"text": "On the tower's outer wall from street level to the tip of the spire at 508 m; put the marker on the plaza at the tower's foot.", "label": "measured (height) + inferred (marker spot)"},
+      "marker": {"type": "statue", "depicts": "A small generic bronze climber, no rope, clinging to a one-storey sample of the tower's flared corner, with a plaque giving the date and the time 1:31:43."},
+      "sources": ["https://www.cbsnews.com/news/alex-honnold-free-solo-climbs-taipei-101-skyscraper", "https://www.nbcnews.com/news/us-news/alex-honnolds-free-solo-climb-taipei-101-skyscraper-rcna255706", "https://en.wikipedia.org/wiki/Taipei_101"],
+      "photo_refs": [
+        {"url": "https://www.nbcnews.com/news/us-news/alex-honnolds-free-solo-climb-taipei-101-skyscraper-rcna255706", "licence": "News site, copyrighted"},
+        {"url": "https://www.cbsnews.com/news/alex-honnold-free-solo-climbs-taipei-101-skyscraper", "licence": "News site, copyrighted"}
+      ]
+    },
+    {
+      "id": "covid-level-3-2021",
+      "zh": "2021年三級警戒下的信義區空城",
+      "en": "COVID-19 Level 3 alert: the empty streets of Xinyi",
+      "kind": "event",
+      "years": "Level 3 announced for Taipei and New Taipei 2021-05-15; nationwide from 2021-05-19; lowered 2021-07-27 (end date inferred)",
+      "history_en": "On 15 May 2021 Taiwan's epidemic command centre raised Taipei and New Taipei to a Level 3 alert, and on 19 May extended it to the whole country. There was no legal lockdown, but people stayed home anyway. The night after the announcement a photographer flew a drone over Xinyi and found the traffic and the crowds gone; public television described the district as looking like an empty city. Department stores shortened their hours, the Taipei 101 mall opened only from noon to 8 p.m. in late May, and the 89th-floor observatory closed. Some clothing shops reported sales down more than 80 percent.",
+      "history_zh": "2021年5月15日，雙北升為第三級警戒，19日擴及全國。民眾自主減少外出，隔日空拍的信義區夜景車潮人潮消失，宛如空城；百貨縮短營業時間，台北101觀景台也暫停開放。",
+      "facts": [
+        {"claim": "Level 3 for Taipei and New Taipei on 15 May 2021, nationwide on 19 May 2021", "label": "measured", "source": "https://news.pts.org.tw/article/527613"},
+        {"claim": "Aerial night photos of Xinyi taken the day after showed traffic and crowds gone, described as 宛如空城", "label": "measured", "source": "https://news.pts.org.tw/article/527613"},
+        {"claim": "Shin Kong Mitsukoshi, Far Eastern, Breeze and SOGO shortened hours; Taipei 101 mall ran 12:00–20:00 from 22 to 28 May and the 89th-floor observatory closed through 28 May; some apparel stores down more than 80 percent", "label": "measured", "source": "https://news.pts.org.tw/article/527613"},
+        {"claim": "The alert was lowered to Level 2 on 27 July 2021", "label": "inferred", "source": "General knowledge; not on a fetched page"}
+      ],
+      "visual_details": [
+        {"detail": "The same streets and skybridges with no people and no cars, shop shutters half down", "label": "measured (empty) + inferred (shutters)"},
+        {"detail": "A notice board at a mall door with shortened hours 12:00–20:00, a temperature-check stand and a hand-sanitiser bottle", "label": "measured (hours) + inferred (props)"},
+        {"detail": "A single generic figure in a surgical mask", "label": "inferred"}
+      ],
+      "location_vs_101": {"text": "Across the whole district; place the marker on Xiangti Avenue between the Shin Kong Mitsukoshi buildings, about 450 m north of Taipei 101, where the missing crowd is most obvious.", "label": "inferred"},
+      "marker": {"type": "立牌", "depicts": "A plain standing notice board like a shop closure sign, with a face-mask icon, the dates 2021.05.15 – 07.27 and an empty-street outline."},
+      "sources": ["https://news.pts.org.tw/article/527613"],
+      "photo_refs": [
+        {"url": "https://news.pts.org.tw/article/527613", "licence": "PTS news, copyrighted"}
+      ]
+    },
+    {
+      "id": "eslite-xinyi-last-night-2023",
+      "zh": "誠品信義店最後一夜",
+      "en": "Eslite Xinyi's last night",
+      "kind": "event",
+      "years": "2023-12-24, lights out 22:30",
+      "history_en": "Eslite Xinyi closed on Christmas Eve 2023, after 18 years, because its lease with landlord Uni-President Group ran out. On the last day the building was packed and staff set up queue lines to keep people moving through the shelves; public television quoted chairperson Wu Min-chieh on the memories visitors had left there. The lights went out at 10:30 p.m. A report says more than 75,000 people came on the day before. The store had been Taipei's only all-night bookstore since 2020, and that role moved to the Songshan Cultural and Creative Park branch in January 2024.",
+      "history_zh": "2023年12月24日平安夜，營運18年的誠品信義店因租約到期熄燈。最後一天店內擠滿人潮，工作人員拉起動線管制，晚間10時30分正式熄燈，24小時書店隨後移往松菸。",
+      "facts": [
+        {"claim": "Closed the evening of 24 December 2023, lights out at 10:30 p.m.; packed on the last day with queue lines; 18 years of operation; landlord Uni-President reclaimed the site as the lease expired; 24-hour store moves to Songyan; chairperson Wu Min-chieh quoted", "label": "measured", "source": "https://news.pts.org.tw/article/672922"},
+        {"claim": "Songyan became the 24-hour store on 20 January 2024", "label": "measured", "source": "https://en.wikipedia.org/wiki/Eslite_Bookstore"},
+        {"claim": "More than 75,000 visitors on 23 December; a farewell exhibition 遊逛.最終回──信義18年回顧展 and weekend concerts", "label": "inferred", "source": "Search-result summaries of https://www.chinatimes.com/realtimenews/20231225003340-260405 and https://www.taiwannews.com.tw/zh/news/5065867 (pages not opened)"},
+        {"claim": "What happened in the final minutes inside the store", "label": "unknown", "source": "(unknown — needs CJ)"}
+      ],
+      "visual_details": [
+        {"detail": "A crowd filling the forecourt and the escalators, many holding books and paper bags", "label": "measured (crowd) + inferred (details)"},
+        {"detail": "Warm yellow light in the windows with one floor already dark", "label": "inferred"},
+        {"detail": "A clock showing 22:30", "label": "measured"}
+      ],
+      "location_vs_101": {"text": "In front of No. 11 Songgao Road, about 650 m north of Taipei 101.", "label": "inferred"},
+      "marker": {"type": "small wall", "depicts": "A short wall built like a wooden bookshelf with one reading lamp left on, a clock at 22:30 and the dates 2006.01.01 – 2023.12.24; visitors' photos pin onto the shelf."},
+      "sources": ["https://news.pts.org.tw/article/672922", "https://en.wikipedia.org/wiki/Eslite_Bookstore"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Eslite_Xinyi_Store_at_night", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://news.pts.org.tw/article/672922", "licence": "PTS news, copyrighted"}
+      ]
+    },
+    {
+      "id": "hualien-earthquake-2024",
+      "zh": "2024年0403花蓮地震與101阻尼器",
+      "en": "3 April 2024 Hualien earthquake and the Taipei 101 damper",
+      "kind": "event",
+      "years": "2024-04-03 (morning)",
+      "history_en": "On the morning of 3 April 2024 a magnitude 7.2 earthquake struck near Hualien on Taiwan's east coast, the strongest the island had felt in 25 years. In Taipei the towers of Xinyi swayed, and Taipei 101 stayed standing. News outlets around the world explained why by pointing to the 660-tonne steel ball near its top, which swings against the building's movement and, by the tower's own figures, can cut the sway by up to 40 percent. No source read for this file gives a measured swing for that morning. The record on file is one metre, set in a 2015 typhoon.",
+      "history_zh": "2024年4月3日上午，花蓮近海發生規模7.2地震，為台灣25年來最強。信義區高樓搖晃，台北101安然無恙，各國媒體紛紛報導塔內660公噸的風阻尼器如何反向擺動、減少大樓晃動。",
+      "facts": [
+        {"claim": "3 April 2024, morning, magnitude 7.2 near Hualien County, strongest in 25 years; Taipei 101 remained standing; the damper can cut movement by up to 40 percent per Taipei 101", "label": "measured", "source": "https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper"},
+        {"claim": "How far the damper moved on 3 April 2024", "label": "unknown", "source": "(unknown — needs CJ); no figure found"},
+        {"claim": "Record swing 100 cm at 6:59 a.m. on 8 August 2015 (Typhoon Soudelor); largest earthquake swing on record 20 cm on 18 April 2019", "label": "inferred", "source": "Search-result summary of https://www.taiwannews.com.tw/en/news/3760667 (page not opened)"},
+        {"claim": "The quake struck at 07:58 local time", "label": "inferred", "source": "General knowledge; not on the fetched page"},
+        {"claim": "The 2002-03-31 earthquake toppled two cranes on the unfinished tower and killed five people", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"}
+      ],
+      "visual_details": [
+        {"detail": "The yellow damper ball shown tilted off-centre, with motion lines", "label": "inferred"},
+        {"detail": "A seismograph trace and the date 2024.04.03, M7.2", "label": "measured (date, magnitude)"}
+      ],
+      "location_vs_101": {"text": "Inside the tower on floors 88–92; put the marker at the tower's foot beside the damper kiosk.", "label": "inferred"},
+      "marker": {"type": "stand", "depicts": "A stand holding a small golden pendulum ball that swings when the visitor clicks it, over a plate reading 2024.04.03 M7.2."},
+      "sources": ["https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper", "https://en.wikipedia.org/wiki/Taipei_101"],
+      "photo_refs": [
+        {"url": "https://commons.wikimedia.org/wiki/Category:Mass_damper_of_Taipei_101", "licence": "Wikimedia Commons, per-file licence"},
+        {"url": "https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper", "licence": "News site, copyrighted"}
+      ]
+    }
+  ],
+  "other_candidates_not_written_up": [
+    {"item": "Felix Baumgartner's unauthorized BASE jump from the 91st floor, 2007-12-12", "label": "measured", "source": "https://en.wikipedia.org/wiki/Taipei_101"},
+    {"item": "World Trade Center footbridge on Keelung Road, opened July 1992, demolished 2022, a well-known photo spot", "label": "inferred", "source": "Search-result summary of a Taiwan News topic page (not opened)"},
+    {"item": "Good Cho's (好丘) at Four Four South Village, 2011 to 2025-11-23", "label": "measured", "source": "https://zh.wikipedia.org/zh-tw/四四南村"},
+    {"item": "2014 Sunflower movement and other large rallies: no evidence found that they took place in this district; left out", "label": "inferred", "source": "Not researched in depth"},
+    {"item": "Taipei Lantern Festival years held in Xinyi", "label": "unknown", "source": "(unknown — needs CJ)"}
+  ]
+}

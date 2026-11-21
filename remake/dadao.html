@@ -14,21 +14,25 @@
 <script src="engine.js"></script>
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="places.js"></script>
+<script src="landmarks-dadao.js"></script>
 <script>
 // 大稻埕: 迪化街 at Lunar New Year (年貨大街), 2000s–2010s. A STREET, not a plaza: 9 m between the arcades,
 // about 70 m long, running north (−z) from the archway. Halfway down, 霞海城隍廟's forecourt opens on the east
 // side; further on, 永樂市場 stands back behind its stalls, and a lane on the west drops to the Tamsui wharf.
 // Only this block's layout lives here; light, sky, ground, builders, finishing chain and controls are in engine.js.
 const ZC = i => 29.6 - i * 4.8, FX = 5.3;                        // shophouse slot centres along the street; origins sit FX out, so fronts stand 9 m apart
-const WEST = ['yang2', 'min1', 'bar3', 'min3', 'yang2', 'min1', 'bar2', 'min1', 'yang3', null, 'min3', 'bar2', 'min1', 'yang2', 'bar3', 'min1', 'yang2', 'min3'];   // null: the lane to the river
-const EAST = ['min3', 'bar2', 'yang3', 'min1', 'bar2', null, null, null, 'yang2', null, null, null, null, 'bar3', 'yang2', 'min3', 'bar2', 'yang3'];             // gaps: temple forecourt, market front
-const AREAS = [[-4.0, 4.0, -33.6, 38.5], [4.0, 10.6, -5.4, 7.0], [4.0, 9.6, -29.4, -12.2], [-27.5, -4.0, -15.3, -11.9]];   // street, forecourt, market front, lane: [minX, maxX, minZ, maxZ]
+// 'L': a landmark built in landmarks-dadao.js stands in that slot (新芳春 2–3, 乾元 6, 屈臣氏 7–8, 波麗路 10 and its second shop 12, 偶戲館 11, 李臨秋 13 on the west; 義美 0, 天馬 3 on the east)
+const WEST = ['yang2', 'min1', 'L', 'L', 'yang2', 'min1', 'L', 'L', 'L', null, 'L', 'L', 'L', 'L', 'bar3', 'min1', 'yang2', 'min3'];   // null: the lane to the river
+const EAST = ['L', 'bar2', 'yang3', 'L', 'bar2', null, null, null, 'yang2', null, null, null, null, null, null, 'min3', 'bar2', 'yang3'];             // gaps: temple forecourt, market front, 慈聖宮's yard
+const AREAS = [[-4.0, 4.0, -39.4, 38.5], [4.0, 10.6, -5.4, 7.0], [4.0, 9.6, -29.4, -12.9], [-27.5, -4.0, -15.3, -11.9], [4.0, 8.2, -39.2, -31.4]];   // street, forecourt, market front, lane, 慈聖宮's yard: [minX, maxX, minZ, maxZ]
 const BLOCKS = [];                                                 // things she walks round: [x, z, radius]
 const camQ = new URLSearchParams(location.search).get('cam');      // ?view=1&cam=px,py,pz,tx,ty,tz : a free camera for checking
 ENGINE.create({
   title: '大稻埕 · 迪化街年貨大街', subtitle: 'Dihua Street at Lunar New Year, 2000–2019', loading: 'Hanging the lanterns…',
   sunDir: [-24, 30, -46], shadowCenter: [0, 0, -2], start: { x: 0.4, z: 29.5, heading: Math.PI },
-  views: [camQ ? camQ.split(',').map(Number) : [0.9, 1.6, 48, -0.2, 5.6, 10], [-2.9, 1.5, 11.5, 9.5, 4.6, -1.5], [0.9, 1.3, 15, -0.6, 6.2, -30], [-3.6, 11.5, 24, 5.5, 1.5, -8], [-2.8, 1.5, -9.5, 10, 9.5, -22], [1.6, 1.6, -13.3, -30, 2.3, -13.8]],
+  views: [camQ ? camQ.split(',').map(Number) : [0.9, 1.6, 48, -0.2, 5.6, 10], [1.8, 2.0, 25.6, -7, 5.0, 16.5], [0.4, 1.7, 11.2, 10.5, 4.4, -1.4], [3.7, 2.2, 3.8, -6, 5.2, -5], [-3.0, 2.2, -23.5, 9, 5.5, -33], [1.6, 1.6, -13.3, -30, 2.6, -13.8]],   // archway · 新芳春茶行 · 霞海城隍廟 · 乾元 and 屈臣氏 · 戲苑 tower and 慈聖宮 · the lane to the water gate
   ground: { puddles: 14, puddle: (rr) => [rr(-3.6, 3.6), rr(-33, 33), rr(0, 3)] },   // wet brick from wall to wall
   dust: { x: [-6, 12], y: [0.3, 8], z: [-36, 36] },
   clamp(p) {
@@ -51,9 +55,10 @@ ENGINE.create({
   const zone2 = get(dadao, 'dihua-zone2'), kit = (...parts) => { const g = new T.Group(); parts.forEach(n => g.add(get(zone2, n).clone())); return g; };
   const KIND = { min3: () => get(dadao, 'dihua-min').clone(), yang3: () => get(dadao, 'dihua-yang').clone(), bar3: () => get(dadao, 'dihua-baroque').clone(),
     min1: () => kit('arcade', 'min'), yang2: () => kit('arcade', 'yang', 'yang_crest'), bar2: () => kit('arcade', 'baroque', 'baroque_crest') };
+  const HOUSES = {};                                               // 'side:slot' -> the house there, so a landmark can make it clickable
   const plasters = ['#d8c8ac', '#cdb694', '#c2b3a4', '#b4bba6', '#d0aa86', '#bdb4a4', '#d9c39c'], bricks = ['#ffffff', '#e9d2c4', '#f3e2cf', '#dcc0b0'];
   const house = (kind, side, i) => {
-    const h = KIND[kind](); h.position.set(side * FX, 0, ZC(i)); h.rotation.y = -side * Math.PI / 2;
+    if (!KIND[kind]) return; const h = KIND[kind](); HOUSES[side + ':' + i] = h; h.position.set(side * FX, 0, ZC(i)); h.rotation.y = -side * Math.PI / 2;
     dress(h, { swap: { bone: triMat({ color: plasters[(i * 3 + (side > 0 ? 2 : 0)) % plasters.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }), brick: triMat({ color: bricks[(i + (side > 0 ? 1 : 0)) % bricks.length], tex: TEX.brick, scale: 1.0, rough: 0.9 }) } });
     scene.add(h);
   };
@@ -63,7 +68,7 @@ ENGINE.create({
   const arch = dress(get(get(dadao, 'dadao-entrance'), 'portal').clone()); arch.position.set(0, 0, 34.4); scene.add(arch);
 
   // ── 霞海城隍廟 and its forecourt, opening off the east side halfway down ──
-  place(dadao, 'temple', 14.0, 0.8, -Math.PI / 2);
+  const templeM = place(dadao, 'temple', 14.0, 0.8, -Math.PI / 2);
   const paving = triMat({ color: '#a79c8c', tex: TEX.concrete, scale: 0.6, rough: 0.5 });
   add(new T.BoxGeometry(7.2, 0.03, 14.4), paving, 8.1, 0.012, 0.8, false);
   { const bronze = triMat({ color: '#6b5a3c', tex: TEX.metal, scale: 2, rough: 0.35, metal: 0.8 }), bx = 7.3, bz = 0.8;      // the incense burner, smoking
@@ -73,7 +78,7 @@ ENGINE.create({
     for (let i = 0; i < 3; i++) steamSrc.push(new T.Vector3(bx + rr(-0.2, 0.2), 1.45, bz + rr(-0.2, 0.2))); BLOCKS.push([bx, bz, 1.1]); }
 
   // ── 永樂市場, standing back behind its own stalls ──
-  place(dadao, 'yongle', 10.9, -20.8, -Math.PI / 2, 0.85);
+  const yongleM = place(dadao, 'yongle', 10.9, -20.8, -Math.PI / 2, 0.85);
   add(new T.BoxGeometry(6.2, 0.03, 19.2), paving, 7.6, 0.012, -20.8, false);
 
   // ── lanterns close overhead: a string across the street every two metres, zig-zagging ──
@@ -81,6 +86,7 @@ ENGINE.create({
   const anchor = (side, z, k) => {                                // where a string can be tied on that side of the street at z
     const kind = kindAt(side < 0 ? WEST : EAST, z);
     if (kind) return new T.Vector3(side * 4.45, kind === 'min1' ? 4.35 : 5.7 + (k % 3) * 0.45, z);
+    if (side > 0 && z < -30.4) return new T.Vector3(9.3, 6.0 + (k % 2) * 0.3, z);   // 慈聖宮's roof
     if (side < 0) return null;                                    // the lane mouth: nothing to tie to
     return z > -8 ? new T.Vector3(11.2, 6.3, z) : new T.Vector3(10.4, 7.0 + (k % 2) * 0.5, z);   // the temple's eave, or the market's front
   };
@@ -124,21 +130,21 @@ ENGINE.create({
     card(...PRICES[pc % PRICES.length], x - side * 0.62, z + e * 2.4, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
     card(...PRICES[pc % PRICES.length], x - side * 0.6, z + e * 3.3, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
   };
-  [[-3.05, 24.6], [-3.05, 2.4], [-3.05, -6.6], [-3.05, -22.2], [-3.05, -30.8]].forEach(([x, z]) => goods(x, z, -1));
-  [[3.05, 14.2], [3.05, -9.6], [3.05, -32.4]].forEach(([x, z]) => goods(x, z, 1));
-  [[8.3, -14.6], [8.3, -20.8], [8.3, -27]].forEach(([x, z]) => goods(x, z, 1));                 // the market's own row
-  [[-3.0, 13.4, Math.PI / 2, 8], [3.0, 23.6, -Math.PI / 2, 205], [-3.0, -38.5, Math.PI / 2, 135]].forEach(([x, z, r, h]) => { stall(x, z, r, h); BLOCKS.push([x, z - 0.8, 1.35], [x, z + 0.8, 1.35], [x + Math.sign(-x) * 1.3, z, 0.8]); });
+  [[-3.05, 27.4], [-3.05, -28.2]].forEach(([x, z]) => goods(x, z, -1));          // fewer than before: the landmark fronts keep their own goods under the arcade
+  [[3.05, -9.6]].forEach(([x, z]) => goods(x, z, 1));
+  [[8.3, -17.6], [8.3, -23.6]].forEach(([x, z]) => goods(x, z, 1));                 // the market's own row
+  [[-3.0, 9.8, Math.PI / 2, 8], [3.0, 25.0, -Math.PI / 2, 205], [-3.0, -38.5, Math.PI / 2, 135], [6.9, -32.0, Math.PI, 28]].forEach(([x, z, r, h]) => { stall(x, z, r, h); BLOCKS.push([x, z - 0.8, 1.35], [x, z + 0.8, 1.35], [x + Math.sign(-x) * 1.3, z, 0.8]); });
   // sacks, crates and boxes where the goods were unloaded; scooters and a bicycle against the piers
   const props = get(core, 'props'), pr = n => get(props, n), scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
-  [[-3.6, 20.2, 'sack'], [-3.3, 19.6, 'sack'], [-3.75, 6.6, 'crate'], [-3.5, -2.2, 'boxes'], [-3.7, -1.6, 'sack'], [3.6, 10.4, 'crate'], [3.7, 9.7, 'boxes'], [3.6, 18.6, 'sack'], [3.5, -5.2, 'sack'], [-3.7, -18.0, 'crate'], [-3.4, -26.6, 'sack'], [3.7, -28.9, 'boxes'], [6.0, -11.9, 'sack'], [5.4, -29.6, 'crate'], [9.9, 6.6, 'boxes']]
+  [[-3.75, 12.2, 'crate'], [3.6, 10.4, 'crate'], [3.7, 9.7, 'boxes'], [3.6, 22.6, 'sack'], [3.5, -5.2, 'sack'], [-3.7, -9.4, 'crate'], [-3.4, -26.2, 'sack'], [3.7, -28.9, 'boxes'], [5.4, -29.6, 'crate']]
     .forEach(([x, z, n]) => { for (let j = 0; j < 2; j++) { const o = dress(pr(n).clone()); o.position.set(x + rr(-0.25, 0.25), 0, z + j * 0.55); o.rotation.y = rr(0, 6.28); o.scale.setScalar(rr(1.0, 1.35)); scene.add(o); } });
-  [[-3.8, 29.2, 1.2], [3.85, 28.4, -1.9], [-3.85, -9.9, 1.5], [3.85, -36.8, -1.4], [-3.8, -34.6, 1.8], [-1.7, 37.3, 0.3], [-2.4, 37.5, 0.1], [-3.2, 37.4, -0.2]].forEach(([x, z, ry], i) => { const sc = dress(scooters.children[i % 3].clone()); sc.position.set(x, 0, z); sc.rotation.y = ry; scene.add(sc); });
-  { const b = dress(pr('bicycle').clone()); b.position.set(-3.9, 0, 9.4); b.rotation.y = 0.15; scene.add(b); }
+  [[-3.8, 29.9, 1.2], [3.85, 22.0, -1.9], [-3.85, -27.0, 1.5], [3.85, -36.8, -1.4], [-3.8, -34.6, 1.8], [-1.7, 37.3, 0.3], [-2.4, 37.5, 0.1], [-3.2, 37.4, -0.2]].forEach(([x, z, ry], i) => { const sc = dress(scooters.children[i % 3].clone()); sc.position.set(x, 0, z); sc.rotation.y = ry; scene.add(sc); });
+  { const b = dress(pr('bicycle').clone()); b.position.set(-3.9, 0, 23.4); b.rotation.y = 0.15; scene.add(b); }
   [[4.9, 7.4, 1], [4.9, -5.8, 1], [10.6, 6.9, 1], [10.6, -5.2, 1], [5.0, -11.7, 0], [5.0, -30.0, 0], [-4.9, -11.6, 1], [-4.9, -15.6, 1]].forEach(([x, z, kind]) => { const p = dress(planter.children[kind].clone()); p.position.set(x, 0, z); p.rotation.y = kind ? 0 : Math.PI / 2; scene.add(p); });
 
   // ── shop signs on the fronts: dried goods, herbs, cloth, tea ──
   const words = ['南北貨', '中藥行', '布莊', '茶行', '蔘藥行', '乾貨', '烏魚子', '燕窩', '糖果', '臘味', '金紙店', '竹器', '米行', '干貝', '紅棗', '蜜餞', '香菇', '魚翅', '漢方', '布行', '茶葉', '雜糧', '餅舖', '香舖'];
-  let wi = 0; [[WEST, -1], [EAST, 1]].forEach(([row, side]) => row.forEach((kind, i) => { if (!kind || kind === 'min1' || i > 15) return; const w = words[wi % words.length];
+  let wi = 0; [[WEST, -1], [EAST, 1]].forEach(([row, side]) => row.forEach((kind, i) => { if (!kind || kind === 'L' || kind === 'min1' || i > 15) return; const w = words[wi % words.length];
     sign(w, side * 4.16, 5.3 + (wi % 3) * 0.35, ZC(i) + (wi % 2 ? 1.75 : -1.75), 0, [4, 38, 210, 150, 350, 28][wi % 6], wi % 3 === 0); wi++; }));
   const nameBoard = (lines, w, h, x, y, z, ry, bg, fg) => { const b = board(lines, w, h, bg, fg, 0.45); b.position.set(x, y, z); b.rotation.y = ry; scene.add(b); return b; };
   nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a');
@@ -150,6 +156,10 @@ ENGINE.create({
     temple: [7.2, -4.6, 0, 'shrine'],                             // a small shrine wall with lanterns on the forecourt's south side, facing whoever walks up the street
     fabric: [4.9, -17.7, -Math.PI / 2, 'shop'],                   // a shop front at the kerb of the market's own front
     wharf: [-23, -10.5, Math.PI - 0.5, 'wall', { accent: '#1f2a44' }] } });   // a wall on the quay where the lane opens out, turned toward whoever comes down the lane
+
+  // ── the researched places and events: landmark buildings, their signs, and a clickable marker for every event ──
+  LANDMARKS_DADAO(E, { FX, sq, temple: templeM, yongle: yongleM, houses: HOUSES, BLOCKS, AREAS });
+  PLACES.mount(E, { district: 'dadao' });
 
   // ── trees: banyans outside the archway, in the forecourt's corner and at the end of the lane ──
   banyans(get(sq, 'sq-banyan'), [[-10.5, 36.2, 'banyanM', 0.95], [10.8, 36.6, 'banyanM', 0.9], [-22.5, -6.8, 'banyanM', 0.85]]);

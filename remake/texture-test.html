@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · Painted textures, before and after</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script>
+// A/B test: each pair of walls is the same box under the same light.
+// Left of each pair = the engine's drawn-in-code texture. Right = the Midjourney painted texture.
+// The painted pictures are 16:9; two rows are stacked so one tile is close to square (about 11% squeeze).
+function painted(T, name, done) {
+  const im = new Image();
+  im.onload = () => { const c = document.createElement('canvas'); c.width = 1024; c.height = 1152; const g = c.getContext('2d'); g.drawImage(im, 0, 0, 1024, 576); g.drawImage(im, 0, 576, 1024, 576);
+    const t = new T.CanvasTexture(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.encoding = T.sRGBEncoding; t.anisotropy = 8; done(t); };
+  im.src = '../asset/textures/painted/' + name + '.jpg';
+}
+ENGINE.create({
+  title: '貼圖比較 · Texture test', subtitle: 'Left of each pair: drawn in code. Right: painted in Midjourney.',
+  shadowCenter: [0, 0, 0], start: { x: 0, z: 5, heading: Math.PI },
+  bounds: { minX: -14, maxX: 14, minZ: -2, maxZ: 10 },
+  views: [[0, 2.2, 9.5, 0, 2, -4], [-8, 1.8, 2.5, -8, 1.9, -4], [0, 1.8, 2.5, 0, 1.9, -4], [8, 1.8, 2.5, 8, 1.9, -4], [-8, 1.7, -1.6, -6.2, 1.7, -4], [8, 3, 4, 8, 3, -4]],
+  ground: { strips: [{ w: 2.8, len: 18 }], puddles: 3, puddle: (rr) => [rr(-8, 8), rr(0, 6), rr(0, 3)] },
+  dust: { x: [-12, 12], y: [0.3, 6], z: [-5, 9] },
+  models: [],
+  build(E) {
+    const { T, scene, TEX, triMat, MATS, board } = E;
+    const wall = (x, mat, label) => { const w = new T.Mesh(new T.BoxGeometry(3.4, 4, 0.5), mat); w.position.set(x, 2, -4); w.castShadow = w.receiveShadow = true; scene.add(w);
+      const b = board([[label, 60, 0.55]], 3.4, 0.5, '#1f2a44', '#f1e7d2', 0.5, 1024); b.position.set(x, 4.35, -4); scene.add(b); return w; };
+    const PAIRS = [
+      [-8, 'brick',    () => MATS.brick, 0.5, '#ffffff', 0.9, 'Brick'],
+      [0,  'terrazzo', () => triMat({ color: '#d9cbb2', tex: TEX.plaster, scale: 0.35, rough: 0.82 }), 0.4, '#ffffff', 0.85, 'Wall finish'],
+      [8,  'glass',    () => MATS.glass, 0.22, '#ffffff', 0.25, 'Glass'],
+    ];
+    PAIRS.forEach(([x, name, old, scale, color, rough, label]) => {
+      wall(x - 1.8, old(), label + ' · code');
+      const w = wall(x + 1.8, triMat({ color: '#888888' }), label + ' · painted');
+      painted(T, name, t => { w.material = triMat({ color, tex: t, scale, rough, metal: name === 'glass' ? 0.35 : 0 }); });
+    });
+  },
+});
+</script>
+</body>
+</html>

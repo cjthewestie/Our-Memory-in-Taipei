@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · Place and event markers</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script src="photo-topics.js"></script>
+<script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="places.js"></script>
+<script>
+// A test page for places.js: one marker of each type, every statue shape, and one "existing building" target,
+// all with real items from PLACE_DATA. Nothing here is a block of the site.
+//   ?place=<key>          opens that item's panel on load
+//   ?pltest=add:<key>     adds one drawn picture to that item's photos, then opens its panel and prints PLTEST lines
+//   ?pltest=near:<key>    stands her beside that marker (the E prompt), then prints PLTEST lines
+//   ?pltest=e:<key>       the same, then presses E      ·  ?pltest=click:<key>  clicks the marker on the canvas
+//   ?pltest=esc:<key>     opens the panel, presses W (she must not move), then Esc
+const QS = new URLSearchParams(location.search);
+if (QS.get('debug') === '1') { const st = document.createElement('style'); st.textContent = '#load { transition: none !important; }'; document.head.appendChild(st); }   // headless shots: no half-faded loading cover
+const E0 = ENGINE.create({
+  title: '地點與事件 · Place markers test', subtitle: 'Click a marker, or walk up to one and press E.',
+  sunDir: [-26, 30, 34], shadowCenter: [0, 0, 0], start: { x: 0, z: 6, heading: Math.PI },   // the sun stands behind the camera here, so the fronts of the markers are lit
+  clamp(p) { p.x = Math.max(-16, Math.min(16, p.x)); p.z = Math.max(-9, Math.min(12, p.z)); PHOTOWALL.keepOut(p); },
+  views: [[0, 2.6, 10.5, 0, 1.5, 0], [-7.5, 1.7, 4.4, -5.6, 1.5, 0], [-0.8, 1.7, 4.6, -1.9, 1.4, 0], [3.2, 1.9, 4.6, 2.1, 1.3, 0], [8.6, 1.7, 4.8, 6.4, 1.1, 0], [0, 3.2, -1.5, 0, 1.6, -8]],
+  ground: { strips: [{ w: 3, len: 30, turn: true, z: 3.4 }], puddles: 3, puddle: (rr) => [rr(-8, 8), rr(4, 9), rr(0, 3)] },
+  dust: { x: [-14, 14], y: [0.3, 6], z: [-8, 10] },
+  models: [],
+  build(E) {
+    const { T, scene, TEX, triMat, MATS, board } = E;
+    const X = k => PLACES.item('xinyi', k), M = k => PLACES.item('ximen', k), D = k => PLACES.item('dadao', k);
+    // front row: one marker of each type
+    PLACES.add(E, D('dadaocheng-fireworks'), { type: 'stand', position: [-5.6, 0], rotation: 0 });
+    PLACES.add(E, X('alain-robert-climb-2004'), { type: 'board', position: [-1.9, 0.4], rotation: 0.12 });
+    PLACES.add(E, X('alex-honnold-free-solo-2026'), { type: 'statue', position: [2.1, 0], rotation: -0.1 });
+    PLACES.add(E, M('railway-underground-1989'), { type: 'wall', position: [6.4, 0.2], rotation: -0.18 });
+    // back row: the other bronzes and boards
+    PLACES.add(E, M('zhonghua-market-1992'), { type: 'statue', position: [-9, -8], rotation: 0.3 });
+    PLACES.add(E, X('first-nye-fireworks-2005'), { type: 'statue', shape: 'firework', position: [-6, -8.4] });
+    PLACES.add(E, X('hualien-earthquake-2024'), { type: 'statue', shape: 'damper', position: [-3, -8.4] });
+    PLACES.add(E, X('taipei-101-opening-2004'), { type: 'statue', shape: 'tower', position: [0, -8.4] });
+    PLACES.add(E, D('city-god-procession'), { type: 'statue', position: [3, -8.4] });
+    PLACES.add(E, D('228-flash-point-1947'), { type: 'statue', position: [6, -8] });
+    PLACES.add(E, D('new-year-goods-street'), { type: 'board', position: [9, -7.6], rotation: -0.3 });
+    PLACES.add(E, X('eslite-xinyi-last-night-2023'), { type: 'wall', position: [12.4, -4], rotation: -1.1 });
+    PLACES.add(E, M('lai-lai-closes-2003'), { position: [-12, -5], rotation: 0.9 });               // no type: the item's own marker type
+    // an existing building registered as a target, with a plaque on its wall
+    const shop = new T.Group(); shop.position.set(11.5, 0, 3); shop.rotation.y = -Math.PI / 2;
+    const body = new T.Mesh(new T.BoxGeometry(4.2, 3.4, 2.6), MATS.brick); body.position.y = 1.7; body.castShadow = body.receiveShadow = true; shop.add(body);
+    const sg = board([['蜂大咖啡', 150, 0.5]], 3.2, 0.7, '#1f2a44', '#f1e7d2', 0.5); sg.position.set(0, 2.9, 1.37); shop.add(sg); scene.add(shop);
+    PLACES.add(E, M('fong-da'), { target: shop, plaque: { position: [10.14, 1.5, 4.6], rotation: -Math.PI / 2 } });
+    PHOTOWALL.block({ x: 11.5, z: 3, facing: -Math.PI / 2, hw: 2.1, hd: 1.3 });
+    window.PL = PLACES.mount(E, { district: 'xinyi' });
+  },
+});
+
+// ── self-test, only with ?pltest= ──
+(async () => {
+  const q = QS.get('pltest'); if (!q) return; const [mode, key] = q.split(':');
+  let FRAME = 0; (function count() { FRAME++; requestAnimationFrame(count); })();   // headless virtual time runs timers ahead of drawing, so the tests wait for drawn frames
+  const wait = ms => new Promise(r => setTimeout(r, ms)), frames = async n => { const f0 = FRAME; for (let i = 0; i < 300 && FRAME - f0 < n; i++) await wait(30); }, done = () => { window.__pltestDone = true; }, say = (tag, o) => console.log('PLTEST ' + tag + ' ' + JSON.stringify(o));
+  while (!(window.__remake && window.__remake.ready && window.__places)) await wait(100);
+  const e = __places.entries.find(x => x.key === key), panel = () => ({ open: __places.isOpen(), current: __places.current(), title: (document.querySelector('.pl-card h2') || {}).textContent,
+    badge: !document.querySelector('.pl-badge').hidden, zh: document.querySelector('.pl-zh').textContent.length, en: document.querySelector('.pl-his').textContent.length,
+    sources: [...document.querySelectorAll('.pl-links a')].map(a => a.target + '|' + a.rel).filter((x, i, l) => l.indexOf(x) === i), nSources: document.querySelectorAll('.pl-links a').length,
+    tiles: document.querySelectorAll('.pl-tile').length, addButton: !document.querySelector('.pl-add').hidden, param: new URLSearchParams(location.search).get('place') });
+  say('list', __places.list().map(x => x.key + ':' + x.type));
+  if (mode === 'add') {
+    __places.open(key); await e.shelf.ready; say('before', panel());
+    const cv = document.createElement('canvas'); cv.width = 1200; cv.height = 900; const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 900);
+    gr.addColorStop(0, '#f7b267'); gr.addColorStop(1, '#3d2c4a'); g.fillStyle = gr; g.fillRect(0, 0, 1200, 900); g.fillStyle = '#fff3d6'; g.font = '700 110px sans-serif'; g.textAlign = 'center'; g.fillText('TEST ' + key.slice(0, 14), 600, 470);
+    const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+    say('added', await e.shelf.add({ file: new File([blob], 't.png', { type: 'image/png' }), body: '測試照片 · a test photo', year: 2004, name: 'pltest' }));
+    await frames(12); say('after', panel());
+    say('records', (await __photowall.records()).map(r => ({ key: r.key, section: r.section, topic: r.topic, body: r.body, blobBytes: r.blob && r.blob.size })));
+    return done();
+  }
+  const P = e.pos, th = e.group ? e.group.rotation.y : 0; E0.heroPos.set(P.x + Math.sin(th) * 2.1, 0, P.z + Math.cos(th) * 2.1); E0.cam(th + 0.5, 0.2, 4.2);
+  await frames(20); say('near', { near: __places.near(), prompt: !document.querySelector('.pl-go').hidden, text: document.querySelector('.pl-go').textContent });
+  if (mode === 'e') { document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true })); await frames(10); say('afterE', panel()); }
+  if (mode === 'click') { const v = new THREE.Vector3(P.x, 1.2, P.z).project(E0.camera), r = E0.canvas.getBoundingClientRect(), x = r.left + (v.x * 0.5 + 0.5) * r.width, y = r.top + (-v.y * 0.5 + 0.5) * r.height;
+    ['pointerdown', 'pointerup'].forEach(t => E0.canvas.dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, pointerId: 7, pointerType: 'mouse', bubbles: true }))); await frames(10); say('afterClick', panel()); }
+  if (mode === 'esc') { __places.open(key); await frames(10); const a = E0.heroPos.clone();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', bubbles: true })); await frames(45);
+    say('walkWhileOpen', { open: __places.isOpen(), moved: +E0.heroPos.distanceTo(a).toFixed(3), keyW: !!E0.keys.w, focusInPanel: document.querySelector('.pl-card').contains(document.activeElement) });
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await frames(10); say('afterEsc', panel());
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', bubbles: true })); await frames(45); say('walkAfterClose', { moved: +E0.heroPos.distanceTo(a).toFixed(3) }); }
+  done();
+})();
+</script>
+</body>
+</html>
