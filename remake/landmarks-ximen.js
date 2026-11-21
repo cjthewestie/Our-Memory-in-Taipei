@@ -312,12 +312,17 @@ function wannian() {
   [[-5.0, -2.4], [2.6, 5.0]].forEach(([a, b]) => { K.bx(a, b, 0.5, 3.4, -0.6, -0.55, M.pane); K.bx(a, b, 0, 0.5, -0.7, -0.1, M.greenDk); K.bx(a + 0.05, b - 0.05, 0.5, 3.4, -3.18, -3.14, M.shopLit);
     for (let s = 0; s < 5; s++) { const y = 0.55 + s * 0.55; K.bx(a + 0.05, b - 0.05, y, y + 0.03, -1.5, -0.75, M.jar); for (let k = 0; k < 7; k++) { const gx = a + 0.1 + k * (b - a - 0.2) / 7; K.bx(gx, gx + 0.26, y + 0.03, y + rr(0.2, 0.48), -1.4, -0.9, pick(CLOTH)); } } });     // model-kit boxes stacked to the ceiling
   K.mesh(sign('豪華鐘錶公司', 2.3, 0.42, { kind: 'box', bg: '#f1ead6', fg: '#1a1a1a', spread: true, glow: 0.8, oneSide: true }), -3.7, 3.62, 0.06); K.mesh(sign('萬年冰宮', 2.3, 0.42, { kind: 'box', bg: '#1f4f9c', fg: '#ffffff', spread: true, glow: 0.8, oneSide: true }), 3.8, 3.62, 0.06);
-  K.mesh(sign('萬年', 5.6, 1.5, { font: FONT, weight: 900, bg: '#efe6cf', fg: '#1a1a1a', border: false, glow: 0.5, oneSide: true }), 0, G + 0.62, 0.08);
+  K.mesh(sign('萬年', 3.2, 1.1, { font: FONT, weight: 900, bg: '#efe6cf', fg: '#1a1a1a', border: false, spread: true, glow: 0.5, oneSide: true }), 0, G + 0.75, 0.1);
   // the corner fin: a three-sided neon tower, name running down nine floors
-  const fx = x0 - 0.05; K.box(1.5, top - G - 1, 1.5, M.greenDk, fx, (top + G + 1) / 2, 0.15, Math.PI / 4);
-  [[-Math.PI / 4, -0.62, 0.72], [Math.PI / 4, 0.62, 0.72]].forEach(([ry, dx, dz]) => K.mesh(sign('萬年商業大樓', 1.34, 19, { vertical: true, font: FONT, weight: 900, bg: '#3f8a66', fg: '#e3261c', border: false, glow: 1.1, oneSide: true, ppm: 52 }), fx + dx, G + 15.6, 0.15 + dz, ry));
+  // the front as the 2020 photo shows it: green with narrow white ribs, few windows; the name down the middle in red block characters under the dark oval; tenant signs hung either side
+  const LG = tm('#6fae62', TEX.concrete, 1.2, 0.55); K.bx(x0, x1, G + 1.5, top + 1.1, 0, 0.08, LG); for (let x = x0 + 0.3; x < x1; x += 0.62) K.bx(x - 0.07, x + 0.07, G + 1.5, top + 1.1, 0.08, 0.2, M.white);
+  for (let f = 0; f < 8; f++) [-3.4, 3.4].forEach(x => { if (rnd() < 0.5) K.bx(x - 0.24, x + 0.24, G + 2.6 + f * fh, G + 3.9 + f * fh, 0.08, 0.1, M.glassBlue); });
+  K.bx(-1.15, 1.15, G + 1.5, top - 0.2, 0.08, 0.22, LG); K.mesh(sign('萬年商業大樓', 1.7, 15.5, { vertical: true, font: FONT, weight: 900, bg: '#5a9a52', fg: '#e3261c', border: false, glow: 1.0, oneSide: true, ppm: 60 }), 0, G + 10.4, 0.28);
   K.mesh(paint(4.4, 2.4, (g, W, H) => { g.fillStyle = '#1d4a39'; g.fillRect(0, 0, W, H); g.fillStyle = '#16181c'; g.beginPath(); g.ellipse(W / 2, H / 2, W * 0.47, H * 0.44, 0, 0, 7); g.fill(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${H * 0.42}px ${KAI}`;
-    [['年', 0.29], ['萬', 0.71]].forEach(([c, x]) => { g.strokeStyle = '#fff'; g.lineWidth = H * 0.035; g.beginPath(); g.arc(W * x, H / 2, H * 0.32, 0, 7); g.stroke(); g.fillStyle = '#fff'; g.fillText(c, W * x, H * 0.52); }); }, { glow: 1.2, oneSide: true }), 1.2, top + 2.5, -0.3);   // the dark oval over the corner sign: 年 and 萬 in two white rings, read right to left (2020 Commons photo) lattice(K, -1.0, 3.4, top + 1.1, top + 3.7, -0.5, 2);
+    [['年', 0.29], ['萬', 0.71]].forEach(([c, x]) => { g.strokeStyle = '#fff'; g.lineWidth = H * 0.035; g.beginPath(); g.arc(W * x, H / 2, H * 0.32, 0, 7); g.stroke(); g.fillStyle = '#fff'; g.fillText(c, W * x, H * 0.52); }); }, { glow: 1.0, oneSide: true }), 0, top - 1.9, 0.3);
+  [[-4.4, '豪華鐘錶公司', '#f4f1e8', '#141414'], [-2.6, '萬年冰宮', '#1f4f9c', '#ffffff'], [2.6, '湯姆熊', '#f2c832', '#c21f1a'], [4.4, 'U2電影館', '#7a1a22', '#ffffff']].forEach(([x, t, bg, fg], i) => { const h = 4.2 + (i % 2) * 1.4, y = G + 6.5 + (i % 3) * 2.2;
+    K.mesh(sign(t, 0.75, h, { vertical: true, kind: 'box', font: FONT, weight: 800, bg, fg, glow: 0.8 }), x, y, 0.7, Math.PI / 2); [y - h / 2 + 0.4, y + h / 2 - 0.4].forEach(yy => K.bx(x - 0.03, x + 0.03, yy, yy + 0.05, 0.2, 0.5, M.frame)); });
+  K.bx(x0, x1, G, G + 1.5, 0, 0.07, std('#efe6cf', 0.7));
   return K.done();
 }
 
@@ -351,8 +356,16 @@ function cinema() {
 // ══ 4. 台北天后宮: the narrow gate squeezed between shops on 成都路 ═══════════════════════════════════════
 function tianhou() {
   const K = Kit('tianhou-temple'), w = 6, x0 = -3, x1 = 3;
-  K.bx(x0, x1, 0, 10.5, -10, -1.6, M.pink); facade(K, { x0, x1, y0: 7.0, floors: 1, fh: 3.2, bays: 3, wall: M.pink, pier: 0.5, lit: 0.3 }); K.bx(x0, x1, 10.2, 10.9, -0.3, 0.05, M.pink);
-  K.bx(x0, x0 + 0.45, 0, 7, -1.6, 0, M.pink); K.bx(x1 - 0.45, x1, 0, 7, -1.6, 0, M.pink);
+  // the front as the 2025 photo shows it: three storeys of dark red brick. Ground floor the gate under a carved gilt eave and a row of red lanterns; second floor the name in white
+  // over a round red emblem, a window each side; third floor a balcony behind two columns; a green swallow-tail roof on top. The yellow uprights hang off the sides.
+  const RW = tm('#7a2a22', TEX.brick, 1, 0.9);
+  K.bx(x0, x1, 0, 12, -10, -1.6, RW); K.bx(x0, x0 + 0.45, 0, 12, -1.6, 0, RW); K.bx(x1 - 0.45, x1, 0, 12, -1.6, 0, RW);
+  K.bx(x0, x1, 5.9, 9.0, -1.6, -0.2, RW); K.bx(x0, x1, 11.4, 12.0, -1.6, 0.05, RW); K.bx(x0, x1, 9.0, 11.4, -1.6, -1.4, M.dark);
+  K.bx(-3.1, 3.1, 5.0, 5.5, 0, 0.55, M.gold); K.box(6.3, 0.12, 1.0, M.tileGreen, 0, 5.75, 0.5, 0, 0.45); for (let i = 0; i < 12; i++) K.bx(-2.9 + i * 0.5, -2.62 + i * 0.5, 5.08, 5.42, 0.55, 0.57, i % 2 ? M.redDk : M.tileGreen);          // the carved eave over the door
+  K.cyl(0.84, 0.84, 0.06, M.gold, 0, 6.95, -0.16, 28, [Math.PI / 2, 0, 0]); K.cyl(0.76, 0.76, 0.08, M.red, 0, 6.95, -0.13, 28, [Math.PI / 2, 0, 0]);                                                                               // the round emblem, as a plain disc
+  [-1, 1].forEach(k => { K.bx(k * 1.35, k * 2.4, 6.3, 7.9, -0.2, -0.15, M.glass); K.bx(k * 1.3, k * 2.45, 6.22, 6.3, -0.2, -0.08, M.gold); K.bx(k * 1.3, k * 2.45, 7.9, 7.98, -0.2, -0.08, M.gold); });
+  K.bx(-3.1, 3.1, 8.85, 9.0, -0.2, 0.5, M.tileGreen); K.bx(-3, 3, 8.65, 8.85, -0.1, 0.35, M.gold);
+  [-1.1, 1.1].forEach(x => K.cyl(0.16, 0.16, 2.4, M.stone, x, 10.2, -0.05, 10)); K.bx(-2.55, 2.55, 9.62, 9.7, -0.1, 0.02, M.concLt); for (let i = 0; i <= 16; i++) K.bx(-2.5 + i * 0.3125 - 0.03, -2.5 + i * 0.3125 + 0.03, 9.0, 9.62, -0.07, -0.01, M.concLt);
   // a glimpse of the courtyard and the main hall through the gate
   K.mesh(paint(4.6, 3.9, (g, W, H) => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#2a1410'); gr.addColorStop(1, '#6a3a20'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
     g.fillStyle = '#c8612c'; g.beginPath(); g.moveTo(W * 0.05, H * 0.3); g.quadraticCurveTo(W * 0.5, H * 0.16, W * 0.95, H * 0.3); g.lineTo(W * 0.88, H * 0.4); g.lineTo(W * 0.12, H * 0.4); g.fill();
@@ -364,7 +377,7 @@ function tianhou() {
   [-2.45, -1.15, 1.15, 2.45].forEach(x => { K.cyl(0.2, 0.2, 4.3, M.red, x, 2.45, 0.2, 12); K.cyl(0.26, 0.3, 0.32, M.stone, x, 0.16, 0.2, 12); K.bx(x - 0.26, x + 0.26, 4.5, 4.7, -0.06, 0.46, M.gold); });
   K.bx(-2.75, 2.75, 3.95, 4.3, 0.05, 0.35, M.tileGreen); K.bx(-2.75, 2.75, 4.3, 4.42, 0.02, 0.38, M.gold); K.bx(-2.75, 2.75, 4.7, 5.0, 0, 0.4, M.redDk); K.bx(-1.3, 1.3, 5.0, 5.9, 0.02, 0.38, M.redDk);
   for (let i = 0; i < 9; i++) K.bx(-2.6 + i * 0.62, -2.6 + i * 0.62 + 0.3, 4.02, 4.24, 0.35, 0.37, i % 2 ? M.gold : M.blue);
-  K.mesh(sign('台北天后宮', 2.4, 0.72, { bg: '#6e1f1c', fg: '#ffffff', font: XING, spread: true, border: false, glow: 0.7, oneSide: true }), 0, 5.42, 0.42);
+  K.mesh(sign('台北天后宮', 3.0, 0.62, { bg: '#7a2a22', fg: '#ffffff', font: XING, spread: true, border: false, glow: 0.5, oneSide: true }), 0, 8.2, -0.14);
   [x0 - 0.08, x1 + 0.08].forEach(x => { K.mesh(sign('台北天后宮', 0.62, 4.4, { vertical: true, kind: 'box', font: KAI, bg: '#f2c832', fg: '#c21f1a', glow: 0.8 }), x, 7.6, 0.55, Math.PI / 2); [5.9, 9.3].forEach(y => K.bx(x - 0.03, x + 0.03, y, y + 0.05, 0, 0.3, M.frame)); });   // the two tall yellow signs with the name in red, hung off the upper floors at each side (looked at the 2025 photo)
   // swallow-tail roofs: a high one over the middle bay, a lower one each side
   const roof = (cx, rw, yE, rise, up) => { const zF = 1.25, zB = -1.5, zm = -0.1, a = Math.atan2(rise, zF - zm), L = Math.hypot(rise, zF - zm), b = Math.atan2(rise, zm - zB), Lb = Math.hypot(rise, zm - zB);
@@ -376,8 +389,8 @@ function tianhou() {
     [-1, 1].forEach(k => { K.box(0.9, 0.09, 0.12, M.tileGreen, cx + k * (hw + 0.33), yR + up + 0.34, zm, 0, 0, k * 0.85); });                                 // the swallow tails
     for (let i = -2; i <= 2; i++) if (i) K.sph(0.13, pick([M.tileGreen, M.blue, M.gold]), cx + i * rw * 0.16, yR + up * Math.pow(Math.abs(i) * 0.32, 2.4) + 0.3, zm);
     K.sph(0.17, M.gold, cx, yR + 0.42, zm); K.cyl(0.03, 0.09, 0.3, M.gold, cx, yR + 0.2, zm, 8); };
-  roof(0, 3.0, 5.95, 0.95, 0.75); roof(-2.15, 1.9, 5.0, 0.75, 0.5); roof(2.15, 1.9, 5.0, 0.75, 0.5);
-  [-1.8, -0.6, 0.6, 1.8].forEach(x => lantern(K, x, 3.3, 0.75)); lantern(K, 0, 3.55, 0.95, 0.3);
+  roof(0, 5.6, 12.0, 0.95, 0.8); [-1.6, 1.6].forEach(x => { K.sph(0.22, M.tileGreen, x, 13.75, -0.1, 1.4); K.sph(0.12, M.gold, x * 1.15, 14.0, -0.1); });                                // the roof and its two dragons, as blocks
+  [-2.0, -1.2, -0.4, 0.4, 1.2, 2.0].forEach(x => lantern(K, x, 3.35, 0.8));                                                                                              // six red lanterns in a row over the door
   [-2.75, 2.75].forEach(x => { K.bx(x - 0.3, x + 0.3, 0, 0.55, 0.75, 1.35, M.stone); K.box(0.36, 0.5, 0.5, M.stone, x, 0.8, 1.05, 0, -0.25); K.sph(0.2, M.stone, x, 1.2, 1.2); K.sph(0.09, M.stone, x - 0.0, 1.05, 1.36); });     // the stone lions, as blocks
   K.cyl(0.42, 0.3, 0.5, M.gold, 0, 0.95, -0.7, 12); K.cyl(0.46, 0.46, 0.06, M.gold, 0, 1.22, -0.7, 12); [0, 2.1, 4.2].forEach(a => K.cyl(0.05, 0.04, 0.7, M.gold, Math.sin(a) * 0.28, 0.35, -0.7 + Math.cos(a) * 0.28, 6));
   [-0.42, 0.42].forEach(x => K.cyl(0.035, 0.035, 0.4, M.gold, x, 1.3, -0.7, 6));
@@ -405,14 +418,19 @@ function starfruit() {
 // ══ 6. 蜂大咖啡, with 南美咖啡 next door: an arcade shopfront and its row of biscuit jars ═════════════════
 function fongda() {
   const K = Kit('fong-da'), x0 = -3.5, x1 = 3.5, G = 3.7, mid = 0.5;
-  const top = facade(K, { x0, x1, y0: G, floors: 3, fh: 3.1, bays: 4, wall: M.cream, depth: 10, pier: 0.42, ac: 0.4, grille: 0.45, lit: 0.2 });
-  K.bx(x0, x1, top, top + 0.8, -0.3, 0.05, M.cream); K.bx(x0, x1, top, top + 0.15, -10, -0.3, M.concDk); waterTank(K, 1.5, top + 0.15, -4);
-  K.bx(x0, x1, 0, G, -10, -3.0, M.dark); [x0, mid - 0.22, x1 - 0.45].forEach(x => K.bx(x, x + 0.45, 0, G, -0.45, 0, M.stone)); K.bx(x0, x1, 3.0, G, -0.45, 0, M.cream); K.bx(mid - 0.08, mid + 0.08, 0, 3.0, -3, -0.45, M.concDk);
+  // the two fronts as the 2023 photo shows them: 蜂大 in red brick, a white panel in its wide second-floor window; 南美 in small white tile with one dark window and a railed roof terrace
+  const TILE = triMat({ color: '#f0efe8', tex: E.canvasTex(128, (g, n) => { g.fillStyle = '#fff'; g.fillRect(0, 0, n, n); g.strokeStyle = '#7d7d78'; g.lineWidth = 3; for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * n / 4, 0); g.lineTo(i * n / 4, n); g.moveTo(0, i * n / 4); g.lineTo(n, i * n / 4); g.stroke(); } }), scale: 2.2, rough: 0.45 });
+  const top = facade(K, { x0, x1: mid, y0: G, floors: 2, fh: 3.1, bays: 2, wall: M.brick, depth: 10, pier: 0.5, ac: 0.5, lit: 0.2 });
+  facade(K, { x0: mid, x1, y0: G, floors: 2, fh: 3.1, bays: 1, wall: TILE, depth: 10, pier: 0.9, sill: 1.1, head: 0.7, lit: 0 });
+  K.bx(x0, mid, top, top + 0.7, -0.3, 0.05, M.brick); K.bx(mid, x1, top, top + 0.5, -0.3, 0.05, TILE); K.bx(x0, x1, top, top + 0.15, -10, -0.3, M.concDk); waterTank(K, -1.5, top + 0.15, -4);
+  lattice(K, mid + 0.1, x1 - 0.1, top + 0.5, top + 1.5, -0.15, 3); K.bx(mid - 0.06, mid + 0.06, G, top + 0.7, -0.05, 0.12, M.concDk);
+  K.mesh(paint(1.5, 1.25, (g, W, H) => { g.fillStyle = '#f2f1ea'; g.fillRect(0, 0, W, H); g.strokeStyle = '#1a1a1a'; g.lineWidth = H * 0.02; g.beginPath(); for (let i = 0; i < 7; i++) { const a = i / 6 * 6.2832; g.lineTo(W / 2 + Math.cos(a) * H * 0.12, H * 0.36 + Math.sin(a) * H * 0.12); } g.stroke(); g.fillStyle = '#1a1a1a'; g.textAlign = 'center'; g.font = `700 ${H * 0.085}px Georgia, serif`; g.fillText('FONG DA COFFEE', W / 2, H * 0.62); }, { glow: 0.3, oneSide: true, light: true, depth: 0.04 }), (x0 + mid) / 2 + 0.2, G + 2.0, -0.2);
+  K.bx(x0, x1, 0, G, -10, -3.0, M.dark); K.bx(x0, x0 + 0.45, 0, G, -0.45, 0, M.brick); K.bx(mid - 0.22, mid + 0.23, 0, G, -0.45, 0, M.brick); K.bx(x1 - 0.45, x1, 0, G, -0.45, 0, TILE); K.bx(x0, mid, 3.0, G, -0.45, 0, M.brick); K.bx(mid, x1, 3.0, G, -0.45, 0, TILE); K.bx(mid - 0.08, mid + 0.08, 0, 3.0, -3, -0.45, M.concDk);
   [x0, x1 - 0.2].forEach(x => K.bx(x, x + 0.2, 0, G, -3, -0.45, M.concDk)); K.bx(x0, x1, 2.95, 3.0, -3, -0.45, M.concLt); [-1.5, 2.0].forEach(x => K.bx(x - 0.6, x + 0.6, 2.88, 2.94, -1.6, -1.5, M.tube));
   K.mesh(paint(3.9, 0.82, (g, W, H) => { g.fillStyle = '#f4f1e8'; g.fillRect(0, 0, W, H); g.fillStyle = '#1a1a1a'; [0, 0.89].forEach(x => { for (let i = 0; i < 7; i++) g.fillRect(W * x, H * (0.06 + i * 0.13), W * 0.11, H * 0.07); });
     g.beginPath(); g.arc(W * 0.2, H * 0.44, H * 0.26, 0, 7); g.fill(); g.strokeStyle = '#f4f1e8'; g.lineWidth = H * 0.03; g.beginPath(); for (let i = 0; i < 7; i++) { const a = i / 6 * 6.2832; g.lineTo(W * 0.2 + Math.cos(a) * H * 0.15, H * 0.44 + Math.sin(a) * H * 0.15); } g.stroke();
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${H * 0.46}px ${FONT}`; [...'蜂大咖啡'].forEach((c, i) => g.fillText(c, W * (0.34 + i * 0.145), H * 0.42)); g.font = `600 ${H * 0.13}px ${FONT}`; g.fillText('創立於西元1956年　咖啡器材專業經營', W * 0.56, H * 0.83); }, { glow: 0.35, oneSide: true, light: true }), -1.5, 3.36, 0.06); K.mesh(sign('南美咖啡', 2.6, 0.82, { font: WEI, bg: '#3a1a1e', fg: '#f1dfb4', spread: true, glow: 0.7, oneSide: true }), 2.0, 3.36, 0.06);
-  K.mesh(sign('蜂大咖啡', 0.55, 5.2, { vertical: true, kind: 'box', font: FONT, weight: 900, bg: '#f4f1e8', fg: '#141414', glow: 0.6 }), mid, 6.6, 0.85, Math.PI / 2); K.mesh(sign('南美咖啡', 0.5, 2.2, { vertical: true, font: WEI, bg: '#3a1a1e', fg: '#f1dfb4', glow: 0.6 }), x1 - 0.4, 5.6, 0.75, Math.PI / 2);
+  K.mesh(sign('蜂大咖啡', 0.55, 4.6, { vertical: true, kind: 'box', font: FONT, weight: 900, bg: '#f4f1e8', fg: '#141414', glow: 0.6 }), mid, 6.9, 0.85, Math.PI / 2); K.mesh(sign('南美咖啡', 0.5, 2.2, { vertical: true, font: WEI, bg: '#3a1a1e', fg: '#f1dfb4', glow: 0.6 }), x1 - 0.4, 5.6, 0.75, Math.PI / 2);
   // 蜂大: the counter at the door with big glass jars of biscuits, the shelves and bean bins behind, the roaster deep inside
   K.bx(x0 + 0.5, mid - 0.4, 0, 0.95, -1.15, -0.5, M.woodDk); K.bx(x0 + 0.45, mid - 0.35, 0.95, 1.0, -1.2, -0.45, M.wood); for (let i = 0; i < 7; i++) jar(K, x0 + 0.78 + i * 0.42, 1.0, -0.82, 0.17, 0.46, M.biscuit, M.red);
   K.bx(x0 + 0.3, mid - 0.2, 0.2, 2.8, -2.98, -2.94, M.shopLit); for (let s = 0; s < 4; s++) { const y = 0.9 + s * 0.48; K.bx(x0 + 0.3, mid - 0.2, y, y + 0.04, -2.9, -2.55, M.woodDk); for (let k = 0; k < 9; k++) { const gx = x0 + 0.4 + k * 0.38; if (rnd() < 0.85) K.cyl(0.11, 0.11, rr(0.2, 0.36), pick([M.biscuit, M.woodDk, M.red, M.jar]), gx, y + 0.2, -2.72, 8); } }
@@ -449,16 +467,19 @@ function aychung() {
 
 // ══ 8. 獅子林商業大樓: ten storeys, film posters for the cinemas upstairs, escalators seen through the door ═
 function lions() {
-  const K = Kit('lions-plaza'), x0 = -6.5, x1 = 6.5, G = 4.6, P = 4, D = 12;
-  K.bx(x0, x1, G, G + P * 3.2, -D, -0.05, M.tan); for (let i = 0; i <= 13; i++) K.bx(x0 + i - 0.06, x0 + i + 0.06, G, G + P * 3.2, -0.05, 0.05, M.tanDk);
-  const top = facade(K, { x0, x1, y0: G + P * 3.2, floors: 5, fh: 3.2, bays: 8, wall: M.tan, band: M.tanDk, depth: D, pier: 0.34, sill: 1.0, lit: 0.2 });
-  K.bx(x0, x1, top, top + 1.0, -0.4, 0, M.tan); K.bx(x0, x1, top, top + 0.2, -D, -0.4, M.concDk); waterTank(K, -3, top + 0.2, -6); K.bx(1, 5, top + 0.2, top + 3, -8, -4, M.tanDk);
-  [['好小子', -4.1, 40, 'kids.jpg'], ['大頭兵', 0, 150, 'army.jpg'], ['七匹狼', 4.1, 260, 'denim.jpg']].forEach(([t, x, hue, img]) => { K.bx(x - 1.85, x + 1.85, G + 4.5, G + 11.3, -0.05, 0.1, M.woodDk); K.mesh(paint(3.5, 6.5, filmPoster(t, '樓上戲院上映', hue, { img }), { glow: 0.42, oneSide: true, ppm: 110, depth: 0.06 }), x, G + 7.9, 0.13); });
-  K.mesh(sign('獅子林商業大樓', 10.5, 1.7, { bg: '#8f6f4e', fg: '#d9261c', font: WEI, spread: true, border: false, glow: 0.8, oneSide: true }), 0, G + 2.2, 0.12);
-  K.mesh(sign('獅子林', 1.3, 9, { vertical: true, kind: 'neon', font: WEI, bg: '#151515', fg: '#ffb23a', glow: 1.6 }), x1 + 0.1, top - 6, 1.0, Math.PI / 2);
+  const K = Kit('lions-plaza'), x0 = -6.5, x1 = 6.5, G = 4.6, P = 4, D = 12, GOLD = tm('#c9a246', TEX.concrete, 1.2, 0.5), GOLDDK = tm('#8f6f2c', TEX.concrete, 1.2, 0.6);   // 「金黃色的大樓外觀十分顯眼」 (1984 press caption)
+  K.bx(x0, x1, G, G + P * 3.2, -D, -0.05, GOLD); for (let i = 0; i <= 13; i++) K.bx(x0 + i - 0.06, x0 + i + 0.06, G, G + P * 3.2, -0.05, 0.05, GOLDDK);
+  const top = facade(K, { x0, x1, y0: G + P * 3.2, floors: 5, fh: 3.2, bays: 8, wall: GOLD, band: GOLDDK, depth: D, pier: 0.34, sill: 1.0, lit: 0.2 });
+  K.bx(x0, x1, top, top + 1.0, -0.4, 0, GOLD); K.bx(x0, x1, top, top + 0.2, -D, -0.4, M.concDk); waterTank(K, -3, top + 0.2, -6); K.bx(1, 5, top + 0.2, top + 3, -8, -4, GOLDDK);
+  [['好小子', -4.5, 40, 'kids.jpg'], ['大頭兵', -0.8, 150, 'army.jpg'], ['七匹狼', 2.9, 260, 'denim.jpg']].forEach(([t, x, hue, img]) => { K.bx(x - 1.85, x + 1.85, G + 4.5, G + 11.3, -0.05, 0.1, M.woodDk); K.mesh(paint(3.5, 6.5, filmPoster(t, '樓上戲院上映', hue, { img }), { glow: 0.42, oneSide: true, ppm: 110, depth: 0.06 }), x, G + 7.9, 0.13); });
+  K.mesh(sign('獅子林商業大樓', 9.6, 1.6, { bg: '#b08d3c', fg: '#d9261c', font: WEI, spread: true, border: false, glow: 0.8, oneSide: true }), -0.8, G + 2.2, 0.12);
+  for (let i = 1; i < P * 2; i++) K.bx(x0, x1, G + i * 1.6 - 0.04, G + i * 1.6 + 0.04, -0.05, 0.05, GOLDDK);                                                      // the square panel joints
+  const cx = x1 + 0.7, cz = -0.6, R = 1.9; K.cyl(R, R, top + 1.2 - G, GOLD, cx, (top + 1.2 + G) / 2, cz, 20); [-0.75, 0.75].forEach(d => K.bx(cx + d - 0.3, cx + d + 0.3, G + 5, top - 1.2, cz + R - 0.25, cz + R - 0.02, M.glass));   // the rounded corner tower and its two dark glass strips
+  K.cyl(R + 0.25, R + 0.25, 2.2, std('#3a2c18', 0.5, 0.3), cx, top + 2.3, cz, 20); [-0.95, 0.95].forEach(d => K.sph(0.48, M.tube, cx + d, top + 0.75, cz + R - 0.1));                                             // the crown and the two globe lamps under it
+  K.mesh(sign('獅子林', 3.1, 1.3, { kind: 'neon', font: WEI, bg: '#3a2c18', fg: '#ffcf5a', sub: "LIONS' PLAZA", glow: 1.4, oneSide: true }), cx, top + 2.35, cz + R + 0.28);
   // street level: a wide mouth, two escalators rising inside a lit lobby
-  K.bx(x0, x1, 0, G, -D, -5.5, M.dark); [x0, x1 - 0.7].forEach(x => K.bx(x, x + 0.7, 0, G, -5.5, 0, M.tanDk)); [-3.6, 3.0].forEach(x => K.bx(x, x + 0.6, 0, G, -0.6, 0, M.tanDk)); K.bx(x0, x1, G - 0.7, G, -0.6, 0, M.tanDk);
-  K.bx(x0, x1, G - 0.25, G + 0.1, 0, 1.6, M.tanDk); K.mesh(sign('十樓　金獅大酒樓', 6, 0.42, { kind: 'box', font: KAI, bg: '#f3ecd9', fg: '#a3221a', glow: 0.8, oneSide: true }), 0, G - 0.36, 1.62);
+  K.bx(x0, x1, 0, G, -D, -5.5, M.dark); [x0, x1 - 0.7].forEach(x => K.bx(x, x + 0.7, 0, G, -5.5, 0, GOLDDK)); [-3.6, 3.0].forEach(x => K.bx(x, x + 0.6, 0, G, -0.6, 0, GOLDDK)); K.bx(x0, x1, G - 0.7, G, -0.6, 0, GOLDDK);
+  K.bx(x0, x1, G - 0.25, G + 0.1, 0, 1.6, GOLDDK); K.mesh(sign('十樓　金獅大酒樓', 6, 0.42, { kind: 'box', font: KAI, bg: '#f3ecd9', fg: '#a3221a', glow: 0.8, oneSide: true }), 0, G - 0.36, 1.62);
   K.bx(-3.0, 3.0, 0.05, G - 0.7, -5.48, -5.44, M.shopLit); K.bx(-3.0, 3.0, G - 0.78, G - 0.72, -3, -2.9, M.tube);
   [-1.3, 1.3].forEach(x => { K.box(1.0, 0.25, 5.4, M.steelDk, x, 1.6, -3.0, 0, 0.6); [-0.5, 0.5].forEach(d => { K.box(0.08, 0.7, 5.6, M.jar, x + d, 2.1, -3.0, 0, 0.6); K.box(0.1, 0.06, 5.7, M.black, x + d, 2.46, -3.0, 0, 0.6); }); for (let i = 0; i < 12; i++) K.box(0.84, 0.03, 0.2, M.steel, x, 0.3 + i * 0.27, -1.1 - i * 0.39); });
   [[-5.1, '#b3271e'], [4.9, '#1f3a6e']].forEach(([x, c]) => { K.bx(x - 1.1, x + 1.1, 0.6, 3.4, -0.5, -0.45, M.pane); K.bx(x - 1.05, x + 1.05, 0.6, 3.4, -1.6, -1.56, M.shopLit); K.bx(x - 1.1, x + 1.1, 0, 0.6, -0.6, -0.1, std(c, 0.6)); for (let k = 0; k < 3; k++) person(K, x - 0.7 + k * 0.7, -1.0, 0, { h: 1 }); });
