@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake · 大稻埕 迪化街 年貨大街, golden hour</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script>
+// 大稻埕: 迪化街 at Lunar New Year (年貨大街), 2000s–2010s. A STREET, not a plaza: 9 m between the arcades,
+// about 70 m long, running north (−z) from the archway. Halfway down, 霞海城隍廟's forecourt opens on the east
+// side; further on, 永樂市場 stands back behind its stalls, and a lane on the west drops to the Tamsui wharf.
+// Only this block's layout lives here; light, sky, ground, builders, finishing chain and controls are in engine.js.
+const ZC = i => 29.6 - i * 4.8, FX = 5.3;                        // shophouse slot centres along the street; origins sit FX out, so fronts stand 9 m apart
+const WEST = ['yang2', 'min1', 'bar3', 'min3', 'yang2', 'min1', 'bar2', 'min1', 'yang3', null, 'min3', 'bar2', 'min1', 'yang2', 'bar3', 'min1', 'yang2', 'min3'];   // null: the lane to the river
+const EAST = ['min3', 'bar2', 'yang3', 'min1', 'bar2', null, null, null, 'yang2', null, null, null, null, 'bar3', 'yang2', 'min3', 'bar2', 'yang3'];             // gaps: temple forecourt, market front
+const AREAS = [[-4.0, 4.0, -33.6, 38.5], [4.0, 10.6, -5.4, 7.0], [4.0, 9.6, -29.4, -12.2], [-27.5, -4.0, -15.3, -11.9]];   // street, forecourt, market front, lane: [minX, maxX, minZ, maxZ]
+const BLOCKS = [];                                                 // things she walks round: [x, z, radius]
+const camQ = new URLSearchParams(location.search).get('cam');      // ?view=1&cam=px,py,pz,tx,ty,tz : a free camera for checking
+ENGINE.create({
+  title: '大稻埕 · 迪化街年貨大街', subtitle: 'Dihua Street at Lunar New Year, 2000–2019', loading: 'Hanging the lanterns…',
+  sunDir: [-24, 30, -46], shadowCenter: [0, 0, -2], start: { x: 0.4, z: 29.5, heading: Math.PI },
+  views: [camQ ? camQ.split(',').map(Number) : [0.9, 1.6, 48, -0.2, 5.6, 10], [-2.9, 1.5, 11.5, 9.5, 4.6, -1.5], [0.9, 1.3, 15, -0.6, 6.2, -30], [-3.6, 11.5, 24, 5.5, 1.5, -8], [-2.8, 1.5, -9.5, 10, 9.5, -22], [1.6, 1.6, -13.3, -30, 2.3, -13.8]],
+  ground: { puddles: 14, puddle: (rr) => [rr(-3.6, 3.6), rr(-33, 33), rr(0, 3)] },   // wet brick from wall to wall
+  dust: { x: [-6, 12], y: [0.3, 8], z: [-36, 36] },
+  clamp(p) {
+    for (let pass = 0; pass < 2; pass++) {
+      let best = null, bd = 1e9;
+      for (const [x0, x1, z0, z1] of AREAS) { const cx = Math.max(x0, Math.min(x1, p.x)), cz = Math.max(z0, Math.min(z1, p.z)), d = Math.hypot(cx - p.x, cz - p.z); if (d < bd) { bd = d; best = [cx, cz]; } }
+      p.x = best[0]; p.z = best[1];
+      if (pass === 0) for (const [bx, bz, br] of BLOCKS) { const d = Math.hypot(p.x - bx, p.z - bz); if (d < br) { const k = br / Math.max(d, 1e-3); p.x = bx + (p.x - bx) * k; p.z = bz + (p.z - bz) * k; } }
+    }
+  },
+  onFrame: (E) => { if (E.heroPos.z > 38) E.leave('square.html?from=dadao', '廣場 · The Square', 500);    // out under the archway, back to the square
+    if (E.QS.get('debug') === '1' && E.state.ready) document.getElementById('load').style.display = 'none'; },   // checking shots: drop the loading cover at once, no fade
+  models: ['bundle-dadao', 'bundle-core', 'bundle-square'],
+  build(E, [dadao, core, sq]) {
+  const { T, scene, rr, TEX, MATS, GLOW, triMat, dress, get, place, board, sign, canopy, banyans, lanternString, stall, steamSrc, canvasTex, speckle } = E;
+  const add = (geo, mat, x, y, z, cast = true) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = cast; m.receiveShadow = true; scene.add(m); return m; };
+
+  // ── the two rows of shophouses: 閩南 brick, 洋樓 and Baroque crests, two and three storeys ──
+  const zone2 = get(dadao, 'dihua-zone2'), kit = (...parts) => { const g = new T.Group(); parts.forEach(n => g.add(get(zone2, n).clone())); return g; };
+  const KIND = { min3: () => get(dadao, 'dihua-min').clone(), yang3: () => get(dadao, 'dihua-yang').clone(), bar3: () => get(dadao, 'dihua-baroque').clone(),
+    min1: () => kit('arcade', 'min'), yang2: () => kit('arcade', 'yang', 'yang_crest'), bar2: () => kit('arcade', 'baroque', 'baroque_crest') };
+  const plasters = ['#d8c8ac', '#cdb694', '#c2b3a4', '#b4bba6', '#d0aa86', '#bdb4a4', '#d9c39c'], bricks = ['#ffffff', '#e9d2c4', '#f3e2cf', '#dcc0b0'];
+  const house = (kind, side, i) => {
+    const h = KIND[kind](); h.position.set(side * FX, 0, ZC(i)); h.rotation.y = -side * Math.PI / 2;
+    dress(h, { swap: { bone: triMat({ color: plasters[(i * 3 + (side > 0 ? 2 : 0)) % plasters.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }), brick: triMat({ color: bricks[(i + (side > 0 ? 1 : 0)) % bricks.length], tex: TEX.brick, scale: 1.0, rough: 0.9 }) } });
+    scene.add(h);
+  };
+  WEST.forEach((k, i) => k && house(k, -1, i)); EAST.forEach((k, i) => k && house(k, 1, i));
+
+  // ── the 年貨大街 archway at the street's mouth; she arrives just inside it ──
+  const arch = dress(get(get(dadao, 'dadao-entrance'), 'portal').clone()); arch.position.set(0, 0, 34.4); scene.add(arch);
+
+  // ── 霞海城隍廟 and its forecourt, opening off the east side halfway down ──
+  place(dadao, 'temple', 14.0, 0.8, -Math.PI / 2);
+  const paving = triMat({ color: '#a79c8c', tex: TEX.concrete, scale: 0.6, rough: 0.5 });
+  add(new T.BoxGeometry(7.2, 0.03, 14.4), paving, 8.1, 0.012, 0.8, false);
+  { const bronze = triMat({ color: '#6b5a3c', tex: TEX.metal, scale: 2, rough: 0.35, metal: 0.8 }), bx = 7.3, bz = 0.8;      // the incense burner, smoking
+    add(new T.CylinderGeometry(0.62, 0.42, 0.62, 20), bronze, bx, 1.0, bz); add(new T.CylinderGeometry(0.7, 0.66, 0.1, 20), bronze, bx, 1.34, bz);
+    [0, 2.1, 4.2].forEach(a => add(new T.CylinderGeometry(0.07, 0.05, 0.72, 8), bronze, bx + Math.cos(a) * 0.4, 0.36, bz + Math.sin(a) * 0.4));
+    add(new T.CylinderGeometry(0.56, 0.56, 0.03, 20), GLOW(2.6, 0.9, 0.25), bx, 1.385, bz, false);
+    for (let i = 0; i < 3; i++) steamSrc.push(new T.Vector3(bx + rr(-0.2, 0.2), 1.45, bz + rr(-0.2, 0.2))); BLOCKS.push([bx, bz, 1.1]); }
+
+  // ── 永樂市場, standing back behind its own stalls ──
+  place(dadao, 'yongle', 10.9, -20.8, -Math.PI / 2, 0.85);
+  add(new T.BoxGeometry(6.2, 0.03, 19.2), paving, 7.6, 0.012, -20.8, false);
+
+  // ── lanterns close overhead: a string across the street every two metres, zig-zagging ──
+  const kindAt = (row, z) => row[Math.max(0, Math.min(17, Math.round((29.6 - z) / 4.8)))];
+  const anchor = (side, z, k) => {                                // where a string can be tied on that side of the street at z
+    const kind = kindAt(side < 0 ? WEST : EAST, z);
+    if (kind) return new T.Vector3(side * 4.45, kind === 'min1' ? 4.35 : 5.7 + (k % 3) * 0.45, z);
+    if (side < 0) return null;                                    // the lane mouth: nothing to tie to
+    return z > -8 ? new T.Vector3(11.2, 6.3, z) : new T.Vector3(10.4, 7.0 + (k % 2) * 0.5, z);   // the temple's eave, or the market's front
+  };
+  let k = 0; for (let z = 31; z > -51; z -= 1.9, k++) { const a = anchor(-1, z, k), b = anchor(1, z + (k % 2 ? 1.2 : -1.2), k + 1); if (a && b) lanternString(a, b, b.x > 5 ? 1.5 : 0.8); }
+  E.buildLanterns();
+
+  // ── red New Year banners on wires across the street ──
+  const cloth = (text, w, h, wide) => { const cv = document.createElement('canvas'); cv.width = wide ? 1024 : 128; cv.height = wide ? Math.round(1024 * h / w) : Math.round(128 * h / w); const g = cv.getContext('2d');
+    g.fillStyle = '#b3241a'; g.fillRect(0, 0, cv.width, cv.height); g.strokeStyle = '#e9c46a'; g.lineWidth = wide ? 10 : 5; g.strokeRect(7, 7, cv.width - 14, cv.height - 14);
+    g.fillStyle = '#f3d27a'; g.textAlign = 'center'; g.textBaseline = 'middle'; const n = [...text].length;
+    if (wide) { g.font = `700 ${Math.round(cv.height * 0.62)}px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif`; g.fillText(text, cv.width / 2, cv.height * 0.53); }
+    else { const step = (cv.height - 30) / n; g.font = `700 ${Math.round(Math.min(92, step * 0.82))}px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif`; [...text].forEach((ch, i) => g.fillText(ch, 64, 15 + step * (i + 0.5))); }
+    const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    const f = new T.MeshStandardMaterial({ map: t, roughness: 0.85, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.2 }), e = new T.MeshStandardMaterial({ color: 0x7a1c14 });
+    const m = new T.Mesh(new T.BoxGeometry(w, h, 0.016), [e, e, e, e, f, f]); m.castShadow = true; return m; };   // a thin box, so the words read the right way round from both sides
+  const wishes = ['恭賀新禧', '年貨大街', '大吉大利', '招財進寶', '新春特賣', '萬事如意', '迪化街', '年年有餘', '南北貨', '歲歲平安'];
+  [27.2, 17.6, -8.8, -32.8, -42.4].forEach((z, j) => {
+    add(new T.CylinderGeometry(0.012, 0.012, 8.9, 4), MATS.ink, 0, 7.55, z, false).rotation.z = Math.PI / 2;
+    [-2.6, 0, 2.6].forEach((x, i) => { const b = cloth(wishes[(j * 3 + i) % wishes.length], 0.78, 2.5); b.position.set(x + rr(-0.3, 0.3), 6.28, z); b.rotation.y = rr(-0.12, 0.12); scene.add(b); });
+  });
+
+  [[7.0, 7.9, '國泰民安'], [9.4, 7.9, '風調雨順'], [7.0, -6.3, '合境平安'], [9.4, -6.3, '神恩廣被']].forEach(([x, z, t]) => { const b = cloth(t, 1.0, 3.5); b.position.set(x, 5.5, z); scene.add(b); });   // on the forecourt's side walls
+
+  // ── dried-goods stalls spilling into the road, with baskets of goods and price cards; three cooked-food stalls that steam ──
+  const stallM = get(dadao, 'stall'), wicker = triMat({ color: '#dcb986', tex: TEX.plaster, scale: 3, rough: 0.9 }), plank = triMat({ color: '#a67c52', tex: TEX.bark, scale: 2, rough: 0.85 });
+  const GOODS = ['#7a1f1a', '#d9852b', '#5a4030', '#c9a56a', '#d43a5a', '#7d8f3a', '#e9e2d0', '#a8501f'], goodsMat = GOODS.map(c => new T.MeshStandardMaterial({ color: E.col(c), roughness: 0.75 }));
+  const baskets = (x, z, alongZ, n, seed) => { for (let i = 0; i < n; i++) { const o = (i - (n - 1) / 2) * 0.66, bx = alongZ ? x : x + o, bz = alongZ ? z + o : z;
+    add(new T.CylinderGeometry(0.31, 0.25, 0.42, 14), wicker, bx, 0.56, bz); const g = add(new T.SphereGeometry(0.29, 14, 8), goodsMat[(seed + i * 3) % GOODS.length], bx, 0.76, bz); g.scale.y = 0.5; }
+    add(new T.BoxGeometry(alongZ ? 0.8 : n * 0.66 + 0.2, 0.35, alongZ ? n * 0.66 + 0.2 : 0.8), plank, x, 0.175, z); };
+  const card = (a, b, x, z, ry) => { const cv = document.createElement('canvas'); cv.width = 256; cv.height = 176; const g = cv.getContext('2d'); g.fillStyle = '#f7ecd0'; g.fillRect(0, 0, 256, 176); g.strokeStyle = '#b3241a'; g.lineWidth = 8; g.strokeRect(6, 6, 244, 164);
+    g.fillStyle = '#b3241a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '700 70px "PingFang TC","Heiti TC",sans-serif'; g.fillText(a, 128, 58); g.fillStyle = '#2a2420'; g.font = '700 50px system-ui,sans-serif'; g.fillText(b, 128, 128);
+    const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    const m = add(new T.BoxGeometry(0.62, 0.43, 0.02), new T.MeshStandardMaterial({ map: t, roughness: 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.25 }), x, 1.32, z); m.rotation.y = ry;
+    add(new T.CylinderGeometry(0.012, 0.012, 1.1, 5), MATS.ink, x, 0.6, z); };
+  const PRICES = [['烏魚子', '一兩 $380'], ['香菇', '一斤 $450'], ['干貝', '一兩 $260'], ['瓜子', '一斤 $120'], ['紅棗', '一斤 $180'], ['開心果', '一斤 $320'], ['糖果', '一斤 $150'], ['魷魚絲', '一包 $100'], ['枸杞', '一斤 $240'], ['腰果', '一斤 $300'], ['蜜餞', '一盒 $200'], ['臘腸', '一斤 $280']];
+  let pc = 0;
+  const goods = (x, z, side) => {                                 // one dried-goods stall on that side, facing the middle of the road
+    const s = dress(stallM.clone()); s.position.set(x, 0, z); s.rotation.y = -side * Math.PI / 2; scene.add(s);
+    BLOCKS.push([x, z - 0.95, 1.3], [x, z + 0.95, 1.3]);
+    const e = rr(0, 1) < 0.5 ? 1 : -1; baskets(x - side * 0.1, z + e * 2.75, true, 3, pc); BLOCKS.push([x, z + e * 2.75, 1.05]);
+    card(...PRICES[pc % PRICES.length], x - side * 0.62, z + e * 2.4, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
+    card(...PRICES[pc % PRICES.length], x - side * 0.6, z + e * 3.3, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
+  };
+  [[-3.05, 24.6], [-3.05, 2.4], [-3.05, -6.6], [-3.05, -22.2], [-3.05, -30.8]].forEach(([x, z]) => goods(x, z, -1));
+  [[3.05, 14.2], [3.05, -9.6], [3.05, -32.4]].forEach(([x, z]) => goods(x, z, 1));
+  [[8.3, -14.6], [8.3, -20.8], [8.3, -27]].forEach(([x, z]) => goods(x, z, 1));                 // the market's own row
+  [[-3.0, 13.4, Math.PI / 2, 8], [3.0, 23.6, -Math.PI / 2, 205], [-3.0, -38.5, Math.PI / 2, 135]].forEach(([x, z, r, h]) => { stall(x, z, r, h); BLOCKS.push([x, z - 0.8, 1.35], [x, z + 0.8, 1.35], [x + Math.sign(-x) * 1.3, z, 0.8]); });
+  // sacks, crates and boxes where the goods were unloaded; scooters and a bicycle against the piers
+  const props = get(core, 'props'), pr = n => get(props, n), scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
+  [[-3.6, 20.2, 'sack'], [-3.3, 19.6, 'sack'], [-3.75, 6.6, 'crate'], [-3.5, -2.2, 'boxes'], [-3.7, -1.6, 'sack'], [3.6, 10.4, 'crate'], [3.7, 9.7, 'boxes'], [3.6, 18.6, 'sack'], [3.5, -5.2, 'sack'], [-3.7, -18.0, 'crate'], [-3.4, -26.6, 'sack'], [3.7, -28.9, 'boxes'], [6.0, -11.9, 'sack'], [5.4, -29.6, 'crate'], [9.9, 6.6, 'boxes']]
+    .forEach(([x, z, n]) => { for (let j = 0; j < 2; j++) { const o = dress(pr(n).clone()); o.position.set(x + rr(-0.25, 0.25), 0, z + j * 0.55); o.rotation.y = rr(0, 6.28); o.scale.setScalar(rr(1.0, 1.35)); scene.add(o); } });
+  [[-3.8, 29.2, 1.2], [3.85, 28.4, -1.9], [-3.85, -9.9, 1.5], [3.85, -36.8, -1.4], [-3.8, -34.6, 1.8], [2.6, 37.3, 0.3], [3.5, 37.5, 0.1], [-3.2, 37.4, -0.2]].forEach(([x, z, ry], i) => { const sc = dress(scooters.children[i % 3].clone()); sc.position.set(x, 0, z); sc.rotation.y = ry; scene.add(sc); });
+  { const b = dress(pr('bicycle').clone()); b.position.set(-3.9, 0, 9.4); b.rotation.y = 0.15; scene.add(b); }
+  [[4.9, 7.4, 1], [4.9, -5.8, 1], [10.6, 6.9, 1], [10.6, -5.2, 1], [5.0, -11.7, 0], [5.0, -30.0, 0], [-4.9, -11.6, 1], [-4.9, -15.6, 1]].forEach(([x, z, kind]) => { const p = dress(planter.children[kind].clone()); p.position.set(x, 0, z); p.rotation.y = kind ? 0 : Math.PI / 2; scene.add(p); });
+
+  // ── shop signs on the fronts: dried goods, herbs, cloth, tea ──
+  const words = ['南北貨', '中藥行', '布莊', '茶行', '蔘藥行', '乾貨', '烏魚子', '燕窩', '糖果', '臘味', '金紙店', '竹器', '米行', '干貝', '紅棗', '蜜餞', '香菇', '魚翅', '漢方', '布行', '茶葉', '雜糧', '餅舖', '香舖'];
+  let wi = 0; [[WEST, -1], [EAST, 1]].forEach(([row, side]) => row.forEach((kind, i) => { if (!kind || kind === 'min1' || i > 15) return; const w = words[wi % words.length];
+    sign(w, side * 4.16, 5.3 + (wi % 3) * 0.35, ZC(i) + (wi % 2 ? 1.75 : -1.75), 0, [4, 38, 210, 150, 350, 28][wi % 6], wi % 3 === 0); wi++; }));
+  const nameBoard = (lines, w, h, x, y, z, ry, bg, fg) => { const b = board(lines, w, h, bg, fg, 0.45); b.position.set(x, y, z); b.rotation.y = ry; scene.add(b); return b; };
+  nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a');
+  nameBoard([['永樂市場', 170, 0.42], ['YONGLE MARKET', 60, 0.8, 600]], 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, '#1f2a44', '#f1e7d2');
+
+  // ── trees: banyans outside the archway, in the forecourt's corner and at the end of the lane ──
+  banyans(get(sq, 'sq-banyan'), [[-10.5, 36.2, 'banyanM', 0.95], [10.8, 36.6, 'banyanM', 0.9], [-22.5, -6.8, 'banyanM', 0.85]]);
+
+  // ── the lane to the river: a quay, a rail, a moored boat, and the Tamsui wide and bright beyond ──
+  { const water = new T.Mesh(new T.PlaneGeometry(180, 320), new T.MeshStandardMaterial({ color: E.col('#4a6f7c'), roughness: 0.1, metalness: 0.35, emissive: E.col('#b8743e'), emissiveIntensity: 0.22 }));
+    water.rotation.x = -Math.PI / 2; water.position.set(-121, 0.02, 0); water.receiveShadow = true; scene.add(water);
+    const stone = triMat({ color: '#9a9288', tex: TEX.concrete, scale: 0.8, rough: 0.7 });
+    add(new T.BoxGeometry(1.0, 0.5, 320), stone, -30.6, 0.25, 0);
+    add(new T.BoxGeometry(0.07, 0.07, 110), MATS.ink, -29.6, 1.05, -10); add(new T.BoxGeometry(0.05, 0.05, 110), MATS.ink, -29.6, 0.6, -10);
+    for (let z = -64; z <= 44; z += 2.4) add(new T.BoxGeometry(0.09, 1.1, 0.09), MATS.ink, -29.6, 0.55, z);
+    [[-28.4, -9.5], [-28.4, -18.5], [-28.4, 8], [-28.4, -36]].forEach(([x, z]) => { const l = dress(get(core, 'lamp').clone()); l.position.set(x, 0, z); l.rotation.y = Math.PI / 2; scene.add(l); });
+    [[-26.6, -15.9], [-26.6, -11.4]].forEach(([x, z]) => { const b = dress(get(core, 'bollard').clone()); b.position.set(x, 0, z); scene.add(b); });
+    nameBoard([['大稻埕碼頭', 150, 0.5]], 3.4, 0.8, -27.6, 3.9, -13.6, Math.PI / 2, '#1f2a44', '#f1e7d2');
+    [-15.1, -12.1].forEach(z => add(new T.CylinderGeometry(0.05, 0.05, 3.6, 8), MATS.ink, -27.6, 1.8, z));
+    const hull = triMat({ color: '#3d5c6e', tex: TEX.bark, scale: 2, rough: 0.7 }), deck = triMat({ color: '#e6dcc6', tex: TEX.plaster, scale: 1, rough: 0.8 });   // a ferry at the wharf
+    const boat = new T.Group(); boat.position.set(-35.4, 0, -14.6); boat.rotation.y = 0.06;
+    [[new T.BoxGeometry(3.4, 1.0, 11), hull, 0, 0.45, 0], [new T.BoxGeometry(2.7, 1.5, 6.2), deck, 0, 1.7, -0.6], [new T.BoxGeometry(3.0, 0.12, 6.8), hull, 0, 2.5, -0.6], [new T.BoxGeometry(0.5, 0.9, 0.5), MATS.verm, 0, 3.0, -2.4], [new T.CylinderGeometry(0.04, 0.05, 3.4, 6), MATS.ink, 0, 4.2, 1.6]]
+      .forEach(([g, m, x, y, z]) => { const o = new T.Mesh(g, m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; boat.add(o); });
+    for (let i = 0; i < 5; i++) { const w = new T.Mesh(new T.BoxGeometry(0.04, 0.6, 0.8), GLOW(2.4, 1.6, 0.8)); w.position.set(1.36, 1.8, -2.9 + i * 1.15); boat.add(w); }
+    scene.add(boat);
+    [[-23.5, 12], [-24, 24], [-23, -28], [-24, -42]].forEach(([x, z], i) => { const t = dress(get(core, 'tree').clone()); t.position.set(x, 0, z); t.rotation.y = i * 1.3; t.scale.setScalar(1 + (i % 2) * 0.15); scene.add(t); }); }
+
+  // ── the hazy city all round, kept clear of the river and of the street's two ends ──
+  { const n = 190, im = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), triMat({ color: '#6d6762', tex: TEX.concrete, scale: 0.15, rough: 0.9 }), n), d = new T.Object3D();
+    for (let i = 0; i < n;) { const a = rr(0, 6.283), r = rr(44, 215), x = Math.cos(a) * r, z = Math.sin(a) * r; if ((x < -26 && x > -150) || Math.abs(x) < 15) continue;
+      const h = Math.min(rr(8, 30), 8 + (r - 44) * 0.5); d.position.set(x, h / 2, z); d.scale.set(rr(8, 18), h, rr(8, 18)); d.rotation.y = rr(0, 1.5); d.updateMatrix(); im.setMatrixAt(i++, d.matrix); }
+    im.castShadow = im.receiveShadow = true; scene.add(im); }
+  },
+});
+</script>
+</body>
+</html>

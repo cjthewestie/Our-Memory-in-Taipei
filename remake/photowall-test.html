@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · The photo wall</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script src="photowall.js"></script>
+<script>
+// A test page for photowall.js: one wall with three frames in an empty lit scene. Nothing here is a block of the site.
+// ?selftest=add drives the real form with a picture drawn on a canvas and prints the stored record;
+// ?selftest=open opens the newest photo's large view. Without it the page is just the wall.
+ENGINE.create({
+  title: '照片牆 · Photo wall test', subtitle: 'Click a frame. Add a photo. Copy its link.',
+  shadowCenter: [0, 0, 0], start: { x: 2.2, z: 2.4, heading: Math.PI },
+  bounds: { minX: -9, maxX: 9, minZ: -2.6, maxZ: 9 },
+  views: [[0, 1.9, 4.6, 0, 1.9, -4], [4.5, 1.6, 2.5, -1, 1.9, -4], [-4.5, 1.6, 2.5, 1, 1.9, -4], [0, 7, 11, 0, 1.5, -4], [0, 1.8, 1.2, 0, 1.8, -4], [6, 2.2, 6, 0, 1.6, -4]],
+  ground: { strips: [{ w: 2.8, len: 18 }], puddles: 4, puddle: (rr) => [rr(-6, 6), rr(-1, 6), rr(0, 3)] },
+  dust: { x: [-9, 9], y: [0.3, 6], z: [-5, 9] },
+  models: [],
+  build(E) {
+    const { T, scene, TEX, triMat, board } = E;
+    const w = new T.Mesh(new T.BoxGeometry(8.4, 3.3, 0.32), triMat({ color: '#e9dfca', tex: TEX.plaster, scale: 0.5, rough: 0.9 }));
+    w.position.set(0, 1.65, -4); w.castShadow = w.receiveShadow = true; scene.add(w);
+    const hd = board([["你的照片 VISITORS' WALL", 84, 0.4], ['Photos left by people who walked here', 40, 0.8, 500]], 8.4, 0.8, '#1f2a44', '#f1e7d2', 0.5, 2048);
+    hd.position.set(0, 3.7, -4); scene.add(hd);
+    [-2.6, 0, 2.6].forEach(x => { const fr = new T.Mesh(new T.BoxGeometry(2.25, 1.95, 0.08), new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 })); fr.position.set(x, 1.8, -3.81); fr.castShadow = true; scene.add(fr); });
+    // ── the integration: these lines are all a scene page adds ──
+    window.PW = PHOTOWALL.attach({ THREE: T, scene, camera: E.camera, canvas: E.canvas, keys: E.keys,
+      section: 'square', place: 'The Square · 廣場',
+      frames: PHOTOWALL.row({ center: [0, 1.8, -4], facing: 0, count: 3, gap: 2.6, size: [2.0, 1.7], out: 0.26 }) });
+  },
+});
+
+// ── self-test, only with ?selftest= ──
+(async () => {
+  const mode = new URLSearchParams(location.search).get('selftest'); if (!mode) return;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  while (!(window.__remake && window.__remake.ready && window.PW)) await wait(100);
+  await PW.ready;
+  const dump = async tag => console.log('PWTEST ' + tag + ' ' + JSON.stringify({ online: PW.ONLINE, onFrames: PW.frames.map(f => f.kind + (f.item ? ':' + f.item.key : '')),
+    records: (await PW.records()).map(r => ({ id: r.id, key: r.key, section: r.section, year: r.year, body: r.body, name: r.name, local: r.local, blobType: r.blob && r.blob.type, blobBytes: r.blob && r.blob.size, width: r.width, height: r.height })) }));
+  if (mode === 'open') { const l = PW.list().filter(x => x.kind === 'local'); if (l[0]) PW.open(l[0].key); await dump('open'); return; }
+  if (mode !== 'add') return;
+  await dump('before');
+  const cv = document.createElement('canvas'); cv.width = 3200; cv.height = 2000; const g = cv.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 0, 2000); gr.addColorStop(0, '#f7b267'); gr.addColorStop(0.6, '#f25c54'); gr.addColorStop(1, '#3d2c4a'); g.fillStyle = gr; g.fillRect(0, 0, 3200, 2000);
+  g.fillStyle = '#2a1c2a'; for (let i = 0; i < 14; i++) g.fillRect(i * 240, 1200 - ((i * 7919) % 600), 200, 900);
+  g.fillStyle = '#fff3d6'; g.font = '700 220px sans-serif'; g.textAlign = 'center'; g.fillText('TEST 3200×2000', 1600, 520);
+  const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+  const file = new File([blob], 'test-photo.png', { type: 'image/png' });
+  document.querySelector('.pw-bar .pw-primary').click();                      // the real "+ Add your photo" button
+  const form = document.querySelector('.pw-form'), dt = new DataTransfer(); dt.items.add(file);
+  form.elements.photo.files = dt.files; form.elements.photo.dispatchEvent(new Event('change', { bubbles: true }));
+  form.elements.body.value = '西門町的夕陽 · a test photo'; form.elements.year.value = '1994'; form.elements.name.value = 'selftest'; form.elements.ok.checked = true;
+  await wait(1700); form.requestSubmit();
+  for (let i = 0; i < 60 && !(await PW.records()).length; i++) await wait(100);
+  await wait(300);
+  console.log('PWTEST status ' + JSON.stringify({ status: document.querySelector('.pw-status').textContent, where: document.querySelector('.pw-where').textContent, source: file.size + ' bytes png 3200x2000' }));
+  await dump('after');
+})();
+</script>
+</body>
+</html>
