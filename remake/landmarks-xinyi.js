@@ -363,9 +363,15 @@ PLACES.add(E, P('taipei-city-hall'), { type: 'board', position: [-12.6, -16.5], 
 PLACES.add(E, P('taipei-101-opening-2004'), { position: [-2.4, -41.7], rotation: 0 });
 PLACES.add(E, P('alain-robert-climb-2004'), { position: [0.6, -41.7], rotation: 0 });
 PLACES.add(E, P('alex-honnold-free-solo-2026'), { position: [3.9, -41.4], rotation: 0 });
-PLACES.add(E, P('hualien-earthquake-2024'), { position: [25.6, -41.6], rotation: 0 });
+PLACES.add(E, P('taipei-101-run-up-2005'), { position: [25.6, -41.6], rotation: 0 });                    // at the tower's foot, where the stair race starts
 PLACES.add(E, P('first-nye-fireworks-2005'), { position: [29.2, -41.6], rotation: 0 });
-PLACES.add(E, P('covid-level-3-2021'), { position: [-14.3, -7.9], rotation: PI / 2 });
+// CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」
+PLACES.add(E, P('deadpool-reynolds-2016'), { position: [-14.3, -7.9], rotation: PI / 2 });                     // the red carpet outside 信義威秀
+PLACES.add(E, P('weekend-in-taipei-2024'), { position: [-14.3, -12.6], rotation: PI / 2 });
+PLACES.add(E, P('taipei-nye-party-2020'), { position: [-8.6, -18.2], rotation: 0.35 });                        // toward 市府廣場
+PLACES.add(E, P('taiwan-pride-city-hall-2024'), { position: [-16.2, -20.4], rotation: 0.35 });
+PLACES.add(E, P('nuit-blanche-xinyi-2023'), { position: [-14.3, 1.6], rotation: PI / 2 });                     // on 香堤大道
+PLACES.add(E, P('simple-life-urban-2019'), { position: [6.4, 17.6], rotation: PI });
 PLACES.add(E, P('eslite-xinyi-last-night-2023'), { position: [-6.3, 17.6], rotation: PI });
 // the 2026 climb, life size: one storey of a flared corner of the tower with a plain figure on it, no rope
 { const B = maker('climb-slice'), h = 3.4, rb = 1.2, rt = 1.62;

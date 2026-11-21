@@ -435,12 +435,16 @@
     PLACES.add(E, P('i-mei-original-shop'), { target: OUT.imei, plaque: { position: [4.4, 1.5, 31.78], rotation: -HP }, near: [3.6, 29.6], radius: 2.8 });
     // events: each stands where it happened in this layout
     PLACES.add(E, P('new-year-goods-street'), { position: [-3.45, 33.0], rotation: HP });                         // just inside the archway
-    PLACES.add(E, P('i-love-dihua-street-1988'), { position: [7.0, 6.35], rotation: PI }); PLACES.add(E, P('i-love-dihua-street-1988'), { target: OUT.line });   // the saved street; the road line runs across the forecourt beside it
+    PLACES.add(E, P('yuelao-matchmaker-crowds'), { position: [7.0, 6.35], rotation: PI });                        // in the temple forecourt, where the queue for 月老 forms
+    //   // the saved street; the road line runs across the forecourt beside it
     if (P('228-flash-point-1947')) PLACES.add(E, P('228-flash-point-1947'), { position: [3.3, 12.2], rotation: -HP });                           // on the kerb a little way from 天馬茶房's door
     PLACES.add(E, P('city-god-procession'), { position: [5.3, 3.4], rotation: -HP });                             // setting out from the temple forecourt
     PLACES.add(E, P('dadaocheng-fireworks'), { position: [-25.4, -13.6], rotation: HP });                         // on the quay, the river behind it
     PLACES.add(E, P('tttifa-arts-festival'), { position: [-3.45, -20.8], rotation: HP });                         // the costume parade's route, between the café and the puppet museum
-    PLACES.add(E, P('watsons-fire-and-restoration'), { position: [-3.45, -1.75], rotation: HP });                 // beside the pharmacy
+    PLACES.add(E, P('film-twa-tiu-tiann-2014'), { position: [-3.45, -1.75], rotation: HP });                      // on the street the film was named for
+    PLACES.add(E, P('solitary-gourmet-yongle'), { position: [3.45, -17.2], rotation: -HP });                       // on the kerb by 永樂市場, where 五郎 ate
+    PLACES.add(E, P('pier5-container-market'), { position: [-25.4, -8.6], rotation: HP });                         // on the quay beside the fireworks stand
+    //                 // beside the pharmacy
     return OUT;
   };
 })();

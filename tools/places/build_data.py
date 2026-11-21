@@ -87,7 +87,8 @@ def marker_of(item):
     kind = 'board' if '立牌' in t or 'board' in t else 'wall' if 'wall' in t else 'statue' if 'statue' in t or '雕像' in t else 'stand' if 'stand' in t else 'board'
     words = (item.get('id', '') + ' ' + (m.get('depicts') or '') + ' ' + t).lower()
     shape = 'generic'
-    for name, keys in (('stone', ('memorial stone', 'stone marker')), ('climber', ('climb',)), ('firework', ('firework',)), ('train', ('railway', 'track', 'train')),
+    for name, keys in (('stone', ('memorial stone', 'stone marker')), ('climber', ('climb',)), ('firework', ('firework',)), ('rainbow', ('rainbow', 'pride')), ('mic', ('microphone', 'concert', 'stage', 'signing', 'countdown show')), ('star', ('red carpet', 'premiere', 'celebrity', 'idol', 'star ')),
+                       ('train', ('railway', 'track', 'train')),
                        ('crane', ('demoli',)), ('damper', ('pendulum', 'damper')), ('tower', ('tower',)), ('cinema', ('cinema', 'ticket')),
                        ('walk', ('pedestrian',)), ('bag', ('shopping bag', 'department')), ('mask', ('mask',)), ('book', ('book',)),
                        ('lantern', ('new year', 'lantern')), ('fire', ('fire', 'burnt', 'scorched')), ('parade', ('parade', 'procession')), ('neon', ('neon',))):

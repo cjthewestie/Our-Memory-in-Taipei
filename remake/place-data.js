@@ -407,231 +407,286 @@ window.PLACE_DATA = {
   ],
   "events": [
    {
-    "key": "national-neon-removed-1985",
-    "id": "national-neon-removed-1985",
+    "key": "mayday-5th-anniv-2004",
+    "id": "mayday-5th-anniv-2004",
     "district": "ximen",
-    "zh": "中華商場國際牌霓虹塔拆除",
-    "en": "The National neon sign comes down",
+    "zh": "五月天成軍五周年西門町小型演唱",
+    "en": "Mayday's fifth-anniversary mini concert",
     "kind": "event",
-    "years": "1985 (installed 1964)",
-    "history_en": "In 1964 Matsushita Electric put up a giant neon sign for its National brand (國際牌) on the south end of the 信 block of Zhonghua Market. For twenty-one years it was the market's landmark and the glow people saw when they arrived in Ximending at night. It was taken down in 1985 for safety reasons. The day and month were not found.",
-    "history_zh": "1964年松下電器在中華商場信棟南面架設巨幅國際牌霓虹招牌，是西門町夜景的代表。1985年因安全問題拆除，確切日期待查。",
+    "years": "April 2004 (reported 5 April 2004; exact day inferred)",
+    "history_en": "In April 2004 the rock band Mayday (五月天) played a small concert in Ximending to mark five years since the band formed, just before setting off on an Asian tour. TVBS headlined its report with fans packing the Red House. For students who had grown up with the band's first albums, it was a rare chance to stand a few metres from five musicians who were already filling stadiums.",
+    "history_zh": "2004年4月，五月天在西門町舉辦成軍五周年小型演唱，TVBS以「歌迷擠爆紅樓」為題報導，隨後展開亞洲巡迴。",
     "visual": [],
-    "where": "South end of the 信 block of 中華商場 on 中華路, near 武昌街 (measured for the block; exact spot inferred).",
+    "where": "西門紅樓 (named in the TVBS headline; the article body only says 西門町, so the exact spot at the Red House is inferred).",
     "sources": [
-     "https://zh.wikipedia.org/zh-tw/中華商場"
+     "https://news.tvbs.com.tw/life/497714"
     ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/File:臺北市中華商場夜景.jpg"
-    ],
+    "photos": [],
     "confirmed": true,
     "unconfirmed": [
-     "Day and month of removal: not confirmed"
+     "Exact day of the concert: not confirmed",
+     "Crowd size: not confirmed",
+     "Which side of the Red House the stage stood on: not confirmed"
     ],
     "marker": {
      "type": "board",
-     "shape": "tower",
-     "depicts": "A standing sign board shaped like the neon tower, with the 國際牌 National sign lit up and a line saying it shone from 1964 to 1985."
+     "shape": "mic",
+     "depicts": "A standing board shaped like a small stage with five band silhouettes, guitars and a drum kit, and a banner reading 成軍五周年 2004."
     }
    },
    {
-    "key": "railway-underground-1989",
-    "id": "railway-underground-1989",
+    "key": "jay-chou-signing-2004",
+    "id": "jay-chou-signing-2004",
     "district": "ximen",
-    "zh": "台北鐵路地下化通車",
-    "en": "Taipei's railway goes underground",
+    "zh": "周杰倫《七里香》西門町簽唱會",
+    "en": "Jay Chou's album signing jams Ximending",
     "kind": "event",
-    "years": "1989-09-02 (groundbreaking 1983-07-12)",
-    "history_en": "Trains used to run at street level along Zhonghua Road, right beside Zhonghua Market, and people waited at level crossings to get into Ximending. The plan to put the tracks underground was approved on 26 July 1979 and work began on 12 July 1983. On 2 September 1989 the first phase opened and was handed to Taiwan Railways, with Premier 李煥 leading the ceremony. Zhonghua Road was widened afterwards.",
-    "history_zh": "過去火車沿中華路平面行駛，緊鄰中華商場。鐵路地下化1979年7月26日核定、1983年7月12日動工，1989年9月2日第一期完工通車，由行政院長李煥主持。",
+    "years": "14 August 2004",
+    "history_en": "On the afternoon of 14 August 2004 Jay Chou (周杰倫) held a signing for his new album in Ximending and sang the new song 七里香. Central News Agency reported that thousands of fans turned up and traffic around the site knotted up. Signing sessions were how fans met their idols before social media, and this one showed how completely one singer could stop the district.",
+    "history_zh": "2004年8月14日下午，周杰倫在西門町舉辦新專輯簽唱會並演唱〈七里香〉，中央社報導數千歌迷到場，周邊交通打結。",
     "visual": [],
-    "where": "On 中華路 at the east edge of the scene, between 中華商場 and the road (inferred position).",
+    "where": "西門町徒步區; the report gives only 台北西門町, so the exact street is not known.",
     "sources": [
-     "https://zh.wikipedia.org/zh-tw/臺北鐵路地下化專案",
-     "https://zh.wikipedia.org/zh-tw/中華商場"
+     "https://www.epochtimes.com/b5/4/8/14/n627582.htm"
     ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/File:台北鐵路地下隧道演變.jpg"
-    ],
+    "photos": [],
     "confirmed": true,
     "unconfirmed": [
-     "A photo of the 中華路 level crossing beside the market: not confirmed"
+     "Exact street or plaza of the signing: not confirmed",
+     "The original 中央社 page was not found; the text was read on a republishing site: not confirmed"
     ],
     "marker": {
-     "type": "wall",
-     "shape": "train",
-     "depicts": "A short wall with a level-crossing gate and warning bell, a strip of old track set in the ground, and the date 1989-09-02."
+     "type": "board",
+     "shape": "mic",
+     "depicts": "A standing board showing a signing table with a stack of CDs and a marker pen, a long queue of fans drawn as outlines, and the date 2004.8.14."
     }
    },
    {
-    "key": "zhonghua-market-1992",
-    "id": "zhonghua-market-demolition-1992",
+    "key": "lantern-festival-2017",
+    "id": "lantern-festival-2017",
     "district": "ximen",
-    "zh": "中華商場拆除",
-    "en": "Demolition of Zhonghua Market",
+    "zh": "2017台北燈節首度移師西門町",
+    "en": "Taipei Lantern Festival moves to Ximending",
     "kind": "event",
-    "years": "1992-10-20 to 1992-10-30",
-    "history_en": "After thirty-one years the eight blocks of Zhonghua Market were pulled down in eleven days. Mayor 黃大洲 gave the order on 20 October 1992 and the 忠 block went first; the 義, 和 and 平 blocks fell on 30 October. The market had declined and the land was needed for the MRT's Ximen Station and the rebuilding of Zhonghua Road. For many Taipei people this is the day old Ximending ended.",
-    "history_zh": "1992年10月20日市長黃大洲下令拆除，忠棟最先動工，10月30日義、和、平三棟拆除完畢。啟用31年的中華商場因捷運西門站與中華路改建而走入歷史。",
+    "years": "4–12 February 2017",
+    "history_en": "From 4 to 12 February 2017 the Taipei Lantern Festival left its usual home and came to the west side of the city for the first time, lighting up Ximending, 中華路 and the North Gate. The main lantern for the Year of the Rooster was a family of chicks called 小奇雞家族. Young people came for the photos and the night crowds, and the festival has returned to Ximending in many later years.",
+    "history_zh": "2017年2月4日至12日，台北燈節首度移師西區，在西門町、中華路一段與北門展出，主燈為「小奇雞家族」。",
     "visual": [],
-    "where": "On 中華路 on the market's footprint, east edge of the scene (measured for the market's line).",
+    "where": "中華路一段 beside the 西門町 pedestrian area, running north to 北門; a festival stage stood below the 中影新世界大樓 (stage position from a Commons photo caption).",
     "sources": [
-     "https://zh.wikipedia.org/zh-tw/中華商場"
+     "https://www.storm.mg/article/219678",
+     "https://zh.wikipedia.org/zh-tw/台北燈節"
     ],
     "photos": [
-     "https://commons.wikimedia.org/wiki/File:臺北市中華商場夜景.jpg"
+     "https://commons.wikimedia.org/wiki/File:2017台北燈節期間的捷運西門站1號出口.jpg",
+     "https://commons.wikimedia.org/wiki/File:Central_Pictures_New_World_Building_20170126.jpg"
     ],
     "confirmed": true,
     "unconfirmed": [
-     "A free-licence photo of the demolition itself: not confirmed"
+     "Total visitor count for 2017: not confirmed",
+     "Exact position of the main lantern: not confirmed"
     ],
     "marker": {
      "type": "statue",
-     "shape": "crane",
-     "depicts": "A bronze group of a shopkeeper carrying a folded signboard in front of a half-demolished three-storey block with one of the eight block names (忠) still on the wall."
+     "shape": "lantern",
+     "depicts": "A small glowing statue of a family of round cartoon chicks standing in a row, like the 小奇雞家族 main lantern, with paper lanterns strung above."
     }
    },
    {
-    "key": "red-house-cinema-closes-1997",
-    "id": "red-house-cinema-closes-1997",
+    "key": "golden-horse-outdoor-2018",
+    "id": "golden-horse-outdoor-2018",
     "district": "ximen",
-    "zh": "紅樓戲院歇業並列為古蹟",
-    "en": "The Red House cinema closes and becomes a monument",
+    "zh": "金馬影展電影公園露天放映《龍貓》",
+    "en": "Golden Horse open-air Ghibli night",
     "kind": "event",
-    "years": "1997 (monument assessment 1997-02-20)",
-    "history_en": "The 紅樓戲院 had shown films in the octagon since 1958 and second-run foreign films since 1976. By the 1990s it was a faded back-street cinema. It closed in 1997, and on 20 February of that year the building was assessed as a Taipei city monument, which protected it from being torn down. Restoration of the octagon began on 9 June 1998.",
-    "history_zh": "紅樓戲院自1958年起在八角樓放映電影，1997年歇業。同年2月20日建築評定為市定古蹟，1998年6月9日八角樓開始整修。",
+    "years": "10–11 November 2018",
+    "history_en": "On 10 November 2018 the Golden Horse Film Festival screened Grave of the Fireflies and My Neighbor Totoro back to back under the open sky at Ximending's film park, repeating the way the two films were first shown together in Japan thirty years earlier. Life of Pi followed on 11 November. It was a tribute to director Isao Takahata, who died that year, and it drew a generation raised on Ghibli films.",
+    "history_zh": "2018年11月10日，金馬影展在西門町電影主題公園露天連映《螢火蟲之墓》與《龍貓》，向高畑勲致敬，11日加映《少年PI的奇幻漂流》。",
     "visual": [],
-    "where": "In front of the Red House octagon, south side of 成都路 (measured).",
+    "where": "台北市電影主題公園 (Taipei Cinema Park) at the west end of 武昌街 and 康定路, the far end of 電影街.",
     "sources": [
-     "https://zh.wikipedia.org/zh-tw/西門紅樓"
+     "https://www.storm.mg/article/567169"
     ],
     "photos": [
-     "https://commons.wikimedia.org/wiki/File:西門紅樓八角樓.jpg"
+     "https://commons.wikimedia.org/wiki/File:Golden_Horse_Awards_trophy_sample_in_Taipei_Cinema_Park_20181117a.jpg"
     ],
     "confirmed": true,
     "unconfirmed": [
-     "Day and month the cinema closed: not confirmed"
-    ],
-    "marker": {
-     "type": "board",
-     "shape": "cinema",
-     "depicts": "A standing board in the shape of an old cinema ticket window with a hand-painted 'last show' poster and the monument plaque date."
-    }
-   },
-   {
-    "key": "pedestrian-zone-1999",
-    "id": "pedestrian-zone-1999",
-    "district": "ximen",
-    "zh": "西門町行人徒步區設立",
-    "en": "The pedestrian zone is created",
-    "kind": "event",
-    "years": "1999 (day and month unknown)",
-    "history_en": "In 1999 the city closed the core streets of Ximending to cars and made them a pedestrian zone, described in 2008 as the largest in the country, with more than three million shoppers a month. Together with the new MRT station it brought young people back to a district that had lost ground to east Taipei since the 1980s. A three-month trial to extend the zone west to Kangding Road ran from 21 June 2008 and was dropped after shopkeepers protested.",
-    "history_zh": "1999年西門町核心街道設為行人徒步區，是全台最大的徒步區，每月逾三百萬人次。它與捷運通車一起，讓1980年代起被東區取代的西門町重新聚集年輕人。",
-    "visual": [],
-    "where": "At the 漢中街 entrance to the zone, just north of the Exit 6 plaza (inferred).",
-    "sources": [
-     "https://taipeitimes.com/News/taiwan/archives/2008/06/18/2003415053",
-     "https://zh.wikipedia.org/zh-tw/西門町"
-    ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/File:Ximenting_night_view2_201507.jpg"
-    ],
-    "confirmed": false,
-    "unconfirmed": [
-     "years: 1999 (day and month unknown)",
-     "Exact date in 1999, the first streets included, and who opened it: not confirmed"
-    ],
-    "marker": {
-     "type": "board",
-     "shape": "walk",
-     "depicts": "A standing board made like a 'pedestrians only' street sign with a no-cars symbol, the year 1999, and a small map of the car-free streets."
-    }
-   },
-   {
-    "key": "mrt-ximen-opens-1999",
-    "id": "mrt-ximen-opens-1999",
-    "district": "ximen",
-    "zh": "捷運西門站通車",
-    "en": "MRT Ximen Station opens",
-    "kind": "event",
-    "years": "1999-12-24 (second pair of platforms 2000-08-31)",
-    "history_en": "MRT Ximen Station opened on Christmas Eve, 24 December 1999, when the Nangang line reached Ximen and the Banqiao line ran on to Longshan Temple. The station lies under Zhonghua Road, on land cleared when Zhonghua Market came down seven years earlier. The second pair of platforms opened on 31 August 2000 with the Xiaonanmen line. Exit 6 quickly became the station's busiest exit and the front door of Ximending.",
-    "history_zh": "捷運西門站於1999年12月24日通車，位於中華路下方，正是七年前拆除中華商場所騰出的土地。2000年8月31日小南門線通車。",
-    "visual": [],
-    "where": "At Exit 6, north side of 成都路 at 漢中街 (measured).",
-    "sources": [
-     "https://zh.wikipedia.org/zh-tw/西門站_(臺北捷運)",
-     "https://zh.wikipedia.org/zh-tw/中華商場"
-    ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/File:Exit_6,_Ximen_Station_20210323.jpg",
-     "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_MRT-Station-Ximen-03.jpg"
-    ],
-    "confirmed": true,
-    "unconfirmed": [],
-    "marker": {
-     "type": "stand",
-     "shape": "generic",
-     "depicts": "A stand shaped like the Exit 6 entrance canopy with the blue Bannan line colour, an old station name board reading 西門 Ximen, and the date 1999-12-24."
-    }
-   },
-   {
-    "key": "red-house-fire-and-reopening",
-    "id": "red-house-fire-and-reopening",
-    "district": "ximen",
-    "zh": "紅樓十字樓大火與八角樓重新開幕",
-    "en": "The Red House fire and reopening",
-    "kind": "event",
-    "years": "Fire 2000-07-22; octagon reopened 2002-07-26; cross-shaped hall reopened 2004-10-24",
-    "history_en": "In the early hours of 22 July 2000 a fire destroyed the cross-shaped market hall behind the Red House and about 200 stalls. The octagon, already under restoration, survived. It reopened on 26 July 2002 with the 紙風車 foundation running it as a theatre and tea house. Rebuilding of the cross-shaped hall began on 26 August 2001; it had a trial sale on 3 July 2003 and reopened on 24 October 2004.",
-    "history_zh": "2000年7月22日清晨大火燒毀紅樓後方的十字樓與約200個攤位，整修中的八角樓倖存。",
-    "visual": [],
-    "where": "Behind the Red House octagon, beside the cross-shaped hall, south of 成都路 (measured).",
-    "sources": [
-     "https://zh.wikipedia.org/zh-tw/西門紅樓"
-    ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Red-House-Theater-02.jpg"
-    ],
-    "confirmed": true,
-    "unconfirmed": [
-     "Cause of the fire and whether anyone was hurt: not confirmed"
+     "Whether the screenings were free: seen only in a search summary, not on an opened page: not confirmed",
+     "Audience size: not confirmed"
     ],
     "marker": {
      "type": "wall",
-     "shape": "fire",
-     "depicts": "A low wall of scorched red bricks on one half and clean new bricks on the other, with the two dates 2000-07-22 and 2002-07-26."
+     "shape": "cinema",
+     "depicts": "A low wall painted as an outdoor cinema screen with rows of deck chairs in front and a Golden Horse trophy outline in the corner."
     }
    },
    {
-    "key": "lai-lai-closes-2003",
-    "id": "lai-lai-closes-2003",
+    "key": "rainbow-crossing-2019",
+    "id": "rainbow-crossing-2019",
     "district": "ximen",
-    "zh": "來來百貨熄燈",
-    "en": "Lai Lai Department Store's last day",
+    "zh": "西門6號出口彩虹地景啟用",
+    "en": "The Exit 6 rainbow crossing appears",
     "kind": "event",
-    "years": "2003-02-10",
-    "history_en": "Lai Lai had stood on movie street since 25 November 1978. It planned to close on 25 December 2002, but so many people came to the closing sale that the last day was pushed back to 10 February 2003. Its end marked the close of the department-store era in Ximending; the building later became an Eslite store and a hotel.",
-    "history_zh": "1978年開幕的來來百貨原訂2002年12月25日結束營業，因封館拍賣人潮踴躍，延到2003年2月10日才熄燈，象徵西門町百貨時代的結束。",
+    "years": "25 September 2019",
+    "history_en": "On 25 September 2019 a six-colour rainbow with the word Taipei was painted on the plaza outside Ximen MRT Exit 6. It marked Taiwan becoming the first place in Asia to legalise same-sex marriage on 17 May that year, and was ready before the Pride parade on 26 October. It quickly became the spot where visitors and students stop for a photo, and it was repainted in 2025.",
+    "history_zh": "2019年9月25日，捷運西門站6號出口前廣場出現寫著「Taipei」的六色彩虹地景，紀念同年5月17日同婚合法化，成為打卡地標。",
     "visual": [],
-    "where": "武昌街二段77號, corner of 武昌街 and 昆明街 (measured).",
+    "where": "The plaza in front of Ximen MRT Exit 6, at the corner of 中華路 and 成都路, the main mouth of the pedestrian area.",
     "sources": [
-     "https://zh.wikipedia.org/zh-tw/來來百貨",
-     "https://edh.tw/article/9757"
+     "https://www.marieclaire.com.tw/lifestyle/travel/45227",
+     "https://en.wikipedia.org/wiki/Rainbow_crossings_in_Taipei"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Size of the painted area: not confirmed",
+     "A Wikimedia Commons photo: the category query returned no files: not confirmed",
+     "Exact 2025 repaint date: search results disagreed and no page was opened for it: not confirmed"
+    ],
+    "marker": {
+     "type": "wall",
+     "shape": "rainbow",
+     "depicts": "A low wall painted with six rainbow stripes and the white word TAIPEI, with footprints showing where people stand for a photo."
+    }
+   },
+   {
+    "key": "backstreet-fest-2020",
+    "id": "backstreet-fest-2020",
+    "district": "ximen",
+    "zh": "2020西門町後街文化祭",
+    "en": "Ximending Back Street Culture Festival",
+    "kind": "event",
+    "years": "August 2020 (3–29 August)",
+    "history_en": "Through August 2020 the Ximending Back Street Culture Festival took over the film park under the theme 後街製造. There were live vinyl DJ sets and workshops with DJ Chicano, large graffiti pieces with artist Vastar, street dance from the crew 90's bboyz, skateboarding lessons from Delta Skate Supply and Saturday night open-air films. It put the district's street culture, usually tucked in the back lanes, on show for anyone to try.",
+    "history_zh": "2020年8月，西門町後街文化祭以「後街製造」為題在電影主題公園登場，有黑膠DJ、塗鴉、街舞、滑板教學與週六月光電影院。",
+    "visual": [],
+    "where": "台北市電影主題公園 (Taipei Cinema Park) at 武昌街 and 康定路, next to the 美國街 back lanes.",
+    "sources": [
+     "https://www.taiwannews.com.tw/zh/news/3979310"
     ],
     "photos": [
-     "https://zh.wikipedia.org/zh-tw/來來百貨"
+     "https://commons.wikimedia.org/wiki/File:Graffiti_at_Taipei_Cinema_Park_01.jpg"
     ],
     "confirmed": true,
     "unconfirmed": [
-     "A period photo of the closing sale: not confirmed"
+     "Organiser: not confirmed",
+     "Visitor numbers: not confirmed",
+     "The first edition was reported as 2010 in a search summary only; not opened: not confirmed"
+    ],
+    "marker": {
+     "type": "wall",
+     "shape": "generic",
+     "depicts": "A graffiti wall with a spray can, a turntable and a skateboard leaning against it, tagged 後街製造 2020."
+    }
+   },
+   {
+    "key": "play-now-concert-2021",
+    "id": "play-now-concert-2021",
+    "district": "ximen",
+    "zh": "PLAY NOW音樂演唱會「嘻嘻哈哈」",
+    "en": "PLAY NOW hip-hop concert at Exit 6",
+    "kind": "event",
+    "years": "28 February 2021 (date inferred from a 1 March 2021 report)",
+    "history_en": "At the end of February 2021 a free hip-hop show called PLAY NOW EP2 嘻嘻哈哈 was staged on the Exit 6 plaza as part of the 西門PLAY樂購町 shopping campaign. Rapper OSN (高爾宣) led it as campaign ambassador, with 婁峻碩, 陳零九, 呂士軒, 王豔薇 and 陳忻玥 on the bill. Mirror Media reported more than ten thousand visits. The singers were the names filling young listeners' playlists that year.",
+    "history_zh": "2021年2月底，「PLAY NOW音樂演唱會EP2嘻嘻哈哈」在西門町6號出口廣場開唱，高爾宣、婁峻碩、陳零九等演出，吸引上萬人次。",
+    "visual": [],
+    "where": "西門町6號出口廣場, the open plaza outside Ximen MRT Exit 6.",
+    "sources": [
+     "https://www.mirrormedia.mg/story/20210301ent029",
+     "https://www.taiwannews.com.tw/ch/news/4082971"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Organiser stated in words (photo credit suggests 台北市商業處): not confirmed",
+     "Whether the 30 January 2021 show ran as announced: not confirmed"
+    ],
+    "marker": {
+     "type": "stand",
+     "shape": "mic",
+     "depicts": "A small stage stand with a microphone, two speakers and a big LED screen behind it, with PLAY NOW written across the front."
+    }
+   },
+   {
+    "key": "orange-carnival-2024",
+    "id": "orange-carnival-2024",
+    "district": "ximen",
+    "zh": "2024春季橘子嘉年華・紅樓夜嗨祭",
+    "en": "Gamania Orange Carnival night show",
+    "kind": "event",
+    "years": "4 February 2024",
+    "history_en": "On Sunday 4 February 2024 the game company Gamania (橘子集團) held its Spring Orange Carnival on the north plaza of the Red House, from 1 p.m. to 9 p.m. The evening part, called 夜嗨祭, put the band 怕胖團, the idol group 幽靈水晶 CRYXTAL, 林潔心 and Theseus 忒修斯 on stage from 6 p.m. It mixed games, idols and indie music, the things its young crowd already followed online.",
+    "history_zh": "2024年2月4日，橘子集團在西門紅樓北廣場舉辦春季橘子嘉年華，晚間「夜嗨祭」由怕胖團、幽靈水晶、林潔心、忒修斯演出。",
+    "visual": [],
+    "where": "西門紅樓北廣場, the open square on the north side of the Red House at 成都路10號.",
+    "sources": [
+     "https://www.nownews.com/news/6355149"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Crowd size: not confirmed",
+     "A report written after the event: not confirmed"
+    ],
+    "marker": {
+     "type": "stand",
+     "shape": "mic",
+     "depicts": "An orange stage stand with a drum kit, string lights and a round orange mascot shape on top, set in front of the red-brick octagon."
+    }
+   },
+   {
+    "key": "gatao-fanmeet-2025",
+    "id": "gatao-fanmeet-2025",
+    "district": "ximen",
+    "zh": "《角頭－鬥陣欸》封街電影街見面會",
+    "en": "Gatao cast closes Movie Street",
+    "kind": "event",
+    "years": "19 August 2025",
+    "history_en": "On 19 August 2025 the cast of the Taiwanese film 《角頭－鬥陣欸》 walked through Ximending and then closed off Movie Street for a Taipei fan meeting, two days before the film opened on 21 August. Actors 高捷, 黃鐙輝, 王陽明, 鄭人碩, 吳念軒 and 黃冠智 were there. NOWnews wrote that the street was packed so tightly nobody could move, with fans stretching back toward Exit 6.",
+    "history_zh": "2025年8月19日，《角頭－鬥陣欸》劇組封下西門町電影街辦粉絲見面會，高捷、王陽明、鄭人碩等到場，街道擠得水洩不通。",
+    "visual": [],
+    "where": "電影街, the cinema stretch of 武昌街二段 (the report says 西門町電影街; the 武昌街二段 reading is inferred).",
+    "sources": [
+     "https://www.nownews.com/news/6721290"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Number of fans: not confirmed",
+     "Which cinema hosted the screening: not confirmed"
     ],
     "marker": {
      "type": "board",
-     "shape": "bag",
-     "depicts": "A standing board shaped like a department-store shopping bag with a 'closing sale' banner and the dates 1978–2003."
+     "shape": "star",
+     "depicts": "A standing board shaped like a film poster frame with a red carpet running out of it and a clapperboard dated 2025.8.19."
+    }
+   },
+   {
+    "key": "drag-festival-2025",
+    "id": "drag-festival-2025",
+    "district": "ximen",
+    "zh": "國際變裝藝術節 × Color Taipei 西門紅樓",
+    "en": "International Drag Festival at the Red House",
+    "kind": "event",
+    "years": "25 October 2025 (shop offers 22–26 October)",
+    "history_en": "On 25 October 2025, the day of the 23rd Taiwan Pride parade, drag queens from across Asia were booked to perform at the live house inside the Red House for the International Drag Arts Festival. It was the first year Taipei's tourism department joined the festival, under its Color Taipei programme, and shops around the Red House gave discounts from 22 to 26 October. The Red House squares are the city's best-known LGBT+ meeting place.",
+    "history_zh": "2025年10月25日同志遊行當天，國際變裝藝術節在河岸留言西門紅樓展演館登場，北市觀傳局首度合作，紅樓周邊店家同步優惠。",
+    "visual": [],
+    "where": "河岸留言西門紅樓展演館 inside 西門紅樓, with the open-air bar area on the south plaza beside it.",
+    "sources": [
+     "https://www.taiwannews.com.tw/zh/news/6225431"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Names of the drag performers: not confirmed",
+     "Audience size and a report written after the show: not confirmed"
+    ],
+    "marker": {
+     "type": "statue",
+     "shape": "rainbow",
+     "depicts": "A small statue of a tall wig, a pair of platform heels and a folding fan under a rainbow spotlight, on a round stage base."
     }
    }
   ]
@@ -1083,59 +1138,30 @@ window.PLACE_DATA = {
     "zh": "迪化街年貨大街",
     "en": "Dihua Street Lunar New Year Market",
     "kind": "event",
-    "years": "first held 1996; yearly, about the 10th to the 29th day of the 12th lunar month",
-    "history_en": "The New Year Goods Street started in 1996, before the Lunar New Year, and the article read calls it the first event of its kind in Taiwan. For about three weeks before New Year's Eve the shops of Dihua Street push stalls into the arcades and the road, selling sweets, biscuits, dried seafood, mushrooms, nuts, herbs and gift boxes, with sellers shouting and handing out samples. Guisui Street takes the overflow stalls and night snacks. More than a million people come each year. For many Taipei families this crowd is the strongest memory of the street.",
-    "history_zh": "1996年春節前首度舉辦，為全台首創的年貨大街。每年農曆十二月十日至二十九日前後，迪化街店家沿街擺攤販售糖果、南北貨與禮盒，試吃叫賣聲不斷，歸綏街設小吃攤。",
+    "years": "first held 1996; yearly before Lunar New Year; 2026 edition 31 Jan to 15 Feb",
+    "history_en": "For about two weeks before Lunar New Year, Dihua Street turns into Taipei's best-known holiday market. It began in 1996 and was the first of its kind in Taiwan. Shops push stalls into the arcades, hand out samples and shout prices over the crowd, and more than a million people come. The 2026 edition ran from 31 January to 15 February, noon to midnight, with photo spots built around popular cartoon characters. Young people come for the snacks, the samples and the photos.",
+    "history_zh": "1996年起於春節前舉辦，為全台首創年貨大街，估計逾百萬人次。2026年於1月31日至2月15日登場，每日中午至午夜，設有人氣IP打卡點。",
     "visual": [
-     "Red banners and lanterns strung across the street, stall tables under the arcades piled with open sacks and trays [inferred (check the 2007 and 2018 photos)]",
-     "Dense crowd filling the whole street width [measured (visitor numbers) + inferred]"
+     "Dense crowd filling the street at dusk under red lanterns and shop signs (measured: 2018 Commons photo caption 迪化街湧入年貨採買人潮)",
+     "Stall tables under the arcades with open sacks and sample trays (inferred)",
+     "2026 horse-year installations and cartoon IP photo spots; exact look not confirmed"
     ],
-    "where": "Along Dihua Street Section 1 from Nanjing W. Rd north, with Guisui St as the side branch; place the marker near Yongle Plaza. (streets measured; marker spot is a suggestion)",
-    "sources": [
-     "https://zh.wikipedia.org/zh-tw/迪化街"
-    ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/File:2007-02-13_vendor_at_the_Chinese_New_Year_Fair_of_Dihua_Street.jpg",
-     "https://commons.wikimedia.org/wiki/File:2018-02-13_Taipei_Lunar_New_Year_Festival.jpg"
-    ],
-    "confirmed": true,
-    "unconfirmed": [
-     "Whether 1996 was already a city-government event or shop-association led: not confirmed"
-    ],
-    "marker": {
-     "type": "board",
-     "shape": "lantern",
-     "depicts": "A red New Year arch-shaped board with lanterns, a stall heaped with sweets and dried mushrooms, and a seller holding out a sample tray; date 1996 on the header."
-    }
-   },
-   {
-    "key": "i-love-dihua-street-1988",
-    "id": "i-love-dihua-street-1988",
-    "district": "dadao",
-    "zh": "我愛迪化街保存運動",
-    "en": "I Love Dihua Street preservation movement",
-    "kind": "event",
-    "years": "widening planned 1973, approved Oct 1977; campaign July 1988; preservation plan 1995",
-    "history_en": "In the 1970s the city planned to widen Dihua Street from under 8 metres to 20 metres, which would have cut the fronts off its old shophouses. The plan was approved in October 1977. When land was about to be taken in 1988, the Leshan Cultural Foundation started the I Love Dihua Street campaign in July with residents, citizens and scholars, and collected signatures. The widening was paused and universities were asked to study how to save the street. In 1995 a plan fixed the street at its old width and protected 77 historic buildings. Everything a visitor sees today exists because of this fight.",
-    "history_zh": "1977年10月市府核定將迪化街拓寬為20公尺，老街屋面臨拆除。1988年7月樂山文教基金會與居民、學者發起「我愛迪化街」連署，拓寬暫緩。",
-    "visual": [
-     "Ground line showing the planned 20 m width against the real 7.8 m street is the clearest way to show what was at stake [inferred (design suggestion from measured widths)]",
-     "What the 1988 banners and posters looked like: not confirmed [unknown]"
-    ],
-    "where": "Anywhere on Dihua Street Section 1; suggest the south entrance near Nanjing W. Rd so visitors meet it first. (suggestion)",
+    "where": "Dihua Street Section 1 from Nanjing W. Rd north to Guisui St (measured); place the marker near Yongle Plaza (suggestion).",
     "sources": [
      "https://zh.wikipedia.org/zh-tw/迪化街",
-     "https://zh.wikipedia.org/zh-tw/大稻埕"
+     "https://www.gvm.com.tw/article/127283",
+     "https://news.tvbs.com.tw/life/3112101"
     ],
     "photos": [
-     "https://commons.wikimedia.org/wiki/File:Buildings_along_Dihua_Street_07.23.jpg"
+     "https://commons.wikimedia.org/wiki/File:2018-02-13_Taipei_Lunar_New_Year_Festival.jpg",
+     "https://commons.wikimedia.org/wiki/File:2007-02-13_vendor_at_the_Chinese_New_Year_Fair_of_Dihua_Street.jpg"
     ],
     "confirmed": true,
     "unconfirmed": [],
     "marker": {
-     "type": "wall",
-     "shape": "generic",
-     "depicts": "A short brick wall section painted with the slogan 我愛迪化街, a row of signatures, and a white line on the ground showing where the 20-metre road would have cut through the houses."
+     "type": "board",
+     "shape": "lantern",
+     "depicts": "A red New Year arch board with lanterns, a stall heaped with sweets and dried mushrooms, and a seller holding out a sample tray, headed 1996."
     }
    },
    {
@@ -1146,25 +1172,23 @@ window.PLACE_DATA = {
     "en": "Xia-Hai City God birthday procession",
     "kind": "event",
     "years": "13th day of the 5th lunar month, yearly; earliest record 1879; resumed 1898",
-    "history_en": "Every year on the 13th day of the fifth lunar month the City God leaves his small temple and is carried around Dadaocheng. The earliest record of the procession is from 1879. It was banned in the first years of Japanese rule and came back in 1898 after an epidemic. It is one of Taipei's three great temple festivals, and the crowds gave rise to the saying that on the 13th of the fifth month, people come to look at people. The City God's Wife was added to the temple in 1893, the story goes, so the god would stop carrying off women who came to watch.",
-    "history_zh": "每年農曆五月十三日霞海城隍聖誕出巡遶境，最早紀錄見於1879年，日治初期一度禁止，1898年因疫病而恢復，為台北三大廟會之一。",
+    "history_en": "Every year on the 13th day of the fifth lunar month, the City God leaves his small temple on Dihua Street and is carried around Dadaocheng with a parade of temple troupes. The earliest record is from 1879; it was banned early in Japanese rule and came back in 1898 after an epidemic. The crowd is so thick that the saying goes: on the thirteenth, people come to watch people. Young visitors join for the street spectacle and the photos.",
+    "history_zh": "每年農曆五月十三日霞海城隍聖誕遶境，最早文獻記載為1879年，日治初期一度禁止，1898年因瘟疫解禁，留下「五月十三人看人」俗諺。",
     "visual": [
-     "Tall and short general puppets (七爺八爺), sedan chair, drum and gong troupes, firecracker smoke [inferred (general knowledge of City God processions; check festival photos)]",
-     "Route through the streets: not confirmed [unknown]"
+     "Tall and short general puppets, sedan chair, drum and gong troupes, firecracker smoke (inferred, not on a page read)",
+     "Route through the streets: not confirmed"
     ],
-    "where": "Starts and ends at the City God Temple, Dihua Street Section 1 No. 61; place the statue in the temple forecourt or Yongle Plaza. (temple measured; spot is a suggestion)",
+    "where": "Starts and ends at the City God Temple, Dihua Street Section 1 No. 61 (address from search snippet); place the statue in the temple forecourt (suggestion).",
     "sources": [
      "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
     ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/Category:Taipei_Xia-Hai_City_God_Temple"
-    ],
+    "photos": [],
     "confirmed": true,
     "unconfirmed": [],
     "marker": {
      "type": "statue",
      "shape": "parade",
-     "depicts": "A pair of tall parade figures, Seventh Lord and Eighth Lord (七爺八爺), walking ahead of a small carved sedan chair, with the phrase 五月十三人看人 on the base."
+     "depicts": "Tall and short parade generals (七爺八爺) walking ahead of a small sedan chair, with 五月十三人看人 on the base."
     }
    },
    {
@@ -1174,97 +1198,176 @@ window.PLACE_DATA = {
     "zh": "大稻埕情人節煙火（大稻埕夏日節）",
     "en": "Dadaocheng Valentine's fireworks (Dadaocheng Summer Festival)",
     "kind": "event",
-    "years": "first year not confirmed, held by 2005; yearly around Qixi; renamed Dadaocheng Summer Festival from 2023",
-    "history_en": "Each summer, close to Qixi, the Chinese Valentine's Day, fireworks are fired over the Tamsui River beside Dadaocheng Wharf. A news report of 26 August 2006 describes the Taipei Dadaocheng Fireworks Music Festival at Yanping Riverside Park, with about 7,000 shells from 8:30 pm in six themed parts, and says it had more variety than the year before, so the event was running by 2005. In 2022 about 80,000 to 100,000 people came. From 2023 it grew into the Dadaocheng Summer Festival, which lasts close to a month with several fireworks nights.",
-    "history_zh": "每年七夕前後於大稻埕碼頭、延平河濱公園施放煙火。2006年8月26日報導稱當晚施放約七千發，並較前一年更多變化，可知至遲2005年已舉辦。",
+    "years": "first year not confirmed; running by 2006; yearly around Qixi; 2026 edition 25 Jul to 15 Aug",
+    "history_en": "Each summer near Qixi, the Chinese Valentine's Day, fireworks go up over the Tamsui River beside Dadaocheng Wharf. The show was already running in 2006, with about 7,000 shells. Today it is the Dadaocheng Summer Festival. The 2026 edition opened on 25 July with its first drone light show, a Spider-Man theme and a nine-metre Spider-Man at the wharf, plus live sets by acts such as Bennu, and ran until 15 August. It is the classic Taipei summer date night.",
+    "history_zh": "每年七夕前後於大稻埕碼頭、延平河濱公園施放煙火，2006年已施放約七千發。2026年7月25日開幕，首次加入無人機燈光秀與蜘蛛人主題，至8月15日。",
     "visual": [
-     "Fireworks launched over the river, crowd on the grass and bike path between flood gates 3 and 5, Sanchong bank opposite",
-     "Night sky, reflections on the water, picnic mats and food stalls [inferred]"
+     "Fireworks over the river, crowd between flood gates 3 and 5, Sanchong bank opposite (measured)",
+     "2026: drone formations of Taipei landmarks and Spider-Man, a 9-metre Spider-Man figure at the wharf (measured)",
+     "Picnic mats and reflections on the water (inferred)"
     ],
-    "where": "Yanping Riverside Park and Dadaocheng Wharf, between flood gates 3 and 5, west of Dihua Street outside the flood wall. (measured)",
+    "where": "Dadaocheng Wharf and Yanping Riverside Park, between flood gates 3 and 5, west of Dihua Street outside the flood wall (measured).",
     "sources": [
      "https://www.epochtimes.com/b5/6/8/26/n1435221.htm",
-     "https://www.cna.com.tw/news/aloc/202207300212.aspx",
-     "https://udn.com/news/story/6961/9644197"
+     "https://udn.com/news/story/7323/9650967"
     ],
-    "photos": [
-     "https://www.cna.com.tw/news/aloc/202207300212.aspx"
-    ],
+    "photos": [],
     "confirmed": false,
     "unconfirmed": [
-     "years: first year not confirmed, held by 2005; yearly around Qixi; renamed Dadaocheng Summer Festival from 2023",
-     "First year of the event and its organiser in the early years: not confirmed"
+     "years: first year not confirmed; running by 2006; yearly around Qixi; 2026 edition 25 Jul to 15 Aug"
     ],
     "marker": {
      "type": "stand",
      "shape": "firework",
-     "depicts": "A riverside viewing stand shaped like a small pier railing with a couple's silhouette looking up, and a clickable night-sky panel of fireworks bursting over the Tamsui River and the bridge lights."
+     "depicts": "A pier-railing viewing stand with a couple's silhouette looking up at a night-sky panel of fireworks and drone lights over the Tamsui River."
     }
    },
    {
     "key": "tttifa-arts-festival",
     "id": "tttifa-arts-festival",
     "district": "dadao",
-    "zh": "大稻埕國際藝術節",
-    "en": "Tua-Tiu-Tiann International Festival of Arts (TTTIFA)",
+    "zh": "大稻埕國際藝術節（1920變裝遊行）",
+    "en": "Tua-Tiu-Tiann International Festival of Arts and 1920s costume parade",
     "kind": "event",
-    "years": "first held 2015; yearly in October; costume parade on the weekend of 17 October",
-    "history_en": "The festival began in 2015 as an independent, citizen-run event, started together by Bookstore 1920s, the small theatre Thinkers' Theatre in the old Watsons building, and the Chiang Wei-shui Cultural Foundation. It looks back to the 1920s, when Dadaocheng was the centre of Taiwanese new culture, and mixes that era with the present through plays, music and street events in shophouses and lanes. Its best-known part is the 1920s costume parade, held on the weekend of 17 October, when people walk Dihua Street in period suits, cheongsams and kimono. By its third year the motto was the more local, the more international.",
-    "history_zh": "2015年由二十書店、思劇場與蔣渭水文化基金會共同發起的民間藝術節，以1920年代大稻埕新文化精神為主題。",
+    "years": "first held 2015 (inferred); yearly in October; 2025 parade on 12 October",
+    "history_en": "Every October the Tua-Tiu-Tiann International Festival of Arts fills Dadaocheng with plays, music and dance for about a month. Its highlight is the 1920s costume parade. In 2025, on 12 October, people dressed as 1920s gentry, ladies and street vendors set off on five routes and met at the Yongle Plaza main stage, where the day ended with a starlit ball. Young people come to dress up, take photos and dance in the street.",
+    "history_zh": "每年十月舉行，為期約一個月，重頭戲為「1920變裝遊行」。2025年10月12日分五條路線出發，匯聚永樂廣場主舞台，並有星光舞會。",
     "visual": [
-     "Paraders in 1920s suits, cheongsams, kimono and student uniforms walking down Dihua Street [measured (costume parade) + inferred (costume types)]",
-     "Festival poster style and colours: not confirmed [unknown]"
+     "Paraders dressed as 1920s gentry, ladies and street vendors (measured)",
+     "Main stage at Yongle Plaza with an evening ball (measured)",
+     "Exact costume colours and poster style: not confirmed"
     ],
-    "where": "Venues spread through Dihua Street shophouses; put the board outside the Watsons / ArtYard building at No. 34, where two of the founders are based. (snippet: bookshop 1F and theatre 3F there; spot is a suggestion)",
+    "where": "Parade ends at Yongle Plaza in front of Yongle Market on Dihua Street Section 1 (measured); place the board at the plaza edge (suggestion).",
     "sources": [
-     "https://www.accupass.com/event/1607201412491932333344",
-     "https://par.npac-ntch.org/article/tag/8975",
-     "https://smiletaiwan.cw.com.tw/article/566"
+     "https://www.cna.com.tw/news/acul/202510120144.aspx",
+     "https://www.accupass.com/event/1607201412491932333344"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [],
+    "marker": {
+     "type": "board",
+     "shape": "generic",
+     "depicts": "Life-size cut-out figures in 1920s dress, a man in a three-piece suit and a woman with a parasol, with a face-hole photo board."
+    }
+   },
+   {
+    "key": "film-twa-tiu-tiann-2014",
+    "id": "film-twa-tiu-tiann-2014",
+    "district": "dadao",
+    "zh": "電影《大稻埕》",
+    "en": "The film Twa-Tiu-Tiann (2014)",
+    "kind": "event",
+    "years": "released 30 January 2014",
+    "history_en": "Twa-Tiu-Tiann is a Taiwanese Lunar New Year film released on 30 January 2014 and named after the district. It was directed by Yeh Tien-lun (葉天倫) and stars Chu Ke-liang (豬哥亮), 宥勝, 簡嫚書 and Sonia Sui (隋棠). It earned NT$220 million across Taiwan. One filming site was the century-old house now known as ArtYard (民藝埕), just north of the City God Temple. For many young viewers it was their first look at old Dadaocheng.",
+    "history_zh": "2014年1月30日上映的台灣電影，葉天倫導演，豬哥亮、宥勝、簡嫚書、隋棠主演，全台票房2.2億元，曾於霞海城隍廟北側的民藝埕古厝取景。",
+    "visual": [
+     "Old shophouse front of 民藝埕 as the backdrop (measured as a filming site)",
+     "Poster design and costume details: not confirmed"
+    ],
+    "where": "Outside ArtYard (民藝埕), the old house on the north side of Xia-Hai City God Temple, Dihua Street Section 1 (measured; house number not confirmed).",
+    "sources": [
+     "https://zh.wikipedia.org/zh-tw/大稻埕_(電影)"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [],
+    "marker": {
+     "type": "wall",
+     "shape": "generic",
+     "depicts": "A low wall styled as a film poster board with a clapperboard reading 大稻埕 2014 and four cast silhouettes in 1920s dress."
+    }
+   },
+   {
+    "key": "solitary-gourmet-yongle",
+    "id": "solitary-gourmet-yongle",
+    "district": "dadao",
+    "zh": "《孤獨的美食家》五郎在永樂市場",
+    "en": "Solitary Gourmet: Goro eats at Yongle Market",
+    "kind": "event",
+    "years": "Season 5, episodes 4 and 5; broadcast year 2015 (inferred)",
+    "history_en": "In season 5 of the Japanese drama Solitary Gourmet (孤獨的美食家), episodes 4 and 5 sent the hero Goro to Taiwan, the show's first trip abroad. Goro, played by Yutaka Matsushige (松重豐), ate at Yongle Danzai Noodles beside Yongle Market. The shop still sells a Goro set, a chicken rice box with side dishes. Fans from Japan and Taiwan come to eat exactly what he ate, and Matsushige has come back to Taiwan to film again since.",
+    "history_zh": "日劇《孤獨的美食家》第五季第4、5話首度海外出差來台，五郎（松重豐飾）曾到永樂市場旁的永樂担仔麵，店內至今有「五郎套餐」雞肉飯便當。",
+    "visual": [
+     "Chicken rice with a plate of side dishes, the Goro set (measured)",
+     "Danzai noodles and braised pork rice (measured)",
+     "Shop front look and signage: not confirmed"
+    ],
+    "where": "永樂担仔麵, 南京西路233巷20號, on the lane beside Yongle Market just off Dihua Street (address measured).",
+    "sources": [
+     "https://ja.wikipedia.org/wiki/孤独のグルメ_(テレビドラマ)",
+     "https://supertaste.tvbs.com.tw/pack/347055",
+     "https://zh.wikipedia.org/zh-tw/孤獨的美食家_(電視劇)"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [],
+    "marker": {
+     "type": "stand",
+     "shape": "generic",
+     "depicts": "A small noodle-stall stand with a tray holding a chicken rice box and a bowl of danzai noodles, and a lone salaryman silhouette seen from behind."
+    }
+   },
+   {
+    "key": "pier5-container-market",
+    "id": "pier5-container-market",
+    "district": "dadao",
+    "zh": "PIER5 大稻埕碼頭貨櫃市集",
+    "en": "PIER5 container market at Dadaocheng Wharf",
+    "kind": "event",
+    "years": "opened 1 April 2018; later re-let as 大稻埕貨櫃市集 (inferred); status in 2026 not confirmed",
+    "history_en": "PIER5 opened on 1 April 2018 inside flood gate 5 at Dadaocheng Wharf, at the river end of Minsheng West Road. White shipping containers were turned into small food and drink bars beside the Tamsui River, and the place quickly became a photo spot that drew big crowds. The organiser planned themed markets on two weekends a month and regular sets by singer-songwriters and bands. Young people come in the evening for a drink, the river breeze and live music.",
+    "history_zh": "2018年4月1日於大稻埕碼頭五號水門內開幕，白色貨櫃改裝成河岸餐飲吧，迅速成為拍照熱點，每月兩個週末辦主題市集，並有創作歌手與樂團演出。",
+    "visual": [
+     "White container units (measured)",
+     "River, wharf and live-music stage (measured)",
+     "Sunset sky and string lights (inferred)"
+    ],
+    "where": "Inside flood gate 5 at Dadaocheng Wharf, river end of Minsheng W. Rd, west of Dihua Street (measured).",
+    "sources": [
+     "https://supertaste.tvbs.com.tw/travel/309332"
     ],
     "photos": [],
     "confirmed": false,
     "unconfirmed": [
-     "the core fact was read in a search summary only, not on the page",
-     "The name 狂騷二零 and founder 周奕成's role: not confirmed"
+     "years: opened 1 April 2018; later re-let as 大稻埕貨櫃市集 (inferred); status in 2026 not confirmed",
+     "most of its facts are inferred or unknown"
     ],
     "marker": {
-     "type": "board",
-     "shape": "generic",
-     "depicts": "Life-size cut-out figures in 1920s dress, a man in a three-piece suit and straw boater and a woman in a cheongsam with a parasol, with a face-hole photo board and the festival years from 2015."
+     "type": "wall",
+     "shape": "mic",
+     "depicts": "A low wall of stacked white shipping containers with a string of bulbs, a bar counter window and a small stage with a guitar."
     }
    },
    {
-    "key": "watsons-fire-and-restoration",
-    "id": "watsons-fire-and-restoration",
+    "key": "yuelao-matchmaker-crowds",
+    "id": "yuelao-matchmaker-crowds",
     "district": "dadao",
-    "zh": "屈臣氏大藥房火災與修復",
-    "en": "Watsons pharmacy fire and restoration",
+    "zh": "霞海城隍廟月老人潮",
+    "en": "Matchmaker-god crowds at Xia-Hai City God Temple",
     "kind": "event",
-    "years": "fire date not confirmed; listed as a city monument 2005; ArtYard opened 2011",
-    "history_en": "People tell of a fire at the Watsons pharmacy building and a careful restoration afterwards. This site has not yet confirmed the date of the fire or the years of the repair. What is confirmed: Watsons traded on Dihua Street from 1917, the old shop was listed as a city monument in 2005, and it reopened as ArtYard (小藝埕) in 2011. If you remember the fire, leave a photo or a note here.",
-    "history_zh": "相傳屈臣氏大藥房曾遭祝融後修復，但火災日期與修復年份尚待確認。已確認：2005年列為市定古蹟，2011年以小藝埕重新開張。",
+    "years": "Yue Lao worshipped here since 1971; viral Japanese school-trip video October 2025",
+    "history_en": "The Old Man under the Moon, the matchmaker god, has been worshipped at Xia-Hai City God Temple since 1971 and is now the temple's most popular god. Single people come to ask him for a partner. In October 2025 a Threads video of Japanese high-school girls in uniform crowding the temple and its arcade went viral. People joked that the temple had become a stop on Japanese school trips and that the matchmaker now has overseas business.",
+    "history_zh": "霞海城隍廟自1971年起供奉月下老人，今為廟中最具人氣的神明。2025年10月，日本女高中生穿制服擠滿廟前騎樓拜月老的影片在Threads爆紅。",
     "visual": [
-     "Use the present restored facade; do not model fire damage until a source photo is found [inferred (caution)]"
+     "The temple's Yue Lao statue (measured: Commons photo)",
+     "Uniformed students filling the arcade in front of the temple (measured, 2025 report)",
+     "Red thread and offerings: (inferred)"
     ],
-    "where": "Beside the Watsons / ArtYard building, Dihua Street Section 1 No. 34, west side at Lane 32. (address via snippet)",
+    "where": "Xia-Hai City God Temple, Dihua Street Section 1 No. 61 (address from search snippet); place the statue beside the temple door (suggestion).",
     "sources": [
-     "https://zh.wikipedia.org/zh-tw/屈臣氏大藥房",
-     "https://www.businessweekly.com.tw/style/blog/7430",
-     "https://travel.yam.com/article/128430"
+     "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟",
+     "https://udn.com/news/story/120912/9101135"
     ],
     "photos": [
-     "https://commons.wikimedia.org/wiki/File:Watson's_Pharmacy,_Dihua_Street_20160604.jpg"
+     "https://commons.wikimedia.org/wiki/File:Taipei_Ha-hai_Sing-hong_Temple's_guat-noo.jpg"
     ],
-    "confirmed": false,
-    "unconfirmed": [
-     "years: fire date not confirmed; listed as a city monument 2005; ArtYard opened 2011",
-     "the research says to hold it until confirmed",
-     "Fire year, cause, damage, restoration years, builder 李俊啟: not confirmed"
-    ],
+    "confirmed": true,
+    "unconfirmed": [],
     "marker": {
-     "type": "board",
-     "shape": "fire",
-     "depicts": "A before-and-after board beside the building: burnt shell on the left, restored facade on the right, with the dates left blank until confirmed."
+     "type": "statue",
+     "shape": "generic",
+     "depicts": "A small seated Old Man under the Moon with a white beard holding a red thread that runs out to a row of schoolgirl and couple silhouettes."
     }
    }
   ]
@@ -1784,36 +1887,6 @@ window.PLACE_DATA = {
     }
    },
    {
-    "key": "covid-level-3-2021",
-    "id": "covid-level-3-2021",
-    "district": "xinyi",
-    "zh": "2021年三級警戒下的信義區空城",
-    "en": "COVID-19 Level 3 alert: the empty streets of Xinyi",
-    "kind": "event",
-    "years": "Level 3 announced for Taipei and New Taipei 2021-05-15; nationwide from 2021-05-19; lowered 2021-07-27 (end date inferred)",
-    "history_en": "On 15 May 2021 Taiwan's epidemic command centre raised Taipei and New Taipei to a Level 3 alert, and on 19 May extended it to the whole country. There was no legal lockdown, but people stayed home anyway. The night after the announcement a photographer flew a drone over Xinyi and found the traffic and the crowds gone; public television described the district as looking like an empty city. Department stores shortened their hours, the Taipei 101 mall opened only from noon to 8 p.m. in late May, and the 89th-floor observatory closed. Some clothing shops reported sales down more than 80 percent.",
-    "history_zh": "2021年5月15日，雙北升為第三級警戒，19日擴及全國。民眾自主減少外出，隔日空拍的信義區夜景車潮人潮消失，宛如空城；百貨縮短營業時間。",
-    "visual": [
-     "The same streets and skybridges with no people and no cars, shop shutters half down [measured (empty) + inferred (shutters)]",
-     "A notice board at a mall door with shortened hours 12:00–20:00, a temperature-check stand and a hand-sanitiser bottle [measured (hours) + inferred (props)]",
-     "A single generic figure in a surgical mask [inferred]"
-    ],
-    "where": "Across the whole district; place the marker on Xiangti Avenue between the Shin Kong Mitsukoshi buildings, about 450 m north of Taipei 101, where the missing crowd is most obvious.",
-    "sources": [
-     "https://news.pts.org.tw/article/527613"
-    ],
-    "photos": [
-     "https://news.pts.org.tw/article/527613"
-    ],
-    "confirmed": true,
-    "unconfirmed": [],
-    "marker": {
-     "type": "board",
-     "shape": "mask",
-     "depicts": "A plain standing notice board like a shop closure sign, with a face-mask icon, the dates 2021.05.15 – 07.27 and an empty-street outline."
-    }
-   },
-   {
     "key": "eslite-xinyi-last-night-2023",
     "id": "eslite-xinyi-last-night-2023",
     "district": "xinyi",
@@ -1848,37 +1921,208 @@ window.PLACE_DATA = {
     }
    },
    {
-    "key": "hualien-earthquake-2024",
-    "id": "hualien-earthquake-2024",
+    "key": "taipei-nye-party-2020",
+    "id": "taipei-nye-party-2020",
     "district": "xinyi",
-    "zh": "2024年0403花蓮地震與101阻尼器",
-    "en": "3 April 2024 Hualien earthquake and the Taipei 101 damper",
+    "zh": "臺北最HIGH新年城2020跨年晚會",
+    "en": "Taipei New Year's Eve party at City Hall plaza (2020 edition)",
     "kind": "event",
-    "years": "2024-04-03 (morning)",
-    "history_en": "On the morning of 3 April 2024 a magnitude 7.2 earthquake struck near Hualien on Taiwan's east coast, the strongest the island had felt in 25 years. In Taipei the towers of Xinyi swayed, and Taipei 101 stayed standing. News outlets around the world explained why by pointing to the 660-tonne steel ball near its top, which swings against the building's movement and, by the tower's own figures, can cut the sway by up to 40 percent. No source read for this file gives a measured swing for that morning. The record on file is one metre, set in a 2015 typhoon.",
-    "history_zh": "2024年4月3日上午，花蓮近海發生規模7.2地震，為台灣25年來最強。信義區高樓搖晃，台北101安然無恙。",
+    "years": "2019-12-31 (held yearly at this plaza since 1996)",
+    "history_en": "Every 31 December the plaza in front of Taipei City Hall turns into a free outdoor concert that ends with the Taipei 101 fireworks. The edition that welcomed 2020 is a good example of why young people queue for hours: Mayday opened the night, their first time as opening act in eight years, Super Junior-D&E played their first Taipei countdown show, Rainie Yang led the countdown and Wu Qing-feng closed. About 16,000 fireworks then went off over 300 seconds.",
+    "history_zh": "每年12月31日，市府前市民廣場辦跨年晚會，接著看101煙火。迎接2020年那場由五月天開場、Super Junior-D&E首度登台、楊丞琳倒數、吳青峰壓軸。",
     "visual": [
-     "The yellow damper ball shown tilted off-centre, with motion lines [inferred]",
-     "A seismograph trace and the date 2024.04.03, M7.2 [measured (date, magnitude)]"
+     "A large concert stage on the plaza in front of City Hall with the lit Taipei 101 behind the crowd [inferred]",
+     "A countdown clock and a date plate reading 2019.12.31 [measured (date)]"
     ],
-    "where": "Inside the tower on floors 88–92; put the marker at the tower's foot beside the damper kiosk.",
+    "where": "On the plaza in front of Taipei City Hall, a few blocks north-west of Taipei 101, with the tower in view for the fireworks.",
     "sources": [
-     "https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper",
-     "https://en.wikipedia.org/wiki/Taipei_101"
+     "https://www.cna.com.tw/news/firstnews/201912315002.aspx",
+     "https://zh.wikipedia.org/zh-tw/臺北最HIGH新年城"
     ],
-    "photos": [
-     "https://commons.wikimedia.org/wiki/Category:Mass_damper_of_Taipei_101",
-     "https://mothership.sg/2024/04/taiwan-earthquake-taipei101-damper"
-    ],
-    "confirmed": false,
+    "photos": [],
+    "confirmed": true,
     "unconfirmed": [
-     "most of its facts are inferred or unknown",
-     "How far the damper moved on 3 April 2024: not confirmed"
+     "Crowd count for the 2020 edition itself: not confirmed"
+    ],
+    "marker": {
+     "type": "wall",
+     "shape": "mic",
+     "depicts": "A low stage-shaped wall with a band silhouette, a countdown clock and a list of the 2020 edition's acts."
+    }
+   },
+   {
+    "key": "taiwan-pride-city-hall-2024",
+    "id": "taiwan-pride-city-hall-2024",
+    "district": "xinyi",
+    "zh": "臺灣同志遊行（市府前廣場出發）",
+    "en": "Taiwan Pride parade from City Hall plaza",
+    "kind": "event",
+    "years": "2024-10-26 (parade first ended at this plaza in 2005; based here yearly 2022-2026)",
+    "history_en": "Taiwan Pride is one of the biggest pride parades in Asia, and since 2022 it has set off from the plaza in front of Taipei City Hall. On 26 October 2024 organisers counted 180,000 people. Marchers left at about 2 p.m. on a north and a south route, with drag queen Nymphia Wind leading one group, and came back to a stage where singer Wan Fang closed the show. For many young people it is the year's biggest street party.",
+    "history_zh": "臺灣同志遊行自2022年起連年從台北市政府前廣場出發。2024年10月26日主辦單位統計18萬人參加，妮妃雅領隊，萬芳壓軸演出。",
+    "visual": [
+     "A long six-colour rainbow flag carried by a crowd leaving the plaza [measured (6-colour flags carried, CNA)]",
+     "A main stage on the plaza with City Hall behind it [inferred]"
+    ],
+    "where": "On the plaza in front of Taipei City Hall, a few blocks north-west of Taipei 101.",
+    "sources": [
+     "https://www.cna.com.tw/news/ahel/202410260196.aspx",
+     "https://zh.wikipedia.org/zh-tw/臺灣同志遊行"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Exact streets of the 2024 routes: not confirmed"
+    ],
+    "marker": {
+     "type": "board",
+     "shape": "rainbow",
+     "depicts": "A standing board in six rainbow stripes showing marchers under a long flag, with the date 2024.10.26 and the figure 180,000."
+    }
+   },
+   {
+    "key": "taipei-101-run-up-2005",
+    "id": "taipei-101-run-up-2005",
+    "district": "xinyi",
+    "zh": "台北101國際登高賽",
+    "en": "Taipei 101 Run Up stair race",
+    "kind": "event",
+    "years": "2005-11-20 (first race; most recent listed 2025-05-03)",
+    "history_en": "The Taipei 101 Run Up is a race up the tower's stairs: 2,046 steps from the 1st floor to the 91st, a climb of 390 metres. It was first held on 20 November 2005. That day Australia's Paul Crake won in 10 minutes 29 seconds and Austria's Andrea Mayr took the women's race in 12 minutes 38 seconds, and both times still stand as the event records. Places are limited for safety, so getting a bib is a bragging right in itself.",
+    "history_zh": "台北101國際登高賽2005年11月20日首度舉辦，選手從1樓爬到91樓，共2,046階、390公尺。首屆冠軍Paul Crake的10分29秒仍是大會紀錄。",
+    "visual": [
+     "Runners with race bibs entering a stairwell door, with a sign reading 2,046 steps / 91F [measured (figures)]",
+     "A finish banner on the 91st-floor outdoor deck [inferred]"
+    ],
+    "where": "Inside Taipei 101 itself, starting at the ground floor and finishing on the 91st floor.",
+    "sources": [
+     "https://zh.wikipedia.org/zh-tw/台北101國際登高賽",
+     "https://zh.wikipedia.org/zh-tw/台北101國際登高賽歷年成績列表"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Number of runners in any given year: not confirmed"
+    ],
+    "marker": {
+     "type": "statue",
+     "shape": "generic",
+     "depicts": "A runner figure mid-stride on a short flight of steps, with a plate reading 2,046 steps, 91 floors, record 10:29."
+    }
+   },
+   {
+    "key": "nuit-blanche-xinyi-2023",
+    "id": "nuit-blanche-xinyi-2023",
+    "district": "xinyi",
+    "zh": "2023臺北白晝之夜「起義吧！」",
+    "en": "Nuit Blanche Taipei 2023 in Xinyi",
+    "kind": "event",
+    "years": "2023-10-07 evening to 2023-10-08 early morning",
+    "history_en": "Nuit Blanche is a free all-night art festival that Taipei has held since 2016, each year in a different part of the city. On 7 October 2023 it came to Xinyi under the theme \"Rise up!\". City Hall, the City Council and Sun Yat-sen Memorial Hall stayed open through the night, the mayor's office was filled with art and a \"cat mayor\", and the council chamber was opened to visitors. About 400,000 visits were counted before morning.",
+    "history_zh": "2023年10月7日傍晚至翌日清晨，白晝之夜以「起義吧！」為題在信義區登場，市府、市議會、國父紀念館徹夜開放，約40萬人次參與。",
+    "visual": [
+     "City Hall lit at night with crowds on the plaza and large black-and-white portrait posters (JR's Inside Out Project) [inferred]",
+     "Rows of small ice figures sitting on steps (Minimum Monument) [inferred]",
+     "A sign with the theme 「起義吧！」 [measured (theme)]"
+    ],
+    "where": "Spread from Taipei City Hall and the City Council, a few blocks north-west of Taipei 101, west to Sun Yat-sen Memorial Hall.",
+    "sources": [
+     "https://www.cna.com.tw/news/ahel/202310080103.aspx"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [],
+    "marker": {
+     "type": "wall",
+     "shape": "generic",
+     "depicts": "A short wall pasted with large black-and-white face posters under a moon, with the words 「起義吧！」 and the date 2023.10.07."
+    }
+   },
+   {
+    "key": "simple-life-urban-2019",
+    "id": "simple-life-urban-2019",
+    "district": "xinyi",
+    "zh": "2019簡單生活節 Simple Urban+",
+    "en": "Simple Life festival at the Taipei 101 fountain plaza (2019)",
+    "kind": "event",
+    "years": "2019-11-30 to 2019-12-08 (start date per Wikipedia; nine days)",
+    "history_en": "Simple Life is Taiwan's best-known indie music and lifestyle festival, started in 2006. In 2019 it left its usual home at Huashan and set up for nine days on the fountain plaza beside Taipei 101 under the name Simple Urban Plus. Sixty-three music acts played, among them Tanya Chua, 9m88, ØZI, Waa Wei and Sandee Chan, next to more than 100 food and maker stalls. It put the bands young listeners follow right at the foot of the tower.",
+    "history_zh": "簡單生活節2019年移師101大樓旁的水舞廣場，以Simple Urban+為題舉辦九天，共63組音樂人演出，包括蔡健雅、9m88、ØZI，另有逾百組品牌市集。",
+    "visual": [
+     "An open-air stage and rows of market tents on the plaza with the base of Taipei 101 rising directly behind [inferred]",
+     "A festival sign reading Simple Urban+ [measured (name)]"
+    ],
+    "where": "On the fountain plaza right beside Taipei 101, at the foot of the tower.",
+    "sources": [
+     "https://www.taiwannews.com.tw/zh/news/3830730",
+     "https://zh.wikipedia.org/zh-tw/簡單生活節"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Whether entry was free or ticketed, and the attendance: not confirmed"
     ],
     "marker": {
      "type": "stand",
-     "shape": "damper",
-     "depicts": "A stand holding a small golden pendulum ball that swings when the visitor clicks it, over a plate reading 2024.04.03 M7.2."
+     "shape": "generic",
+     "depicts": "A small market stall with a guitar leaning on it and a sign reading Simple Urban+ 2019."
+    }
+   },
+   {
+    "key": "deadpool-reynolds-2016",
+    "id": "deadpool-reynolds-2016",
+    "district": "xinyi",
+    "zh": "萊恩雷諾斯《惡棍英雄：死侍》信義威秀紅毯",
+    "en": "Ryan Reynolds' Deadpool red carpet at Vieshow Xinyi",
+    "kind": "event",
+    "years": "2016-01-21",
+    "history_en": "On 21 January 2016 Ryan Reynolds walked a red carpet on the central plaza of Vieshow Cinemas Xinyi for a fan screening of Deadpool. Taiwan was the film's only promotional stop in Asia, and several hundred fans stood through a cold front to see him. He signed, posed for photos, blew kisses and said \"I love Taipei\" in Mandarin. He also went up Taipei 101 during the trip. The film opened in Taiwan at midnight on 9 February.",
+    "history_zh": "2016年1月21日，萊恩雷諾斯在信義威秀中庭廣場出席《惡棍英雄：死侍》粉絲特映會紅毯，台灣是亞洲唯一宣傳站，數百位影迷頂著寒流到場。",
+    "visual": [
+     "A red carpet across the cinema's open-air plaza with fans pressed against barriers holding posters [inferred]",
+     "A figure in the red-and-black Deadpool suit as a standee beside the carpet [inferred]"
+    ],
+    "where": "On the central plaza of Vieshow Cinemas Xinyi, a short walk north of Taipei 101.",
+    "sources": [
+     "https://www.gvm.com.tw/article/31272",
+     "https://www.marieclaire.com.tw/entertainment/news/21828"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [
+     "Exact number of fans: not confirmed"
+    ],
+    "marker": {
+     "type": "board",
+     "shape": "star",
+     "depicts": "A standing board of a red carpet and a film clapperboard reading Deadpool, Taipei, 2016.01.21."
+    }
+   },
+   {
+    "key": "weekend-in-taipei-2024",
+    "id": "weekend-in-taipei-2024",
+    "district": "xinyi",
+    "zh": "《台北追緝令》世界首映紅毯",
+    "en": "Weekend in Taipei world premiere red carpet",
+    "kind": "event",
+    "years": "2024-09-01",
+    "history_en": "Weekend in Taipei, a Luc Besson action film shot in the city in 2023, held its world premiere red carpet on the central plaza of Vieshow Cinemas Xinyi on 1 September 2024. More than 3,000 fans came, some queuing from early morning in 37-degree heat. Besson, director George Huang, Gwei Lun-mei and Fast and Furious actor Sung Kang walked the carpet, and Kang spent close to twenty minutes signing. Luke Evans was filming abroad and sent a video.",
+    "history_zh": "2024年9月1日，盧貝松監製的《台北追緝令》在信義威秀中庭廣場舉行世界首映紅毯，桂綸鎂、姜成鎬等人出席，超過三千名粉絲到場。",
+    "visual": [
+     "A red carpet and a backdrop with the film's title on the cinema plaza, crowds on both sides in summer clothes [inferred]",
+     "A date plate reading 2024.09.01 [measured (date)]"
+    ],
+    "where": "On the central plaza of Vieshow Cinemas Xinyi, a short walk north of Taipei 101.",
+    "sources": [
+     "https://n.yam.com/Article/20240901664325"
+    ],
+    "photos": [],
+    "confirmed": true,
+    "unconfirmed": [],
+    "marker": {
+     "type": "stand",
+     "shape": "star",
+     "depicts": "A premiere photo-wall stand with the film title, a strip of red carpet and the date 2024.09.01."
     }
    }
   ]

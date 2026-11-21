@@ -24,7 +24,7 @@
 //             (events carry one), or 'board'. With `target` and no `type`, nothing is built.
 //   position  [x, z] or [x, y, z] in metres · rotation  the angle about Y the front looks along (0 looks toward +Z)
 //   shape     the pictogram / bronze of the marker: climber, crane, train, firework, tower, damper, stone, parade,
-//             cinema, walk, bag, mask, book, lantern, fire, neon, generic. Left out: the item's marker.shape.
+//             cinema, walk, bag, mask, book, lantern, fire, neon, mic, star, rainbow, generic. Left out: the item's marker.shape.
 //   target    an existing Object3D (or an array of them): a click anywhere on it opens the item
 //   plaque    with a target: { position: [x, y, z], rotation, size } hangs a glowing "i" plaque there
 //   near      [x, z]: where she must stand (within `radius`, default 3 m) for the E prompt. Left out: the marker,
@@ -103,6 +103,9 @@
     neon(g) { g.fillRect(-12, -12, 24, 104); g.lineWidth = 9; g.strokeRect(-58, -72, 116, 58); g.fillRect(-40, -52, 80, 18); g.lineWidth = 5; [[-78, -86, -92, -98], [78, -86, 92, -98], [0, -84, 0, -100], [-84, -42, -100, -42], [84, -42, 100, -42]].forEach(([a, b, c, d]) => line(g, [[a, b], [c, d]])); },
     damper(g) { g.lineWidth = 6; line(g, [[-56, -96], [-22, -16]]); line(g, [[56, -96], [22, -16]]); g.fillRect(-70, -100, 140, 8); disc(g, 0, 26, 52); g.save(); g.globalCompositeOperation = 'source-atop'; g.restore(); g.lineWidth = 4; g.globalAlpha = 0.45; g.strokeStyle = '#000'; [8, 26, 44].forEach(y => line(g, [[-50, y], [50, y]])); g.globalAlpha = 1; },
     stone(g) { g.beginPath(); g.moveTo(-48, 80); g.lineTo(-48, -30); g.arc(0, -30, 48, Math.PI, 0); g.lineTo(48, 80); g.closePath(); g.fill(); g.fillRect(-70, 80, 140, 14); },
+    mic(g) { g.beginPath(); g.ellipse(0, -44, 30, 42, 0, 0, 6.2832); g.fill(); g.lineWidth = 10; g.beginPath(); g.arc(0, -30, 50, 0.12, Math.PI - 0.12); g.stroke(); line(g, [[0, 20], [0, 78]]); line(g, [[-36, 84], [36, 84]]); },                  // a stage microphone: concerts, signings, countdown shows
+    star(g) { g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 38 : 92; g.lineTo(Math.cos(a) * r, Math.sin(a) * r + 4); } g.closePath(); g.fill(); },                                   // a star: a celebrity visit, a premiere
+    rainbow(g) { g.lineWidth = 15; [88, 68, 48, 28].forEach((r, i) => { g.globalAlpha = 1 - i * 0.2; g.beginPath(); g.arc(0, 54, r, Math.PI, 0); g.stroke(); }); g.globalAlpha = 1; },                                                       // arcs of a rainbow
     generic(g) { g.beginPath(); g.arc(0, -24, 46, Math.PI * 0.82, Math.PI * 0.18); g.lineTo(0, 92); g.closePath(); g.fill(); g.save(); g.globalAlpha = 0.5; g.fillStyle = '#fff'; disc(g, 0, -26, 17); g.restore(); },
   };
   function picto(g, shape, cx, cy, half, color) {

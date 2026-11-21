@@ -588,14 +588,17 @@ if (window.PLACES) {
   if (G['red-house']) { PLACES.add(E, P('red-house'), { target: G['red-house'], plaque: { position: [2.6, 1.6, 8.75], rotation: 0, size: 0.24 }, near: [0, 11.6], radius: 4 }); count++; }
   // the events, each near where it happened in this layout
   const ev = (key, o) => { const it = P(key); if (!it) { console.warn('[landmarks-ximen] no event', key); return; } PLACES.add(E, it, o); count++; };
-  ev('national-neon-removed-1985', { position: [-18.4, 11.8], rotation: L });                 // under the empty frame at the block's south end
-  ev('railway-underground-1989', { position: [-18.6, 22], rotation: L });                      // beside the strip of old track
-  ev('zhonghua-market-1992', { position: [-17.6, 45.2], rotation: L - 0.25 });                 // on the market's own pavement
-  ev('red-house-cinema-closes-1997', { position: [-4.8, 15.4], rotation: 0.22 });              // in front of the octagon
-  ev('red-house-fire-and-reopening', { position: [-12.6, 13.6], rotation: 0.3 });              // beside the Red House
-  ev('pedestrian-zone-1999', { position: [4.6, 55.6], rotation: Math.PI - 0.15 });             // at the mouth of the car-free streets
-  ev('mrt-ximen-opens-1999', { position: [-6.6, 50.6], rotation: Math.PI + 0.3 });             // at Exit 6
-  ev('lai-lai-closes-2003', { position: [-17.6, 56.6], rotation: Math.PI - 0.35 });            // at the store's door
+  // CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」: concerts, signings, festivals and fan meets
+  ev('orange-carnival-2024', { position: [-4.8, 15.4], rotation: 0.22 });                      // in front of the octagon, where the stage stood
+  ev('drag-festival-2025', { position: [-12.6, 13.6], rotation: 0.3 });                        // beside the Red House
+  ev('jay-chou-signing-2004', { position: [-18.6, 22], rotation: L });
+  ev('lantern-festival-2017', { position: [-17.6, 45.2], rotation: L - 0.25 });                // on the 中華路 side, where the lanterns ran
+  ev('backstreet-fest-2020', { position: [16.8, 33.2], rotation: -L });                        // toward 美國街 and the back streets
+  ev('golden-horse-outdoor-2018', { position: [16.5, 47.5], rotation: -L });                   // on the 電影街 side
+  ev('rainbow-crossing-2019', { position: [-6.6, 50.6], rotation: Math.PI + 0.3 });            // at Exit 6
+  ev('mayday-5th-anniv-2004', { position: [4.6, 55.6], rotation: Math.PI - 0.15 });            // at the mouth of the car-free streets
+  ev('gatao-fanmeet-2025', { position: [12.8, 56.4], rotation: Math.PI - 0.3 });
+  ev('play-now-concert-2021', { position: [-17.6, 56.6], rotation: Math.PI - 0.35 });
 }
 return { groups, count };
 };
