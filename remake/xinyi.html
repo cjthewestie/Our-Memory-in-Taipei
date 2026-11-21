@@ -9,8 +9,11 @@
 <script src="../three.min.js"></script>
 <script src="../GLTFLoader.js"></script>
 <script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
 <script src="hero.js"></script>
 <script src="engine.js"></script>
+<script src="photo-topics.js"></script>
+<script src="photowall.js"></script>
 <script>
 // 信義, the 2020s: a compact stone plaza at the foot of Taipei 101, the skywalk crossing overhead,
 // 新光三越 A11 to the west, glass towers to the east. Only this block's layout lives here; the light,
@@ -29,6 +32,7 @@ ENGINE.create({
     const gate = Math.abs(p.x) < 3.2;
     p.x = Math.max(-17, Math.min(17, p.x)); p.z = Math.max(-17.5, Math.min(gate ? 23 : 19, p.z)); if (p.z > 19) p.x = Math.max(-3.2, Math.min(3.2, p.x));
     for (const [x, z, hx, hz] of SOLID) { const dx = p.x - x, dz = p.z - z; if (Math.abs(dx) < hx && Math.abs(dz) < hz) { if (hx - Math.abs(dx) < hz - Math.abs(dz)) p.x = x + (dx < 0 ? -hx : hx); else p.z = z + (dz < 0 ? -hz : hz); } }
+    PHOTOWALL.keepOut(p);                                           // and round the topic showcases
   },
   onFrame: (E) => { if (E.heroPos.z > 22) E.leave('square.html?from=xinyi', '廣場 · The Square', 500); },   // out of the south gate, back to the square
   models: ['bundle-tower', 'bundle-core', 'bundle-square'],
@@ -132,6 +136,14 @@ ENGINE.create({
   [[-17.6, -11], [-17.6, 9.2], [-17.6, -1.2], [17.8, 11.5], [17.8, -15.5], [-6.2, 20.6], [6.2, 20.6]].forEach(([x, z], i) => { const p = dress(planter.children[0].clone()); p.position.set(x, 0, z); p.rotation.y = Math.abs(z) > 20 ? 0 : Math.PI / 2; scene.add(p); });
   stall(-5.6, 6.4, 0.75, 190); solid(-5.6, 6.4, 1.3, 1.2); stall(12.6, 15.6, -0.9, 28); solid(12.6, 15.6, 1.3, 1.2);
   get(props, 'aboard') && [[-3.6, 8.2, 0.5], [10.6, 14.0, -0.6]].forEach(([x, z, r]) => { const o = dress(get(props, 'aboard').clone()); o.position.set(x, 0, z); o.rotation.y = r; scene.add(o); });
+
+  // ── one showcase per topic of this scene (the list is PHOTO_TOPICS, in photo-topics.js): topic key -> [x, z, facing, kind, options]. A click opens the topic's gallery ──
+  PHOTOWALL.showcases(E, { section: 'tower', topics: PHOTO_TOPICS.tower, spots: {
+    climb: [7.4, -16.4, 0, 'poster'],                             // a tall poster board at the north end, right of the crossing to the tower
+    fireworks: [-7.4, -16.4, 0, 'kiosk'],                         // a steel kiosk left of the crossing, the tower behind it
+    quiet: [-11, 18.7, Math.PI, 'wall', { body: '#cfd3d6' }],     // a pale wall tucked by the south gate's low wall
+    skywalk: [-15.5, 12.3, Math.PI / 2, 'shop'],                  // a shop front along the department store's side
+    lookup: [16.0, 10.5, -Math.PI / 2, 'stand'] } });             // a stand on the east side, looking back across the plaza
 
   // ── the way back: the 信義 gate at the south end, glowing toward the square ──
   { const g = dress(get(get(sq, 'sq-gate'), 'xinyi').clone()); g.position.set(0, 0, 21); scene.add(g);

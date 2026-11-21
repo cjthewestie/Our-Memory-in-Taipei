@@ -19,8 +19,11 @@ create table if not exists public.memories (
   body        text not null check (char_length(body) between 1 and 280),
   name        text check (char_length(name) <= 40),
   photo_path  text check (photo_path ~ '^[0-9a-f-]{36}\.(webp|jpg)$'),
+  topic       text check (char_length(topic) <= 40),   -- which photo wall of the scene it hangs on: a key from remake/photo-topics.js; null = no topic (older rows, text memories)
   status      text not null default 'pending' check (status in ('pending', 'approved', 'rejected'))
 );
+
+alter table public.memories add column if not exists topic text check (char_length(topic) <= 40);   -- the same column, for a table created before topics existed
 
 create index if not exists memories_approved on public.memories (status, created_at desc);
 
@@ -38,7 +41,7 @@ create policy "submit a pending memory" on public.memories
 
 -- the visitor's role may only write these columns; id, created_at and status take their defaults
 revoke insert on public.memories from anon, authenticated;
-grant insert (section, x, z, year, body, name, photo_path) on public.memories to anon, authenticated;
+grant insert (section, x, z, year, body, name, photo_path, topic) on public.memories to anon, authenticated;
 grant select on public.memories to anon, authenticated;
 
 -- the queue cannot be flooded: a trigger refuses a new memory when 500 already wait, or when 20 arrived in

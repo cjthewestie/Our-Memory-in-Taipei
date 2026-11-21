@@ -408,7 +408,8 @@ const draw = (mat, target) => { fsTri.material = mat; renderer.setRenderTarget(t
 const blur = (src, tmp, dst, r) => { blurMat.uniforms.tSrc.value = src.texture; blurMat.uniforms.uDir.value.set(r / tmp.width, 0); draw(blurMat, tmp); blurMat.uniforms.tSrc.value = tmp.texture; blurMat.uniforms.uDir.value.set(0, r / dst.height); draw(blurMat, dst); };
 
 // ── camera: six viewpoints, drag to look, keys to walk ───────────────────────────────────────
-const VIEWS = opts.views || [[0, 1.5, 16.5, 0, 4.5, 0]];
+const VIEWS = (opts.views || [[0, 1.5, 16.5, 0, 4.5, 0]]).slice();
+{ const c = (QS.get('cam') || '').split(',').map(Number); if (c.length === 6 && c.every(isFinite)) VIEWS[0] = c; }   // ?view=1&cam=px,py,pz,tx,ty,tz : a free camera for checking shots, on any block page
 let yaw = 0, pitch = 0; const pos = new T.Vector3(), keys = {};
 function setView(i) { const v = VIEWS[Math.max(0, Math.min(VIEWS.length - 1, i))]; pos.set(v[0], v[1], v[2]); const dx = v[3] - v[0], dy = v[4] - v[1], dz = v[5] - v[2]; yaw = Math.atan2(-dx, -dz); pitch = Math.atan2(dy, Math.hypot(dx, dz)); mode = 'fixed'; }
 // follow: the camera rides behind the character; fixed: it stands at a viewpoint and she still walks
