@@ -37,6 +37,7 @@ Open it: `python3 -m http.server 8000` in the repo, then http://localhost:8000/i
 
 ## CJ's decisions (quoted, so nobody re-litigates them)
 
+- 2026-11-21: 「我不是只要風格換 我要整個場景的重制達成風格的轉換 先做完整的一個小區塊讓我看看」 and 「張君雅小妹妹也要重制喔變成一個專業可動的角色」 — the visual upgrade is a scene remake, one finished block first, and the girl is rebuilt as a rigged, animated character. First pass on branch `style-lab` (worktree `_worktrees/Our-Memory-in-Taipei/style-lab`): `remake/index.html` (the 紅樓 plaza at golden hour) and `remake/character.js` (the character maker). Not merged; `main` and the live site are unchanged. Which final style the remake takes is `(unknown — needs CJ)`.
 - 2026-11-21: 「主角不一定要張君雅小妹妹我會有很多角色讓大家選」 — the lead no longer has to be 張君雅小妹妹; there will be several characters and the visitor picks one. Which characters, and whether the Guided tour keeps her, is `(unknown — needs CJ)`. Same day, on the look: 「所以場景光影很重要」 — light and atmosphere come first in the next visual pass (reference: Noniv/abyssal-garden).
 - 2026-10-31: "Yes, merge it in" — to "Make your lantern square the main Taipei page?". The page opens on the walkable square with three gates and visitor lanterns; the scroll film is the Guided tour. This replaces "one verb: scroll" for the entry, and the girl may now be steered on the road in walk mode; the no-traffic rule still holds.
 - 2026-09-20: "first 1 to ximen red house, second be dadaocheng, third taipei 101, all in english" — three chapters, English copy, Chinese only as the small secondary name.
