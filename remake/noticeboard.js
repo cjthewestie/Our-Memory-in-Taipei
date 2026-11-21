@@ -107,7 +107,9 @@
     if (window.PHOTOWALL && PHOTOWALL.block) PHOTOWALL.block({ x: p[0], z: p[1], facing: rot, u0: -1.6, u1: 1.6, v0: -0.45, v1: 0.5 });
     const it = Object.assign({ district: o.district || 'square' }, ITEM);
     // places.js finds an item by key in PLACE_DATA (for ?place=notice-board and the test hook), so the board joins its district's list while the page runs.
-    const D = window.PLACE_DATA && window.PLACE_DATA[it.district]; if (D && D.places && !D.places.some(i => i.key === it.key)) D.places.push(it);
+    const ALL = window.PLACE_DATA = window.PLACE_DATA || {};
+    if (!ALL[it.district]) ALL[it.district] = { section: it.district, zh: '廣場', en: 'The Square', places: [], events: [] };   // until the square has researched places of its own
+    const D = ALL[it.district]; if (D.places && !D.places.some(i => i.key === it.key)) D.places.push(it);
     if (window.PLACES) {
       const near = [p[0] + Math.sin(rot) * 1.6, p[1] + Math.cos(rot) * 1.6];
       PLACES.add(E, it, { target: g, near, radius: 2.6, plaque: { position: [p[0] + Math.cos(rot) * 1.08 + Math.sin(rot) * 0.1, 1.25, p[1] - Math.sin(rot) * 1.08 + Math.cos(rot) * 0.1], rotation: rot } });

@@ -14,6 +14,9 @@
 <script src="engine.js"></script>
 <script src="photo-topics.js"></script>
 <script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="places.js"></script>
+<script src="noticeboard.js"></script>
 <script>
 // The hub square: three gates, forty years. Only this block's layout lives here. The light, sky,
 // ground, builders, finishing chain, camera and controls are in engine.js, shared with every block page.
@@ -112,6 +115,10 @@ ENGINE.create({
     const cap = new T.Mesh(new T.CylinderGeometry(3, 7, 9, 4), tm); cap.position.y = 126.5; tw.add(cap); const spire = new T.Mesh(new T.CylinderGeometry(0.3, 1.4, 26, 6), tm); spire.position.y = 144; tw.add(spire);
     tw.traverse(o => { if (o.isMesh) { o.rotation.y = Math.PI / 4; o.castShadow = true; } }); tw.position.set(150, 0, 8); scene.add(tw); }
   city(80, 200);
+  // the memory notice board, the first thing she sees: just right of the path, turned toward where she starts.
+  // CJ, 2026-11-21: 「把告示牌放進廣場給我看，放在一進來就看得到的地方」
+  NOTICEBOARD.add(E, { position: [3.3, 5.4], rotation: -0.5, district: 'square' });
+  if (!window.__places) PLACES.mount(E, { district: 'square' });
   },
 });
 </script>
