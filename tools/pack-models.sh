@@ -29,7 +29,7 @@ for n in $names; do
   [ -f "$f" ] || { echo "no $f"; continue; }
   if head -c 2000 "$f" | grep -q EXT_meshopt_compression; then echo "$n: already packed"; continue; fi
   before=$(wc -c < "$f")
-  $GLTFPACK -i "$f" -o "$f.pack" -kn -km -ke -kv -cc -vpf -vtf -vn 8
-  mv "$f.pack" "$f"
+  $GLTFPACK -i "$f" -o "$f.pack.glb" -kn -km -ke -kv -cc -vpf -vtf -vn 8
+  mv "$f.pack.glb" "$f"
   echo "$n: $before -> $(wc -c < "$f") bytes"
 done

@@ -1,0 +1,421 @@
+{
+  "label": "after",
+  "page": "http://127.0.0.1:8193/?tour=1",
+  "date": "2026-10-31T18:49:36.211Z",
+  "browser": "153.0.8010.12",
+  "launchArgs": [
+    "--use-angle=metal",
+    "--enable-gpu",
+    "--ignore-gpu-blocklist",
+    "--mute-audio",
+    "--disable-gpu-vsync",
+    "--disable-frame-rate-limit"
+  ],
+  "webglRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Max, Unspecified Version)",
+  "note": "Headless Chromium. webglRenderer says which GPU path ran: ANGLE Metal (real GPU, headless) or SwiftShader (software). vsync and the frame-rate limit are off, so rAF intervals are uncapped. cpuFrameMs is the page own smoothed CPU time per frame (__fog.frameMs). Either way frame times are relative between runs of this script on this machine, not the 100 fps display-cap figure HANDOFF.md records for headed runs. External hosts are aborted (YouTube iframe API, Supabase), so the music falls back to the local loops.",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "deviceScaleFactor": 1
+  },
+  "sampleMs": 3000,
+  "warmFrames": 90,
+  "tree": {
+    "servedFrom": "/private/tmp/claude-501/-Users-cjthewestie-Documents-CJ-project-vault-Our-Memory-in-Taipei/2bc5a3af-c03b-45cd-b8c1-4ade6f4d353f/scratchpad/cap/after2",
+    "commit": "14bcfa2",
+    "servedFilesDifferingFromCommit": []
+  },
+  "bootMs": 4155,
+  "models": {
+    "released": {
+      "1": true,
+      "2": true
+    },
+    "held": {
+      "1": [],
+      "2": []
+    },
+    "inflight": {
+      "1": 0,
+      "2": 0
+    }
+  },
+  "shots": [
+    {
+      "district": "ximen",
+      "n": 1,
+      "u": 0.14,
+      "why": "camZ -7: the 中華商場 row runs down the left (north end at x -0.66), Red House ahead right",
+      "file": "ximen-1.png",
+      "camZ": -7.14,
+      "year": 1991,
+      "era": "red",
+      "inFrame": {
+        "chunghwa_n": [
+          -0.66,
+          0.08
+        ],
+        "redhouse": [
+          0.16,
+          0.08
+        ],
+        "wannian": [
+          -0.38,
+          0.24
+        ],
+        "dihua_w": [
+          -0.27,
+          0.04
+        ],
+        "dihua_e": [
+          -0.15,
+          0.04
+        ],
+        "temple": [
+          -0.28,
+          0.02
+        ],
+        "yongle": [
+          -0.28,
+          0.07
+        ],
+        "t101_base": [
+          -0.21,
+          0.15
+        ],
+        "a11": [
+          -0.14,
+          0.09
+        ],
+        "skywalk": [
+          -0.21,
+          0.04
+        ]
+      },
+      "cpuFrameMs": 10.49,
+      "frames": 554,
+      "meanMs": 5.42,
+      "p50Ms": 5.5,
+      "p95Ms": 6.1,
+      "maxMs": 8.1,
+      "triangles": 1036472,
+      "drawCalls": 961,
+      "programs": 53,
+      "geometries": 1167,
+      "textures": 197
+    },
+    {
+      "district": "ximen",
+      "n": 2,
+      "u": 0.22,
+      "why": "camZ -47: Red House close on the right (x 0.50), 萬年大樓 ahead left (x -0.76)",
+      "file": "ximen-2.png",
+      "camZ": -46.89,
+      "year": 1994,
+      "era": "red",
+      "inFrame": {
+        "redhouse": [
+          0.5,
+          0.16
+        ],
+        "wannian": [
+          -0.76,
+          0.36
+        ],
+        "dihua_w": [
+          -0.56,
+          0.01
+        ],
+        "dihua_e": [
+          -0.39,
+          0
+        ],
+        "temple": [
+          -0.58,
+          -0.03
+        ],
+        "yongle": [
+          -0.57,
+          0.03
+        ],
+        "t101_base": [
+          -0.48,
+          0.12
+        ],
+        "a11": [
+          -0.39,
+          0.05
+        ],
+        "skywalk": [
+          -0.48,
+          -0.02
+        ]
+      },
+      "cpuFrameMs": 9.33,
+      "frames": 617,
+      "meanMs": 4.87,
+      "p50Ms": 4.9,
+      "p95Ms": 5.5,
+      "maxMs": 5.8,
+      "triangles": 1035176,
+      "drawCalls": 869,
+      "programs": 55,
+      "geometries": 1167,
+      "textures": 197
+    },
+    {
+      "district": "dadao",
+      "n": 1,
+      "u": 0.38,
+      "why": "camZ -164: inside the 迪化街 arcade rows, 霞海城隍廟 ahead left (x -0.51)",
+      "file": "dadao-1.png",
+      "camZ": -163.91,
+      "year": 2003,
+      "era": "dadao",
+      "inFrame": {
+        "dihua_e": [
+          0.1,
+          0.13
+        ],
+        "temple": [
+          -0.51,
+          0.01
+        ],
+        "yongle": [
+          -0.45,
+          0.13
+        ],
+        "t101_base": [
+          -0.28,
+          0.24
+        ],
+        "a11": [
+          -0.14,
+          0.13
+        ],
+        "skywalk": [
+          -0.28,
+          0.04
+        ]
+      },
+      "cpuFrameMs": 6.73,
+      "frames": 865,
+      "meanMs": 3.47,
+      "p50Ms": 3.5,
+      "p95Ms": 4.1,
+      "maxMs": 5.8,
+      "triangles": 940764,
+      "drawCalls": 521,
+      "programs": 55,
+      "geometries": 1167,
+      "textures": 198
+    },
+    {
+      "district": "dadao",
+      "n": 2,
+      "u": 0.46,
+      "why": "camZ -216: 霞海城隍廟 close left (x -0.84), 永樂市場 ahead left (x -0.42)",
+      "file": "dadao-2.png",
+      "camZ": -216.36,
+      "year": 2010,
+      "era": "dadao",
+      "inFrame": {
+        "temple": [
+          -0.84,
+          -0.27
+        ],
+        "yongle": [
+          -0.42,
+          -0.02
+        ],
+        "t101_base": [
+          -0.1,
+          0.04
+        ],
+        "a11": [
+          0.07,
+          -0.08
+        ],
+        "skywalk": [
+          -0.1,
+          -0.2
+        ]
+      },
+      "cpuFrameMs": 5.37,
+      "frames": 998,
+      "meanMs": 3.01,
+      "p50Ms": 3,
+      "p95Ms": 3.5,
+      "maxMs": 13.8,
+      "triangles": 935650,
+      "drawCalls": 440,
+      "programs": 55,
+      "geometries": 1167,
+      "textures": 198
+    },
+    {
+      "district": "xinyi",
+      "n": 1,
+      "u": 0.66,
+      "why": "camZ -325: 101 ahead, 新光三越 A11 right (x 0.37), skywalk across the lower frame (y -0.62)",
+      "file": "xinyi-1.png",
+      "camZ": -324.52,
+      "year": 2021,
+      "era": "tower",
+      "inFrame": {
+        "t101_base": [
+          0.01,
+          -0.21
+        ],
+        "a11": [
+          0.37,
+          -0.34
+        ],
+        "skywalk": [
+          0.01,
+          -0.62
+        ]
+      },
+      "cpuFrameMs": 3.88,
+      "frames": 1462,
+      "meanMs": 2.05,
+      "p50Ms": 2.1,
+      "p95Ms": 2.5,
+      "maxMs": 12.5,
+      "triangles": 944212,
+      "drawCalls": 291,
+      "programs": 56,
+      "geometries": 1198,
+      "textures": 199
+    },
+    {
+      "district": "xinyi",
+      "n": 2,
+      "u": 0.78,
+      "why": "camZ -367: the base shot HANDOFF measures at, 101 west face, A11 at the right edge (x 0.85), skywalk deck at the bottom",
+      "file": "xinyi-2.png",
+      "camZ": -366.85,
+      "year": 2023,
+      "era": "tower",
+      "inFrame": {
+        "t101_base": [
+          0.07,
+          -0.39
+        ],
+        "a11": [
+          0.85,
+          -0.29
+        ],
+        "skywalk": [
+          0.13,
+          -0.86
+        ]
+      },
+      "cpuFrameMs": 3.75,
+      "frames": 1466,
+      "meanMs": 2.05,
+      "p50Ms": 2.1,
+      "p95Ms": 2.4,
+      "maxMs": 3.1,
+      "triangles": 935814,
+      "drawCalls": 262,
+      "programs": 56,
+      "geometries": 1198,
+      "textures": 199
+    }
+  ],
+  "load": {
+    "totalTransferredBytes": 4628952,
+    "responses": 53,
+    "glb": {
+      "asset/models/bundle-core.glb": {
+        "transferred": 815244,
+        "onDisk": 815244
+      },
+      "asset/models/bundle-dadao.glb": {
+        "transferred": 549224,
+        "onDisk": 549224
+      },
+      "asset/models/bundle-tower.glb": {
+        "transferred": 370736,
+        "onDisk": 370736
+      }
+    },
+    "byUrl": {
+      "?tour=1": 8248,
+      "style.css": 24836,
+      "photos.css": 8228,
+      "walk.css": 7281,
+      "gallery.css": 1793,
+      "memories.css": 4027,
+      "meshopt_decoder.js": 29776,
+      "GLTFLoader.js": 103624,
+      "asset/3d/assets-core.js": 26878,
+      "asset/3d/assets-ximen-1980s.js": 13776,
+      "three.min.js": 608081,
+      "asset/3d/assets-ximen-2000s.js": 12336,
+      "asset/3d/assets-ximen-1990s.js": 12159,
+      "asset/3d/assets-dadaocheng-1980s.js": 18419,
+      "asset/3d/assets-dadaocheng-1990s.js": 16997,
+      "asset/3d/assets-dadaocheng-2000s.js": 20856,
+      "data.js": 10606,
+      "models.js": 11399,
+      "app.js": 114536,
+      "asset/fonts/barlow-400.woff2": 7168,
+      "asset/fonts/barlow-600.woff2": 7256,
+      "asset/fonts/barlow-700.woff2": 7256,
+      "asset/fonts/barlow-condensed-700.woff2": 3248,
+      "scene-tower.js": 49747,
+      "music.js": 33422,
+      "scene-dadao.js": 44674,
+      "scene-red.js": 76753,
+      "photos.js": 18163,
+      "asset/fonts/chocolate-classical-sans-400.woff2": 3840,
+      "asset/textures/chunghwa-concrete.webp": 17556,
+      "asset/textures/chunghwa-concrete-n.webp": 2774,
+      "asset/textures/chunghwa-awning.webp": 3934,
+      "asset/textures/chunghwa-shops.webp": 280892,
+      "asset/textures/chunghwa-ends.webp": 120732,
+      "asset/textures/chunghwa-ends-n.webp": 46744,
+      "asset/textures/ximen-fronts.webp": 98034,
+      "asset/textures/ximen-fronts-n.webp": 62300,
+      "walk.js": 34228,
+      "memories-config.js": 1003,
+      "memories.js": 21971,
+      "gallery.js": 20168,
+      "asset/models/bundle-core.glb": 815244,
+      "asset/textures/chunghwa-shops.json": 1935,
+      "asset/fonts/barlow-condensed-300.woff2": 2584,
+      "asset/photos/hotspots/redhouse.webp": 193848,
+      "asset/photos/hotspots/dihua.webp": 148276,
+      "asset/photos/hotspots/temple.webp": 133014,
+      "asset/photos/hotspots/tower101.webp": 83850,
+      "asset/share/icon.svg": 502,
+      "asset/models/bundle-dadao.glb": 549224,
+      "asset/models/bundle-tower.glb": 370736,
+      "asset/photos/chunghwa-1961.webp": 154000,
+      "asset/photos/yongle-2012.webp": 149878
+    }
+  },
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    }
+  ],
+  "pageErrors": [],
+  "httpErrors": [
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8193/asset/music/private/manifest.js"
+    }
+  ],
+  "aborted": [
+    "https://www.youtube.com/iframe_api"
+  ],
+  "release": "idle"
+}

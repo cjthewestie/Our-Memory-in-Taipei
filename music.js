@@ -11,6 +11,10 @@
 // ends or errors moves on to the next in its list. The tower chapter (2020 onward) keeps the 2010s list.
 // A manual choice holds until the scroll moves into a decade other than the chosen one, then the scroll
 // takes over again. Every song starts at its chorus (`start`, CJ 2026-09-23 「use chorus」).
+// Walk mode (window.WALK.on, the square and its gates): the district picks the decade, not the year under
+// her feet: 西門町 the 1980s (or the 1990s, if that is what already plays), 大稻埕 the 2000s, 信義 the
+// 2010s, and the square keeps whatever played last. The decade changes only when the district does, so
+// walking down a street or back through the same gate loads nothing new (each load is a fresh pre-roll).
 //
 // Fallback: when the YouTube API cannot load (offline), or YouTube refuses to play (it answers error
 // 153 to a double-clicked file:// page, which sends no HTTP referrer), the four synthesised loops
@@ -83,6 +87,7 @@
   let why = '';                         // for local mode: 'offline', 'referrer' (file:// page, YouTube error 153) or 'refused' (every video errors, e.g. a browser YouTube treats as a bot)
   let cur = -1;                         // decade index currently chosen for playback
   let manual = null;                    // { decade } while a button choice holds
+  let switches = 0;                     // decade changes since load (each one loads a video or crossfades a loop)
   let gestured = false;                 // the page has had its first click, tap or key
   // Fault 4 (CJ, 2026-09-24: 「手機幫我default msuic off」): on a phone the music starts off, every visit. The first
   // tap or swipe no longer arms the player (gesture() and the YouTube onReady already hold back while muted on a
@@ -227,7 +232,7 @@
   // ── actions ─────────────────────────────────────────────────────────────────
   function goTo(d, instant) {
     if (d === cur) return;
-    cur = d;
+    cur = d; switches++;
     if (mode === 'youtube') youtubeGo(d);
     else if (mode === 'local') localGo(d, instant);
     render();
@@ -284,7 +289,8 @@
     if (mode === 'local') { const p = players[active]; const d = isFinite(p.duration) ? p.duration : 0; return { t: p.currentTime || 0, d }; }
     return { t: 0, d: 0 };
   }
-  const isPlaying = () => mode === 'youtube' ? (ytState === 1 || ytState === 3) : mode === 'local' && unlocked && !players[active].paused;
+  // a phone primes the local player silently on its first tap (iOS needs that); silent is not playing, so the button still reads Play
+  const isPlaying = () => mode === 'youtube' ? (ytState === 1 || ytState === 3) : mode === 'local' && unlocked && !players[active].paused && !(muted && isPhone());
   const fmt = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   function seek(t) {
     if (ytLive()) yt.seekTo(t, true);                                     // a paused player stays paused, a playing one plays on from there
@@ -298,6 +304,7 @@
     } else if (mode === 'local') {
       if (!unlocked) { if (muted && isPhone()) setMuted(false); unlock(); return; }   // as on the YouTube branch: play on a muted phone means sound on
       const p = players[active];
+      if (muted && isPhone()) { setMuted(false); if (p.paused) { userPaused = false; tryPlay(p); } render(); return; }   // primed but silent: play means sound on, not pause
       if (p.paused) { userPaused = false; if (p.ended) cue(p, cur); tryPlay(p); } else { userPaused = true; p.pause(); }
     }
     render();
@@ -346,8 +353,9 @@
     const onYT = mode === 'youtube', n = onYT ? d.videos.length : d.local.length, i = onYT ? d.vi : d.li;
     if (el.decade) el.decade.textContent = d.label + (mode !== 'pending' && n > 1 ? ' · ' + (i + 1) + '/' + n : '');
     if (el.track) el.track.textContent = onYT && v ? v.title + ' · ' + v.artist + ' · ' + v.year : mode === 'local' ? t.title + ' · ' + t.credit : '';
-    const what = privateOn ? 'your songs' : 'local loops';
-    if (el.status) el.status.textContent = onYT ? 'YouTube · ' + (v ? v.channel : '') : mode === 'local' ? (why === 'referrer' ? what + ' · YouTube needs http' : why === 'refused' ? what + ' · YouTube refused to embed' : 'offline: ' + what) : 'connecting to YouTube…';
+    // the reason first, so the bar's ellipsis never cuts it off
+    const what = privateOn ? 'your songs' : 'our own loops';
+    if (el.status) el.status.textContent = onYT ? 'YouTube · ' + (v ? v.channel : '') : mode === 'local' ? (why === 'referrer' ? 'YouTube needs a web address · ' + what : 'YouTube unavailable · ' + what) : 'connecting to YouTube…';
     if (el.toggle) {
       const started = onYT ? gestured : unlocked;
       el.toggle.textContent = !started ? (onYT ? 'Click to play' : 'Click for sound') : muted ? 'Sound off' : 'Sound on';
@@ -358,9 +366,18 @@
     if (el.root) { el.root.dataset.mode = mode; el.root.classList.toggle('muted', muted); el.root.classList.toggle('playing', isPlaying()); el.root.classList.toggle('locked', onYT ? !gestured : mode === 'local' && !unlocked); }
   }
 
-  // ── per-frame: follow the scroll year ───────────────────────────────────────
+  // ── per-frame: follow the scroll year, or in walk mode the district ─────────
+  const DISTRICT_DECADES = { red: [0, 1], dadao: [2], tower: [3] };   // walk.js section keys → decade indices
+  function wantedDecade() {
+    const W = window.WALK;                                        // walk.js loads after this file: read it each frame
+    if (!W || !W.on) return decadeOfYear(currentYear());
+    const ok = DISTRICT_DECADES[W.where];
+    if (!ok) return lastScrollDecade >= 0 ? lastScrollDecade : cur;   // the square: keep what played last
+    const keep = [lastScrollDecade, cur].find(d => ok.includes(d));     // 西門町 takes the 1980s or the 1990s: keep either, no new load
+    return keep === undefined ? ok[0] : keep;
+  }
   function frame() {
-    const sd = decadeOfYear(currentYear());
+    const sd = wantedDecade();
     // a manual choice holds until the scroll enters a decade other than the chosen one; then the scroll takes over
     if (manual && lastScrollDecade >= 0 && sd !== lastScrollDecade && sd !== manual.decade) { manual = null; store.set(LS_DECADE, null); }
     const want = manual ? manual.decade : sd;
@@ -374,7 +391,17 @@
   if (storedDecade && decadeIndex(storedDecade) >= 0) manual = { decade: decadeIndex(storedDecade) };
   cur = manual ? manual.decade : decadeOfYear(currentYear());
   render();
-  loadYouTube();
+  // YouTube waits until the square is up (perf, area 04): its iframe is ~2.8 MB in ~25 requests and it held the
+  // page's load event back by about a second. Sound on (desktop): fetch it once the page has loaded and gone idle,
+  // so the player is ready before the first click. Sound off (every phone, fault 4): fetch it on the first touch,
+  // click or key, the visit's first sign of wanting anything, so a visitor who never asks for music never pays for it.
+  let ytAsked = false;
+  const wantYouTube = () => { if (!ytAsked) { ytAsked = true; loadYouTube(); } };
+  if (muted) ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, wantYouTube, { passive: true, capture: true, once: true }));
+  else {
+    const idle = () => (window.requestIdleCallback || (f => setTimeout(f, 200)))(wantYouTube, { timeout: 2000 });
+    if (document.readyState === 'complete') idle(); else window.addEventListener('load', idle, { once: true });
+  }
   requestAnimationFrame(frame);
 
   // ── private drop-in ─────────────────────────────────────────────────────────
@@ -413,7 +440,7 @@
 
   // ── probe ───────────────────────────────────────────────────────────────────
   window.__music = {
-    get mode() { return mode; }, get why() { return why; }, get decade() { return DECADES[cur].key; }, get video() { return videoOf(cur) || null; }, get loadedId() { return ytLoadedId; },
+    get mode() { return mode; }, get why() { return why; }, get decade() { return DECADES[cur].key; }, get video() { return videoOf(cur) || null; }, get loadedId() { return ytLoadedId; }, get switches() { return switches; },
     get index() { return DECADES[cur].vi; }, get count() { return DECADES[cur].videos.length; },
     get track() { return mode === 'local' ? localOf(cur).title : (videoOf(cur) || {}).title; }, get src() { return localOf(cur).src; },
     get private() { return privateOn; }, get localCount() { return DECADES[cur].local.length; }, get localIndex() { return DECADES[cur].li; }, get chorus() { const t = localOf(cur); return [t.start || 0, t.end || 0]; },

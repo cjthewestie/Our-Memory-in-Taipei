@@ -30,7 +30,7 @@
       en: 'Chunghwa Market', zh: '中華商場', when: '1961', tag: '1961',
       caption: 'Brand new, on its opening day: a newspaper photograph from 1961. The street here shows it twenty years on, when the rooftop neon had gone up. Demolished in 1992.',
       note: 'Cropped to the photograph from the newspaper page.',
-      by: '涂柏辰', holder: '國立臺灣歷史博物館', licence: 'CC BY 3.0 TW', licenceUrl: 'https://creativecommons.org/licenses/by/3.0/tw/',
+      by: '凃柏辰', holder: '內容力有限公司 · 國家文化記憶庫', licence: 'CC BY 3.0 TW', licenceUrl: 'https://creativecommons.org/licenses/by/3.0/tw/',
       src: 'https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Object&id=301814', img: 'chunghwa.webp', w: 1000, h: 681 },
     { id: 'redhouse', anchor: 'redhouse', dx: -1.4, y: 6.2, eras: ALL, far: 90,   // the octagon's front face (scene-red.js cx 16.6, circumradius 7.2)
       en: 'Ximen Red House', zh: '西門紅樓', when: '2019', tag: '2019',
@@ -74,6 +74,31 @@
     if (s.face && S.TOWER && S.TOWER.faceX) s.x = S.TOWER.faceX(s.y) - 0.4;   // scene-tower.js sets faceX before this file loads
   });
 
+  // ── everything else the page plays, draws in or runs on (CREDITS.md at the repo root, same order) ──
+  const OTHER = [
+    { h: 'Music', intro: 'Over http the music bar plays official music videos through YouTube\u2019s own embedded player; the track, artist and channel show in the bar while each plays. Rights stay with the labels and artists; the page hosts no copy. Offline, it plays four loops made for this page.', items: [
+      { what: '望春風 · 鄧麗君 (1980)', by: 'YouTube: 鄧麗君 Teresa Teng official channel', src: 'https://www.youtube.com/watch?v=v2zjxM4wtZc' },
+      { what: '台北的天空 · 王芷蕾 (1985)', by: 'YouTube: Timeless Music', src: 'https://www.youtube.com/watch?v=ZGRrJY7VELU' },
+      { what: '我的未來不是夢 · 張雨生 (1988)', by: 'YouTube: 滾石唱片 ROCK RECORDS', src: 'https://www.youtube.com/watch?v=lTxZmhAoSGU' },
+      { what: '大約在冬季 · 齊秦 (1987)', by: 'YouTube: Qin Qi - Topic', src: 'https://www.youtube.com/watch?v=KueFDMWV5ps' },
+      { what: '吻別 · 張學友 (1993)', by: 'YouTube: 張學友 Jacky Cheung - Topic', src: 'https://www.youtube.com/watch?v=L3xC-dlVS5c' },
+      { what: '心太軟 · 任賢齊 (1996)', by: 'YouTube: 滾石唱片 ROCK RECORDS', src: 'https://www.youtube.com/watch?v=ZSWeurc1yMw' },
+      { what: '七里香 · 周杰倫 (2004)', by: 'YouTube: 周杰倫 Jay Chou', src: 'https://www.youtube.com/watch?v=Bbp9ZaJD_eA' },
+      { what: '後來的我們 · 五月天 (2016)', by: 'YouTube: 相信音樂BinMusic', src: 'https://www.youtube.com/watch?v=pd3eV-SG23E' },
+      { what: 'Neon Arcade, Letters Home, Night Market Slow Jam, Skyline Pulse', by: 'the offline loops, synthesised for this page', licence: 'CC0 1.0', licenceUrl: 'https://creativecommons.org/publicdomain/zero/1.0/' },
+    ] },
+    { h: 'Typefaces', intro: 'Self-hosted, cut down to the letters the page uses, as the licence allows.', items: [
+      { what: 'Barlow and Barlow Condensed', by: 'The Barlow Project Authors', licence: 'SIL Open Font License 1.1', licenceUrl: 'https://openfontlicense.org', src: 'https://github.com/jpt/barlow' },
+      { what: 'Chocolate Classical Sans', by: 'The Chocolate Classical Sans Project Authors', licence: 'SIL Open Font License 1.1', licenceUrl: 'https://openfontlicense.org', src: 'https://github.com/MoonlitOwen/ChocolateSans' },
+    ] },
+    { h: 'Code and 3D', items: [
+      { what: 'three.js r149 and its GLTFLoader', by: 'Copyright 2010-2023 three.js authors', licence: 'MIT', licenceUrl: 'https://github.com/mrdoob/three.js/blob/dev/LICENSE', src: 'https://threejs.org' },
+      { what: 'meshoptimizer decoder', by: 'Copyright 2016-2026 Arseny Kapoulkine', licence: 'MIT', licenceUrl: 'https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md', src: 'https://github.com/zeux/meshoptimizer' },
+      { what: 'Street props library', zh: '台北懷舊 3D 素材庫', by: 'made by a teammate for this project (asset/3d/)' },
+      { what: 'Buildings, the girl, painted textures and the square', by: 'made for this page' },
+    ] },
+  ];
+
   // ── DOM ─────────────────────────────────────────────────────────────────────
   const host = document.createElement('div');
   host.id = 'photoSpots';
@@ -81,7 +106,7 @@
   SPOTS.forEach(s => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'spot'; b.dataset.id = s.id;
-    b.setAttribute('aria-label', 'Photograph of ' + s.en + ' ' + s.zh);
+    b.setAttribute('aria-label', 'Photograph of ' + s.en + ' ' + s.zh + ', ' + s.tag);   // a11y: the label ends with the visible year tag
     b.innerHTML = '<span class="spot-ring"></span><span class="spot-dot"></span><span class="spot-tag">' + esc(s.tag) + '</span>';
     b.hidden = true;
     b.addEventListener('click', e => { e.preventDefault(); open(s, b); });
@@ -112,10 +137,12 @@
     close: panel.querySelector('.pp-close'), all: panel.querySelector('.pp-all'),
   };
 
-  // the credits: a small caps button top-right under the title, and the block it opens
+  // the credits: a small caps button top-right under the title, and the block it opens. One panel for every
+  // third-party thing the page shows or plays (CREDITS.md at the repo root is the same list in plain words),
+  // reachable from the square, the streets and the guided tour alike.
   const credBtn = document.createElement('button');
-  credBtn.type = 'button'; credBtn.id = 'photoCreditsBtn'; credBtn.textContent = 'Photo credits';
-  credBtn.setAttribute('aria-label', 'Photo credits: every photograph, its rights holder and its licence');
+  credBtn.type = 'button'; credBtn.id = 'photoCreditsBtn'; credBtn.textContent = 'Credits';
+  credBtn.setAttribute('aria-label', 'Credits: every photograph, song, typeface and code library on the page, with its licence');
   document.body.appendChild(credBtn);
   const credits = document.createElement('aside');
   credits.id = 'photoCredits'; credits.hidden = true;
@@ -124,12 +151,19 @@
     '<button type="button" class="pp-close" aria-label="Close">×</button>' +
     '<div class="pc-body">' +
       '<div class="pp-k">CREDITS</div>' +
-      '<h2 class="pp-name" id="photoCreditsTitle">The photographs</h2>' +
-      '<p class="pc-intro">Every building on this street is modelled from a real Taipei building. These are the photographs behind eight of them, each used under its own licence. Files are resized for the screen; the 1961 frame is cropped to the photograph from the newspaper page. 樂聲戲院 and the 西門町 pedestrian zone have no licence-cleared photograph yet.</p>' +
+      '<h2 class="pp-name" id="photoCreditsTitle">Credits</h2>' +
+      '<h3 class="pc-h">Photographs</h3>' +
+      '<p class="pc-intro">Every building on this street is modelled from a real Taipei building. These are the photographs behind eight of them, each used under its own licence. Files are resized for the screen; the 1961 frame is cropped to the photograph from the newspaper page. The two pictures that pass over the guided tour are the Chunghwa Market and Yongle Market photographs below. The CC BY-SA photographs, and our resized copies of them, stay under their CC BY-SA licence. 樂聲戲院 and the 西門町 pedestrian zone have no licence-cleared photograph yet.</p>' +
       '<ol class="pc-list">' + SPOTS.map(s =>
         '<li><span class="pc-place">' + esc(s.en) + ' <span class="pc-zh">' + esc(s.zh) + '</span></span>' +
         '<span class="pc-line">' + esc(s.when) + ' · ' + esc(s.by) + ' · ' + esc(s.holder) + ' · <a href="' + esc(s.licenceUrl) + '" target="_blank" rel="noopener license">' + esc(s.licence) + '</a> · <a href="' + esc(s.src) + '" target="_blank" rel="noopener">source</a></span></li>'
       ).join('') + '</ol>' +
+      OTHER.map(g => '<h3 class="pc-h">' + esc(g.h) + '</h3>' + (g.intro ? '<p class="pc-intro">' + esc(g.intro) + '</p>' : '') +
+        '<ol class="pc-list">' + g.items.map(i =>
+          '<li><span class="pc-place">' + esc(i.what) + (i.zh ? ' <span class="pc-zh">' + esc(i.zh) + '</span>' : '') + '</span>' +
+          '<span class="pc-line">' + esc(i.by) + (i.licence ? ' · ' + (i.licenceUrl ? '<a href="' + esc(i.licenceUrl) + '" target="_blank" rel="noopener license">' + esc(i.licence) + '</a>' : esc(i.licence)) : '') +
+          (i.src ? ' · <a href="' + esc(i.src) + '" target="_blank" rel="noopener">source</a>' : '') + '</span></li>'
+        ).join('') + '</ol>').join('') +
     '</div>';
   document.body.appendChild(credits);
 

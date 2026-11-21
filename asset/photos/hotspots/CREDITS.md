@@ -6,7 +6,7 @@ CJ, 2026-09-24: 「ok」 — the share-alike obligation of the CC BY-SA photogra
 
 | File | Place | Year | Photographer / rights holder | Institution | Licence | Source |
 |---|---|---|---|---|---|---|
-| `chunghwa.webp` | Chunghwa Market 中華商場 | 1961 (opening day; the page models the 1980s neon era) | 涂柏辰 | 國立臺灣歷史博物館 | CC BY 3.0 TW | https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Object&id=301814 |
+| `chunghwa.webp` | Chunghwa Market 中華商場 | 1961 (opening day; the page models the 1980s neon era) | 凃柏辰 | 內容力有限公司 @ 國家文化記憶庫 (site run by 國立臺灣歷史博物館) | CC BY 3.0 TW | https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Object&id=301814 |
 | `redhouse.webp` | Ximen Red House 西門紅樓 | 2019 (golden hour, plaza busy with people) | 毛貓大少爺 | Wikimedia Commons | CC BY-SA 2.0 | https://commons.wikimedia.org/wiki/File:Octagon_Building,_Red_House_Theater.jpg |
 | `wannian.webp` | Wannian Commercial Building 萬年大樓 | 2008 | Tianmu peter | Wikimedia Commons | CC BY 3.0 | https://commons.wikimedia.org/wiki/File:Wan_Nian_Commercial_Building_20080805.jpg |
 | `dihua.webp` | Dihua Street 迪化街 | 2011 (Lunar New Year morning crowd) | 玄史生 | Wikimedia Commons | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Dihua_Street_Lunar_New_Year_20110203a.jpg |

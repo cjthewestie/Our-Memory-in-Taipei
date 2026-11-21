@@ -1,456 +1,690 @@
 # temple.py — 霞海城隍廟 (Xiahai City God Temple, Dadaocheng, 1859) as a stylized glb.
 #
 # Build headless:
-#   /Applications/Blender.app/Contents/MacOS/Blender --background --python asset/blender/temple.py -- --out asset/models/temple.glb [--preview x.png] [--stats]
+#   /Applications/Blender.app/Contents/MacOS/Blender --background --python asset/blender/temple.py -- --out asset/models/src/temple.glb [--preview x.png] [--stats]
 #
-# Reference (HANDOFF.md): one of Taipei's smallest temples (~150 m²), a single hall facing the
-# street: brick side walls, a dark carved wooden front wall with red doors, two thick red porch
-# columns at the kerb, a gabled (硬山) brick-orange tiled roof with an ink 燕尾脊 swallowtail
-# ridge whose tips sweep up and out past the gables, a name board on the eave (drawn by the
-# scene as canvas text, not here), two big red lanterns, an incense burner on the forecourt.
+# Rebuilt 2026-11-01 (blender-detail) from the Commons photos in research/reference/dadao/img/
+# (temple-01 front elevation, temple-02 forecourt, temple-04 roof oblique). What the photos show,
+# and this script now builds:
+#   - a single hall squeezed between shophouses, about 8 m of frontage, one floor;
+#   - the 三川 front: two brick corner piers on a ~1 m granite base, each with a framed carved
+#     panel (blank) on top and a stone-framed 堵 relief below it; between them one wide opening
+#     split by two round red columns on granite drum bases into three doors (三川門). The centre
+#     door stands open onto the dark hall and a gilt altar; the two side doors are closed red
+#     leaves with the door-god panels (blank — painted art stays out of the geometry);
+#   - the dark carved wooden front: the gilt 雀替 frieze beam over the doors, a dark band of
+#     painted cloud brackets above it, the hanging vertical name plaque (blank), and the eave
+#     fascia with five round medallions (the 霞海城隍廟 characters, blank — canvas text);
+#   - one terracotta roof: a concave front slope of barrel tiles with round 瓦當 ends and
+#     triangular 滴水 drip tiles, the ridge only ~4 m behind the eave edge, and a long hidden back
+#     slope;
+#   - the high swallowtail 燕尾脊: an ink ridge with a blue 剪黏 panel full of little figures,
+#     sagging deep in the middle and sweeping up into forked tips past the gables; the red sun
+#     disc on a lotus at the centre, two green rearing dragons, and on the front corners the
+#     垂脊 ends carrying small pavilion-and-phoenix 剪黏 groups;
+#   - two red lanterns under the eave and the 朝天爐 incense burner on a stone pedestal.
+# The kerb porch columns of the old model are gone: the real red columns stand in the doorway.
 #
 # Frame: metres, Blender Z up. scene-dadao.js places the glb at (-8.8, 0, -240) with
 # rotation.y = +π/2, so Blender -Y (glTF +Z) → world +x (the road) and Blender +X → world -z.
-# The front wall's face is the plane y = 0, the hall runs into +Y, the width (8 m) along X.
-# Origin on the ground at the front wall's centre. Sizes match the primitive build:
-# hall 8 x 9, walls 5.0, porch columns at y -2.3 (the kerb), roof from y -3.1 to 9.5, ridge at
-# z 9.4, swallowtail tips at x ±5.9 up to z 12 (label top is 12.5). The eave's front fascia
-# stays at y -3.1 so the scene's name board (at y -3.15, z 4.1..4.95) hangs just in front of it.
+# The facade plane is y = 0, the hall runs into +Y to y 9, the width (8 m) along X. Origin on
+# the ground at the facade's centre. Walls 5 m, as the scene states. The front eave edge is at
+# y -1.35 (it was -3.1): the scene's name board should move to world x -7.45 (note in
+# .scratch/blender-detail/notes/temple.md). Top of the swallowtail tips z ≈ 10.6 (under the
+# scene's G.top 12.5).
 #
-# Look: primitives, boolean-cut lattice windows, a bevel on every edge, flat palette materials
-# (stylized.py owns the mechanics).
+# Look: primitives, boolean-cut openings, a bevel on every edge, flat palette materials
+# (stylized.py owns the mechanics). Budget 25,000 triangles.
 
 import math
 import os
 import sys
 
+import bmesh
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import stylized as S
-from stylized import bm_box, bm_bar, bm_solid, bm_cylinder, bm_prism, bm_lathe, bm_sphere, rect_pts, face_frame, quad, cubic, solid, cutter
+from stylized import bm_box, bm_bar, bm_solid, bm_cylinder, bm_prism, bm_lathe, bm_sphere, quad, cubic, solid, cutter
 
-# ── dimensions (metres), from scene-dadao.js ─────────────────────────────────
+# ── dimensions (metres) ──────────────────────────────────────────────────────
 HW = 4.0            # half width of the hall (x ±4)
 DEPTH = 9.0         # hall depth (y 0..9)
 WH = 5.0            # wall height
-WALK = 0.22         # top of the sidewalk slab the porch stands on
-COL_Y = -2.3        # porch columns, the kerb line
-COL_X = 3.6
-ROOF_Y0, ROOF_Y1 = -3.1, 9.5      # roof span front..back
-ROOF_YC = (ROOF_Y0 + ROOF_Y1) / 2  # the ridge line (y 3.2)
-ROOF_HALF = (ROOF_Y1 - ROOF_Y0) / 2
-ROOF_X = HW + 0.3                 # gable ends just past the walls (硬山: no side overhang)
-EAVE_Z = 5.5                      # top of the eave beam, the roof's bottom edge
-RIDGE_Z = 9.4                     # roof apex
-TIP_X, TIP_Z = 5.9, 12.0          # swallowtail tips
-DOU_BASE = WH - 0.43              # 4.57: top of the porch beam, foot of the 斗拱 stacks
-DOOR_X = 1.3                      # the two door centres
-REC_D = 0.46                      # how deep the door recess is cut into the 0.58 front wall
+WALK = 0.22         # top of the sidewalk slab
+PIER_IN = 2.95      # inner face of the brick corner piers (opening x ±2.95)
+PLINTH = 1.1        # granite base height
+COL_X = 0.95        # the two red columns in the doorway
+COL_R = 0.18
+OPEN_TOP = 3.55     # top of the door openings, foot of the gilt frieze
+FRIEZE_TOP = 3.95
+SOFFIT = 4.45       # underside of the eave / roof block
+EAVE_Y, EAVE_Z = -1.35, 4.75      # the front eave edge (top of the drip line)
+RIDGE_Y, RIDGE_Z = 3.0, 7.15      # roof apex line
+BACK_Y, BACK_Z = 9.45, 5.4        # back eave
+ROOF_X = 4.45       # gable ends, a little past the walls
+WOOD_Y = 0.55       # face of the dark wooden front wall (the doors stand in it)
+
+
+def slab(bm, p0, p1, w, h, side=(0, 1, 0)):
+    """A box bar from p0 to p1, w across `side` (a world direction) and h across both: an explicit
+    roll, so a bar along any direction (vertical included) never twists (the bm_bar roll trap)."""
+    p0, p1 = Vector(p0), Vector(p1)
+    d = (p1 - p0)
+    L = d.length
+    d.normalize()
+    a = Vector(side)
+    a = (a - d * a.dot(d)).normalized()
+    b = d.cross(a)
+    m = Matrix((
+        (a.x, b.x, d.x, p0.x),
+        (a.y, b.y, d.y, p0.y),
+        (a.z, b.z, d.z, p0.z),
+        (0, 0, 0, 1)))
+    bm_box(bm, (w, h, L), (0, 0, L / 2), m)
+
+
+def _bm(fn):
+    bm = bmesh.new()
+    fn(bm)
+    return bm
+
+
+def tube(bm, path, r, n=6, axis=Vector((1, 0, 0))):
+    """A closed tube of n sides along a 3D polyline. Rings sit square to the local tangent; `axis`
+    is a direction never parallel to the path (X for paths in the Y-Z plane)."""
+    rings = []
+    P = [Vector(p) for p in path]
+    for i, p in enumerate(P):
+        d = (P[min(i + 1, len(P) - 1)] - P[max(i - 1, 0)]).normalized()
+        a = (axis - d * axis.dot(d)).normalized()
+        b = d.cross(a)
+        rings.append([bm.verts.new(p + r * (math.cos(k * 2 * math.pi / n) * a + math.sin(k * 2 * math.pi / n) * b)) for k in range(n)])
+    for A, B in zip(rings, rings[1:]):
+        for k in range(n):
+            bm.faces.new((A[k], A[(k + 1) % n], B[(k + 1) % n], B[k]))
+    bm.faces.new(rings[0][::-1])
+    bm.faces.new(rings[-1])
+
+
+# ── the roof surface: concave front and back slopes as (y, z) curves ─────────
+def front_slope(n):
+    return quad((EAVE_Y, EAVE_Z), (0.9, 5.15), (RIDGE_Y, RIDGE_Z), n, include_start=True)
+
+
+def back_slope(n):
+    return quad((RIDGE_Y, RIDGE_Z), (6.4, 5.75), (BACK_Y, BACK_Z), n, include_start=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# the hall
+# the hall body and the front
 # ─────────────────────────────────────────────────────────────────────────────
 def hall():
-    """Brick side and back walls with a pale plinth and two lattice windows per side; the front
-    wall is the dark carved wood: two red doors with pale frames and lattice panels between."""
-    # side lattice windows: a pale surround cut shallow, then a dark recess with bone bars inside
-    sur = S.new_cutter('hall_surround', _bm(lambda bm: [
-        bm_solid(bm, rect_pts(1.3, 1.5, 2.2), -0.6, 0.08, face_frame(th, HW, (0, 0, 0)) @ Matrix.Translation((S.face_x_sign(th) * u, 0, 0)))
-        for th in (math.pi / 2, 3 * math.pi / 2) for u in (3.0, 6.5)]), 'bone')
-    rec = S.new_cutter('hall_recess', _bm(lambda bm: [
-        bm_solid(bm, rect_pts(1.0, 1.2, 2.35), -0.6, 0.3, face_frame(th, HW, (0, 0, 0)) @ Matrix.Translation((S.face_x_sign(th) * u, 0, 0)))
-        for th in (math.pi / 2, 3 * math.pi / 2) for u in (3.0, 6.5)]), 'ink')
-    # the front bay is cut out of the brick box so the wooden wall sits 2 cm behind brick corner
-    # posts (no coplanar faces between the two)
-    front = cutter('hall_front_cut', 'ink', lambda bm: bm_box(bm, (2 * HW - 0.2, 1.2, WH + 0.2), (0, 0.0, WH / 2)))
-    solid('hall_walls', 'brick', lambda bm: bm_box(bm, (2 * HW, DEPTH, WH), (0, DEPTH / 2, WH / 2)), cutters=(front, sur, rec))
+    """Brick side and back walls on a granite base band. The front block is the dark wooden wall:
+    the three door openings are cut through it into the hall."""
+    doors = cutter('door_cut', 'ink', lambda bm: [
+        bm_box(bm, (1.5, 3.4, OPEN_TOP), (0, 1.9, OPEN_TOP / 2)),
+        bm_box(bm, (1.25, 0.5, 3.15), (-1.95, WOOD_Y + 0.12, 3.15 / 2)),
+        bm_box(bm, (1.25, 0.5, 3.15), (1.95, WOOD_Y + 0.12, 3.15 / 2))])
+    solid('hall_walls', 'brick', lambda bm: bm_box(bm, (2 * HW, DEPTH - 0.8, WH), (0, 0.8 + (DEPTH - 0.8) / 2, WH / 2)), cutters=(doors,))
+    solid('front_wood', 'ink', lambda bm: bm_box(bm, (2 * PIER_IN + 0.1, 0.35, SOFFIT), (0, WOOD_Y + 0.175, SOFFIT / 2)), cutters=(doors,))
+    # granite base band along the side and back walls
+    solid('hall_base', 'walk', lambda bm: [
+        bm_box(bm, (0.08, DEPTH - 0.8, PLINTH), (sx * (HW + 0.03), 0.8 + (DEPTH - 0.8) / 2, PLINTH / 2)) for sx in (-1, 1)]
+        + [bm_box(bm, (2 * HW + 0.14, 0.08, PLINTH), (0, DEPTH + 0.03, PLINTH / 2))], bevel=0.03)
 
-    def lattice(bm):
-        for th in (math.pi / 2, 3 * math.pi / 2):
-            for u in (3.0, 6.5):
-                F = face_frame(th, HW, (0, 0, 0)) @ Matrix.Translation((S.face_x_sign(th) * u, 0.18, 0))
-                for dx in (-0.25, 0, 0.25):
-                    bm_box(bm, (0.06, 0.06, 1.2), (dx, 0, 2.95), F)
-                for dz in (2.75, 3.15):
-                    bm_box(bm, (1.0, 0.06, 0.06), (0, 0, dz), F)
-    solid('hall_lattice', 'bone', lattice, bevel=0.0)
-    solid('hall_plinth', 'walk', lambda bm: bm_box(bm, (2 * HW + 0.2, DEPTH + 0.1, 0.45), (0, DEPTH / 2 + 0.05, 0.225)), bevel=0.03)
+    def altar(bm):      # the gilt shrine glimpsed through the open centre door
+        bm_box(bm, (1.3, 0.5, 1.0), (0, 3.3, 0.5))
+        bm_box(bm, (0.9, 0.35, 1.0), (0, 3.4, 1.5))
+        bm_box(bm, (1.5, 0.15, 0.25), (0, 3.25, 2.6))
+    solid('altar', 'lamp', altar, bevel=0.03)
+    solid('altar_cloth', 'verm', lambda bm: bm_box(bm, (1.36, 0.06, 0.7), (0, 3.03, 0.55)), bevel=0.0)
 
 
-def front_wall():
-    """The carved front (ink), 0.58 thick. Each red door sits at the back of a 0.3 m recess behind
-    pale stone jambs, a 門楣 lintel and a 門檻 threshold, instead of standing proud of a flat board."""
-    rec = cutter('door_recess', 'ink', lambda bm: [
-        bm_box(bm, (1.46, REC_D, 3.36), (x, -0.02 + REC_D / 2, 1.8)) for x in (-DOOR_X, DOOR_X)])
-    solid('front_wall', 'ink', lambda bm: bm_box(bm, (2 * HW - 0.2, 0.58, WH), (0, 0.31, WH / 2)), cutters=(rec,))
+def piers():
+    """The two brick corner piers: granite base with a moulded top course, brick shaft, a stone
+    堵 panel with a carved roundel, and a tilted framed picture panel at the top (blank)."""
+    PW = HW - PIER_IN               # 1.05
+    xs = [sx * (PIER_IN + PW / 2) for sx in (-1, 1)]
+    solid('pier_brick', 'brick', lambda bm: [bm_box(bm, (PW, 0.8, SOFFIT), (x, 0.4, SOFFIT / 2)) for x in xs])
 
-    def doors(bm):
-        for x in (-DOOR_X, DOOR_X):
-            bm_box(bm, (1.4, 0.12, 3.2), (x, 0.38, 1.72), None)
-    solid('doors', 'verm', doors, bevel=0.03)
+    def base(bm):
+        for x in xs:
+            bm_box(bm, (PW + 0.08, 0.88, PLINTH), (x, 0.4, PLINTH / 2))
+            bm_box(bm, (PW + 0.14, 0.94, 0.14), (x, 0.4, PLINTH + 0.07))      # the capping course
+    solid('pier_base', 'walk', base)
 
-    def frames(bm):
-        for x in (-DOOR_X, DOOR_X):
-            for dx in (-0.78, 0.78):
-                bm_box(bm, (0.18, 0.3, 3.62), (x + dx, -0.04, 1.81), None)            # jambs
-            bm_box(bm, (1.92, 0.3, 0.26), (x, -0.04, 3.61), None)                     # 門楣 lintel
-            bm_box(bm, (1.74, 0.34, 0.2), (x, -0.04, 0.1), None)                      # 門檻 threshold
-        bm_box(bm, (2 * HW - 0.2, 0.25, 0.3), (0, -0.05, WH - 0.35), None)            # the carved lintel band
-        bm_box(bm, (2 * HW - 0.2, 0.25, 0.2), (0, -0.05, 0.1), None)                  # the sill board
-    solid('door_frames', 'bone', frames, bevel=0.03)
+    def joints(bm):                 # stone joints on the granite face: two courses, staggered heads
+        for x in xs:
+            for z in (0.37, 0.74):
+                bm_box(bm, (PW + 0.02, 0.03, 0.035), (x, -0.045, z))
+            for z, dx in ((0.18, -0.15), (0.55, 0.22), (0.92, -0.05)):
+                bm_box(bm, (0.035, 0.03, 0.33), (x + dx, -0.045, z))
+    solid('pier_joints', 'haze', joints, bevel=0.0)
 
-    def door_studs(bm):
-        for x in (-DOOR_X, DOOR_X):
-            for dx in (-0.38, 0.0, 0.38):
-                for dz in (1.05, 1.95, 2.85):
-                    bm_box(bm, (0.13, 0.08, 0.13), (x + dx, 0.28, dz), None)
-    solid('door_studs', 'lamp', door_studs, bevel=0.0)
+    PZ, PH, PWW = 2.35, 1.5, 0.78   # the 堵 panel
 
-
-def stone_window():
-    """竹節窗, the bamboo-joint stone window between the two doors: three round bars with joints,
-    in a plain stone surround. The real front has one of these in every blind bay."""
-    z0, z1 = 1.55, 3.45
-
-    def frame(bm):
-        bm_box(bm, (0.86, 0.26, 0.18), (0, -0.04, z0 - 0.09), None)
-        bm_box(bm, (0.86, 0.26, 0.18), (0, -0.04, z1 + 0.09), None)
-        for dx in (-0.37, 0.37):
-            bm_box(bm, (0.12, 0.26, z1 - z0 + 0.36), (dx, -0.04, (z0 + z1) / 2), None)
-    solid('window_frame', 'walk', frame, bevel=0.03)
-
-    def bars(bm):
-        for dx in (-0.23, 0.0, 0.23):
-            bm_cylinder(bm, 0.06, z0, z1, 8, (dx, -0.09))
-            for z in (2.03, 2.5, 2.97):
-                bm_cylinder(bm, 0.1, z - 0.06, z + 0.06, 8, (dx, -0.09))
-    solid('window_bars', 'walk', bars, bevel=0.0)
-
-
-def wall_relief():
-    """The two carved stone 堵 panels beside the doors — a raised frame, a 卷草 scroll spiral and
-    two cloud curls standing off the field, a round boss at the eye — and a 石鼓 drum stone at the
-    foot of each outer jamb. This is the carved relief the first pass dropped."""
-    PX, PZ, PW, PH = 3.05, 2.5, 1.42, 2.5
-
-    def frames(bm):
-        for x in (-PX, PX):
+    def panel(bm):
+        for x in xs:
             for dz in (-PH / 2, PH / 2):
-                bm_box(bm, (PW, 0.2, 0.15), (x, -0.04, PZ + dz), None)
-            for dx in (-PW / 2 + 0.075, PW / 2 - 0.075):
-                bm_box(bm, (0.15, 0.2, PH), (x + dx, -0.04, PZ), None)
-    solid('relief_frames', 'walk', frames, bevel=0.03)
+                bm_box(bm, (PWW, 0.12, 0.12), (x, -0.04, PZ + dz))
+            for dx in (-PWW / 2 + 0.06, PWW / 2 - 0.06):
+                bm_box(bm, (0.12, 0.12, PH), (x + dx, -0.04, PZ))
+            bm_box(bm, (PWW - 0.12, 0.05, PH - 0.12), (x, -0.01, PZ))           # the field
+    solid('pier_panel', 'walk', panel, bevel=0.025)
 
     def carving(bm):
-        """A closed 團螭 roundel over three carved bands: continuous rings read as carving, a
-        broken spiral reads as damage."""
-        for sgn in (-1, 1):
-            cx, cz = sgn * PX, PZ + 0.42
-            for R, n, t in ((0.44, 14, 0.1), (0.24, 10, 0.08)):
-                ring = [(cx + R * math.cos(i * 2 * math.pi / n), cz + R * math.sin(i * 2 * math.pi / n)) for i in range(n)]
+        for x in xs:
+            cz = PZ + 0.18
+            for R, k, t in ((0.24, 12, 0.07), (0.12, 8, 0.06)):
+                ring = [(x + R * math.cos(i * 2 * math.pi / k), cz + R * math.sin(i * 2 * math.pi / k)) for i in range(k)]
                 for p, q in zip(ring, ring[1:] + ring[:1]):
-                    bm_bar(bm, (p[0], -0.12, p[1]), (q[0], -0.12, q[1]), t)
-            for k in range(4):                                       # four cloud spokes off the ring
-                a = math.pi / 4 + k * math.pi / 2
-                bm_bar(bm, (cx + 0.4 * math.cos(a), -0.11, cz + 0.4 * math.sin(a)),
-                       (cx + 0.66 * math.cos(a), -0.11, cz + 0.66 * math.sin(a)), 0.09)
-            for dz in (-0.62, -0.86, -1.1):                          # carved bands under the roundel
-                bm_box(bm, (PW - 0.44, 0.1, 0.09), (cx, -0.11, PZ + dz), None)
-    solid('relief_carving', 'haze', carving, bevel=0.0)
+                    bm_bar(bm, (p[0], -0.065, p[1]), (q[0], -0.065, q[1]), t)
+            for dz in (-0.35, -0.52):
+                bm_box(bm, (PWW - 0.34, 0.06, 0.06), (x, -0.06, PZ + dz))
+    solid('pier_carving', 'haze', carving, bevel=0.0)
 
-    def boss(bm):
-        for x in (-PX, PX):
-            bm_lathe(bm, [(0, 0), (0.15, 0), (0.17, -0.07), (0.12, -0.16), (0, -0.2)], 10,
-                     Matrix.Translation((x, -0.06, PZ + 0.3)) @ Matrix.Rotation(-math.pi / 2, 4, 'X'))
-    solid('relief_boss', 'lamp', boss, bevel=0.0)
+    def picture(bm):                # the glazed relief cases at the pier tops, tilted forward
+        for x in xs:
+            T = Matrix.Translation((x, -0.05, 3.95)) @ Matrix.Rotation(math.radians(-12), 4, 'X')
+            bm_box(bm, (0.9, 0.14, 0.82), (0, 0, 0), T)
+    solid('pier_picture_frame', 'verm', picture, bevel=0.03)
 
-    def drums(bm):
-        for x in (-DOOR_X - 0.78, DOOR_X + 0.78):
-            T = Matrix.Translation((x, -0.19, 0.66)) @ Matrix.Rotation(math.pi / 2, 4, 'X')
-            bm_cylinder(bm, 0.3, -0.12, 0.12, 14, (0, 0), T)
-            bm_box(bm, (0.56, 0.46, 0.4), (x, -0.16, 0.2), None)
-    solid('door_drums', 'walk', drums, bevel=0.03)
+    def picture_field(bm):
+        for x in xs:
+            T = Matrix.Translation((x, -0.05, 3.95)) @ Matrix.Rotation(math.radians(-12), 4, 'X')
+            bm_box(bm, (0.72, 0.04, 0.64), (0, -0.07, 0), T)
+    solid('pier_picture', 'glass', picture_field, bevel=0.0)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# the porch
-# ─────────────────────────────────────────────────────────────────────────────
-def gong_pts(L, h, lobes=2):
-    """A 栱 arm seen from the side: flat top, the ends cut back, the bottom scalloped into lobes."""
-    top, bot = h / 2, -h / 2
-    xr = L / 2 - 0.08
-    pts = [(-L / 2, top), (L / 2, top), (L / 2, bot + 0.06), (xr, bot)]
-    step = 2 * xr / lobes
-    for i in range(lobes):
-        a, b = xr - i * step, xr - (i + 1) * step
-        pts += quad((a, bot), ((a + b) / 2, bot + 0.10), (b, bot), 3)
-    pts.append((-L / 2, bot + 0.06))
-    return pts
+def doors():
+    """三川門: the open centre door with folded leaves, two closed side doors with door-god panels
+    (blank), stone thresholds, and the two red couplet columns on granite drums."""
+    def leaves(bm):
+        for sx in (-1, 1):
+            x = sx * 1.95
+            for dx in (-0.31, 0.31):
+                bm_box(bm, (0.6, 0.1, 3.05), (x + dx, WOOD_Y + 0.25, 1.6))
+            # the centre door's leaves, folded back against the reveal
+            bm_box(bm, (0.1, 0.72, 3.4), (sx * 0.68, WOOD_Y + 0.75, 1.75))
+    solid('door_leaves', 'verm', leaves, bevel=0.025)
 
+    def gods(bm):                   # the door gods, blank: an armoured silhouette on each leaf
+        for sx in (-1, 1):
+            for dx in (-0.31, 0.31):
+                x, y = sx * 1.95 + dx, WOOD_Y + 0.18
+                bm_solid(bm, [(x - 0.17, 1.0), (x + 0.17, 1.0), (x + 0.2, 2.15), (x + 0.12, 2.35), (x - 0.12, 2.35), (x - 0.2, 2.15)], y - 0.02, y + 0.02)
+                bm_box(bm, (0.14, 0.04, 0.16), (x, y, 2.47))             # face
+                bm_box(bm, (0.22, 0.04, 0.12), (x, y, 2.62))             # helmet
+                bm_box(bm, (0.08, 0.04, 0.55), (x - 0.13, y, 0.75))      # legs
+                bm_box(bm, (0.08, 0.04, 0.55), (x + 0.13, y, 0.75))
+    solid('door_gods', 'ink', gods, bevel=0.0)
 
-def porch():
-    """Two thick red columns on octagonal stone bases at the kerb, a low brick step between them,
-    red beams tying the column tops to the hall, and the 斗拱 stacks carrying the eave."""
+    def gods_frame(bm):
+        for sx in (-1, 1):
+            for dx in (-0.31, 0.31):
+                x = sx * 1.95 + dx
+                for dz in (-1.3, 1.0):
+                    bm_box(bm, (0.5, 0.05, 0.06), (x, WOOD_Y + 0.165, 1.75 + dz))
+                for ddx in (-0.25, 0.25):
+                    bm_box(bm, (0.06, 0.05, 2.36), (x + ddx, WOOD_Y + 0.165, 1.6))
+                bm_box(bm, (0.3, 0.05, 0.36), (x, WOOD_Y + 0.165, 1.55))       # gilt armour plate
+            bm_box(bm, (0.12, 0.06, 0.12), (sx * 1.95 - 0.08, WOOD_Y + 0.17, 1.6))   # rings
+            bm_box(bm, (0.12, 0.06, 0.12), (sx * 1.95 + 0.08, WOOD_Y + 0.17, 1.6))
+    solid('door_gods_frame', 'lamp', gods_frame, bevel=0.0)
+
+    def thresholds(bm):
+        bm_box(bm, (1.6, 0.4, 0.22), (0, WOOD_Y + 0.05, 0.11))
+        for sx in (-1, 1):
+            bm_box(bm, (1.35, 0.4, 0.3), (sx * 1.95, WOOD_Y + 0.05, 0.15))
+        bm_box(bm, (2 * PIER_IN, 0.9, 0.12), (0, 0.0, 0.06))        # the stone step
+    solid('thresholds', 'walk', thresholds, bevel=0.03)
+
     def columns(bm):
-        for x in (-COL_X, COL_X):
-            bm_cylinder(bm, 0.35, WALK + 0.35, DOU_BASE, 12, (x, COL_Y))
-    solid('columns', 'verm', columns, bevel=0.03)
+        for sx in (-1, 1):
+            bm_cylinder(bm, COL_R, 0.62, OPEN_TOP, 16, (sx * COL_X, 0.12))
+    solid('columns', 'verm', columns, bevel=0.0)
+
+    def couplets(bm):               # the dark couplet boards on the columns' fronts (text = blank)
+        for sx in (-1, 1):
+            bm_box(bm, (0.26, 0.05, 2.5), (sx * COL_X, 0.12 - COL_R - 0.01, 2.1))
+    solid('couplets', 'ink', couplets, bevel=0.0)
 
     def bases(bm):
-        for x in (-COL_X, COL_X):
-            bm_prism(bm, 8, 0.5, 0.44, WALK, WALK + 0.35, center=(x, COL_Y))
-    solid('column_bases', 'walk', bases, bevel=0.03)
-    solid('porch_step', 'brick', lambda bm: bm_box(bm, (2 * COL_X - 0.8, 0.35, 0.5), (0, COL_Y, WALK + 0.25)), bevel=0.03)
+        for sx in (-1, 1):
+            c = (sx * COL_X, 0.12)
+            bm_prism(bm, 8, 0.3, 0.3, 0.12, 0.3, center=c)                          # square-ish plinth
+            bm_lathe(bm, [(0.3, 0.3), (0.31, 0.36), (0.3, 0.48), (0.25, 0.58), (0.2, 0.62)], 12,
+                     Matrix.Translation((c[0], c[1], 0)))                           # the drum
+    solid('column_bases', 'walk', bases, bevel=0.0)
 
-    def beams(bm):
-        for x in (-COL_X, COL_X):
-            bm_box(bm, (0.4, -COL_Y + 0.2, 0.4), (x, COL_Y / 2 + 0.1, DOU_BASE - 0.2), None)   # tie beams to the hall
-        bm_box(bm, (2 * COL_X + 0.4, 0.4, 0.5), (0, COL_Y, DOU_BASE - 0.25), None)             # the front beam
-    solid('porch_beams', 'verm', beams, bevel=0.03)
 
-    # 斗拱: each stack is a flared 坐斗, a scalloped 栱 across the eave line, a 華栱 projecting out
-    # under it, and three 升 blocks carrying the eave beam. Red blocks, pale arms, as on the real
-    # temple. Front stacks sit over the porch, side stacks under the gable eaves.
-    STACKS = [(x, COL_Y, True) for x in (-COL_X, -1.8, 0.0, 1.8, COL_X)]
-    STACKS += [(sx * (HW + 0.05), y, False) for sx in (-1, 1) for y in (1.5, 4.5, 7.5)]
+def frieze():
+    """Over the doors: the gilt carved 雀替 beam, a dark band of painted cloud brackets, the
+    vertical name plaque, and the eave fascia with five round medallions."""
+    def gilt(bm):
+        bm_box(bm, (2 * PIER_IN + 0.1, 0.28, FRIEZE_TOP - OPEN_TOP), (0, 0.32, (OPEN_TOP + FRIEZE_TOP) / 2))
+        for sx in (-1, 1):          # the carved 雀替 brackets dropping into the side doors' corners
+            for x in (sx * PIER_IN, sx * COL_X):
+                d = -sx if abs(x) > 2 else sx
+                bm_solid(bm, [(x, OPEN_TOP), (x + d * 0.5, OPEN_TOP), (x, OPEN_TOP - 0.42)], 0.22, 0.42)
+    solid('frieze_gilt', 'lamp', gilt, bevel=0.0)
 
-    def blocks(bm):
-        for x, y, along_x in STACKS:
-            T = Matrix.Translation((x, y, 0)) @ Matrix.Rotation(0 if along_x else math.pi / 2, 4, 'Z')
-            bm_prism(bm, 4, 0.20, 0.27, DOU_BASE, DOU_BASE + 0.21, rot=math.pi / 4, xform=T)      # 坐斗
-            for u in (-0.55, 0.0, 0.55):
-                bm_prism(bm, 4, 0.11, 0.15, DOU_BASE + 0.43, DOU_BASE + 0.55, rot=math.pi / 4,
-                         xform=T, center=(u, 0))                                                  # 升
-    solid('brackets', 'verm', blocks, bevel=0.025)
+    def relief(bm):                 # carved figures standing off the gilt beam
+        for i in range(13):
+            x = -2.7 + i * 0.45
+            if abs(x) < 0.3:
+                continue
+            bm_box(bm, (0.2, 0.06, 0.22), (x, 0.16, (OPEN_TOP + FRIEZE_TOP) / 2))
+    solid('frieze_relief', 'verm', relief, bevel=0.0)
 
-    def arms(bm):
-        for x, y, along_x in STACKS:
-            R = Matrix.Rotation(0 if along_x else math.pi / 2, 4, 'Z')
-            T = Matrix.Translation((x, y, DOU_BASE + 0.32)) @ R
-            bm_solid(bm, gong_pts(1.30, 0.22), -0.12, 0.12, T)                                    # 栱
-            bm_solid(bm, gong_pts(0.92, 0.18, 1), -0.09, 0.09, T @ Matrix.Rotation(math.pi / 2, 4, 'Z'))  # 華栱
-    solid('bracket_arms', 'bone', arms, bevel=0.025)
+    def band(bm):                   # the dark band between the frieze and the soffit
+        bm_box(bm, (2 * PIER_IN + 0.1, 0.3, SOFFIT - FRIEZE_TOP), (0, 0.32, (FRIEZE_TOP + SOFFIT) / 2))
+    solid('frieze_band', 'ink', band, bevel=0.03)
+
+    def clouds(bm):                 # painted cloud bracket blocks (the colourful 吊筒 row)
+        for x in (-2.2, -1.1, 1.1, 2.2):
+            T = Matrix.Translation((x, 0.15, (FRIEZE_TOP + SOFFIT) / 2)) @ Matrix.Rotation(math.pi / 2, 4, 'X')
+            bm_cylinder(bm, 0.17, -0.05, 0.05, 10, (0, 0), T)
+            bm_cylinder(bm, 0.11, -0.05, 0.05, 8, (-0.22, 0.04), T)
+            bm_cylinder(bm, 0.11, -0.05, 0.05, 8, (0.22, 0.04), T)
+    solid('frieze_clouds', 'glass', clouds, bevel=0.0)
+
+    def plaque(bm):                 # the vertical name plaque hanging at the centre
+        bm_box(bm, (0.5, 0.12, 0.95), (0, 0.06, 3.85))
+    solid('plaque', 'ink', plaque, bevel=0.03)
+    solid('plaque_frame', 'lamp', lambda bm: [bm_box(bm, (0.6, 0.08, 0.08), (0, 0.04, z)) for z in (3.36, 4.34)]
+          + [bm_box(bm, (0.08, 0.08, 1.06), (x, 0.04, 3.85)) for x in (-0.29, 0.29)], bevel=0.0)
+
+    # the eave fascia across the full width, on the wing beams out to the eave edge
+    solid('fascia', 'verm', lambda bm: bm_box(bm, (2 * HW + 0.5, 0.18, 0.42), (0, EAVE_Y + 0.12, SOFFIT - 0.05)), bevel=0.03)
+
+    def wing_beams(bm):
+        for sx in (-1, 1):
+            bm_box(bm, (0.3, -EAVE_Y + 0.2, 0.32), (sx * (HW - 0.2), (EAVE_Y + 0.2) / 2, SOFFIT - 0.1))
+    solid('wing_beams', 'verm', wing_beams, bevel=0.03)
+
+    def medallions(bm):
+        for i in range(5):
+            x = -2.4 + i * 1.2
+            T = Matrix.Translation((x, EAVE_Y + 0.02, SOFFIT - 0.05)) @ Matrix.Rotation(math.pi / 2, 4, 'X')
+            bm_cylinder(bm, 0.16, -0.02, 0.04, 14, (0, 0), T)
+    solid('medallions', 'lamp', medallions, bevel=0.0)
+
+    def scrolls(bm):                # painted scroll band between the medallions
+        for i in range(4):
+            x = -1.8 + i * 1.2
+            bm_box(bm, (0.8, 0.04, 0.12), (x, EAVE_Y + 0.02, SOFFIT - 0.05))
+    solid('fascia_scrolls', 'leaf', scrolls, bevel=0.0)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # the roof
 # ─────────────────────────────────────────────────────────────────────────────
-def slope_pts(n=7):
-    """One roof slope as (u, z) from the front eave to the apex, gently concave the Chinese way."""
-    return quad((-ROOF_HALF, EAVE_Z + 0.05), (-ROOF_HALF * 0.55, EAVE_Z + 0.5), (0, RIDGE_Z), n, include_start=True)
-
-
 def roof():
-    """The eave beam, the gabled tiled roof (a concave-sloped prism along X), tile courses as
-    thin bars down each slope, pale verge boards on the gable edges and eave rims, and the
-    ridge with its swallowtail tails and painted band."""
-    solid('eave_beam', 'ink', lambda bm: bm_box(bm, (2 * HW + 0.8, ROOF_Y1 - ROOF_Y0, 0.4), (0, ROOF_YC, EAVE_Z - 0.2)), bevel=0.03)
-    # the roof body: profile in (u, z) across the roof, extruded along X. bm_solid extrudes an
-    # X-Z profile along Y, so build it and turn it 90° about Z (profile x → -y).
-    front = slope_pts()
-    back = [(-u, z) for u, z in reversed(front[:-1])]
-    top = front + back
-    prof = [(-ROOF_HALF, EAVE_Z - 0.28), (ROOF_HALF, EAVE_Z - 0.28)] + list(reversed(top))
-    T = Matrix.Translation((0, ROOF_YC, 0)) @ Matrix.Rotation(-math.pi / 2, 4, 'Z')
-    solid('roof', 'brick', lambda bm: bm_solid(bm, prof, -ROOF_X, ROOF_X, T), bevel=0.06)
+    """The roof block (soffit flat at 4.45, the concave slopes on top), barrel-tile rows with 瓦當
+    end discs and 滴水 drip tiles down the front, cheaper rows on the back, ink verges."""
+    top = front_slope(8) + back_slope(8)[1:]
+    prof = [(-EAVE_Y, SOFFIT)] + [(-y, z) for y, z in top] + [(-BACK_Y, SOFFIT)]
+    T = Matrix.Rotation(-math.pi / 2, 4, 'Z')        # profile x (= -y) → world y
+    # the block fills the gable between the walls (flush with them, so the gable reads as the
+    # brick wall rising), and a 0.3 m tiled slab on top overhangs the gables as the verge
+    solid('roof', 'brick', lambda bm: bm_solid(bm, prof, -HW, HW, T), bevel=0.05)
+    slab_prof = [(-y, z) for y, z in top] + [(-y, z - 0.32) for y, z in reversed(top)]
+    solid('roof_slab', 'brick', lambda bm: bm_solid(bm, slab_prof, -ROOF_X, ROOF_X, T), bevel=0.05)
 
-    def courses(bm):
-        pts = slope_pts(12)
-        for u, z in pts[1:-1]:
-            for sgn in (-1, 1):
-                y = ROOF_YC + sgn * u
-                bm_bar(bm, (-ROOF_X + 0.1, y, z + 0.06), (ROOF_X - 0.1, y, z + 0.06), 0.13)
-    solid('tile_courses', 'brick', courses, bevel=0.0)
+    STEP = 0.33
+    xs = [-ROOF_X + 0.2 + i * STEP for i in range(int((2 * ROOF_X - 0.4) / STEP) + 1)]
 
-    def verges(bm):
-        pts = slope_pts(8)
-        for x in (-ROOF_X - 0.02, ROOF_X + 0.02):
-            for (u0, z0), (u1, z1) in zip(pts, pts[1:]):
-                for sgn in (-1, 1):
-                    bm_bar(bm, (x, ROOF_YC + sgn * u0, z0 + 0.08), (x, ROOF_YC + sgn * u1, z1 + 0.08), 0.22)
-        for y in (ROOF_Y0, ROOF_Y1):
-            bm_bar(bm, (-ROOF_X, y, EAVE_Z - 0.05), (ROOF_X, y, EAVE_Z - 0.05), 0.24)   # eave rims
-    solid('verges', 'bone', verges, bevel=0.03)
+    def tiles(bm):
+        fs = front_slope(6)
+        bs = back_slope(4)
+        for x in xs:
+            tube(bm, [(x, y, z + 0.08) for y, z in fs[:-1]] + [(x, fs[-1][0] - 0.25, fs[-1][1] - 0.05)], 0.105, 6)
+            tube(bm, [(x, y, z + 0.06) for y, z in bs[1:]], 0.075, 4)
+    solid('roof_tiles', 'brick', tiles, bevel=0.0)
+
+    def ends(bm):                   # 瓦當: round end discs on the front tile rows
+        y0, z0 = front_slope(6)[0]
+        for x in xs:
+            T = Matrix.Translation((x, y0 - 0.02, z0 + 0.08)) @ Matrix.Rotation(math.pi / 2, 4, 'X')
+            bm_cylinder(bm, 0.13, -0.03, 0.03, 10, (0, 0), T)
+    solid('tile_ends', 'brick', ends, bevel=0.0)
+
+    def drips(bm):                  # 滴水: pointed drip tiles hanging between the rows
+        y0, z0 = front_slope(6)[0]
+        for x0, x1 in zip(xs, xs[1:]):
+            x = (x0 + x1) / 2
+            bm_solid(bm, [(x - 0.14, z0 + 0.02), (x + 0.14, z0 + 0.02), (x, z0 - 0.22)], y0 - 0.04, y0 + 0.06)
+    solid('drip_tiles', 'brick', drips, bevel=0.0)
+
+    def eave_rim(bm):               # the white mortar line under the tile ends
+        y0, z0 = front_slope(6)[0]
+        bm_bar(bm, (-ROOF_X, y0 + 0.05, z0 - 0.06), (ROOF_X, y0 + 0.05, z0 - 0.06), 0.1)
+    solid('eave_rim', 'bone', eave_rim, bevel=0.0)
+
+
+def gable_vents():
+    """A round stone vent high in each brick gable, the one opening the side walls show."""
+    def vent(bm):
+        for sx in (-1, 1):
+            T = Matrix.Translation((sx * HW, 4.2, 5.75)) @ Matrix.Rotation(math.pi / 2, 4, 'Y')
+            bm_lathe(bm, [(0.3, -0.05), (0.42, -0.05), (0.42, 0.05), (0.3, 0.05)], 14, T)
+    solid('gable_vent_ring', 'walk', vent, bevel=0.0)
+    solid('gable_vent', 'ink', lambda bm: [bm_cylinder(bm, 0.31, -0.02, 0.02, 14, (0, 0),
+                                                       Matrix.Translation((sx * HW, 4.2, 5.75)) @ Matrix.Rotation(math.pi / 2, 4, 'Y'))
+                                           for sx in (-1, 1)], bevel=0.0)
+
+    def bars(bm):
+        for sx in (-1, 1):
+            for dy in (-0.15, 0.0, 0.15):
+                bm_cylinder(bm, 0.035, 5.75 - 0.3, 5.75 + 0.3, 6, (sx * (HW + 0.03), 4.2 + dy))
+    solid('gable_vent_bars', 'walk', bars, bevel=0.0)
+
+
+def gable_ridges():
+    """垂脊: the dark gable ridges down each verge, blue-faced, ending at the front corners under a
+    pavilion-and-phoenix 剪黏 group on a green rock."""
+    fs = front_slope(6)
+
+    def ridges(bm):
+        for sx in (-1, 1):
+            x = sx * (ROOF_X - 0.05)
+            path = [(x, y, z + 0.28) for y, z in reversed(fs)]
+            tube(bm, path, 0.2, 4)
+            bs = back_slope(4)
+            tube(bm, [(x, y, z + 0.22) for y, z in bs], 0.15, 4)
+    solid('gable_ridge', 'ink', ridges, bevel=0.0)
+
+    def faces(bm):                  # the blue 剪黏 strip on each gable ridge's outer face
+        for sx in (-1, 1):
+            x = sx * (ROOF_X + 0.17)
+            pts = list(reversed(fs))
+            for (y0, z0), (y1, z1) in zip(pts, pts[1:]):
+                slab(bm, (x, y0, z0 + 0.28), (x, y1, z1 + 0.28), 0.04, 0.22, (1, 0, 0))
+    solid('gable_ridge_face', 'glass', faces, bevel=0.0)
+
+    # pavilion groups standing on the corner ends of the gable ridges (x ±4.35, y about -0.6)
+    y0, z0 = fs[1]
+    BZ = z0 + 0.35
+    PY = y0
+
+    def rock(bm):                   # the green-blue rock / cloud platform
+        for sx in (-1, 1):
+            x = sx * (ROOF_X - 0.15)
+            bm_box(bm, (0.95, 0.75, 0.3), (x, PY, BZ + 0.15))
+            bm_box(bm, (0.7, 0.55, 0.2), (x, PY, BZ - 0.08))
+    solid('pavilion_rock', 'leaf', rock, bevel=0.03)
+
+    def pav(bm):
+        for sx in (-1, 1):
+            x = sx * (ROOF_X - 0.15)
+            bm_box(bm, (0.42, 0.36, 0.42), (x, PY + 0.05, BZ + 0.51))
+            bm_box(bm, (0.3, 0.26, 0.28), (x, PY + 0.05, BZ + 0.98))
+    solid('pavilion_body', 'verm', pav, bevel=0.025)
+
+    def pav_roof(bm):
+        for sx in (-1, 1):
+            x = sx * (ROOF_X - 0.15)
+            bm_prism(bm, 4, 0.42, 0.1, BZ + 0.72, BZ + 0.86, rot=math.pi / 4, center=(x, PY + 0.05))
+            bm_prism(bm, 4, 0.32, 0.04, BZ + 1.12, BZ + 1.3, rot=math.pi / 4, center=(x, PY + 0.05))
+    solid('pavilion_roof', 'ink', pav_roof, bevel=0.0)
+
+    def figures(bm):                # little warriors on the rock in front of the pavilion
+        for sx in (-1, 1):
+            x = sx * (ROOF_X - 0.15)
+            for dx in (-0.3, 0.0, 0.3):
+                bm_box(bm, (0.12, 0.1, 0.24), (x + dx, PY - 0.28, BZ + 0.42))
+                bm_sphere(bm, 0.06, (x + dx, PY - 0.28, BZ + 0.6), 6, 4)
+    solid('pavilion_figures', 'bone', figures, bevel=0.0)
+
+    def phoenix(bm):                # a phoenix on top: body and a fan of tail feathers
+        for sx in (-1, 1):
+            x = sx * (ROOF_X - 0.15)
+            c = (x, PY + 0.05, BZ + 1.5)
+            bm_sphere(bm, 0.14, c, 8, 6, scale_z=1.2)
+            bm_bar(bm, c, (x - sx * 0.12, c[1] - 0.18, c[2] + 0.3), 0.07)                      # neck
+            for a in (0.35, 0.65, 0.95, 1.25):
+                slab(bm, c, (x + sx * 0.75 * math.cos(a), c[1] + 0.15, c[2] + 0.85 * math.sin(a)), 0.04, 0.1)
+    solid('phoenix', 'glass', phoenix, bevel=0.0)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# the swallowtail ridge
+# ─────────────────────────────────────────────────────────────────────────────
+RB = RIDGE_Z - 0.05          # ridge body bottom
+INNER = 4.3                  # where the sag meets the tail
+
+
+def ridge_top(x):
+    """The top of the ridge's sag: low in the middle, rising to the tails."""
+    return 7.95 + 1.0 * (abs(x) / INNER) ** 2
 
 
 def ridge():
-    """燕尾脊: an ink band along the apex, sagging in the middle, its ends sweeping up and out
-    into the forked tails past the gables; a red painted band on the sag; a pearl at the centre."""
-    band_z = RIDGE_Z - 0.2
-    inner = 4.3
-    # right half outline, from the bottom at the centre out to the tail and back in over the top
-    right = [(0, band_z), (4.6, band_z)]
-    right += quad((4.6, band_z), (TIP_X - 0.15, band_z + 1.0), (TIP_X, TIP_Z - 0.15), 5)    # outer edge up to the tip
-    right += [(TIP_X - 0.22, TIP_Z), (TIP_X - 0.45, TIP_Z - 0.3)]                               # the fork's notch
-    right += quad((TIP_X - 0.45, TIP_Z - 0.3), (5.35, RIDGE_Z + 1.05), (inner, RIDGE_Z + 0.8), 5)  # inner edge back down
-    right += quad((inner, RIDGE_Z + 0.8), (0, RIDGE_Z + 0.25), (0, RIDGE_Z + 0.55), 5)         # the sag to the centre top
-    left = [(-x, z) for x, z in reversed(right[1:-1])]
+    """燕尾脊: an ink body, its top sagging deep in the middle and sweeping up and out into forked
+    tips past the gables; a blue 剪黏 panel on both faces with a row of small figures."""
+    right = [(0, RB), (3.7, RB)]
+    right += quad((3.7, RB), (4.95, RB + 0.4), (5.5, 10.25), 6)                    # under the tail
+    right += [(5.62, 10.6), (5.35, 10.3), (5.28, 10.55)]                              # the fork
+    right += quad((5.28, 10.55), (4.7, 9.45), (INNER, ridge_top(INNER)), 4)           # back down
+    right += [(x, ridge_top(x)) for x in (3.6, 2.8, 2.0, 1.2, 0.5)]
+    left = [(-x, z) for x, z in reversed(right[1:])]
     prof = right + left
-    solid('ridge', 'ink', lambda bm: bm_solid(bm, prof, ROOF_YC - 0.28, ROOF_YC + 0.28, None), bevel=0.04)
+    solid('ridge', 'ink', lambda bm: bm_solid(bm, prof, RIDGE_Y - 0.26, RIDGE_Y + 0.26, None), bevel=0.04)
 
-    def band(bm):
-        top = quad((-inner + 0.3, RIDGE_Z + 0.62), (0, RIDGE_Z + 0.1), (inner - 0.3, RIDGE_Z + 0.62), 8, include_start=True)
-        bottom = [(x, z - 0.34) for x, z in reversed(top)]
-        bm_solid(bm, top + bottom, ROOF_YC - 0.34, ROOF_YC + 0.34, None)
-    solid('ridge_band', 'verm', band, bevel=0.03)
+    def panel(bm):                  # the blue band on both faces, following the sag
+        xs = [-4.1 + i * 0.41 for i in range(21)]
+        top = [(x, ridge_top(x) - 0.1) for x in xs]
+        bot = [(x, RB + 0.1 + 0.35 * (abs(x) / INNER) ** 2) for x in reversed(xs)]
+        bm_solid(bm, top + bot, RIDGE_Y - 0.3, RIDGE_Y + 0.3, None)
+    solid('ridge_panel', 'glass', panel, bevel=0.0)
 
-    def pearl(bm):
-        bm_sphere(bm, 0.3, (0, ROOF_YC, RIDGE_Z + 0.85), 12, 8)
-        bm_box(bm, (0.5, 0.5, 0.12), (0, ROOF_YC, RIDGE_Z + 0.5), None)
-    solid('ridge_pearl', 'lamp', pearl, bevel=0.0)
+    def cap(bm):                    # the light cap line on the top edge
+        xs = [-4.2 + i * 0.6 for i in range(15)]
+        for a, b in zip(xs, xs[1:]):
+            slab(bm, (a, RIDGE_Y, ridge_top(a) + 0.02), (b, RIDGE_Y, ridge_top(b) + 0.02), 0.58, 0.1)
+    solid('ridge_cap', 'haze', cap, bevel=0.0)
+
+    COLS = ('verm', 'lamp', 'leaf', 'bone')
+    for ci, col in enumerate(COLS):
+        def figs(bm, ci=ci):        # 剪黏 warriors and horses along both faces
+            for i in range(-6, 7):
+                if i == 0 or (i + 6) % 4 != ci:
+                    continue
+                x = i * 0.6
+                z = (ridge_top(x) + RB + 0.35 * (abs(x) / INNER) ** 2) / 2 + 0.08
+                for sy in (-1, 1):
+                    y = RIDGE_Y + sy * 0.33
+                    bm_box(bm, (0.4, 0.09, 0.17), (x, y, z - 0.1))             # horse
+                    bm_box(bm, (0.08, 0.09, 0.16), (x - 0.17, y, z - 0.24))    # legs
+                    bm_box(bm, (0.08, 0.09, 0.16), (x + 0.15, y, z - 0.24))
+                    bm_box(bm, (0.1, 0.09, 0.14), (x + 0.22, y, z + 0.0))      # horse head
+                    bm_box(bm, (0.13, 0.09, 0.24), (x, y, z + 0.1))            # rider
+                    bm_sphere(bm, 0.07, (x, y, z + 0.29), 6, 4)
+        solid('ridge_figures_' + col, col, figs, bevel=0.0)
+
+
+def ridge_clouds():
+    """White cloud curls on the blue 剪黏 panel between the riders."""
+    def clouds(bm):
+        for i in range(-6, 6):
+            x = i * 0.6 + 0.3
+            zb = RB + 0.1 + 0.35 * (abs(x) / INNER) ** 2
+            for sy in (-1, 1):
+                y = RIDGE_Y + sy * 0.31
+                T = Matrix.Translation((x, y, zb + 0.16)) @ Matrix.Rotation(math.pi / 2, 4, 'X')
+                for dx, r in ((-0.12, 0.08), (0.0, 0.11), (0.12, 0.08)):
+                    bm_cylinder(bm, r, -0.02, 0.02, 8, (dx, 0), T)
+    solid('ridge_clouds', 'bone', clouds, bevel=0.0)
+
+
+def sun_disc():
+    """The red sun disc at the ridge centre: a blue-green lotus seat, a red ball, a ring of
+    flame rays."""
+    zc = ridge_top(0) + 0.95
+    solid('sun_seat', 'leaf', lambda bm: bm_lathe(bm, [(0, ridge_top(0) - 0.05), (0.42, ridge_top(0) - 0.05), (0.5, ridge_top(0) + 0.15),
+                                                       (0.3, ridge_top(0) + 0.32), (0.12, zc - 0.3), (0, zc - 0.3)], 12,
+                                                      Matrix.Translation((0, RIDGE_Y, 0))), bevel=0.0)
+    solid('sun_ball', 'verm', lambda bm: bm_sphere(bm, 0.3, (0, RIDGE_Y, zc), 14, 10), bevel=0.0)
+
+    def rays(bm):
+        for k in range(13):
+            a = math.pi * (-0.15 + 1.3 * k / 12)
+            p0 = (0.36 * math.cos(a), RIDGE_Y, zc + 0.36 * math.sin(a))
+            mid = (0.62 * math.cos(a + 0.12), RIDGE_Y, zc + 0.62 * math.sin(a + 0.12))
+            p1 = (0.86 * math.cos(a - 0.05), RIDGE_Y, zc + 0.86 * math.sin(a - 0.05))
+            slab(bm, p0, mid, 0.07, 0.13)
+            slab(bm, mid, p1, 0.05, 0.08)
+    solid('sun_rays', 'verm', rays, bevel=0.0)
+    solid('sun_ring', 'lamp', lambda bm: bm_lathe(bm, [(0.29, -0.04), (0.38, -0.04), (0.38, 0.04), (0.29, 0.04)], 16,
+                                                  Matrix.Translation((0, RIDGE_Y, zc)) @ Matrix.Rotation(math.pi / 2, 4, 'X')), bevel=0.0)
 
 
 def ridge_dragons():
-    """雙龍搶珠: one 剪黏 dragon on each half of the ridge, its tail out over the swallowtail and
-    its head reared in toward the pearl. The spine is a shallow cubic S that hugs the ridge, the
-    body a chain of bars tapering from the tail to the neck, with a swept-back comb, two clawed
-    legs, a blocky head with an upturned snout and horns, and a fanned tail. Thin bars, no bevel."""
-    y0 = ROOF_YC
-    spine = cubic((4.35, RIDGE_Z + 0.95), (3.5, RIDGE_Z + 1.85), (2.2, RIDGE_Z + 0.75),
-                  (1.25, RIDGE_Z + 1.25), 10, include_start=True)
+    """雙龍搶珠: two green dragons standing on the ridge, bodies coiling up, heads reared in toward
+    the sun disc. Spine a cubic S; bars tapering from the tail to the neck."""
+    y0 = RIDGE_Y
+    base = ridge_top(3.7)
+    spine = cubic((3.75, base), (3.1, base + 1.6), (3.4, base + 0.2), (2.35, base + 1.45), 12, include_start=True)
     N = len(spine)
-    wave = [0.10 * math.sin(i * math.pi / 3) for i in range(N)]   # a little off the ridge plane
+    wave = [0.12 * math.sin(i * math.pi / 3.5) for i in range(N)]
 
     def pt(sgn, i):
         return (sgn * spine[i][0], y0 + wave[i], spine[i][1])
 
     def axes(i):
-        """Unit tangent and the up-ish normal of the spine at vertex i, in the X-Z plane."""
         a, b = spine[max(i - 1, 0)], spine[min(i + 1, N - 1)]
         d = Vector((b[0] - a[0], 0.0, b[1] - a[1])).normalized()
         n = Vector((-d.z, 0.0, d.x))
-        return d, (n if n.z >= 0 else -n)
+        return d, n
 
     def body(bm):
         for sgn in (-1, 1):
-            for i in range(N - 1):
-                t = 0.10 + 0.17 * (i / (N - 2)) ** 0.8
-                bm_bar(bm, pt(sgn, i), pt(sgn, i + 1), t)
-    solid('dragon_body', 'verm', body, bevel=0.0)
+            tube(bm, [pt(sgn, i) for i in range(N)], 0.12, 6, axis=Vector((0, 1, 0)))
+            bm_sphere(bm, 0.13, pt(sgn, N - 1), 8, 6)
+    solid('dragon_body', 'leaf', body, bevel=0.0)
 
     def comb(bm):
         for sgn in (-1, 1):
-            for i in range(2, N - 1, 2):
+            for i in range(1, N - 1):
                 d, n = axes(i)
-                v = (n - d * 0.5).normalized() * 0.15          # swept back toward the tail
+                if n.x * sgn > 0:
+                    n = -n
+                v = (n * 0.8 - d * 0.5).normalized() * 0.2
                 p = pt(sgn, i)
-                bm_bar(bm, p, (p[0] + sgn * v.x, p[1], p[2] + v.z), 0.06, t2=0.2)
+                slab(bm, p, (p[0] + sgn * v.x, p[1], p[2] + v.z), 0.04, 0.14)
     solid('dragon_comb', 'lamp', comb, bevel=0.0)
 
     def head(bm):
         for sgn in (-1, 1):
             hx, hz = sgn * spine[-1][0], spine[-1][1]
             y = y0 + wave[-1]
-            bm_box(bm, (0.52, 0.38, 0.38), (hx - sgn * 0.22, y, hz + 0.08), None)       # skull
-            bm_box(bm, (0.36, 0.26, 0.2), (hx - sgn * 0.56, y, hz + 0.02), None)        # snout
-            bm_box(bm, (0.2, 0.22, 0.16), (hx - sgn * 0.7, y, hz + 0.16), None)         # upturned nose
-            bm_box(bm, (0.34, 0.3, 0.1), (hx - sgn * 0.52, y, hz - 0.15), None)         # jaw
-            for dy in (-0.17, 0.17):
-                bm_bar(bm, (hx - sgn * 0.12, y + dy, hz + 0.2),
-                       (hx + sgn * 0.3, y + dy, hz + 0.52), 0.07)                       # horns, swept back
-    solid('dragon_head', 'verm', head, bevel=0.025)
+            bm_box(bm, (0.42, 0.34, 0.34), (hx - sgn * 0.12, y, hz + 0.1))        # skull
+            bm_box(bm, (0.36, 0.26, 0.18), (hx - sgn * 0.45, y, hz + 0.02))       # snout, down and in
+            bm_box(bm, (0.16, 0.22, 0.14), (hx - sgn * 0.62, y, hz + 0.12))       # upturned nose
+            bm_box(bm, (0.32, 0.26, 0.08), (hx - sgn * 0.42, y, hz - 0.15))       # open jaw
+            for dy in (-0.14, 0.14):
+                bm_bar(bm, (hx, y + dy, hz + 0.24), (hx + sgn * 0.32, y + dy, hz + 0.55), 0.06)    # horns
+    solid('dragon_head', 'leaf', head, bevel=0.025)
 
-    def eyes(bm):
+    def details(bm):                # eyes, mane and whiskers
         for sgn in (-1, 1):
             hx, hz = sgn * spine[-1][0], spine[-1][1]
-            for dy in (-0.2, 0.2):
-                bm_sphere(bm, 0.075, (hx - sgn * 0.36, y0 + wave[-1] + dy, hz + 0.14), 8, 6)
-    solid('dragon_eyes', 'ink', eyes, bevel=0.0)
+            y = y0 + wave[-1]
+            for dy in (-0.17, 0.17):
+                bm_sphere(bm, 0.06, (hx - sgn * 0.25, y + dy, hz + 0.2), 6, 4)
+                bm_bar(bm, (hx - sgn * 0.58, y + dy * 0.6, hz + 0.08),
+                       (hx - sgn * 0.75, y + dy * 2.5, hz + 0.7), 0.025)          # whiskers, up
+    solid('dragon_eyes', 'ink', details, bevel=0.0)
+
+    def mane(bm):
+        for sgn in (-1, 1):
+            hx, hz = sgn * spine[-1][0], spine[-1][1]
+            for a in (0.4, 0.9, 1.4):
+                slab(bm, (hx + sgn * 0.05, y0, hz + 0.05),
+                       (hx + sgn * (0.05 + 0.4 * math.cos(a)), y0, hz + 0.05 + 0.3 * math.sin(a) - 0.15), 0.05, 0.16)
+    solid('dragon_mane', 'lamp', mane, bevel=0.0)
 
     def legs(bm):
         for sgn in (-1, 1):
-            for i in (3, 7):
+            for i in (3, 8):
                 c, y = pt(sgn, i), y0 + wave[i]
-                for dy in (-0.15, 0.15):
-                    knee = (c[0] - sgn * 0.2, y + dy * 1.5, c[2] - 0.26)
-                    bm_bar(bm, (c[0], y + dy * 0.7, c[2]), knee, 0.085)
-                    bm_bar(bm, knee, (knee[0] - sgn * 0.02, knee[1], knee[2] - 0.24), 0.07)
-    solid('dragon_legs', 'verm', legs, bevel=0.0)
-
-    def claws(bm):
-        for sgn in (-1, 1):
-            for i in (3, 7):
-                c, y = pt(sgn, i), y0 + wave[i]
-                for dy in (-0.15, 0.15):
-                    bm_box(bm, (0.2, 0.16, 0.1), (c[0] - sgn * 0.24, y + dy * 1.5, c[2] - 0.55), None)
-    solid('dragon_claws', 'lamp', claws, bevel=0.0)
+                for dy in (-0.14, 0.14):
+                    knee = (c[0] - sgn * 0.18, y + dy * 1.4, c[2] - 0.2)
+                    bm_bar(bm, (c[0], y + dy * 0.6, c[2]), knee, 0.07)
+                    bm_bar(bm, knee, (knee[0] - sgn * 0.12, knee[1], knee[2] - 0.12), 0.06)
+    solid('dragon_legs', 'leaf', legs, bevel=0.0)
 
     def tail(bm):
         for sgn in (-1, 1):
             tx, tz = spine[0]
-            for a, L in ((0.35, 0.5), (0.85, 0.66), (1.35, 0.5)):
-                bm_bar(bm, (sgn * tx, y0 + wave[0], tz),
-                       (sgn * (tx + L * math.cos(a)), y0 + wave[0], tz - 0.04 + L * math.sin(a)), 0.06, t2=0.19)
+            for a, L in ((0.2, 0.45), (0.65, 0.55), (1.1, 0.4)):
+                slab(bm, (sgn * tx, y0 + wave[0], tz),
+                     (sgn * (tx + L * math.cos(a)), y0 + wave[0], tz + L * math.sin(a)), 0.05, 0.16)
     solid('dragon_tail', 'lamp', tail, bevel=0.0)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # lanterns and the incense burner
 # ─────────────────────────────────────────────────────────────────────────────
-LAN_Y, LAN_Z = -2.5, 3.7
+LAN_Y, LAN_Z = -0.85, 3.55
 
 
 def lanterns():
-    def body(bm):
-        for x in (-2.0, 2.0):
-            bm_sphere(bm, 0.5, (x, LAN_Y, LAN_Z), 14, 10, scale_z=0.86)
-    solid('lanterns', 'verm', body, bevel=0.0)
+    xs = (-2.0, 2.0)
+    solid('lanterns', 'verm', lambda bm: [bm_sphere(bm, 0.36, (x, LAN_Y, LAN_Z), 14, 10, scale_z=1.15) for x in xs], bevel=0.0)
 
     def caps(bm):
-        for x in (-2.0, 2.0):
-            bm_cylinder(bm, 0.2, LAN_Z + 0.36, LAN_Z + 0.52, 10, (x, LAN_Y))       # top cap
-            bm_cylinder(bm, 0.2, LAN_Z - 0.52, LAN_Z - 0.36, 10, (x, LAN_Y))       # bottom cap
-            bm_bar(bm, (x, LAN_Y, LAN_Z + 0.5), (x, LAN_Y, DOU_BASE - 0.05), 0.05)  # cord up to the beam
-            bm_bar(bm, (x, LAN_Y, LAN_Z - 0.85), (x, LAN_Y, LAN_Z - 0.5), 0.05)     # tassel cord
+        for x in xs:
+            bm_cylinder(bm, 0.16, LAN_Z + 0.36, LAN_Z + 0.48, 10, (x, LAN_Y))
+            bm_cylinder(bm, 0.16, LAN_Z - 0.48, LAN_Z - 0.36, 10, (x, LAN_Y))
+            bm_cylinder(bm, 0.025, LAN_Z + 0.46, SOFFIT + 0.02, 6, (x, LAN_Y))
     solid('lantern_caps', 'ink', caps, bevel=0.0)
-
-    def tassels(bm):
-        for x in (-2.0, 2.0):
-            bm_lathe(bm, [(0, LAN_Z - 0.85), (0.1, LAN_Z - 0.9), (0.08, LAN_Z - 1.2), (0, LAN_Z - 1.25)], 8)
-    solid('lantern_tassels', 'lamp', tassels, bevel=0.0)
+    solid('lantern_tassels', 'lamp', lambda bm: [bm_lathe(bm, [(0, LAN_Z - 0.48), (0.08, LAN_Z - 0.52), (0.06, LAN_Z - 0.8), (0, LAN_Z - 0.84)], 8,
+                                                          Matrix.Translation((x, LAN_Y, 0))) for x in xs], bevel=0.0)
 
 
 def burner():
-    """The incense burner on the forecourt: a lathe pot on three legs with ear handles and a lid ring."""
+    """朝天爐 on the forecourt: a granite pedestal, a bronze tripod pot with ear handles and a
+    flared rim (the scene's smoke rises from its mouth)."""
     x, y = 0.0, -1.9
     T = Matrix.Translation((x, y, 0))
+    solid('burner_pedestal', 'walk', lambda bm: [bm_prism(bm, 8, 0.62, 0.58, WALK, WALK + 0.22, center=(x, y)),
+                                                  bm_prism(bm, 8, 0.5, 0.5, WALK + 0.22, WALK + 0.3, center=(x, y))], bevel=0.03)
+    b = WALK + 0.3
 
     def pot(bm):
-        bm_lathe(bm, [(0, WALK + 0.5), (0.34, WALK + 0.5), (0.52, WALK + 0.72), (0.54, WALK + 1.05), (0.46, WALK + 1.22),
-                      (0.4, WALK + 1.36), (0, WALK + 1.36)], 14, T)
+        bm_lathe(bm, [(0, b + 0.35), (0.3, b + 0.35), (0.5, b + 0.5), (0.56, b + 0.78), (0.5, b + 1.0),
+                      (0.44, b + 1.1), (0, b + 1.1)], 16, T)
         for i in range(3):
             a = math.pi / 2 + i * 2 * math.pi / 3
-            bm_cylinder(bm, 0.08, WALK, WALK + 0.55, 8, (x + 0.34 * math.cos(a), y + 0.34 * math.sin(a)))
-        for sx in (-1, 1):                                                          # ear handles
-            bm_box(bm, (0.14, 0.22, 0.34), (x + sx * 0.6, y, WALK + 1.35), None)
-            bm_box(bm, (0.22, 0.22, 0.1), (x + sx * 0.52, y, WALK + 1.2), None)
+            bm_lathe(bm, [(0.07, b), (0.1, b + 0.05), (0.07, b + 0.2), (0.06, b + 0.42)], 8,
+                     Matrix.Translation((x + 0.36 * math.cos(a), y + 0.36 * math.sin(a), 0)))
+        for sx in (-1, 1):
+            slab(bm, (x + sx * 0.42, y, b + 1.05), (x + sx * 0.58, y, b + 1.38), 0.2, 0.08)
+            slab(bm, (x + sx * 0.58, y, b + 1.38), (x + sx * 0.7, y, b + 1.24), 0.2, 0.08)
     solid('burner', 'ink', pot, bevel=0.0)
-    solid('burner_rim', 'haze', lambda bm: bm_lathe(bm, [(0.3, WALK + 1.36), (0.42, WALK + 1.36), (0.42, WALK + 1.46), (0.3, WALK + 1.46)], 14, T), bevel=0.0)
-
-
-def _bm(fn):
-    """Run fn(bm) on a fresh bmesh and return it (for cutters built from a comprehension)."""
-    import bmesh
-    bm = bmesh.new()
-    fn(bm)
-    return bm
+    solid('burner_rim', 'lamp', lambda bm: bm_lathe(bm, [(0.38, b + 1.1), (0.56, b + 1.16), (0.56, b + 1.24), (0.38, b + 1.2)], 16, T), bevel=0.0)
+    solid('burner_band', 'lamp', lambda bm: bm_lathe(bm, [(0.555, b + 0.72), (0.575, b + 0.74), (0.575, b + 0.84), (0.555, b + 0.86)], 16, T), bevel=0.0)
 
 
 def build():
     hall()
-    front_wall()
-    stone_window()
-    wall_relief()
-    porch()
+    piers()
+    doors()
+    frieze()
     roof()
+    gable_vents()
+    gable_ridges()
     ridge()
+    ridge_clouds()
+    sun_disc()
     ridge_dragons()
     lanterns()
     burner()
 
 
 if __name__ == '__main__':
-    # preview: from the road, three-quarter, in this file's frame
-    S.run(build, camera=((12.0, -14.0, 5.0), (0.0, 2.0, 4.0), 45))
+    # preview: straight-on from the forecourt, a little left of centre, like temple-01
+    S.run(build, camera=((0.6, -15.5, 2.2), (0.0, 1.0, 5.0), 42))

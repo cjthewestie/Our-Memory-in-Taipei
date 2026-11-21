@@ -31,7 +31,7 @@
 .spot:hover .spot-ring, .spot:focus-visible .spot-ring, .spot.open .spot-ring { animation: none; opacity: 1; }
 .spot.open .spot-dot { background: var(--lamp); }
 .spot:focus-visible { outline: none; }
-.spot:focus-visible .spot-ring { border-color: var(--lamp); }
+.spot:focus-visible .spot-ring { border-color: var(--lamp); border-width: 2px; box-shadow: 0 0 0 2px var(--ink); }   /* a11y: a ring that reads on sky and on facade */
 @keyframes spot-breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.85; } 50% { transform: translate(-50%, -50%) scale(1.25); opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .spot-ring { animation: none; } }
 @media (hover: none) { .spot-tag { opacity: 0.9; } }   /* no hover on a phone: the year always shows under the dot */
@@ -39,7 +39,7 @@
 /* ── the panel: a bright card on the right, the model still visible beside it ── */
 #photoPanel, #photoCredits {
   position: fixed;
-  z-index: 3;
+  z-index: 10;   /* over the walk HUD (walk.css #walkHud 3) and the lanterns (memories.css 4), under the memory form (20) */
   top: clamp(72px, 10vh, 110px);
   right: clamp(20px, 4vw, 56px);
   width: min(460px, calc(100vw - 40px));
@@ -71,11 +71,11 @@
 .pp-fig img { display: block; width: 100%; height: auto; max-height: min(52vh, 420px); object-fit: contain; }
 .pp-fig.tall img { max-height: min(56vh, 460px); }
 .pp-body { padding: 16px 20px 20px; }
-.pp-k { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.6; border-top: 1px solid var(--ink); padding-top: 8px; }
+.pp-k { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.8; border-top: 1px solid var(--ink); padding-top: 8px; }
 .pp-name { margin: 8px 0 0; font-size: clamp(20px, 2vw, 26px); font-weight: 700; letter-spacing: 0.02em; line-height: 1.15; }
 .pp-zh { font-size: 12px; letter-spacing: 0.3em; opacity: 0.7; margin-top: 3px; }
 .pp-cap { margin: 12px 0 0; font-size: 14px; line-height: 1.6; }
-.pp-note { margin: 6px 0 0; font-size: 12px; line-height: 1.5; opacity: 0.6; }
+.pp-note { margin: 6px 0 0; font-size: 12px; line-height: 1.5; opacity: 0.8; }
 .pp-note[hidden] { display: none; }
 .pp-credit { margin-top: 12px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); font-size: 11px; letter-spacing: 0.06em; line-height: 1.6; opacity: 0.8; }
 .pp-credit a, .pc-line a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -104,6 +104,8 @@
 }
 #photoCreditsBtn:hover { background: rgba(36,29,24,0.06); border-color: var(--hud-fg); }
 .pc-body { padding: 20px 20px 22px; }
+.pc-h { margin: 22px 0 0; font-size: 11px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.6; border-top: 1px solid var(--ink); padding-top: 8px; }
+.pc-h:first-of-type { margin-top: 14px; }
 .pc-intro { margin: 12px 0 0; font-size: 13px; line-height: 1.6; }
 .pc-list { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .pc-list li { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
@@ -124,5 +126,5 @@
   .pp-name { font-size: 20px; }
   .pp-cap { font-size: 13px; }
   .pc-body { padding: 18px 16px 20px; }
-  #photoCreditsBtn { top: auto; bottom: 72px; right: 20px; }   /* bottom-right on a phone, on the music button's row (style.css .hud-music bottom 72px); the title and the year share the row below */
+  #photoCreditsBtn { top: auto; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); right: calc(20px + env(safe-area-inset-right, 0px)); min-height: 44px; touch-action: manipulation; }   /* bottom-right on a phone, on the music button's row (style.css .hud-music bottom 72px); the title and the year share the row below */
 }

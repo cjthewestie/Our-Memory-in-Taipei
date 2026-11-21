@@ -120,6 +120,8 @@
     if (s < 0 && z <= -360) h = 12 + rnd() * 5;                        // low on the west beyond the skywalk: the City Hall silhouette shows over them
     if (z < -386 && z > -446) x = 36;
     if (s < 0 && Math.abs(z + 386) < 14) { x = 40; w = 8; d = 8; } // clear of the closing camera
+    // no ring box inside 新光三越 A11's footprint (x 14…30, z -403…-385): one stood in front of it at z -384
+    if (s > 0 && x - w / 2 < 30 && z - d / 2 < -385 && z + d / 2 > -403) return;
     addB(s * x, z, w, d, h, false);
   });
   // behind the tower, beyond z = -440; kept lower right behind the tower so its silhouette stands
@@ -139,22 +141,19 @@
   [-1, 1].forEach(s => part(s * 17.8, 8, -394, 2.4, 2, TW(0.5, 'bone')));
 
   // ── 新光三越 A11 ────────────────────────────────────────────────────────────
-  // The department store across from the 101 podium: a 12-storey block with the big rounded
-  // corner toward the road, an LED wall on the road face, the red square logo near the top.
-  const A11 = { x0: 14, x1: 30, z0: -403, z1: -385, h: 34, r: 6 };
+  // The department store across from the 101 podium: asset/blender/a11.py, built from the photos
+  // (granite piers with stone bands, a glazed corner behind a free-standing steel frame, the 2F
+  // terrace, the cantilever roof, entrance canopies, skywalk doors, the LED wall's backing). The
+  // corner is square: no A11 photo shows a drum. The red logo board, the LED screens and the shop
+  // signs stay canvas, on the faces the model leaves plain. Tower era only.
+  const A11 = { x0: 14, x1: 30, z0: -403, z1: -385, h: 34 };
   (() => {
-    const cx = A11.x0 + A11.r, cz = A11.z1 - A11.r;                      // the rounded corner's axis
-    const fm = () => { const m = lit({ color: C('haze') }); return m; };
-    const body = part((A11.x0 + A11.r + A11.x1) / 2, 0, (A11.z0 + A11.z1) / 2, A11.x1 - A11.x0 - A11.r, A11.z1 - A11.z0, TW(A11.h, 'bone'));
-    const wing = part((A11.x0 + cx) / 2, 0, (A11.z0 + cz) / 2, cx - A11.x0, cz - A11.z0, TW(A11.h, 'bone'));
-    const cyl = new THREE.CylinderGeometry(0.5, 0.5, 1, 24); cyl.translate(0, 0.5, 0);
-    const corner = part(cx, 0, cz, A11.r * 2, A11.r * 2, TW(A11.h, 'bone'), 0, cyl);
-    [[body, 4, 12], [wing, 2, 12], [corner, 10, 12]].forEach(([p, cols, rows]) => {
-      const m = p.mesh.material;
-      m.map = winTex(cols, rows, false, 4); m.map.wrapS = m.map.wrapT = THREE.RepeatWrapping; m.map.repeat.set(1, 1);
-      m.emissive = C('lamp'); m.emissiveMap = winTex(cols, rows, true, 4); m.emissiveIntensity = 0.5; m.needsUpdate = true;
+    const a11Group = libGroup(['tower']);
+    MODELS.load('a11', gltf => {
+      const root = MODELS.lambertize(gltf.scene);
+      root.position.set((A11.x0 + A11.x1) / 2, 0, (A11.z0 + A11.z1) / 2);   // (22, 0, -394), footprint centre
+      a11Group.add(root);
     });
-    part(cx + 1, A11.h, cz - 5, 16, 8, TW(1.2, 'haze'));                   // roof plant
     // the red square logo, road face, near the top
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 256;
     const g = cv.getContext('2d');
@@ -163,43 +162,47 @@
     g.fillText('新光', 128, 78); g.fillText('三越', 128, 178);
     const logo = part(A11.x0 - 0.2, A11.h - 6.5, A11.z0 + 4.5, 0.4, 4.4, TW(4.4, 'verm'));
     logo.mesh.material.map = new THREE.CanvasTexture(cv); logo.mesh.material.emissive = C('verm'); logo.mesh.material.emissiveMap = logo.mesh.material.map; logo.mesh.material.emissiveIntensity = 0.35; logo.mesh.material.needsUpdate = true;
-    // the entrance canopy under the rounded corner, toward the road
-    part(A11.x0 - 1.4, 4.2, (A11.z0 + cz) / 2, 3, cz - A11.z0 - 1, TW(0.3, 'haze'));
   })();
 
   // ── 信義空橋: the elevated skywalks ──────────────────────────────────────────
-  // One bridge crosses the road at z -392 (deck y 6.5, clear of the camera which is
-  // at y 5 → 3 here), with railings, a light canopy on slender posts, and a stair ramp down to
-  // each sidewalk; one more segment runs along the mall fronts from A11 to the next mall.
-  const rampGeo = (() => { const g = new THREE.BoxGeometry(1.6, 0.25, 7.6); g.rotateX(Math.atan2(6.35, 7)); g.translate(0, 3.3, -3.5); return g; })();
-  const pale = p => { p.mesh.material = withFog(new THREE.MeshBasicMaterial({ color: C('haze') })); return p; }; // unlit haze: the underside stays soft when the camera passes below
-  function skywalk(z) {
-    const W = 18, D = 3.6, Y = 6.5;
-    pale(part(0, Y, z, W, D, TW(0.2, 'haze')));                                               // deck
-    [-1, 1].forEach(s => part(0, Y + 0.25, z + s * (D / 2 - 0.05), W, 0.06, TW(1.1, 'haze'))); // glass railings
-    [-1, 1].forEach(s => part(0, Y + 1.3, z + s * (D / 2 - 0.05), W, 0.1, TW(0.08, 'bone')));  // handrails
-    [-1, 1].forEach(s => { [-1, 1].forEach(sz => part(s * 8, 0, z + sz * 1.2, 0.6, 0.6, TW(Y, 'haze'))); }); // pillars on the sidewalks
-    [-1, 1].forEach(s => pale(part(s * 8.2, 0.2, z + D / 2, 1, 1, TW(1, 'bone'), 0, rampGeo)));  // stair ramps down toward the camera
-  }
-  skywalk(-392);   // one crossing: at -352 the deck filled the top of the frame as the camera passed under it
-  (() => {  // along the mall fronts, A11 → the next mall (z -409), plaza side
+  // asset/blender/skywalk.py: one bridge crosses the road at z -392 (paving top y 6.72, clear of the
+  // camera which is at y 5 → 3 here) on round piers, glass balustrades, a glass canopy on ribs, an
+  // open stair down to each sidewalk toward the camera; six 1-long deck segments run along the mall
+  // fronts from A11 to the next mall (z -409). The girder, piers and stair cheeks share 'haze' and
+  // stay unlit, so the underside stays soft when the camera passes below (the old pale()).
+  (() => {
     const x = A11.x0 + 1.6, z0 = A11.z0, z1 = -409, Y = 6.5;
-    pale(part(x, Y, (z0 + z1) / 2, 3, z0 - z1, TW(0.2, 'haze')));
-    part(x - 1.45, Y + 0.25, (z0 + z1) / 2, 0.06, z0 - z1, TW(1.1, 'haze'));
-    [z0 - 0.5, z1 + 0.5].forEach(z => part(x - 1.2, 0, z, 0.5, 0.5, TW(Y, 'haze')));
+    const skyGroup = libGroup(['tower']);
+    MODELS.load('skywalk', gltf => {
+      const hazeMeshes = [];
+      gltf.scene.traverse(o => { if (o.isMesh && o.material.name === 'haze') hazeMeshes.push(o); });
+      const root = MODELS.lambertize(gltf.scene);
+      const unlit = withFog(new THREE.MeshBasicMaterial({ color: C('haze') }));
+      hazeMeshes.forEach(o => { o.material = unlit; o.castShadow = false; });
+      MODELS.node(root, 'crossing').position.set(0, 0, -392);
+      const seg = MODELS.node(root, 'segment');
+      for (let i = 0; i < 6; i++) {
+        const s = i ? seg.clone() : seg;
+        s.position.set(x, 0, z0 - 0.5 - i);   // -403.5 … -408.5, length onto z
+        s.rotation.set(0, Math.PI / 2, 0);
+        if (i) seg.parent.add(s);
+      }
+      skyGroup.add(root);
+    });
+    [z0 - 0.5, z1 + 0.5].forEach(z => part(x - 1.2, 0, z, 0.5, 0.5, TW(Y, 'haze')));   // the mall-front run's ground pillars (the segment has none)
   })();
 
-  // ── 台北市政府 on the horizon: a wide symmetrical stepped silhouette, unlit, in haze ──
+  // ── 台北市政府 on the horizon: asset/blender/cityhall.py, built at the silhouette's 1.7× size ──
+  // 12 storeys of punched window grid, the two pylons by the centre court, the granite entrance
+  // block, end blocks stepped down; 153 wide, 50 deep, 57.8 tall. Lit, so the grid reads; the
+  // scene's distance haze softens it. Tower era only.
   (() => {
-    // Drawn at 1.7× so the outline clears the office ring from the approach camera; it is a horizon
-    // silhouette, so presence matters more than metric scale. Centre block, two wings, two end pavilions.
-    const x = -46, z = -505, d = 50, k = 1.7;
-    const basic = () => withFog(new THREE.MeshBasicMaterial({ color: C('haze') }));
-    [[0, 24, 30], [-22, 20, 22], [22, 20, 22], [-38, 12, 14], [38, 12, 14]].forEach(([dx, w, h]) => {
-      const p = part(x + dx * k, 0, z, w * k, d, TW(h * k, 'haze'));
-      p.mesh.material = basic();
+    const cityhallGroup = libGroup(['tower']);
+    MODELS.load('cityhall', gltf => {
+      const root = MODELS.lambertize(gltf.scene);
+      root.position.set(-46, 0, -505);   // the old silhouette's centre; front already faces +z
+      cityhallGroup.add(root);
     });
-    const p = part(x, 30 * k, z, 10 * k, 10 * k, TW(4 * k, 'haze')); p.mesh.material = basic();   // the roof-top block
   })();
 
   // ── LED billboards: canvas text, lamp on ink, unlit material so it reads as a screen ──
