@@ -12,6 +12,7 @@ import bpy, sys, glob, math, os
 import numpy as np
 from mathutils import Vector
 argv = sys.argv[sys.argv.index('--') + 1:]; SRC, OUT = argv[0], argv[1]; PREVIEW = argv[2] if len(argv) > 2 else None
+NAME = os.environ.get('NAME', 'noodles-girl'); HEIGHT = float(os.environ.get('HEIGHT', 1.24))   # NAME=bear-poncho HEIGHT=1.2 finishes another Tripo character the same way
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.fbx(filepath=glob.glob(SRC + '/*.fbx')[0], automatic_bone_orientation=False)
 scene = bpy.context.scene
@@ -21,7 +22,7 @@ arm.animation_data.action = None
 for pb in arm.pose.bones: pb.rotation_mode = pb.rotation_mode; pb.rotation_quaternion = (1, 0, 0, 0); pb.rotation_euler = (0, 0, 0); pb.location = (0, 0, 0); pb.scale = (1, 1, 1)
 
 # ── the texture, at 2K ───────────────────────────────────────────────────────────────────────────
-im = [i for i in bpy.data.images if 'BaseColor' in i.filepath][0]; TEX = int(os.environ.get('TEX', 2048)); im.scale(TEX, TEX); W = H = TEX
+im = [i for i in bpy.data.images if 'basecolor' in i.filepath.lower()][0]; TEX = int(os.environ.get('TEX', 2048)); im.scale(TEX, TEX); W = H = TEX
 px = np.array(im.pixels[:], dtype=np.float32).reshape(H, W, 4)
 # ── a 3D position for every texture pixel ────────────────────────────────────────────────────────
 co = np.array([mesh.matrix_world @ v.co for v in me.vertices], dtype=np.float32)
@@ -51,14 +52,14 @@ if os.environ.get('SKIN_SHIFT') == '1':
     skin = has & (r > 0.78) & (g_ > 0.5) & (g_ < 0.86) & (b_ > 0.3) & (b_ < 0.72) & (r - b_ > 0.18) & ((Z_ > 0.5) | (np.abs(X_) > 0.19))
     px[skin, 0] = np.clip(px[skin, 0] * 1.005, 0, 1); px[skin, 1] = np.clip(px[skin, 1] * 0.985, 0, 1); px[skin, 2] = np.clip(px[skin, 2] * 1.17, 0, 1)
     print('SKIN', int(skin.sum()))
-im.pixels = px.ravel().tolist(); tex_path = os.path.join(os.path.dirname(OUT), '_noodles-girl-basecolor.jpg')
+im.pixels = px.ravel().tolist(); tex_path = os.path.join(os.path.dirname(OUT), '_' + NAME + '-basecolor.jpg')
 im.filepath_raw = tex_path; im.file_format = 'JPEG'; scene.render.image_settings.quality = 90; im.save()
 # ── one simple material: her painted colour, matte ───────────────────────────────────────────────
-mat = bpy.data.materials.new('noodles-girl'); mat.use_nodes = True; bsdf = mat.node_tree.nodes['Principled BSDF']
+mat = bpy.data.materials.new(NAME); mat.use_nodes = True; bsdf = mat.node_tree.nodes['Principled BSDF']
 tn = mat.node_tree.nodes.new('ShaderNodeTexImage'); tn.image = im; mat.node_tree.links.new(tn.outputs['Color'], bsdf.inputs['Base Color']); bsdf.inputs['Roughness'].default_value = 0.9
 me.materials.clear(); me.materials.append(mat)
 # ── scale her to the height the scenes expect, and measure her gait ──────────────────────────────
-K = 1.24 / float(co[:, 2].max()); arm.scale = (arm.scale[0] * K,) * 3
+K = HEIGHT / float(co[:, 2].max()); arm.scale = (arm.scale[0] * K,) * 3
 def gait(act, foot='mixamorig:LeftFoot'):
     arm.animation_data.action = act; f0, f1 = int(act.frame_range[0]), int(act.frame_range[1]); ys, zs = [], []
     for f in range(f0, f1 + 1):
