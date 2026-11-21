@@ -297,8 +297,9 @@
   const lib = libGroup(['tower']);
   const SIGNS = (() => {
     const AW = 2048, AH = 2048, PX = 150;                                         // atlas size, pixels per metre
-    const cv = document.createElement('canvas'); cv.width = AW; cv.height = AH;
-    const g = cv.getContext('2d');
+    const TS = window.SCENE.TEX_SCALE;                                           // smaller on a phone: see scene-red.js SIGNS
+    const cv = document.createElement('canvas'); cv.width = AW * TS; cv.height = AH * TS;
+    const g = cv.getContext('2d'); g.scale(TS, TS);
     let ax = 0, ay = 0, rowH = 0;
     const alloc = (w, h) => {
       w = Math.ceil(w); h = Math.ceil(h);

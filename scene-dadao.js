@@ -37,8 +37,10 @@
   // two readable faces on projecting signs, proud rims and an outer-edge neon tube.
   const SIGNAGE = (() => {
     const W = 2048, H = 4096, PX = 100;
-    const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d'), batches = new Map(), records = [];
+    const TS = window.SCENE.TEX_SCALE;                                           // smaller on a phone: see scene-red.js SIGNS
+    const canvas = document.createElement('canvas'); canvas.width = W * TS; canvas.height = H * TS;
+    const ctx = canvas.getContext('2d'); ctx.scale(TS, TS);
+    const batches = new Map(), records = [];
     let ax = 2, ay = 2, row = 0;
     const faces = new Map();
     const V = (x, y, z) => new THREE.Vector3(x, y, z);

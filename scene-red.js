@@ -511,8 +511,11 @@
   // units (asset/textures/chunghwa-shops.json) and the checks listed in research/realism-ximen/signs.
   const SIGNS = (() => {
     const AW = 2048, AH = 4096, PX = 150;                                         // atlas size, pixels per metre
-    const cv = document.createElement('canvas'); cv.width = AW; cv.height = AH;
-    const g = cv.getContext('2d');
+    // on a phone the atlas canvas itself is TEX_SCALE the size, drawn through a scale transform, so no
+    // 2048 x 4096 canvas ever exists there (app.js TEX_SCALE); layout and UVs stay in AW x AH units
+    const TS = window.SCENE.TEX_SCALE;
+    const cv = document.createElement('canvas'); cv.width = AW * TS; cv.height = AH * TS;
+    const g = cv.getContext('2d'); g.scale(TS, TS);
     let ax = 0, ay = 0, rowH = 0;
     const alloc = (w, h) => {
       w = Math.ceil(w); h = Math.ceil(h);

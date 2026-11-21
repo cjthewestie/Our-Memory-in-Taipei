@@ -386,7 +386,8 @@
     }
     ctx.restore();
 
-    var texture = new THREE.CanvasTexture(canvas);
+    // app.js 在手機上設 C.shrink：交給 GPU 的是半尺寸副本（畫的時候仍是原尺寸）
+    var texture = new THREE.CanvasTexture(C.shrink ? C.shrink(canvas) : canvas);
     texture.needsUpdate = true;
     texture.userData = { contentW: contentW, contentH: contentH, aspect: contentW / contentH };
     return texture;

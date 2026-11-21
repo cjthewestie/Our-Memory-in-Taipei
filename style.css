@@ -37,6 +37,16 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* The boot screen (CJ, 2026-09-25: 「載很久」): until app.js has drawn its first frame, the page is the opening
+   as it will look — the cream fog, the title in ink, the phone's arrow — painted from this file alone, so the
+   first thing a phone shows is the title, not an ink screen while three.js builds the street and compiles its
+   shaders. The cream is the fog's own colour at scroll 0 (sampled from the frame). app.js takes `booting` off
+   the body after its first frame is on the canvas; from then its inline styles drive all of this. */
+body.booting { background: radial-gradient(ellipse at 50% 45%, #f7e5ca 55%, #dbcab2 130%) fixed; }
+body.booting #scene { visibility: hidden; }
+body.booting .hud-opening { opacity: 1; visibility: visible; color: var(--ink); }
+body.booting .hud-guide { opacity: 1; visibility: visible; }
+
 /* the world: fixed, full viewport, under everything */
 #scene {
   position: fixed;
@@ -216,12 +226,18 @@ html, body {
    的顏色」). The wordmark is ink in the fog for the same reason. A 2 px bone stroke (four offset drop-shadows, twice; the
    words' ink text-shadow inverted and hardened) keeps the arrow readable while the fog thins and the girl's dark skirt
    passes under it (scroll 0.02–0.06); a soft halo was not enough there. */
-.hud-guide { display: none; position: absolute; inset: 0; opacity: 0; visibility: hidden; will-change: opacity; }
-.guide-arrow { position: absolute; left: 50%; bottom: 210px; width: 2px; height: 56px; margin-left: -1px; background: var(--ink); border-radius: 1px; filter: drop-shadow(1px 0 0 var(--bone)) drop-shadow(-1px 0 0 var(--bone)) drop-shadow(0 1px 0 var(--bone)) drop-shadow(0 -1px 0 var(--bone)) drop-shadow(1px 0 0 var(--bone)) drop-shadow(-1px 0 0 var(--bone)) drop-shadow(0 1px 0 var(--bone)) drop-shadow(0 -1px 0 var(--bone)); animation: guide-swipe 1.8s ease-in-out infinite; }
+.hud-guide { display: none; position: absolute; left: 0; right: 0; top: var(--guide-top, calc(100% - 270px)); height: 60px; opacity: 0; visibility: hidden; will-change: opacity; }
+/* The guide is a 60 px block (arrow 28 px with 6 px of swipe each way, the word under it). app.js puts its top in the
+   middle of the gap between the sub line and the music bar, so it never crosses the title's words (CJ, 2026-09-25,
+   a 390x644 phone: the arrow, then pinned 210 px off the bottom, ran through THREE GENERATIONS). When that gap is
+   under 64 px the word goes and the arrow stands alone. */
+.guide-arrow { position: absolute; left: 50%; top: 8px; width: 2px; height: 28px; margin-left: -1px; background: var(--ink); border-radius: 1px; filter: drop-shadow(1px 0 0 var(--bone)) drop-shadow(-1px 0 0 var(--bone)) drop-shadow(0 1px 0 var(--bone)) drop-shadow(0 -1px 0 var(--bone)) drop-shadow(1px 0 0 var(--bone)) drop-shadow(-1px 0 0 var(--bone)) drop-shadow(0 1px 0 var(--bone)) drop-shadow(0 -1px 0 var(--bone)); animation: guide-swipe 1.8s ease-in-out infinite; }
 /* CJ, 2026-09-24: 「往上箭頭要有scroll字樣」: the word under the arrow, in the same caps as the sub line; its glyphs are in the hud subset */
-.guide-word { position: absolute; left: 0; right: 0; bottom: 182px; text-align: center; color: var(--ink); font-size: 11px; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; text-shadow: -1px -1px 0 var(--bone), 1px -1px 0 var(--bone), -1px 1px 0 var(--bone), 1px 1px 0 var(--bone), 0 0 4px var(--bone), 0 0 8px var(--bone); }
-.guide-arrow::before { content: ""; position: absolute; left: -5px; top: 0; width: 12px; height: 12px; border-left: 2px solid var(--ink); border-top: 2px solid var(--ink); transform: rotate(45deg); }
-@keyframes guide-swipe { 0% { transform: translateY(18px); opacity: 0; } 25% { opacity: 1; } 75% { opacity: 1; } 100% { transform: translateY(-18px); opacity: 0; } }
+.guide-word { position: absolute; left: 0; right: 0; top: 44px; line-height: 14px; text-align: center; color: var(--ink); font-size: 11px; font-weight: 600; letter-spacing: 0.32em; text-indent: 0.32em; text-transform: uppercase; text-shadow: -1px -1px 0 var(--bone), 1px -1px 0 var(--bone), -1px 1px 0 var(--bone), 1px 1px 0 var(--bone), 0 0 4px var(--bone), 0 0 8px var(--bone); }
+.hud-guide.tight { height: 44px; }
+.hud-guide.tight .guide-word { display: none; }
+.guide-arrow::before { content: ""; position: absolute; left: -4px; top: 0; width: 10px; height: 10px; box-sizing: border-box; border-left: 2px solid var(--ink); border-top: 2px solid var(--ink); transform: rotate(45deg); }
+@keyframes guide-swipe { 0% { transform: translateY(6px); opacity: 0; } 25% { opacity: 1; } 75% { opacity: 1; } 100% { transform: translateY(-6px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .guide-arrow { animation: none; } }
 
 /* the words (issue #16, CJ's pick: today's lines in option 3's treatment): the big line in the display face at 700,
