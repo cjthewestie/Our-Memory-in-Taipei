@@ -70,6 +70,20 @@ CJ, 2026-11-21: 「還有這些招牌都怪怪的請出搜尋真實招牌 海報
 | 捷運6號出口 | 西門 Ximen / 出口 6 Exit, white on Metro blue | none opened | inferred |
 | Fill-in shophouses | 世運食品, 美觀園, 老天祿, 雪王冰淇淋, 大車輪, 楊記冰店, 鴨肉扁, 謝謝魷魚羹, 金園排骨, 天天利, 張記排骨酥 | none opened this session | inferred (old Ximending shops from general knowledge; not at their real addresses) |
 
+## Second pass: matched by eye
+
+CJ, 2026-11-21: 「很多沒有按照真實招牌」. The first pass drew the signs from written descriptions of the photos. In this pass S1, S3, S4, S14, S16, S20, S21, S23 and S25 were opened and looked at, and these signs were redrawn to what the photos show:
+
+- 蜂大咖啡: white fascia with black striped blocks at both ends, a round mark at the left, heavy black block characters, the small 1956 line; a tall white upright between the two shops (S20).
+- 南美咖啡: cream heavy brush characters on dark maroon with a thin cream rule (S20).
+- 阿宗麵線: brown louvre grilles each side of the white board, a gold and green wave under the red brush name, a red and white striped awning (S21).
+- 成都楊桃冰: wide-spaced green brush characters with the red 創於1966年 under them; the red strip with gold characters read right to left inside (S23).
+- 台北天后宮: white brush name on dark red; the two tall yellow signs hang off the upper floors at each side, not on the door posts (S25).
+- 萬年: the name down the building is solid red block characters, not brush or tube; the band over the door is cream with black characters (S14).
+- 中華商場: the walkway banner is light cloth with dark characters; the upright boards are tall white boards with black characters; the 國際牌 tower is back on its frame, red with a white ring and the name across it, blue bands at the corners (S1, S3, S4). Its lightning-bolt mark is left out.
+
+Still different from the photos, because the building and not the sign would have to change: 蜂大's red-brick front and 南美's white tile, the three-storey temple front of 天后宮 with its round emblem and six lanterns, 獅子林's gold panels and rounded corner tower with the crown sign, and 萬年's green-and-white ribs with the name on the flat front and tenant signs down both sides.
+
 ## Poster pictures
 
 CJ, 2026-11-21: 「需要圖的話也可以去midjourney做」, then "You pick". The painted pictures on the 豪華 billboard, the two poster cases, the three 獅子林 posters and the 來來 poster are Midjourney images made for this scene, in `asset/textures/posters/` (`billboard`, `case-a`, `case-b`, `kids`, `army`, `denim`, `lailai`). They show generic faces, no real actor and no lettering; the titles on top are still drawn in code. Each prompt asked for a hand-painted Taiwanese cinema poster of the period; the pictures are in period style, not copies of the real posters of those films. Jobs: `0b22f3d5` (images 2, 0, 3), `ab6bc0bf` (2), `7fccaf54` (0), `b1074ce2` (2), `bc9efd63` (2).

@@ -267,22 +267,28 @@ function zhonghua() {
     if (rnd() < 0.25) K.bx(a + 0.2, a + 0.9, y + 2.5, y + 2.56, -1.0, -0.9, M.tube); } });
   // signs sticking out from the columns, the dense red, yellow and white of the old photos
   [['小通天', 0], ['訂做皮鞋', 3], ['寶島鐘錶', 5], ['佳佳唱片', 8], ['吳抄手', 10], ['大漢郵幣社', 13], ['致美樓', 15], ['海利電子', 18], ['清真館', 20]].forEach(([t, i], k) => { const c = cols[k % cols.length];
-    K.mesh(sign(t, 0.5, 0.4 * [...t].length + 0.12, { vertical: true, bg: '#f1ece0', fg: k % 3 === 1 ? '#a3221a' : '#1a1a1a', glow: 0.5, border: false }), x0 + i * 2 + 2, G + 1.9 + (k % 2) * 3.0, 1.25, Math.PI / 2); K.bx(x0 + i * 2 + 1.97, x0 + i * 2 + 2.03, G + 2.55 + (k % 2) * 3.0, G + 2.6 + (k % 2) * 3.0, 0.78, 1.25, M.frame); });
+    K.mesh(sign(t, 0.58, 0.52 * [...t].length + 0.2, { vertical: true, bg: '#f1ece0', fg: '#1a1a1a', glow: 0.45, border: false }), x0 + i * 2 + 2, G + 1.9 + (k % 2) * 3.0, 1.25, Math.PI / 2); K.bx(x0 + i * 2 + 1.97, x0 + i * 2 + 2.03, G + 2.55 + (k % 2) * 3.0, G + 2.6 + (k % 2) * 3.0, 0.78, 1.25, M.frame); });
   [['美聲樂器', 1], ['中一皮鞋', 4], ['真北平', 6], ['點心世界', 9], ['松竹唱片', 11], ['徐州啥鍋', 14], ['金門唱片', 16], ['榕江樓', 19]].forEach(([t, i], k) => { const c = cols[(k + 3) % cols.length], lv = (k + 1) % 2;
-    K.mesh(sign(t, 0.5, 0.4 * [...t].length + 0.12, { vertical: true, bg: '#f1ece0', fg: k % 3 === 1 ? '#a3221a' : '#1a1a1a', glow: 0.5, border: false }), x0 + i * 2 + 2, G + 1.9 + lv * 3.0, 1.25, Math.PI / 2); K.bx(x0 + i * 2 + 1.97, x0 + i * 2 + 2.03, G + 2.55 + lv * 3.0, G + 2.6 + lv * 3.0, 0.78, 1.25, M.frame); });
+    K.mesh(sign(t, 0.58, 0.52 * [...t].length + 0.2, { vertical: true, bg: '#f1ece0', fg: '#1a1a1a', glow: 0.45, border: false }), x0 + i * 2 + 2, G + 1.9 + lv * 3.0, 1.25, Math.PI / 2); K.bx(x0 + i * 2 + 1.97, x0 + i * 2 + 2.03, G + 2.55 + lv * 3.0, G + 2.6 + lv * 3.0, 0.78, 1.25, M.frame); });
   K.mesh(sign('中華商場', 7.5, 1.1, { bg: '#f3ecd9', fg: '#b3271e', rtl: true, spread: true, glow: 0.5, oneSide: true }), -2, top + 0.68, 0.84);
-  K.mesh(sign('慶祝臺灣光復節', 9.5, 0.72, { kind: 'cloth', bg: '#b3221a', fg: '#ffe14a', spread: true, glow: 0.35, depth: 0.03, noCast: true }), 4, G + 0.42, 0.87);   // the long cloth banner tied along the walkway rail (Commons photo; its wording there is illegible, this one is of the 1975 光復 parade that passed the market)
+  K.mesh(sign('慶祝臺灣光復節', 11, 0.78, { kind: 'cloth', bg: '#efe9da', fg: '#1a1a1a', font: WEI, spread: true, glow: 0.3, depth: 0.03, noCast: true }), 4, G + 0.42, 0.87);   // the long cloth banner tied along the walkway rail (Commons photo; its wording there is illegible, this one is of the 1975 光復 parade that passed the market)
   // the end walls: a large block numeral under four small characters, as on the 信棟 end wall ("5") in the 1960s night photo; this is the first block
   const endWall = (g, W, H) => { g.fillStyle = '#d6cfbd'; g.fillRect(0, 0, W, H); for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(70,55,35,${0.03 + rnd() * 0.05})`; g.fillRect(rnd() * W, 0, 2 + rnd() * 6, H); } g.fillStyle = '#7a1a14'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = `800 ${H * 0.15}px ${KAI}`; [...'場商華中'].forEach((c, i) => g.fillText(c, W * (0.2 + i * 0.2), H * 0.14)); g.font = `900 ${H * 0.7}px Georgia, "Times New Roman", serif`; g.fillText('1', W / 2, H * 0.62); };
   K.mesh(paint(2.4, 2.4, endWall, { glow: 0.2, light: true }), x1 + 0.06, 6.4, -4.2, Math.PI / 2); K.mesh(paint(2.4, 2.4, endWall, { glow: 0.2, light: true }), x0 - 0.06, 6.4, -4.2, -Math.PI / 2);
-  // the roof line: neon on steel frames. 國際牌 and 黑松汽水 are the two rooftop boards the sources name; two frames stand bare, as after May 1985 when the neon came down
+  // the roof line: neon on steel frames. 國際牌 and 黑松汽水 are the two rooftop boards the sources name; two smaller frames stand bare
   [[-15, null], [-7.5, null], [6, '黑松汽水']].forEach(([x, t]) => { lattice(K, x - 2.4, x + 2.4, top + 0.25, top + 1.9, -1.2, 3); lattice(K, x - 2.4, x + 2.4, top + 0.25, top + 1.9, -2.4, 3);
     if (t) K.mesh(sign(t, 5.2, 2.3, { kind: 'neon', bg: '#141210', fg: '#ff4a3a', font: WEI, spread: true, glow: 1.5 }), x, top + 3.05, -1.2); });
   const tx = 16.5; [-1.7, 1.7].forEach(z => lattice(K, tx - 1.7, tx + 1.7, top + 0.25, top + 8.2, -3 + z, 4));
   [-1.7, 1.7].forEach(dx => { for (let i = 0; i <= 4; i++) K.bx(tx + dx - 0.035, tx + dx + 0.035, top + 0.25 + i * 1.99 - 0.035, top + 0.25 + i * 1.99 + 0.035, -4.7, -1.3, M.steelDk); });
   K.bx(tx - 2.6, tx + 2.6, top + 8.2, top + 8.3, -3.1, -2.9, M.steelDk); K.bx(tx - 2.6, tx + 2.6, top + 11.4, top + 11.5, -3.1, -2.9, M.steelDk); [-2.6, 2.55].forEach(d => K.bx(tx + d, tx + d + 0.08, top + 8.2, top + 11.5, -3.1, -2.9, M.steelDk));
-  for (let i = 1; i < 5; i++) K.bx(tx - 2.6 + i * 1.04, tx - 2.56 + i * 1.04, top + 8.2, top + 11.5, -3.05, -2.95, M.steelDk);                          // the bare bars the letters hung on
+  for (let i = 1; i < 5; i++) K.bx(tx - 2.6 + i * 1.04, tx - 2.56 + i * 1.04, top + 8.2, top + 11.5, -3.05, -2.95, M.steelDk);                          // the bars the letters hung on
+  // the 國際牌 tower as the 1983 colour night photo shows it: red faces, a white ring with the name across it, blue neon bands at the corners, a yellow outline, 牌際國 in white above.
+  // The maker's lightning-bolt mark is left out; the lettering is ours.
+  K.mesh(paint(5.1, 4.2, (g, W, H) => { g.fillStyle = '#0d0d10'; g.fillRect(0, 0, W, H); const y0 = H * 0.2; g.fillStyle = '#d0141c'; g.fillRect(0, y0, W, H - y0); g.fillStyle = '#2f6fe0'; [0, 0.9].forEach(x => { for (let i = 0; i < 12; i++) g.fillRect(W * x, y0 + (H - y0) * (0.04 + i * 0.08), W * 0.1, (H - y0) * 0.04); });
+    g.strokeStyle = '#ffd24a'; g.lineWidth = H * 0.015; g.strokeRect(H * 0.01, y0, W - H * 0.02, H - y0 - H * 0.01); g.shadowColor = '#fff'; g.shadowBlur = H * 0.02; g.strokeStyle = '#fff'; g.lineWidth = H * 0.035; g.beginPath(); g.arc(W / 2, y0 + (H - y0) * 0.5, (H - y0) * 0.36, 0, 7); g.stroke();
+    g.fillStyle = '#d0141c'; g.shadowBlur = 0; g.fillRect(W * 0.14, y0 + (H - y0) * 0.39, W * 0.72, (H - y0) * 0.22); g.shadowBlur = H * 0.02; g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${(H - y0) * 0.2}px "Helvetica Neue", Arial, sans-serif`; g.fillText('National', W / 2, y0 + (H - y0) * 0.51);
+    g.font = `800 ${H * 0.14}px ${FONT}`; [...'牌際國'].forEach((c, i) => g.fillText(c, W * (0.24 + i * 0.26), H * 0.1)); }, { glow: 1.6 }), tx, top + 10.3, -2.86);
   // the footbridge to the second floor at the north end, with its stair down to the pavement
   const bx = -19.5; KB.bx(bx - 1.2, bx + 1.2, G - 0.3, G, 0.78, 5.2, M.concDk); [-1.2, 1.1].forEach(d => { KB.bx(bx + d, bx + d + 0.1, G, G + 0.95, 0.78, 5.2, ZC); }); [1.6, 4.9].forEach(z => KB.bx(bx - 0.2, bx + 0.2, 0, G - 0.3, z - 0.2, z + 0.2, ZC));
   for (let i = 0; i < 16; i++) { const y = G - 0.3 - (i + 1) * 0.181, xs = bx + 1.2 + i * 0.3; KB.bx(xs, xs + 0.32, Math.max(0, y - 0.1), y + 0.19, 3.0, 5.2, M.concDk); }
@@ -299,17 +305,17 @@ function wannian() {
   // ground floor: green piers, the lit arcade of small stalls behind glass, the 峨嵋門 doors under a deep canopy
   K.bx(x0, x1, 0, G, -D, -3.2, M.dark); [x0, -2.4, 2.1, x1 - 0.5].forEach(x => K.bx(x, x + 0.5, 0, G, -3.2, 0, M.green)); [x0 + 0.02, x1 - 0.3].forEach(x => K.bx(x, x + 0.28, 0, G, -D, -3.2, M.green));
   K.bx(x0, x1, G - 0.5, G, -3.2, 0, M.greenDk); K.bx(-2.6, 2.8, 3.1, 3.4, -0.2, 2.1, M.greenDk); K.bx(-2.6, 2.8, 3.4, 3.48, -0.2, 2.1, M.concLt);
-  K.mesh(sign('萬年商業大樓', 5.2, 0.8, { kind: 'box', font: KAI, bg: '#f3ecd9', fg: '#1f5a3a', spread: true, glow: 0.75, oneSide: true }), 0.1, 3.86, 2.14);
+  K.mesh(sign('萬年商業大樓', 5.2, 0.8, { kind: 'box', font: FONT, weight: 900, bg: '#efe6cf', fg: '#1a1a1a', spread: true, glow: 0.75, oneSide: true }), 0.1, 3.86, 2.14);
   K.mesh(sign('峨嵋門', 1.9, 0.5, { bg: '#1f5a3a', fg: '#ffe9a8', glow: 0.8, oneSide: true }), 0.1, 2.8, -0.15);
   K.bx(-1.9, 2.1, 0, 2.5, -0.5, -0.44, M.glassBlue); [-1.9, -0.9, 0.1, 1.1, 2.06].forEach(x => K.bx(x - 0.03, x + 0.03, 0, 2.5, -0.44, -0.38, M.steel)); K.bx(-1.9, 2.1, 2.5, 2.56, -0.5, -0.36, M.steel);
   [-0.4, 0.6].forEach(x => K.bx(x - 0.02, x + 0.02, 0.9, 1.3, -0.38, -0.3, M.steel)); K.bx(-1.8, 2.0, 0.2, 2.4, -3.18, -3.14, M.shopLit);
   [[-5.0, -2.4], [2.6, 5.0]].forEach(([a, b]) => { K.bx(a, b, 0.5, 3.4, -0.6, -0.55, M.pane); K.bx(a, b, 0, 0.5, -0.7, -0.1, M.greenDk); K.bx(a + 0.05, b - 0.05, 0.5, 3.4, -3.18, -3.14, M.shopLit);
     for (let s = 0; s < 5; s++) { const y = 0.55 + s * 0.55; K.bx(a + 0.05, b - 0.05, y, y + 0.03, -1.5, -0.75, M.jar); for (let k = 0; k < 7; k++) { const gx = a + 0.1 + k * (b - a - 0.2) / 7; K.bx(gx, gx + 0.26, y + 0.03, y + rr(0.2, 0.48), -1.4, -0.9, pick(CLOTH)); } } });     // model-kit boxes stacked to the ceiling
   K.mesh(sign('豪華鐘錶公司', 2.3, 0.42, { kind: 'box', bg: '#f1ead6', fg: '#1a1a1a', spread: true, glow: 0.8, oneSide: true }), -3.7, 3.62, 0.06); K.mesh(sign('萬年冰宮', 2.3, 0.42, { kind: 'box', bg: '#1f4f9c', fg: '#ffffff', spread: true, glow: 0.8, oneSide: true }), 3.8, 3.62, 0.06);
-  K.mesh(sign('萬年', 5.6, 1.5, { bg: '#1f5a3a', fg: '#ffe9a8', glow: 0.7, oneSide: true }), 0, G + 0.62, 0.08);
+  K.mesh(sign('萬年', 5.6, 1.5, { font: FONT, weight: 900, bg: '#efe6cf', fg: '#1a1a1a', border: false, glow: 0.5, oneSide: true }), 0, G + 0.62, 0.08);
   // the corner fin: a three-sided neon tower, name running down nine floors
   const fx = x0 - 0.05; K.box(1.5, top - G - 1, 1.5, M.greenDk, fx, (top + G + 1) / 2, 0.15, Math.PI / 4);
-  [[-Math.PI / 4, -0.62, 0.72], [Math.PI / 4, 0.62, 0.72]].forEach(([ry, dx, dz]) => K.mesh(sign('萬年商業大樓', 1.34, 19, { vertical: true, kind: 'neon', font: WEI, bg: '#1d4a39', fg: '#ff4a3a', glow: 1.7, oneSide: true, ppm: 52 }), fx + dx, G + 15.6, 0.15 + dz, ry));
+  [[-Math.PI / 4, -0.62, 0.72], [Math.PI / 4, 0.62, 0.72]].forEach(([ry, dx, dz]) => K.mesh(sign('萬年商業大樓', 1.34, 19, { vertical: true, font: FONT, weight: 900, bg: '#3f8a66', fg: '#e3261c', border: false, glow: 1.1, oneSide: true, ppm: 52 }), fx + dx, G + 15.6, 0.15 + dz, ry));
   K.mesh(paint(4.4, 2.4, (g, W, H) => { g.fillStyle = '#1d4a39'; g.fillRect(0, 0, W, H); g.fillStyle = '#16181c'; g.beginPath(); g.ellipse(W / 2, H / 2, W * 0.47, H * 0.44, 0, 0, 7); g.fill(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${H * 0.42}px ${KAI}`;
     [['年', 0.29], ['萬', 0.71]].forEach(([c, x]) => { g.strokeStyle = '#fff'; g.lineWidth = H * 0.035; g.beginPath(); g.arc(W * x, H / 2, H * 0.32, 0, 7); g.stroke(); g.fillStyle = '#fff'; g.fillText(c, W * x, H * 0.52); }); }, { glow: 1.2, oneSide: true }), 1.2, top + 2.5, -0.3);   // the dark oval over the corner sign: 年 and 萬 in two white rings, read right to left (2020 Commons photo) lattice(K, -1.0, 3.4, top + 1.1, top + 3.7, -0.5, 2);
   return K.done();
@@ -358,8 +364,8 @@ function tianhou() {
   [-2.45, -1.15, 1.15, 2.45].forEach(x => { K.cyl(0.2, 0.2, 4.3, M.red, x, 2.45, 0.2, 12); K.cyl(0.26, 0.3, 0.32, M.stone, x, 0.16, 0.2, 12); K.bx(x - 0.26, x + 0.26, 4.5, 4.7, -0.06, 0.46, M.gold); });
   K.bx(-2.75, 2.75, 3.95, 4.3, 0.05, 0.35, M.tileGreen); K.bx(-2.75, 2.75, 4.3, 4.42, 0.02, 0.38, M.gold); K.bx(-2.75, 2.75, 4.7, 5.0, 0, 0.4, M.redDk); K.bx(-1.3, 1.3, 5.0, 5.9, 0.02, 0.38, M.redDk);
   for (let i = 0; i < 9; i++) K.bx(-2.6 + i * 0.62, -2.6 + i * 0.62 + 0.3, 4.02, 4.24, 0.35, 0.37, i % 2 ? M.gold : M.blue);
-  K.mesh(sign('台北天后宮', 2.4, 0.72, { bg: '#8f3a2c', fg: '#ffffff', font: KAI, spread: true, border: false, glow: 0.7, oneSide: true }), 0, 5.42, 0.42);
-  [-1.15, 1.15].forEach(x => K.mesh(sign('台北天后宮', 0.34, 2.3, { vertical: true, kind: 'box', font: KAI, bg: '#f2c832', fg: '#b3221a', glow: 0.7, oneSide: true, depth: 0.05 }), x, 2.6, 0.42));   // the two yellow uprights with the name in red, one each side (2025 Commons photo)
+  K.mesh(sign('台北天后宮', 2.4, 0.72, { bg: '#6e1f1c', fg: '#ffffff', font: XING, spread: true, border: false, glow: 0.7, oneSide: true }), 0, 5.42, 0.42);
+  [x0 - 0.08, x1 + 0.08].forEach(x => { K.mesh(sign('台北天后宮', 0.62, 4.4, { vertical: true, kind: 'box', font: KAI, bg: '#f2c832', fg: '#c21f1a', glow: 0.8 }), x, 7.6, 0.55, Math.PI / 2); [5.9, 9.3].forEach(y => K.bx(x - 0.03, x + 0.03, y, y + 0.05, 0, 0.3, M.frame)); });   // the two tall yellow signs with the name in red, hung off the upper floors at each side (looked at the 2025 photo)
   // swallow-tail roofs: a high one over the middle bay, a lower one each side
   const roof = (cx, rw, yE, rise, up) => { const zF = 1.25, zB = -1.5, zm = -0.1, a = Math.atan2(rise, zF - zm), L = Math.hypot(rise, zF - zm), b = Math.atan2(rise, zm - zB), Lb = Math.hypot(rise, zm - zB);
     K.box(rw, 0.14, L, M.tile, cx, yE + rise / 2, (zF + zm) / 2, 0, a); K.box(rw, 0.14, Lb, M.tile, cx, yE + rise / 2, (zB + zm) / 2, 0, -b);
@@ -381,7 +387,8 @@ function tianhou() {
 // ══ 5. 成都楊桃冰: white and green, the amber jars on an open counter ═════════════════════════════════════
 function starfruit() {
   const K = Kit('chengdu-starfruit'), w = 4.5, S = shophouse(K, w, 2, M.white, { ground: 3.5, bays: 2, depth: 9 }), x0 = S.x0, x1 = S.x1;
-  K.bx(x0, x1, 3.5, 3.62, -0.05, 0.1, M.tileGreen); K.mesh(sign('成都楊桃冰', 4.1, 0.95, { kind: 'box', font: XING, bg: '#f6f3ea', fg: '#0f5a34', sub: '創於1966年', subFont: KAI, subFg: '#b3221a', glow: 0.7, oneSide: true }), 0, 2.95, 0.1);
+  K.bx(x0, x1, 3.5, 3.62, -0.05, 0.1, M.tileGreen); K.mesh(sign('成都楊桃冰', 4.3, 1.15, { kind: 'box', font: XING, bg: '#f6f3ea', fg: '#1f7a4a', spread: true, sub: '創於1966年', subFont: XING, subFg: '#d3214a', glow: 0.7, oneSide: true }), 0, 2.98, 0.1);
+  K.mesh(sign('成都楊桃冰', 3.4, 0.36, { bg: '#a3221a', fg: '#e8c04a', rtl: true, spread: true, border: false, glow: 0.6, oneSide: true }), 0.3, 2.72, -2.5);
   K.mesh(paint(4.3, 1.5, stripes('#f6f3ea', '#2f8a5a', 12), { glow: 0.3, depth: 0.04, ppm: 60 }), 0, 2.35, 0.8).rotation.x = -Math.PI / 2 + 0.28;
   K.bx(x0 + 0.3, x1 - 0.3, 0.3, 3.0, -2.58, -2.54, M.shopLit);
   K.mesh(paint(1.5, 1.1, (g, W, H) => { g.fillStyle = '#fbf8ee'; g.fillRect(0, 0, W, H); g.strokeStyle = '#2f8a5a'; g.lineWidth = 4; g.strokeRect(4, 4, W - 8, H - 8);
@@ -402,8 +409,10 @@ function fongda() {
   K.bx(x0, x1, top, top + 0.8, -0.3, 0.05, M.cream); K.bx(x0, x1, top, top + 0.15, -10, -0.3, M.concDk); waterTank(K, 1.5, top + 0.15, -4);
   K.bx(x0, x1, 0, G, -10, -3.0, M.dark); [x0, mid - 0.22, x1 - 0.45].forEach(x => K.bx(x, x + 0.45, 0, G, -0.45, 0, M.stone)); K.bx(x0, x1, 3.0, G, -0.45, 0, M.cream); K.bx(mid - 0.08, mid + 0.08, 0, 3.0, -3, -0.45, M.concDk);
   [x0, x1 - 0.2].forEach(x => K.bx(x, x + 0.2, 0, G, -3, -0.45, M.concDk)); K.bx(x0, x1, 2.95, 3.0, -3, -0.45, M.concLt); [-1.5, 2.0].forEach(x => K.bx(x - 0.6, x + 0.6, 2.88, 2.94, -1.6, -1.5, M.tube));
-  K.mesh(sign('蜂大咖啡', 3.5, 0.82, { kind: 'box', font: FONT, weight: 900, bg: '#f4f1e8', fg: '#141414', sub: '創立於西元1956年　咖啡器材專業經營', glow: 0.8, oneSide: true }), -1.5, 3.36, 0.06); K.mesh(sign('南美咖啡', 2.6, 0.82, { font: XING, bg: '#4a1f1a', fg: '#f3e6c8', border: false, glow: 0.7, oneSide: true }), 2.0, 3.36, 0.06);
-  K.mesh(sign('蜂大咖啡', 0.5, 2.6, { vertical: true, kind: 'box', font: FONT, weight: 900, bg: '#f4f1e8', fg: '#141414', glow: 0.9 }), x0 + 0.5, 6.2, 0.85, Math.PI / 2); K.mesh(sign('南美咖啡', 0.5, 2.2, { vertical: true, font: XING, bg: '#4a1f1a', fg: '#f3e6c8', border: false, glow: 0.6 }), x1 - 0.4, 5.6, 0.75, Math.PI / 2);
+  K.mesh(paint(3.9, 0.82, (g, W, H) => { g.fillStyle = '#f4f1e8'; g.fillRect(0, 0, W, H); g.fillStyle = '#1a1a1a'; [0, 0.89].forEach(x => { for (let i = 0; i < 7; i++) g.fillRect(W * x, H * (0.06 + i * 0.13), W * 0.11, H * 0.07); });
+    g.beginPath(); g.arc(W * 0.2, H * 0.44, H * 0.26, 0, 7); g.fill(); g.strokeStyle = '#f4f1e8'; g.lineWidth = H * 0.03; g.beginPath(); for (let i = 0; i < 7; i++) { const a = i / 6 * 6.2832; g.lineTo(W * 0.2 + Math.cos(a) * H * 0.15, H * 0.44 + Math.sin(a) * H * 0.15); } g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${H * 0.46}px ${FONT}`; [...'蜂大咖啡'].forEach((c, i) => g.fillText(c, W * (0.34 + i * 0.145), H * 0.42)); g.font = `600 ${H * 0.13}px ${FONT}`; g.fillText('創立於西元1956年　咖啡器材專業經營', W * 0.56, H * 0.83); }, { glow: 0.35, oneSide: true, light: true }), -1.5, 3.36, 0.06); K.mesh(sign('南美咖啡', 2.6, 0.82, { font: WEI, bg: '#3a1a1e', fg: '#f1dfb4', spread: true, glow: 0.7, oneSide: true }), 2.0, 3.36, 0.06);
+  K.mesh(sign('蜂大咖啡', 0.55, 5.2, { vertical: true, kind: 'box', font: FONT, weight: 900, bg: '#f4f1e8', fg: '#141414', glow: 0.6 }), mid, 6.6, 0.85, Math.PI / 2); K.mesh(sign('南美咖啡', 0.5, 2.2, { vertical: true, font: WEI, bg: '#3a1a1e', fg: '#f1dfb4', glow: 0.6 }), x1 - 0.4, 5.6, 0.75, Math.PI / 2);
   // 蜂大: the counter at the door with big glass jars of biscuits, the shelves and bean bins behind, the roaster deep inside
   K.bx(x0 + 0.5, mid - 0.4, 0, 0.95, -1.15, -0.5, M.woodDk); K.bx(x0 + 0.45, mid - 0.35, 0.95, 1.0, -1.2, -0.45, M.wood); for (let i = 0; i < 7; i++) jar(K, x0 + 0.78 + i * 0.42, 1.0, -0.82, 0.17, 0.46, M.biscuit, M.red);
   K.bx(x0 + 0.3, mid - 0.2, 0.2, 2.8, -2.98, -2.94, M.shopLit); for (let s = 0; s < 4; s++) { const y = 0.9 + s * 0.48; K.bx(x0 + 0.3, mid - 0.2, y, y + 0.04, -2.9, -2.55, M.woodDk); for (let k = 0; k < 9; k++) { const gx = x0 + 0.4 + k * 0.38; if (rnd() < 0.85) K.cyl(0.11, 0.11, rr(0.2, 0.36), pick([M.biscuit, M.woodDk, M.red, M.jar]), gx, y + 0.2, -2.72, 8); } }
@@ -419,8 +428,10 @@ function fongda() {
 // ══ 7. 阿宗麵線: no seats, steel pots at the front, people eating on their feet ═══════════════════════════
 function aychung() {
   const K = Kit('ay-chung'), w = 6, S = shophouse(K, w, 3, M.ochre, { ground: 3.8, bays: 3, depth: 9 }), x0 = S.x0, x1 = S.x1;
-  K.mesh(paint(5.6, 1.25, (g, W, H) => { g.fillStyle = '#f6f3ea'; g.fillRect(0, 0, W, H); g.strokeStyle = '#d9a53a'; g.lineWidth = H * 0.035; for (let k = 0; k < 3; k++) { g.beginPath(); for (let x = 0; x <= W; x += 6) g.lineTo(x, H * (0.84 + k * 0.045) + Math.sin(x / W * 30 + k) * H * 0.02); g.stroke(); }   // white fascia, the name in red brush characters, gold noodle waves along the bottom (2020 Commons photo)
-    g.fillStyle = '#c21f1a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${H * 0.62}px ${XING}`; [...'阿宗麵線'].forEach((c, i) => g.fillText(c, W * (0.17 + i * 0.22), H * 0.42)); g.strokeStyle = '#2b2b30'; g.lineWidth = H * 0.05; g.strokeRect(0, 0, W, H); }, { glow: 0.4, oneSide: true, light: true }), 0, 3.1, 0.1);
+  K.mesh(paint(5.6, 1.25, (g, W, H) => { g.fillStyle = '#5a4636'; g.fillRect(0, 0, W, H); g.fillStyle = '#8a7460'; for (let y = H * 0.06; y < H * 0.94; y += H * 0.09) { g.fillRect(W * 0.01, y, W * 0.2, H * 0.045); g.fillRect(W * 0.79, y, W * 0.2, H * 0.045); }   // the brown louvre grilles each side (looked at the 2020 photo)
+    g.fillStyle = '#f6f3ea'; g.fillRect(W * 0.22, 0, W * 0.56, H); g.save(); g.beginPath(); g.rect(W * 0.22, 0, W * 0.56, H); g.clip(); [['#2f8a5a', 0.9], ['#d9a53a', 0.84]].forEach(([c, y0]) => { g.fillStyle = c; g.beginPath(); g.moveTo(W * 0.22, H); for (let x = W * 0.22; x <= W * 0.78; x += 5) g.lineTo(x, H * y0 + Math.sin(x / W * 22) * H * 0.035); g.lineTo(W * 0.78, H); g.fill(); }); g.restore();
+    g.fillStyle = '#d3211c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${H * 0.56}px ${XING}`; [...'阿宗麵線'].forEach((c, i) => g.fillText(c, W * (0.29 + i * 0.14), H * 0.42)); }, { glow: 0.4, oneSide: true, light: true }), 0, 3.1, 0.1);
+  K.mesh(paint(5.8, 1.3, stripes('#f6f3ea', '#c8323a', 24), { glow: 0.3, depth: 0.04, ppm: 60 }), 0, 2.38, 0.75).rotation.x = -Math.PI / 2 + 0.3;
   K.mesh(sign('阿宗麵線', 0.7, 3.0, { vertical: true, kind: 'box', font: XING, bg: '#f6f3ea', fg: '#c21f1a', glow: 1.0 }), x0 + 0.4, 6.4, 0.9, Math.PI / 2);
   K.bx(x0 + 0.3, x1 - 0.3, 0.2, 3.3, -2.58, -2.54, M.shopLit); [-1.5, 1.5].forEach(x => K.bx(x - 0.7, x + 0.7, 3.38, 3.44, -1.2, -1.1, M.tube));
   K.mesh(sign('大碗麵線　小碗麵線', 2.6, 0.4, { bg: '#f3ecd9', fg: '#b3271e', glow: 0.7, oneSide: true, border: false }), -1.2, 2.2, -2.5);
@@ -601,7 +612,7 @@ if (window.PLACES) {
   ev('drag-festival-2025', { position: [-12.6, 13.6], rotation: 0.3 });                        // beside the Red House
   ev('jay-chou-signing-2004', { position: [-18.6, 22], rotation: L });
   ev('lantern-festival-2017', { position: [-17.6, 45.2], rotation: L - 0.25 });                // on the 中華路 side, where the lanterns ran
-  ev('backstreet-fest-2020', { position: [16.8, 33.2], rotation: -L });                        // toward 美國街 and the back streets
+  ev('backstreet-fest-2020', { position: [15.2, 38.6], rotation: -L });                        // toward 美國街 and the back streets
   ev('golden-horse-outdoor-2018', { position: [16.5, 47.5], rotation: -L });                   // on the 電影街 side
   ev('rainbow-crossing-2019', { position: [-6.6, 50.6], rotation: Math.PI + 0.3 });            // at Exit 6
   ev('mayday-5th-anniv-2004', { position: [4.6, 55.6], rotation: Math.PI - 0.15 });            // at the mouth of the car-free streets
