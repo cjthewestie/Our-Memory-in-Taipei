@@ -455,7 +455,10 @@ Object.defineProperty(E, 'hero', { get() { return hero; } });
 Object.defineProperty(E, 'mode', { get() { return mode; } });
 const B = opts.bounds, clamp = opts.clamp || (B ? (p) => { p.x = Math.max(B.minX, Math.min(B.maxX, p.x)); p.z = Math.max(B.minZ, Math.min(B.maxZ, p.z)); } : null);
 
-Promise.all((opts.models || []).map(loadGLB).concat([loadGLTF(opts.hero || 'noodles-girl')])).then((all) => {
+// Which character you play (CJ, 2026-11-21: 「我會有很多角色讓大家選」). ?hero=<name> in the address picks one of HEROES; anything else falls back to the page's own.
+const HEROES = ['noodles-girl', 'bear-poncho'], askedHero = new URLSearchParams(location.search).get('hero'), heroName = HEROES.includes(askedHero) ? askedHero : (opts.hero || 'noodles-girl');
+E.heroName = heroName;
+Promise.all((opts.models || []).map(loadGLB).concat([loadGLTF(heroName)])).then((all) => {
   const girl = all.pop();
   if (opts.build) opts.build(E, all);
   if (!lanterns && lanternPts.length) lanterns = buildLanterns();

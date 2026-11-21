@@ -178,7 +178,7 @@ def public(v, zh=False):
 
 
 # Researched but not shown. HANDOFF.md: "二二八 (1947, 天馬茶房) deliberately left out of the story, per the original brief."
-# Whether that still holds for these memory markers is (unknown — needs CJ).
+# CJ, 2026-11-21, asked whether they should appear in 大稻埕: "Keep them out".
 HELD = {'tianma-tea-house', '228-flash-point-1947'}
 
 def main():

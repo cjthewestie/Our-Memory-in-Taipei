@@ -307,7 +307,7 @@
       at(g, label('房茶馬天', 1.6, 0.36, { bg: '#b9c9b4', fg: '#3a332b', relief: '#7f8a7a', glow: 0.05 }), 0, S.H + 1.22, F - 0.005);
       shopfront(B, S.pierX[0] + 0.2, S.pierX[1] - 0.2, S.gf, { frame: M.frameD }); shopfront(B, S.pierX[1] + 0.2, S.pierX[2] - 0.2, S.gf, { frame: M.frameD, door: S.pierX[2] - 0.85 });
       B.put(M.redD, new T.BoxGeometry(S.W - 0.3, 0.05, 1.3), 0, S.gf - 0.75, F + 0.5, 0, 0.32); for (let x = -S.hw + 0.3; x < S.hw - 0.2; x += 0.5) B.put(M.paper, new T.BoxGeometry(0.22, 0.055, 1.3), x + 0.1, S.gf - 0.748, F + 0.5, 0, 0.32);
-      nameBoard(g, '天馬茶房', 2.8, 0.62, 0, S.gf + 0.45, { bg: '#22392f', fg: '#f6e3a8', sub: '1941 · CAFÉ TIENMA' }); sideSign(g, '天馬茶房', S.pierX[0], 4.9, 2.0, { bg: '#22392f', fg: '#f6e3a8' });
+      nameBoard(g, '茶房', 2.8, 0.62, 0, S.gf + 0.45, { bg: '#22392f', fg: '#f6e3a8', sub: 'TEA HOUSE' }); sideSign(g, '茶房', S.pierX[0], 4.9, 2.0, { bg: '#22392f', fg: '#f6e3a8' });
       B.cyl(M.timber, 0.36, 0.36, 0.04, -1.3, 0.76, 0.0, 14); B.cyl(M.ink, 0.03, 0.03, 0.7, -1.3, 0.08, 0.0, 6); [[-1.8, 0.1], [-0.8, -0.1]].forEach(([x, z]) => { B.cyl(M.timberD, 0.17, 0.17, 0.04, x, 0.5, z, 10); B.cyl(M.ink, 0.02, 0.02, 0.44, x, 0.08, z, 5); });          // a café table and two stools under the arcade
       B.build(g); OUT.tianma = g; }
 
@@ -429,7 +429,7 @@
     PLACES.add(E, P('li-linqiu-house'), { target: OUT.li, plaque: { position: [-4.4, 1.5, -30.62], rotation: HP }, near: [-3.6, -32.8], radius: 2.8 });
     PLACES.add(E, P('puppet-theatre-museum'), { target: OUT.puppet, plaque: { position: [-4.4, 1.5, -25.4], rotation: HP }, near: [-3.6, -23.2], radius: 2.8 });
     // HANDOFF.md: "二二八 (1947, 天馬茶房) deliberately left out of the story, per the original brief." The research covered it by
-    // mistake; both items are held out of the public data (tools/places/build_data.py HELD) until CJ decides. The shopfront stays as a plain front.
+    // mistake; both items are held out of the public data (tools/places/build_data.py HELD) for good. CJ, 2026-11-21: "Keep them out". The shopfront stays as an unnamed tea house.
     if (P('tianma-tea-house')) PLACES.add(E, P('tianma-tea-house'), { target: OUT.tianma, plaque: { position: [4.4, 1.5, 17.38], rotation: -HP }, near: [3.6, 15.2], radius: 2.8 });
     PLACES.add(E, P('qianyuan-herb-shop'), { target: OUT.qianyuan, plaque: { position: [-4.4, 1.5, 2.98], rotation: HP }, near: [-3.6, 0.8], radius: 2.8 });
     PLACES.add(E, P('i-mei-original-shop'), { target: OUT.imei, plaque: { position: [4.4, 1.5, 31.78], rotation: -HP }, near: [3.6, 29.6], radius: 2.8 });

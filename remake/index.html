@@ -64,9 +64,10 @@ ENGINE.create({
   // the researched places and events: buildings you can click, and a marker for every event (landmarks-ximen.js)
   LANDMARKS_XIMEN(E, { redHouse });
   PLACES.mount(E, { district: 'ximen' });
-  // the poncho bear (CJ, 2026-11-21: "Yes, add it"): a Tripo model from his Midjourney views, shrunk for the web
-  // (asset/models/bear-poncho.glb, 394 KB). It has no rig yet, so it stands beside the path as a figure, not a playable hero.
-  E.loadGLB('bear-poncho').then(bear => { bear.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); bear.scale.setScalar(1.25); bear.position.set(2.6, 0, 39.5); bear.rotation.y = -0.35; scene.add(bear); window.__bear = bear; });
+  // the poncho bear (CJ, 2026-11-21: "Yes, add it", then "Yes, rig it"): a Tripo model from his Midjourney views, retopologized, rigged and
+  // finished by tools/character/finish_tripo_girl.py (asset/models/bear-poncho.glb). Open the page with ?hero=bear-poncho to play as the bear;
+  // otherwise it stands beside the path.
+  if (E.heroName !== 'bear-poncho') E.loadGLB('bear-poncho').then(bear => { bear.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; } }); bear.position.set(2.6, 0, 39.5); bear.rotation.y = -0.35; scene.add(bear); window.__bear = bear; });
   },
 });
 </script>
