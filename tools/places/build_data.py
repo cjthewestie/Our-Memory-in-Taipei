@@ -1,6 +1,6 @@
 import re
 #!/usr/bin/env python3
-"""build_data.py: docs/places/{ximen,dadao,xinyi}.json (research) -> remake/place-data.js (what the scenes show).
+"""build_data.py: docs/places/{ximen,dadao,xinyi,square}.json (research) -> remake/place-data.js (what the scenes show).
 
 Run from anywhere:   python3 tools/places/build_data.py
 Re-run it whenever a research file changes; place-data.js is generated, never edited by hand.
@@ -29,6 +29,7 @@ DISTRICTS = [  # research file, the photo wall's section (the four the database 
     ('ximen', 'red', '西門町', 'Ximending'),
     ('dadao', 'dadao', '大稻埕', 'Dadaocheng'),
     ('xinyi', 'tower', '信義', 'Xinyi'),
+    ('square', 'square', '廣場', 'The Square'),   # the hub: everyday Taipei, city-wide places and events (CJ, 2026-11-21: 「廣場也要加地標跟可以點的事件」)
 ]
 MAX_KEY = 28
 MAX_ZH = 80

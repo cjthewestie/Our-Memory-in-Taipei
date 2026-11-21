@@ -258,20 +258,24 @@
       g.textAlign = 'center'; g.textBaseline = 'middle';
       if (fr.kind === 'cue') {                                               // the "see all" plate of a showcase
         const n = w.items.length;
-        g.fillStyle = '#b7372a'; g.fillRect(0, 0, W, H); g.strokeStyle = '#fff6e6'; g.lineWidth = Math.max(3, H * 0.05); g.strokeRect(m * 0.4, m * 0.4, W - m * 0.8, H - m * 0.8);
+        // an enamelled plate, as on a shop door: a double rule, a fixing rivet at each end
+        const eg = g.createLinearGradient(0, 0, 0, H); eg.addColorStop(0, '#c23d2e'); eg.addColorStop(1, '#a22a20'); g.fillStyle = eg; g.fillRect(0, 0, W, H); g.strokeStyle = '#fff6e6'; g.lineWidth = Math.max(3, H * 0.05); g.strokeRect(m * 0.4, m * 0.4, W - m * 0.8, H - m * 0.8);
+        g.lineWidth = Math.max(1, H * 0.015); g.strokeRect(m * 0.4 + H * 0.1, m * 0.4 + H * 0.1, W - m * 0.8 - H * 0.2, H - m * 0.8 - H * 0.2);
+        [m * 0.4 + H * 0.3, W - m * 0.4 - H * 0.3].forEach(x => { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.arc(x + 1.5, H / 2 + 1.5, H * 0.07, 0, 7); g.fill(); g.fillStyle = '#e8dcc0'; g.beginPath(); g.arc(x, H / 2, H * 0.07, 0, 7); g.fill(); });
         g.fillStyle = '#fff6e6'; g.font = `700 ${Math.round(H * 0.46)}px ${FONT}`;
         g.fillText(fit(g, n ? `See all ${n} photo${n === 1 ? '' : 's'} · 看全部  ›` : 'Open the gallery · 看照片  ›', W - 2 * m), W / 2, H * 0.53);
         fr.tex.needsUpdate = true; return;
       }
       g.fillStyle = '#f4ecdb'; g.fillRect(0, 0, W, H);
+      const corners = () => { g.fillStyle = '#2a2420'; const c = m * 1.5; [[0, 0, 1, 1], [W, 0, -1, 1], [0, H, 1, -1], [W, H, -1, -1]].forEach(([x, y, sx, sy]) => { g.beginPath(); g.moveTo(x + sx * m * 0.5, y + sy * m * 0.5); g.lineTo(x + sx * (m * 0.5 + c), y + sy * m * 0.5); g.lineTo(x + sx * m * 0.5, y + sy * (m * 0.5 + c)); g.closePath(); g.fill(); }); };   // the black paper corners of a photo album
       if (fr.kind === 'add') {
         g.strokeStyle = '#b7372a'; g.lineWidth = 6; g.strokeRect(m, m, W - 2 * m, H - 2 * m);
         g.fillStyle = '#b7372a'; g.font = `700 ${Math.round(H * 0.34)}px ${FONT}`; g.fillText('＋', W / 2, H * 0.4);
         g.font = `700 ${Math.round(W * 0.085)}px ${FONT}`; g.fillText(w.showcase ? 'Add the first photo' : 'Add your photo', W / 2, H * 0.74);
-        g.font = `500 ${Math.round(W * 0.05)}px ${FONT}`; g.fillText(fit(g, (w.info && w.info.ask) || '掛上你的照片', W - 3 * m), W / 2, H * 0.87);
+        g.font = `500 ${Math.round(W * 0.05)}px ${FONT}`; g.fillText(fit(g, (w.info && w.info.ask) || '掛上你的照片', W - 3 * m), W / 2, H * 0.87); corners();
       } else if (fr.kind === 'empty') {
         g.strokeStyle = '#cdbfa5'; g.lineWidth = 4; g.setLineDash([18, 14]); g.strokeRect(m * 1.6, m * 1.6, W - 3.2 * m, H - 3.2 * m); g.setLineDash([]);
-        g.fillStyle = '#b3a384'; g.font = `500 ${Math.round(W * 0.052)}px ${FONT}`; g.fillText('Your photo could hang here', W / 2, H / 2);
+        g.fillStyle = '#b3a384'; g.font = `500 ${Math.round(W * 0.052)}px ${FONT}`; g.fillText('Your photo could hang here', W / 2, H / 2); corners();
       } else {
         const it = fr.item, stripH = Math.round(H * 0.2), px = m, py = m, pw = W - 2 * m, ph = H - m - stripH;
         g.fillStyle = '#e6dcc6'; g.fillRect(px, py, pw, ph);
@@ -279,7 +283,7 @@
           g.drawImage(fr.img, px + (pw - dw) / 2, py + (ph - dh) / 2, dw, dh); }
         else { g.fillStyle = '#b3a384'; g.font = `500 ${Math.round(W * 0.045)}px ${FONT}`; g.fillText('The photo is on its way…', W / 2, py + ph / 2); }
         g.strokeStyle = '#3a2a1c'; g.lineWidth = 3; g.strokeRect(px, py, pw, ph);
-        g.fillStyle = '#2a2420'; g.font = `700 ${Math.round(W * 0.05)}px ${FONT}`; g.fillText(fit(g, it.body || '', W - 2 * m), W / 2, H - stripH * 0.62);
+        g.fillStyle = '#2a2420'; g.font = `700 ${Math.round(W * 0.054)}px "Kaiti TC","BiauKai","DFKai-SB",${FONT}`; g.fillText(fit(g, it.body || '', W - 2 * m), W / 2, H - stripH * 0.62);   // the caption, as if written under the print
         g.fillStyle = it.kind === 'local' || it.kind === 'mine' ? '#b7372a' : '#6b5d50'; g.font = `500 ${Math.round(W * 0.036)}px ${FONT}`;
         const sub = [it.year, it.kind === 'local' ? 'in this browser only' : it.kind === 'mine' ? 'waiting for approval' : it.credit || it.name].filter(Boolean).join(' · ');
         g.fillText(fit(g, sub, W - 2 * m), W / 2, H - stripH * 0.24);
@@ -661,6 +665,7 @@
       steel: E.triMat({ color: '#b9bcc0', tex: E.TEX.metal, scale: 3, rough: 0.3, metal: 0.8 }),
       dark: new T.MeshStandardMaterial({ color: 0x2a2420, roughness: 0.6 }),
       frame: new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 }),
+      gilt: new T.MeshStandardMaterial({ color: E.col('#b98f3e'), roughness: 0.38, metalness: 0.55, emissive: E.col('#3a2608'), emissiveIntensity: 0.5 }),
       goods: ['#7a1f1a', '#d9852b', '#c9a56a', '#7d8f3a', '#d43a5a'].map(c => new T.MeshStandardMaterial({ color: E.col(c), roughness: 0.75 })),
       awning(hex) { const t = E.canvasTex(256, (c, s) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#f1e6d0' : hex; c.fillRect(i * s / 8, 0, s / 8, s); } E.speckle(c, s, 2500, 0.1, true); });
         const m = new T.MeshStandardMaterial({ map: t, roughness: 0.9, side: T.DoubleSide, emissiveMap: t, emissive: new T.Color(0.9, 0.6, 0.3), emissiveIntensity: 0.3 }); return m; },
@@ -679,6 +684,141 @@
     const paint = () => { if (window.ENGINE && ENGINE.paintSign) ENGINE.paintSign(g, W, H, lines.map(([txt, size, y, weight]) => [txt, H * size, y, weight]), bg, fg, { seal: false }); else old(); t.needsUpdate = true; };
     paint(); if (window.ENGINE && ENGINE.paintSign && document.fonts && document.fonts.load) Promise.all([document.fonts.load('40px "Weibei TC"'), document.fonts.load('40px "Kaiti TC"')]).then(paint, () => {});
     return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow == null ? 0.5 : glow }));
+  }
+  // ── the header sign of a showcase ───────────────────────────────────────────────────────────
+  // CJ, 2026-11-21: 「每個招牌要根據他的作用跟含義還有真實的招牌去對應」, 「整個專案都是」. Each topic's header is the kind of sign that
+  // subject really carries: a temple's lacquer 匾額 read from the right, a stall's light box over a scalloped valance, a cinema
+  // marquee with its letter board, a school's enamel plate, a street-name plate, a New Year cloth banner, a stage LED screen…
+  // What each follows, the reference, and how sure it is: docs/signage/sources-shared.md.
+  const KAI = '"Kaiti TC","BiauKai","DFKai-SB","KaiTi",' + FONT, WEI = '"Weibei TC",' + KAI, XING = '"Xingkai TC",' + KAI, SONG = '"Songti TC","LiSong Pro","PMingLiU",serif', SERIF = 'Georgia,"Times New Roman",serif';
+  const SIGNS = {
+    family:    { t: 'studio',  bg: '#efe3c6', fg: '#5a1f1a', font: WEI, rim: 'wood' },
+    school:    { t: 'enamel',  bg: '#f4f1e6', fg: '#16181c', font: KAI, rim: 'steel', strip: true },
+    food:      { t: 'box',     bg: '#fbf8ef', fg: '#c4201a', font: XING, rim: 'steel', valance: ['#c4201a', '#f6d04a'], glow: 0.8, deep: true },
+    chunghwa:  { t: 'paint',   bg: '#1d2a24', fg: '#f1e7cc', font: WEI, rtl: true, rim: 'wood', strip: true },
+    cinema:    { t: 'marquee', bg: '#a3161a', fg: '#ffe27a', font: WEI, rim: 'dark', glow: 0.75, deep: true },
+    walk:      { t: 'road',    bg: '#0b6a3c', fg: '#ffffff', font: FONT, rim: 'steel', icon: 'walk' },
+    redhouse:  { t: 'bronze',  bg: '#3a2614', fg: '#d6ae66', font: KAI, rim: 'gilt', glow: 0.14 },
+    newyear:   { t: 'cloth',   bg: '#e8731a', fg: '#1a1210', font: XING, emblem: '春' },
+    temple:    { t: 'plaque',  bg: '#9c1c16', fg: '#f3cf6a', font: KAI, rtl: true, rim: 'gilt', strip: true, tilt: 0.07 },
+    fabric:    { t: 'fascia',  bg: '#e6e0d4', fg: '#c0261c', font: KAI, rim: 'stone' },
+    wharf:     { t: 'paint',   bg: '#f6f4ec', fg: '#16181c', font: XING, rim: 'steel', stripe: '#8a3a22', strip: true },
+    fireworks: { t: 'led',     bg: '#07060c', fg: '#ffd84a', font: FONT, rim: 'dark', glow: 1.0, deep: true },
+    quiet:     { t: 'notice',  bg: '#f7f5ee', fg: '#16181c', font: KAI },
+    skywalk:   { t: 'modern',  bg: '#1b1e24', fg: '#ffffff', font: FONT, rim: 'steel', glow: 0.8, deep: true },
+    climb:     { t: 'modern',  bg: '#cfd3d6', fg: '#16181c', font: FONT, rim: 'steel', light: true },
+    lookup:    { t: 'road',    bg: '#6b4423', fg: '#ffffff', font: FONT, rim: 'steel', icon: 'up' },
+  };
+  const SIGN_BY_KIND = { plaque: 'temple', marquee: 'cinema', enamel: 'school', awning: 'food', studio: 'family', modern: 'skywalk' };   // a topic added later: the engine reads the type from its wording
+  const signFor = (topic, info) => SIGNS[topic] || SIGNS[SIGN_BY_KIND[window.ENGINE && ENGINE.signKind ? ENGINE.signKind((info.zh || '') + '|' + (info.en || ''), false) : 'studio']] || SIGNS.family;
+  const rnd = Math.random;
+  const speck = (g, x, y, w, h, n, rgb, a) => { for (let i = 0; i < n; i++) { g.fillStyle = `rgba(${rgb},${rnd() * a})`; g.fillRect(x + rnd() * w, y + rnd() * h, 1 + rnd() * 2, 1 + rnd() * 2); } };
+  const fitPx = (g, txt, px, maxW, face, wt) => { g.font = `${wt} ${px}px ${face}`; const w = g.measureText(txt).width; if (w > maxW) { px *= maxW / w; g.font = `${wt} ${px}px ${face}`; } return px; };
+  // one line of lettering. fx: 'flat' | 'raised' | 'cut' | 'glow' | 'mount' (letters standing off the wall) · spread: one character per cell · rtl: read from the right
+  function letter(g, txt, cx, cy, px, maxW, face, wt, fill, fx, o) {
+    if (!txt) return; o = o || {}; g.textAlign = 'center'; g.textBaseline = 'middle'; const t = o.rtl ? [...txt].reverse().join('') : txt;
+    const one = (s, x, y, q) => { g.font = `${wt} ${q}px ${face}`; const d = Math.max(1, q * 0.045);
+      if (fx === 'raised' || fx === 'cut') { const k = fx === 'raised' ? 1 : -1; g.fillStyle = 'rgba(0,0,0,.6)'; g.fillText(s, x + d * k, y + d * k); g.fillStyle = 'rgba(255,244,214,.5)'; g.fillText(s, x - d * k * 0.6, y - d * k * 0.6); }
+      else if (fx === 'mount') { g.fillStyle = 'rgba(0,0,0,.35)'; g.fillText(s, x + d * 1.6, y + d * 2); }
+      else if (fx === 'glow') { g.shadowColor = o.halo || fill; g.shadowBlur = q * 0.3; g.fillStyle = fill; g.fillText(s, x, y); g.shadowBlur = 0; }
+      if (o.outline) { g.lineJoin = 'round'; g.strokeStyle = o.outline; g.lineWidth = q * 0.12; g.strokeText(s, x, y); }
+      g.fillStyle = fill; g.fillText(s, x, y); };
+    const ch = [...t]; if (o.spread && ch.length > 1 && ch.length <= 8 && !/[A-Za-z0-9]/.test(t)) { const cell = Math.min(maxW / ch.length, px * 1.5), q = Math.min(px, cell * 0.92); ch.forEach((c, i) => one(c, cx + (i - (ch.length - 1) / 2) * cell, cy, q)); }
+    else one(t, cx, cy, fitPx(g, t, px, maxW, face, wt));
+  }
+  const rivet = (g, x, y, r, c) => { g.fillStyle = 'rgba(0,0,0,.4)'; g.beginPath(); g.arc(x + r * 0.3, y + r * 0.3, r, 0, 7); g.fill(); g.fillStyle = c || '#9a9ca0'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.arc(x - r * 0.3, y - r * 0.3, r * 0.35, 0, 7); g.fill(); };
+  const FACE = {
+    paint(g, W, H, S, info) {                       // a brush-painted board: an inset rule, rain streaks; with a stripe, a boat's painted waterline
+      g.fillStyle = S.bg; g.fillRect(0, 0, W, H); const dark = S.fg !== '#16181c';
+      for (let i = 0; i < W / 12; i++) { g.fillStyle = `rgba(${dark ? '0,0,0' : '70,55,35'},${0.03 + rnd() * 0.06})`; g.fillRect(rnd() * W, 0, 1 + rnd() * H * 0.05, H * (0.2 + rnd() * 0.8)); }
+      const m = H * 0.07; g.strokeStyle = S.fg; g.lineWidth = Math.max(2, H * 0.022); g.strokeRect(m, m, W - 2 * m, H - 2 * m);
+      if (S.stripe) { g.fillStyle = S.stripe; g.fillRect(m * 1.6, H * 0.74, W - m * 3.2, H * 0.14); g.strokeStyle = '#f6f4ec'; g.lineWidth = H * 0.018; g.beginPath(); for (let x = m * 1.6; x < W - m * 1.6; x += H * 0.2) { g.moveTo(x, H * 0.81); g.quadraticCurveTo(x + H * 0.05, H * 0.775, x + H * 0.1, H * 0.81); g.quadraticCurveTo(x + H * 0.15, H * 0.845, x + H * 0.2, H * 0.81); } g.stroke(); }
+      letter(g, info.zh, W / 2, H * (S.stripe ? 0.4 : 0.52), H * (S.stripe ? 0.52 : 0.66), W * 0.86, S.font, 400, S.fg, 'flat', { spread: true, rtl: S.rtl }); },
+    plaque(g, W, H, S, info) {                      // 匾額: a lacquered board in a gilt fret frame, gilded characters read from the right, the giver's seal at the left
+      const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#a8201a'); gr.addColorStop(1, '#84140f'); g.fillStyle = gr; g.fillRect(0, 0, W, H); speck(g, 0, 0, W, H, 600, '255,200,150', 0.07);
+      if (window.ENGINE && ENGINE.signTrim) ENGINE.signTrim(g, W, H, { dark: true, trim: '#e6bd5c', seed: info.zh, style: 0, ground: -1 }); else { g.strokeStyle = '#e6bd5c'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.05, H * 0.05, W - H * 0.1, H - H * 0.1); }
+      letter(g, info.zh, W / 2, H * 0.52, H * 0.6, W * 0.74, S.font, 700, S.fg, 'raised', { spread: true, rtl: true });
+      const s = H * 0.17; g.fillStyle = '#f3cf6a'; g.fillRect(H * 0.3, H * 0.62, s, s); g.fillStyle = '#84140f'; g.font = `400 ${s * 0.42}px ${WEI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('敬', H * 0.3 + s / 2, H * 0.62 + s * 0.3); g.fillText('獻', H * 0.3 + s / 2, H * 0.62 + s * 0.74); },
+    box(g, W, H, S, info, sub) {                    // a stall's light box: lit acrylic panels in a steel rim, brush characters, a scalloped cloth valance hung under it
+      const vh = S.valance ? H * 0.2 : 0, fh = H - vh, gr = g.createLinearGradient(0, 0, 0, fh); gr.addColorStop(0, '#f1ede2'); gr.addColorStop(0.5, S.bg); gr.addColorStop(1, '#ece7da'); g.fillStyle = gr; g.fillRect(0, 0, W, fh);
+      g.fillStyle = 'rgba(0,0,0,.14)'; for (let i = 1; i < 4; i++) g.fillRect(W * i / 4 - 1, 0, 2, fh); g.strokeStyle = '#3a3c42'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.025, H * 0.025, W - H * 0.05, fh - H * 0.05);
+      letter(g, info.zh, W / 2, fh * 0.4, fh * 0.6, W * 0.8, S.font, 400, S.fg, 'flat', { spread: true }); letter(g, sub, W / 2, fh * 0.81, fh * 0.17, W * 0.8, FONT, 700, S.fg, 'flat');
+      if (vh) { const n = 14, w = W / n; g.fillStyle = '#1a1614'; g.fillRect(0, fh, W, vh); for (let i = 0; i < n; i++) { g.fillStyle = S.valance[i % 2]; g.beginPath(); g.moveTo(i * w, fh); g.lineTo((i + 1) * w, fh); g.lineTo((i + 1) * w, fh + vh * 0.5); g.arc((i + 0.5) * w, fh + vh * 0.5, w / 2, 0, Math.PI); g.closePath(); g.fill(); } g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(0, fh, W, vh * 0.12); } },
+    marquee(g, W, H, S, info, sub) {                // a cinema front: the name board ringed with bulbs, under it the letter board with its rails and loose black letters
+      g.fillStyle = '#1a1210'; g.fillRect(0, 0, W, H); const th = H * 0.64, m = H * 0.05; g.fillStyle = S.bg; g.fillRect(m, m, W - 2 * m, th - m);
+      const per = 2 * (W - 2 * m + th - m), n = Math.round(per / (H * 0.085)); for (let i = 0; i < n; i++) { let d = i / n * per, x, y; const w = W - 2 * m, hh = th - m; if (d < w) { x = m + d; y = m; } else if (d < w + hh) { x = W - m; y = m + d - w; } else if (d < 2 * w + hh) { x = W - m - (d - w - hh); y = th; } else { x = m; y = th - (d - 2 * w - hh); }
+        g.shadowColor = '#ffd97a'; g.shadowBlur = H * 0.04; g.fillStyle = i % 3 ? '#fff0b8' : '#ffc94a'; g.beginPath(); g.arc(x, y, H * 0.022, 0, 7); g.fill(); } g.shadowBlur = 0;
+      letter(g, info.zh, W / 2, (m + th) / 2, (th - m) * 0.74, W * 0.8, S.font, 400, S.fg, 'flat', { spread: true, outline: '#4a0a0c' });
+      const y0 = th + H * 0.05, bh = H - y0 - m; g.fillStyle = '#f4f1e4'; g.fillRect(m, y0, W - 2 * m, bh); g.fillStyle = 'rgba(0,0,0,.2)'; [0.08, 0.92].forEach(k => g.fillRect(m, y0 + bh * k - 1, W - 2 * m, 2));
+      if ('letterSpacing' in g) g.letterSpacing = Math.round(bh * 0.12) + 'px'; letter(g, String(sub || '').toUpperCase(), W / 2, y0 + bh * 0.53, bh * 0.62, W * 0.84, '"Arial Narrow","Helvetica Neue",Arial,sans-serif', 700, '#16181c', 'flat'); if ('letterSpacing' in g) g.letterSpacing = '0px'; },
+    enamel(g, W, H, S, info) {                      // an enamelled iron plate: white ground, a double blue rule, 楷書, fixing rivets, rust where the enamel has chipped
+      const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#fbf9f0'); gr.addColorStop(1, '#e9e5d6'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      g.strokeStyle = '#1d3f8a'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.07, H * 0.07, W - H * 0.14, H - H * 0.14); g.lineWidth = H * 0.014; g.strokeRect(H * 0.15, H * 0.15, W - H * 0.3, H - H * 0.3);
+      for (let i = 0; i < 9; i++) { const e = i % 4, x = e === 0 ? rnd() * W : e === 1 ? W - rnd() * H * 0.05 : e === 2 ? rnd() * W : rnd() * H * 0.05, y = e === 0 ? rnd() * H * 0.05 : e === 2 ? H - rnd() * H * 0.05 : rnd() * H; g.fillStyle = '#7a3a1c'; g.beginPath(); g.ellipse(x, y, H * (0.02 + rnd() * 0.04), H * (0.015 + rnd() * 0.03), rnd() * 3, 0, 7); g.fill(); }
+      [[0.5, 0.07], [0.5, 0.93]].forEach(([x, y]) => rivet(g, W * x, H * y, H * 0.03)); [[H * 0.07, H / 2], [W - H * 0.07, H / 2]].forEach(([x, y]) => rivet(g, x, y, H * 0.03));
+      letter(g, info.zh, W / 2, H * 0.53, H * 0.58, W * 0.8, S.font, 700, S.fg, 'flat', { spread: true }); },
+    road(g, W, H, S, info, sub) {                   // a street-name plate or a brown sight sign: reflective sheet, a white border with round corners, both languages, a pictogram
+      g.fillStyle = '#1a1614'; g.fillRect(0, 0, W, H); const r = H * 0.12, m = H * 0.03, rr = (x, y, w, h, q) => { g.beginPath(); g.moveTo(x + q, y); g.arcTo(x + w, y, x + w, y + h, q); g.arcTo(x + w, y + h, x, y + h, q); g.arcTo(x, y + h, x, y, q); g.arcTo(x, y, x + w, y, q); g.closePath(); };
+      rr(m, m, W - 2 * m, H - 2 * m, r); g.fillStyle = S.bg; g.fill(); g.save(); g.clip(); g.fillStyle = 'rgba(255,255,255,.05)'; for (let x = -H; x < W; x += H * 0.09) { g.beginPath(); g.moveTo(x, H); g.lineTo(x + H * 0.045, H); g.lineTo(x + H + H * 0.045, 0); g.lineTo(x + H, 0); g.fill(); } g.restore();
+      rr(m * 2.6, m * 2.6, W - m * 5.2, H - m * 5.2, r * 0.75); g.strokeStyle = '#ffffff'; g.lineWidth = H * 0.028; g.stroke();
+      const ix = H * 0.62, ir = H * 0.3; g.fillStyle = S.icon === 'walk' ? '#1d4fa8' : 'rgba(0,0,0,0)'; g.beginPath(); g.arc(ix, H / 2, ir, 0, 7); g.fill(); g.strokeStyle = g.fillStyle = '#ffffff'; g.lineCap = g.lineJoin = 'round';
+      if (S.icon === 'walk') { g.lineWidth = H * 0.02; g.beginPath(); g.arc(ix, H / 2, ir, 0, 7); g.stroke(); [[-0.3, 1], [0.34, 0.72]].forEach(([dx, k]) => { const x = ix + ir * dx, y = H / 2 - ir * 0.05, q = ir * k; g.beginPath(); g.arc(x, y - q * 0.52, q * 0.14, 0, 7); g.fill(); g.lineWidth = q * 0.15; g.beginPath(); g.moveTo(x, y - q * 0.34); g.lineTo(x, y + q * 0.1); g.lineTo(x - q * 0.16, y + q * 0.6); g.moveTo(x, y + q * 0.1); g.lineTo(x + q * 0.16, y + q * 0.6); g.moveTo(x - q * 0.22, y - q * 0.02); g.lineTo(x, y - q * 0.24); g.lineTo(x + q * 0.22, y - q * 0.02); g.stroke(); }); }
+      else { g.lineWidth = H * 0.085; g.beginPath(); g.moveTo(ix, H * 0.76); g.lineTo(ix, H * 0.27); g.moveTo(ix - ir * 0.62, H * 0.47); g.lineTo(ix, H * 0.25); g.lineTo(ix + ir * 0.62, H * 0.47); g.stroke(); }
+      const cx = (W + ix + ir) / 2, mw = W - ix - ir - H * 0.5; letter(g, info.zh, cx, H * 0.4, H * 0.42, mw, S.font, 700, '#ffffff', 'flat'); letter(g, sub, cx, H * 0.75, H * 0.17, mw, '"Helvetica Neue",Arial,sans-serif', 600, '#ffffff', 'flat'); },
+    studio(g, W, H, S, info, sub) {                 // a portrait studio's board: cream ground, bracketed corners, an oval mount at each end, 魏碑 over a line of Roman capitals
+      g.fillStyle = S.bg; g.fillRect(0, 0, W, H); speck(g, 0, 0, W, H, 500, '90,60,30', 0.07);
+      if (window.ENGINE && ENGINE.signTrim) ENGINE.signTrim(g, W, H, { dark: false, trim: S.fg, seed: info.zh, style: 1, ground: -1 });
+      [H * 0.66, W - H * 0.66].forEach(x => { g.strokeStyle = S.fg; g.lineWidth = H * 0.03; g.beginPath(); g.ellipse(x, H / 2, H * 0.2, H * 0.27, 0, 0, 7); g.stroke(); g.lineWidth = H * 0.01; g.beginPath(); g.ellipse(x, H / 2, H * 0.155, H * 0.225, 0, 0, 7); g.stroke();
+        g.fillStyle = S.fg; g.fillRect(x - H * 0.09, H * 0.46, H * 0.18, H * 0.12); g.fillRect(x - H * 0.05, H * 0.42, H * 0.06, H * 0.05); g.fillStyle = S.bg; g.beginPath(); g.arc(x, H * 0.52, H * 0.04, 0, 7); g.fill(); });   // a box camera in each mount, not a face
+      const mw = W - H * 2.3; letter(g, info.zh, W / 2, H * 0.4, H * 0.5, mw, S.font, 400, S.fg, 'flat', { spread: true }); g.fillStyle = S.fg; g.fillRect(W / 2 - mw * 0.3, H * 0.68, mw * 0.6, 2);
+      if ('letterSpacing' in g) g.letterSpacing = Math.round(H * 0.03) + 'px'; letter(g, String(sub || '').toUpperCase(), W / 2, H * 0.79, H * 0.13, mw, SERIF, 700, S.fg, 'flat'); if ('letterSpacing' in g) g.letterSpacing = '0px'; },
+    cloth(g, W, H, S, info, sub) {                  // a 布條 tied across the street: it sags, it folds, it has a stitched hem and eyelets, a round emblem at each end, black brush lettering
+      g.fillStyle = '#1a1614'; g.fillRect(0, 0, W, H); const sag = H * 0.1, y0 = H * 0.06, y1 = H * 0.84;
+      g.strokeStyle = '#d8d2c2'; g.lineWidth = 2; [[0, 0, H * 0.12, y0], [W, 0, W - H * 0.12, y0], [0, H * 0.98, H * 0.12, y1], [W, H * 0.98, W - H * 0.12, y1]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); });
+      g.save(); g.beginPath(); g.moveTo(H * 0.1, y0); g.quadraticCurveTo(W / 2, y0 + sag * 2, W - H * 0.1, y0); g.lineTo(W - H * 0.1, y1); g.quadraticCurveTo(W / 2, y1 + sag * 2, H * 0.1, y1); g.closePath(); g.fillStyle = S.bg; g.fill(); g.clip();
+      for (let i = 0; i < 11; i++) { const a = 0.05 + rnd() * 0.07, gr = g.createLinearGradient(W * i / 11, 0, W * (i + 1) / 11, 0); gr.addColorStop(0, `rgba(0,0,0,${a})`); gr.addColorStop(0.5, `rgba(255,255,255,${a * 0.8})`); gr.addColorStop(1, `rgba(0,0,0,${a})`); g.fillStyle = gr; g.fillRect(W * i / 11, 0, W / 11 + 1, H); } g.restore();
+      const cy = (y0 + y1) / 2 + sag * 0.8; [H * 0.6, W - H * 0.6].forEach(x => { g.fillStyle = '#c7281c'; g.beginPath(); g.arc(x, cy - sag * 0.5, H * 0.25, 0, 7); g.fill(); g.strokeStyle = '#ffe9b0'; g.lineWidth = H * 0.02; g.stroke(); g.fillStyle = '#ffe9b0'; g.font = `400 ${H * 0.32}px ${WEI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(S.emblem || '福', x, cy - sag * 0.48); });
+      [[H * 0.17, y0 + H * 0.07], [W - H * 0.17, y0 + H * 0.07], [H * 0.17, y1 - H * 0.05], [W - H * 0.17, y1 - H * 0.05]].forEach(([x, y]) => rivet(g, x, y, H * 0.022, '#d8d2c2'));
+      letter(g, info.zh, W / 2, cy - H * 0.07, H * 0.5, W - H * 2.2, S.font, 400, S.fg, 'flat', { spread: true }); letter(g, sub, W / 2, cy + H * 0.26, H * 0.12, W - H * 2.2, FONT, 700, S.fg, 'flat'); },
+    led(g, W, H, S, info, sub) {                    // a stage LED wall: lit pixels on black, warm bars up both sides, the grid of the modules over everything
+      g.fillStyle = S.bg; g.fillRect(0, 0, W, H); const gr = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.5); gr.addColorStop(0, 'rgba(200,40,170,.5)'); gr.addColorStop(1, 'rgba(40,10,90,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      [0, 1].forEach(k => { for (let i = 0; i < 4; i++) { const x = k ? W - H * (0.12 + i * 0.17) : H * (0.12 + i * 0.17), hh = H * (0.9 - i * 0.16); g.fillStyle = i % 2 ? '#ff9a2a' : '#ffd84a'; g.fillRect(x - H * 0.05, (H - hh) / 2, H * 0.1, hh); } });
+      const mw = W - H * 1.9; letter(g, info.zh, W / 2, H * 0.4, H * 0.5, mw, S.font, 900, S.fg, 'glow', { halo: '#ff7a2a' }); letter(g, sub, W / 2, H * 0.79, H * 0.16, mw, FONT, 700, '#ffffff', 'glow', { halo: '#ff4fd0' });
+      g.fillStyle = 'rgba(0,0,0,.42)'; const q = Math.max(4, Math.round(H / 34)); for (let x = 0; x < W; x += q) g.fillRect(x, 0, 1.4, H); for (let y = 0; y < H; y += q) g.fillRect(0, y, W, 1.4); g.fillStyle = 'rgba(0,0,0,.55)'; for (let x = W / 6; x < W; x += W / 6) g.fillRect(x - 1, 0, 2, H); },
+    modern(g, W, H, S, info, sub) {                 // a backlit sign on a dark panel (haloed letters), or light: a brushed stainless plate with the letters etched and filled black
+      g.fillStyle = S.bg; g.fillRect(0, 0, W, H); for (let i = 0; i < H / 2; i++) { g.fillStyle = S.light ? `rgba(${rnd() > 0.5 ? '255,255,255' : '60,66,72'},${rnd() * 0.12})` : `rgba(255,255,255,${rnd() * 0.035})`; g.fillRect(0, rnd() * H, W, 1); }
+      if (S.light) [[0.05, 0.1], [0.95, 0.1], [0.05, 0.9], [0.95, 0.9]].forEach(([x, y]) => rivet(g, W * x, H * y, Math.min(W, H) * 0.022));
+      const two = W / H < 2.4; letter(g, info.zh, W / 2, H * (two ? 0.36 : 0.4), H * (two ? 0.34 : 0.46), W * 0.82, S.font, 700, S.fg, S.light ? 'cut' : 'glow', { halo: '#cfe6ff' });
+      g.fillStyle = S.light ? '#16181c' : 'rgba(255,255,255,.7)'; g.fillRect(W * 0.3, H * (two ? 0.6 : 0.665), W * 0.4, Math.max(1.5, H * 0.006));
+      if ('letterSpacing' in g) g.letterSpacing = Math.round(H * 0.025) + 'px'; letter(g, String(sub || '').toUpperCase(), W / 2, H * (two ? 0.74 : 0.8), H * (two ? 0.1 : 0.13), W * 0.82, '"Helvetica Neue","Avenir Next",Arial,sans-serif', 500, S.fg, 'flat'); if ('letterSpacing' in g) g.letterSpacing = '0px'; },
+    notice(g, W, H, S, info, sub) {                 // a printed notice taped to a closed roller shutter
+      g.fillStyle = '#8f949a'; g.fillRect(0, 0, W, H); for (let y = 0; y < H; y += H * 0.085) { const gr = g.createLinearGradient(0, y, 0, y + H * 0.085); gr.addColorStop(0, 'rgba(255,255,255,.2)'); gr.addColorStop(1, 'rgba(0,0,0,.28)'); g.fillStyle = gr; g.fillRect(0, y, W, H * 0.085); }
+      const px = W * 0.14, py = H * 0.07, pw = W * 0.72, ph = H * 0.86; g.save(); g.translate(W / 2, H / 2); g.rotate(-0.012); g.translate(-W / 2, -H / 2); g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(px + 5, py + 6, pw, ph); g.fillStyle = S.bg; g.fillRect(px, py, pw, ph);
+      g.fillStyle = '#c0261c'; g.font = `700 ${H * 0.15}px ${KAI}`; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText('公告', px + H * 0.1, py + H * 0.14); g.fillRect(px + H * 0.1, py + H * 0.24, pw - H * 0.2, 3);
+      letter(g, info.zh, W / 2, H * 0.52, H * 0.34, pw - H * 0.4, S.font, 700, S.fg, 'flat', { spread: true }); letter(g, sub, W / 2, H * 0.78, H * 0.11, pw - H * 0.4, FONT, 600, '#3a3c42', 'flat');
+      g.fillStyle = 'rgba(232,214,150,.75)'; [[px - H * 0.05, py - H * 0.03], [px + pw - H * 0.13, py - H * 0.03], [px - H * 0.05, py + ph - H * 0.06], [px + pw - H * 0.13, py + ph - H * 0.06]].forEach(([x, y]) => g.fillRect(x, y, H * 0.18, H * 0.09)); g.restore(); },
+    bronze(g, W, H, S, info, sub) {                 // a cast bronze plaque: stippled ground, a raised polished border, raised letters
+      const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#4d3219'); gr.addColorStop(0.5, '#2c1b0d'); gr.addColorStop(1, '#3f2915'); g.fillStyle = gr; g.fillRect(0, 0, W, H); speck(g, 0, 0, W, H, 3000, '255,210,140', 0.1); speck(g, 0, 0, W, H, 2400, '0,0,0', 0.22);
+      [[0.05, 0.05], [0.13, 0.014]].forEach(([m, lw]) => { g.lineWidth = H * lw; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeRect(H * m + 2, H * m + 2, W - 2 * H * m, H - 2 * H * m); g.strokeStyle = '#b98a44'; g.strokeRect(H * m, H * m, W - 2 * H * m, H - 2 * H * m); });
+      [[H * 0.24, H * 0.24], [W - H * 0.24, H * 0.24], [H * 0.24, H * 0.76], [W - H * 0.24, H * 0.76]].forEach(([x, y]) => rivet(g, x, y, H * 0.035, '#b98a44'));
+      letter(g, info.zh, W / 2, H * 0.4, H * 0.46, W * 0.7, S.font, 700, S.fg, 'raised', { spread: true }); if ('letterSpacing' in g) g.letterSpacing = Math.round(H * 0.02) + 'px'; letter(g, String(sub || '').toUpperCase(), W / 2, H * 0.76, H * 0.12, W * 0.7, SERIF, 700, '#c49a58', 'raised'); if ('letterSpacing' in g) g.letterSpacing = '0px'; },
+    fascia(g, W, H, S, info, sub) {                 // a stone band across a market front with separate red letters fixed to it
+      g.fillStyle = S.bg; g.fillRect(0, 0, W, H); speck(g, 0, 0, W, H, 2600, '120,110,100', 0.22); speck(g, 0, 0, W, H, 1200, '255,255,255', 0.3);
+      g.fillStyle = '#b98f86'; g.fillRect(0, 0, W, H * 0.09); g.fillRect(0, H * 0.91, W, H * 0.09); speck(g, 0, 0, W, H * 0.09, 300, '60,30,30', 0.3); speck(g, 0, H * 0.91, W, H * 0.09, 300, '60,30,30', 0.3); g.fillStyle = 'rgba(0,0,0,.18)'; for (let x = W / 5; x < W; x += W / 5) g.fillRect(x, 0, 2, H);
+      letter(g, info.zh, W / 2, H * 0.43, H * 0.5, W * 0.76, S.font, 700, S.fg, 'mount', { spread: true }); letter(g, sub, W / 2, H * 0.78, H * 0.13, W * 0.76, SERIF, 700, '#4a4640', 'mount'); },
+  };
+  function drawSign(g, W, H, S, info) {
+    const sub = [info.en, info.years].filter(Boolean).join('  ·  '), fh = S.strip ? Math.round(H * 0.72) : H;
+    g.fillStyle = '#1a1614'; g.fillRect(0, 0, W, H); g.save(); g.beginPath(); g.rect(0, 0, W, fh); g.clip(); (FACE[S.t] || FACE.paint)(g, W, fh, S, info, sub); g.restore();
+    if (S.strip) {                                   // the English name and the years: a small enamel plate screwed on under the sign, since a sign of this kind does not carry them
+      const sw = W * 0.58, sh = H * 0.2, sx = (W - sw) / 2, sy = H * 0.785; g.fillStyle = '#efe9d8'; g.fillRect(sx, sy, sw, sh); g.strokeStyle = '#16181c'; g.lineWidth = Math.max(1.5, sh * 0.05); g.strokeRect(sx + sh * 0.1, sy + sh * 0.1, sw - sh * 0.2, sh - sh * 0.2);
+      rivet(g, sx + sh * 0.36, sy + sh / 2, sh * 0.08); rivet(g, sx + sw - sh * 0.36, sy + sh / 2, sh * 0.08); letter(g, sub, W / 2, sy + sh * 0.54, sh * 0.56, sw - sh * 1.4, FONT, 600, '#16181c', 'flat'); }
+  }
+  function signPlate(T, S, info, w, h) {
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = Math.max(64, Math.round(1024 * h / w)); const g = cv.getContext('2d');
+    const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8; const paint = () => { g.setTransform(1, 0, 0, 1, 0, 0); drawSign(g, cv.width, cv.height, S, info); t.needsUpdate = true; };
+    paint(); if (document.fonts && document.fonts.load) Promise.all(['Weibei TC', 'Kaiti TC', 'Xingkai TC'].map(f => document.fonts.load('40px "' + f + '"'))).then(paint, () => {});
+    return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: S.glow == null ? 0.42 : S.glow }));
   }
   // each kind builds its body with box() and returns where the title, the photo frames and the "see all" plate go
   // (all [x, y, z, w, h] on its front, which looks along +Z), and its footprint [u0, u1, v0, v1].
@@ -715,8 +855,12 @@
     const box = (w, h, d, mat, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
     const L = KINDS[kind](E, K, box, Object.assign({}, o, { g }), accent);
     const [tx, ty, tz, tw, th] = L.title;
-    const title = plate(T, [[info.zh, L.zh || 0.5, 0.39], [[info.en, info.years].filter(Boolean).join('  ·  '), 0.19, 0.8, 600]], tw, th, L.bg || accent, L.fg || '#fff3d6', 0.6);
-    title.position.set(tx, ty, tz); g.add(title);
+    // the header: the sign this topic really carries, in its case or frame (a light box stands proud of the wall, a 匾額 leans out from the top)
+    const S = signFor(o.topic, info), sg = new T.Group(); sg.position.set(tx, ty, tz); if (S.tilt) { sg.rotation.x = S.tilt; sg.position.z += Math.sin(S.tilt) * th / 2; } g.add(sg);
+    const title = signPlate(T, S, info, tw, th); sg.add(title);
+    const rimMat = { steel: K.steel, wood: K.frame, dark: K.dark, gilt: K.gilt, stone: K.stone }[S.rim];
+    if (rimMat) { const d = S.deep ? 0.16 : 0.07, r = 0.05; title.position.z = S.deep ? 0.07 : 0;
+      [[tw + 2 * r, r, 0, th / 2 + r / 2], [tw + 2 * r, r, 0, -th / 2 - r / 2], [r, th, -tw / 2 - r / 2, 0], [r, th, tw / 2 + r / 2, 0]].forEach(([w, h, x, y]) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), rimMat); m.position.set(x, y, d / 2 - 0.045); m.castShadow = true; sg.add(m); }); }
     const frames = L.frames.map(([x, y, z, w, h]) => { box(w + 0.2, h + 0.2, 0.06, K.frame, x, y, z - 0.03); return { position: [x, y, z + 0.012], size: [w, h], facing: 0, parent: g, glow: L.glow }; });
     frames.push({ position: [L.cue[0], L.cue[1], L.cue[2] + 0.012], size: [L.cue[3], L.cue[4]], facing: 0, parent: g, cue: true, glow: 0.55 });
     E.scene.add(g);

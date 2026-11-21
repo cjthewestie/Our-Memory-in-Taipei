@@ -70,9 +70,9 @@
     const cut = Math.ceil(s.length / 2); return [s.slice(0, cut), s.slice(cut)]; };
 
   // ── canvas plates and pictograms ────────────────────────────────────────────────────────────
-  function text(g, txt, cx, cy, px, maxW, weight, color) {
-    if (!txt) return 0; g.font = `${weight || 700} ${px}px ${FONT}`; const w = g.measureText(txt).width;
-    if (w > maxW) { px = Math.max(8, Math.floor(px * maxW / w)); g.font = `${weight || 700} ${px}px ${FONT}`; }
+  function text(g, txt, cx, cy, px, maxW, weight, color, face) {
+    if (!txt) return 0; face = face || FONT; g.font = `${weight || 700} ${px}px ${face}`; const w = g.measureText(txt).width;
+    if (w > maxW) { px = Math.max(8, Math.floor(px * maxW / w)); g.font = `${weight || 700} ${px}px ${face}`; }
     if (color) g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, cx, cy); return px;
   }
   function plate(E, w, h, px, draw, glow) {
@@ -131,6 +131,7 @@
       cream: new T.MeshStandardMaterial({ color: E.col('#f1e6d0'), roughness: 0.8 }),
       flower: ['#d43a5a', '#f1c84a', '#f4f0e6'].map(c => new T.MeshStandardMaterial({ color: E.col(c), roughness: 0.7 })),
       warm: E.GLOW(4.2, 2.8, 1.2), red: new T.MeshBasicMaterial({ color: new T.Color(1.9, 0.26, 0.1) }),
+      cloths: {}, cloth(hex) { return this.cloths[hex] || (this.cloths[hex] = new T.MeshStandardMaterial({ color: E.col(hex), roughness: 0.92, side: T.DoubleSide })); },   // tent, valance and carpet cloth, one material per colour
     };
     kits.set(E, k); return k;
   }
@@ -154,7 +155,10 @@
   function plaque(E, size) {
     const T = E.T, r = size || 0.15, g = new T.Group(); g.name = 'place-i';
     const cv = document.createElement('canvas'); cv.width = cv.height = 128; const c = cv.getContext('2d');
-    c.fillStyle = '#f0a020'; c.fillRect(0, 0, 128, 128); c.strokeStyle = '#fff6dc'; c.lineWidth = 9; c.beginPath(); c.arc(64, 64, 55, 0, 6.2832); c.stroke();
+    // an enamelled information roundel: a domed amber face, a cream ring with a hairline inside it, four fixing rivets
+    const dome = c.createRadialGradient(50, 44, 6, 64, 64, 70); dome.addColorStop(0, '#f7b53a'); dome.addColorStop(1, '#e08f12'); c.fillStyle = dome; c.fillRect(0, 0, 128, 128);
+    c.strokeStyle = '#fff6dc'; c.lineWidth = 8; c.beginPath(); c.arc(64, 64, 56, 0, 6.2832); c.stroke(); c.lineWidth = 2; c.beginPath(); c.arc(64, 64, 46, 0, 6.2832); c.stroke();
+    [0.785, 2.356, 3.927, 5.498].forEach(a => { c.fillStyle = '#8a5a10'; c.beginPath(); c.arc(64 + Math.cos(a) * 56, 64 + Math.sin(a) * 56, 3.2, 0, 6.2832); c.fill(); });
     c.fillStyle = '#fff6dc'; c.font = 'italic 700 88px Georgia, "Times New Roman", serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('i', 64, 70);
     const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding;
     const glow = new T.MeshBasicMaterial({ map: t, color: new T.Color(2.3, 1.9, 1.3) });           // brighter than white: it feeds the glow pass
@@ -223,92 +227,213 @@
   const figure = (E, shape) => (FIGURE[shape] || FIGURE.generic)(E, kit(E));
   const HAS_FIGURE = shape => !!FIGURE[shape] && shape !== 'generic';
 
-  // ── the four markers. Each returns a group whose front looks along +Z, with userData.foot and .height ──
-  const titlePlate = (E, it, w, h, bg, fg, glow, px) => plate(E, w, h, px || 768, (g, W, H) => {
-    g.fillStyle = bg; g.fillRect(0, 0, W, H); g.strokeStyle = fg; g.lineWidth = Math.max(3, H * 0.022); g.strokeRect(H * 0.05, H * 0.05, W - H * 0.1, H - H * 0.1);
-    const yr = shortYears(it), L = zhLines(it.zh, Math.max(6, Math.round(w / h * 3.4))), two = L.length > 1;
-    L.forEach((s, i) => text(g, s, W / 2, H * (two ? 0.2 + i * 0.22 : yr ? 0.34 : 0.4), H * (two ? 0.2 : 0.34), W - H * 0.3, 700, fg));
-    text(g, it.en, W / 2, H * (two ? 0.65 : yr ? 0.63 : 0.72), H * (two ? 0.1 : 0.15), W - H * 0.3, 600, fg); if (yr) text(g, yr, W / 2, H * 0.84, H * 0.13, W - H * 0.3, 700, fg); }, glow);
+  // ── the sign faces ──────────────────────────────────────────────────────────────────────────
+  // CJ, 2026-11-21: 「每個招牌要根據他的作用跟含義還有真實的招牌去對應」, 「整個專案都是」. Each marker's sign follows a real kind of sign:
+  // an event 立牌 is that kind of event's poster board (concert truss board, premiere backdrop with a red carpet, festival A-board,
+  // race-day board, a brown interpretive sign for a place), a plinth carries a cast bronze plaque, a memorial an engraved stone,
+  // a stand is a festival booth with a cloth banner tied across it. What each follows, and how sure that is: docs/signage/sources-shared.md.
+  const KAI = '"Kaiti TC","BiauKai","DFKai-SB","KaiTi",' + FONT, WEI = '"Weibei TC",' + KAI, LI = '"Libian TC","Baoli TC",' + KAI, XING = '"Xingkai TC",' + KAI, SONG = '"Songti TC","LiSong Pro","PMingLiU",serif';
+  const rnd = Math.random;
+  const speck = (g, W, H, n, rgb, a, s) => { for (let i = 0; i < n; i++) { g.fillStyle = `rgba(${rgb},${rnd() * a})`; g.fillRect(rnd() * W, rnd() * H, 1 + rnd() * (s || 2), 1 + rnd() * (s || 2)); } };
+  // lettering that stands up from its ground (raised) or is cut into it: a shaded edge, a lit edge, then the fill
+  function relief(g, txt, cx, cy, px, maxW, face, fill, raised, weight) {
+    if (!txt) return 0; const f = q => `${weight || 700} ${q}px ${face}`; g.font = f(px); const w = g.measureText(txt).width; if (w > maxW) { px = Math.max(8, px * maxW / w); g.font = f(px); }
+    const d = Math.max(1, px * 0.045) * (raised ? 1 : -1); g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = 'rgba(0,0,0,.62)'; g.fillText(txt, cx + d, cy + d); g.fillStyle = 'rgba(255,240,205,.5)'; g.fillText(txt, cx - d * 0.6, cy - d * 0.6); g.fillStyle = fill; g.fillText(txt, cx, cy); return px; }
+  // which kind of event (and so which kind of board) an item is, read from its name and its pictogram
+  function eventType(it, shape) {
+    const s = (it.zh || '') + ' ' + (it.en || '');
+    if (it.kind !== 'event') return 'heritage';
+    if (/演唱|簽唱|金曲|晚會|concert/i.test(s)) return 'concert';
+    if (/首映|紅毯|見面會|電影|影展|放映|《|premiere|red carpet/i.test(s) || shape === 'star' || shape === 'cinema') return 'premiere';
+    if (/市集|燈節|文化祭|嘉年華|遊行|年貨|煙火|博覽|藝術節|生活節|夏日節|遶境|白晝之夜|動漫祭/.test(s)) return 'festival';
+    if (shape === 'mic') return 'concert';
+    if (/登高|攀登|賽|世大運|NBA|climb|free solo/i.test(s) || shape === 'climber') return 'sports';
+    if (/啟用|最後一夜|地下化|拆除|結束|亮相|opening|closes/i.test(s)) return 'heritage';
+    return 'festival';
+  }
+  const HEAVY = '"PingFang TC","Heiti TC","Noto Sans TC",system-ui,sans-serif';
+  const THEME = {
+    concert:  { top: '#1b1040', bot: '#b0246a', ink: '#ffffff', band: '#f4d23c', bandInk: '#17121e', face: HEAVY, wt: 900, tag: 'LIVE', cloth: '#17121e', trim: '#f4d23c' },
+    premiere: { top: '#0e0e12', bot: '#1d1d26', ink: '#f3e2b0', band: '#9c1418', bandInk: '#f6dfa0', face: SONG, wt: 900, tag: 'PREMIERE · 首映', cloth: '#16161c', trim: '#9c1418' },
+    festival: { top: '#c7281c', bot: '#9a1812', ink: '#ffe9b0', band: '#e9b53a', bandInk: '#7a1410', face: XING, wt: 400, tag: '', cloth: '#e8731a', trim: '#c7281c' },
+    sports:   { top: '#f6f8fa', bot: '#dde5ee', ink: '#12305c', band: '#12305c', bandInk: '#ffffff', face: HEAVY, wt: 900, tag: 'RACE DAY', cloth: '#1b4f9c', trim: '#f4f6f8' },
+    heritage: { top: '#5d3c22', bot: '#4a2f1a', ink: '#ffffff', band: '#3a2412', bandInk: '#f1e3c4', face: KAI, wt: 700, tag: '', cloth: '#5d3c22', trim: '#f1e3c4' },
+  };
+  // the printed poster of an event board (rear: the plainer back of it)
+  function poster(g, W, H, it, type, shape, rear) {
+    const th = THEME[type], yr = shortYears(it), L = zhLines(it.zh, 7), two = L.length > 1;
+    const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, th.top); gr.addColorStop(1, th.bot); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    if (type === 'concert') {                                              // stage beams over a crowd
+      g.save(); g.globalCompositeOperation = 'lighter'; [[0.18, 0.3], [0.5, 0], [0.82, -0.3]].forEach(([x, k]) => { const b = g.createLinearGradient(0, H * 0.12, 0, H * 0.86); b.addColorStop(0, 'rgba(255,205,250,.42)'); b.addColorStop(1, 'rgba(255,205,250,0)'); g.fillStyle = b;
+        g.beginPath(); g.moveTo(W * x - 6, H * 0.12); g.lineTo(W * x + 6, H * 0.12); g.lineTo(W * (x + k + 0.2), H * 0.9); g.lineTo(W * (x + k - 0.2), H * 0.9); g.closePath(); g.fill(); }); g.restore();
+      g.fillStyle = 'rgba(10,6,24,.82)'; for (let i = 0; i < 15; i++) { const x = W * (i + 0.5) / 15, r = W * (0.034 + (i * 7 % 5) * 0.004), y = H * (0.9 - (i * 3 % 4) * 0.008); g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillRect(x - r * 1.5, y + r * 0.7, r * 3, H); if (i % 4 === 1) g.fillRect(x + r * 0.9, y - r * 2.6, r * 0.5, r * 3); }
+    } else if (type === 'premiere') {                                      // a step-and-repeat ground and film perforations down both edges
+      g.fillStyle = 'rgba(243,226,176,.1)'; g.font = `700 ${H * 0.022}px ${SONG}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      for (let r = 0; r < 15; r++) for (let c = 0; c < 4; c++) g.fillText(r % 2 ? '★  首映' : 'PREMIERE  ★', W * (c + (r % 2 ? 0.5 : 0.25)) / 3.6, H * (0.15 + r * 0.052));
+      g.fillStyle = '#0a0a0c'; g.fillRect(0, 0, W * 0.07, H); g.fillRect(W * 0.93, 0, W * 0.07, H); g.fillStyle = '#e9e2cf'; for (let y = H * 0.02; y < H; y += H * 0.036) { g.fillRect(W * 0.02, y, W * 0.03, H * 0.02); g.fillRect(W * 0.95, y, W * 0.03, H * 0.02); }
+      g.fillStyle = 'rgba(14,14,18,.86)'; g.fillRect(W * 0.13, H * 0.16, W * 0.74, H * 0.72); g.strokeStyle = '#c9a24a'; g.lineWidth = 4; g.strokeRect(W * 0.13, H * 0.16, W * 0.74, H * 0.72);
+    } else if (type === 'festival') {                                      // a gilt double rule, a string of lanterns, faint cloud curls
+      g.strokeStyle = 'rgba(255,225,150,.16)'; g.lineWidth = 3; for (let i = 0; i < 26; i++) { const x = (i * 97 % 100) / 100 * W, y = H * (0.16 + (i * 53 % 100) / 100 * 0.76), r = W * 0.035; g.beginPath(); g.arc(x, y, r, Math.PI, 0); g.arc(x + r * 0.5, y, r * 0.5, 0, Math.PI); g.stroke(); }
+      g.strokeStyle = '#f0c75a'; g.lineWidth = 6; g.strokeRect(14, 14, W - 28, H - 28); g.lineWidth = 2; g.strokeRect(26, 26, W - 52, H - 52);
+      g.lineWidth = 2; g.beginPath(); for (let i = 0; i < 5; i++) { const x0 = 30 + (W - 60) * i / 5, x1 = 30 + (W - 60) * (i + 1) / 5; g.moveTo(x0, H * 0.135); g.quadraticCurveTo((x0 + x1) / 2, H * 0.175, x1, H * 0.135); } g.stroke();
+      for (let i = 0; i < 5; i++) { const x = 30 + (W - 60) * (i + 0.5) / 5; g.fillStyle = i % 2 ? '#f0c75a' : '#ffe9b0'; g.beginPath(); g.ellipse(x, H * 0.175, W * 0.026, W * 0.032, 0, 0, 7); g.fill(); g.fillStyle = '#7a1410'; g.fillRect(x - W * 0.012, H * 0.175 - W * 0.036, W * 0.024, 4); g.fillRect(x - W * 0.012, H * 0.175 + W * 0.03, W * 0.024, 4); }
+      if (shape === 'rainbow') ['#e2342c', '#f08a24', '#f4d23c', '#3a9a4a', '#2a6ac0', '#7a3a9a'].forEach((c, i) => { g.fillStyle = c; g.fillRect(26, H * (0.885 + i * 0.006), W - 52, H * 0.006 + 1); });
+    } else if (type === 'sports') {                                        // racing stripes in two corners, a chequered strip
+      [['#12305c', 0], ['#d8342c', 1]].forEach(([c, i]) => { g.fillStyle = c; g.beginPath(); g.moveTo(W, H * (0.12 + i * 0.05)); g.lineTo(W, H * (0.17 + i * 0.05)); g.lineTo(W * (0.55 - i * 0.07), H * 0.12); g.lineTo(W * (0.62 - i * 0.07), H * 0.12); g.closePath(); g.fill();
+        g.beginPath(); g.moveTo(0, H * (0.9 - i * 0.05)); g.lineTo(0, H * (0.85 - i * 0.05)); g.lineTo(W * (0.42 + i * 0.07), H * 0.925); g.lineTo(W * (0.35 + i * 0.07), H * 0.925); g.closePath(); g.fill(); });
+      const q = W / 24; for (let i = 0; i < 24; i++) for (let j = 0; j < 2; j++) { g.fillStyle = (i + j) % 2 ? '#12305c' : '#ffffff'; g.fillRect(i * q, H * 0.895 + j * q * 0.6 - q * 1.2, q, q * 0.6); }
+    } else { speck(g, W, H, 500, '255,235,200', 0.05, 3); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 3; g.strokeRect(18, 18, W - 36, H - 36); }
+    const tag = type !== 'sports' ? th.tag : /登高|馬拉松|run-up|race/i.test(it.zh + it.en) ? 'RACE DAY' : /攀登|climb|solo/i.test(it.zh + it.en) ? 'THE CLIMB' : 'GAME DAY';
+    const dateLine = [tag.split(' · ')[0], yr].filter(Boolean).join('  ') || (KIND[it.kind] || '').split(' · ')[1] || '';
+    g.fillStyle = th.band; g.fillRect(0, 0, W, H * 0.12); text(g, dateLine, W / 2, H * 0.064, H * 0.066, W - 70, 800, th.bandInk, type === 'premiere' ? SONG : FONT);
+    const ey = H * (rear ? 0.36 : 0.345), er = H * (rear ? 0.17 : 0.15);
+    if (type === 'heritage' || type === 'sports') { g.fillStyle = type === 'sports' ? '#12305c' : 'rgba(255,255,255,.12)'; g.beginPath(); g.arc(W / 2, ey, er, 0, 7); g.fill(); g.strokeStyle = type === 'sports' ? '#d8342c' : '#ffffff'; g.lineWidth = 5; g.stroke(); }
+    else if (type === 'festival') { g.fillStyle = '#ffe9b0'; g.beginPath(); g.arc(W / 2, ey + H * 0.02, er, 0, 7); g.fill(); g.strokeStyle = '#f0c75a'; g.lineWidth = 6; g.stroke(); }
+    picto(g, shape, W / 2, ey + (type === 'festival' ? H * 0.02 : 0), er * 0.68, type === 'festival' ? '#b3221a' : type === 'sports' ? '#ffffff' : th.ink);
+    const ty = rear ? 0.66 : 0.63, tpx = H * (two ? 0.078 : 0.098);
+    g.save(); if (type === 'concert') { g.shadowColor = '#ff4fd0'; g.shadowBlur = tpx * 0.5; } else if (type !== 'sports') { g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 4; g.shadowOffsetY = 3; }
+    if (type === 'sports') g.transform(1, 0, -0.14, 1, H * 0.09, 0);
+    L.forEach((s, i) => text(g, s, W / 2, H * (two ? ty - 0.01 + i * 0.09 : ty + 0.03), tpx, W * (type === 'premiere' ? 0.66 : 0.82), th.wt, th.ink, th.face)); g.restore();
+    if (rear) { text(g, yr, W / 2, H * 0.87, H * 0.06, W - 80, 700, th.ink, FONT); return; }
+    text(g, it.en, W / 2, H * 0.815, H * 0.036, W * (type === 'premiere' ? 0.66 : 0.84), 600, th.ink, type === 'premiere' || type === 'heritage' ? 'Georgia,"Times New Roman",serif' : FONT);
+    g.fillStyle = th.band; g.fillRect(0, H * 0.925, W, H * 0.075); text(g, 'ⓘ 點我看故事 · Tap for the story', W / 2, H * 0.964, H * 0.032, W - 50, 700, th.bandInk);
+  }
+  // a cloth banner (布條): sag folds, a stitched hem, eyelets, a round emblem at each end, brush lettering
+  function clothFace(g, W, H, it, type, shape, withEn) {
+    const th = THEME[type], ink = type === 'festival' ? '#1a1210' : type === 'sports' ? '#ffffff' : th.ink === '#ffffff' && type === 'heritage' ? '#fff3d6' : th.band, u = H;
+    g.fillStyle = th.cloth; g.fillRect(0, 0, W, H); const n = 9; for (let i = 0; i < n; i++) { const a = 0.05 + rnd() * 0.07, gr = g.createLinearGradient(W * i / n, 0, W * (i + 1) / n, 0); gr.addColorStop(0, `rgba(0,0,0,${a})`); gr.addColorStop(0.5, `rgba(255,255,255,${a * 0.8})`); gr.addColorStop(1, `rgba(0,0,0,${a})`); g.fillStyle = gr; g.fillRect(W * i / n, 0, W / n + 1, H); }
+    g.setLineDash([u * 0.06, u * 0.05]); g.strokeStyle = 'rgba(255,255,255,.45)'; g.lineWidth = Math.max(1.5, u * 0.014); g.strokeRect(u * 0.07, u * 0.07, W - u * 0.14, H - u * 0.14); g.setLineDash([]);
+    g.fillStyle = '#d8d2c2'; [[u * 0.1, u * 0.1], [W - u * 0.1, u * 0.1], [u * 0.1, H - u * 0.1], [W - u * 0.1, H - u * 0.1]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, u * 0.035, 0, 7); g.fill(); });
+    [u * 0.62, W - u * 0.62].forEach(x => { g.fillStyle = type === 'festival' ? '#c7281c' : th.trim; g.beginPath(); g.arc(x, H / 2, u * 0.34, 0, 7); g.fill(); g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = u * 0.025; g.stroke(); picto(g, shape, x, H / 2, u * 0.22, type === 'festival' ? '#ffe9b0' : th.cloth); });
+    const t = zhLines(it.zh, 99)[0], yr = shortYears(it);
+    text(g, t, W / 2, H * (withEn ? 0.4 : 0.52), H * (withEn ? 0.46 : 0.6), W - u * 2.4, type === 'festival' || type === 'heritage' ? 400 : 900, ink, type === 'festival' ? XING : type === 'heritage' ? KAI : HEAVY);
+    if (withEn) text(g, [it.en, yr].filter(Boolean).join('  ·  '), W / 2, H * 0.8, H * 0.17, W - u * 2.4, 700, ink, FONT);
+  }
+  function sagBanner(E, w, h, px, draw, sag) {
+    const T = E.T, m = plate(E, w, h, px, draw, 0.3), geo = new T.PlaneGeometry(w, h, 14, 1), p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) { const u = p.getX(i) / (w / 2); p.setY(i, p.getY(i) - sag * (1 - u * u)); p.setZ(i, Math.sin(u * 7) * 0.014); }
+    geo.computeVertexNormals(); m.geometry.dispose(); m.geometry = geo; m.material.side = T.DoubleSide; m.castShadow = true; return m;
+  }
+  // a cast bronze plaque: stippled ground, a raised polished border, rosette bolts, raised letters
+  const bronzeFace = (E, it, w, h, px) => plate(E, w, h, px || 512, (g, W, H) => {
+    const u = Math.min(W, H), gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#4d3219'); gr.addColorStop(0.5, '#2c1b0d'); gr.addColorStop(1, '#3f2915'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    speck(g, W, H, 2600, '255,210,140', 0.1, 2); speck(g, W, H, 2200, '0,0,0', 0.22, 2);
+    [[0.03, 0.04, '#b98a44'], [0.085, 0.012, '#a67a3a']].forEach(([m, lw, c]) => { g.lineWidth = u * lw; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeRect(u * m + 2, u * m + 2, W - 2 * u * m, H - 2 * u * m); g.strokeStyle = c; g.strokeRect(u * m, u * m, W - 2 * u * m, H - 2 * u * m); });
+    [[0.17, 0.17], [0.83, 0.17], [0.17, 0.83], [0.83, 0.83]].forEach(([x, y]) => { const cx = x < 0.5 ? u * 0.15 : W - u * 0.15, cy = y < 0.5 ? u * 0.15 : H - u * 0.15; g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.arc(cx + 2, cy + 2, u * 0.035, 0, 7); g.fill(); g.fillStyle = '#b98a44';
+      for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(cx + Math.cos(k * 1.047) * u * 0.022, cy + Math.sin(k * 1.047) * u * 0.022, u * 0.014, 0, 7); g.fill(); } g.fillStyle = '#7a5226'; g.beginPath(); g.arc(cx, cy, u * 0.012, 0, 7); g.fill(); });
+    const yr = shortYears(it), L = zhLines(it.zh, Math.max(6, Math.round(w / h * 3.6))), two = L.length > 1, mw = W - u * 0.5;
+    L.forEach((s, i) => relief(g, s, W / 2, H * (two ? 0.25 + i * 0.21 : yr ? 0.36 : 0.4), H * (two ? 0.2 : 0.26), mw, KAI, '#d9b06a', true, 700));
+    if ('letterSpacing' in g) g.letterSpacing = '1px'; relief(g, String(it.en || '').toUpperCase(), W / 2, H * (two ? 0.655 : 0.6), H * 0.07, mw, 'Georgia,"Times New Roman",serif', '#c49a58', true, 700); if ('letterSpacing' in g) g.letterSpacing = '0px';
+    g.fillStyle = '#c9984a'; g.fillRect(W * 0.36, H * (two ? 0.735 : 0.69), W * 0.28, 2); if (yr) relief(g, yr, W / 2, H * 0.81, H * 0.1, mw, 'Georgia,"Times New Roman",serif', '#d9b06a', true, 700); }, 0.07);
+  // an engraved stone: polished granite, a cut rule, 隸書 cut in and gilded; vertical = the columns of a 碑, read from the right
+  const stoneFace = (E, it, w, h, px, o) => plate(E, w, h, px || 512, (g, W, H) => {
+    o = o || {}; const u = Math.min(W, H), gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, o.grey ? '#5b5853' : '#2c2b2e'); gr.addColorStop(0.55, o.grey ? '#494641' : '#1b1a1d'); gr.addColorStop(1, o.grey ? '#56534e' : '#27262a'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    speck(g, W, H, 3200, '225,225,235', 0.2, 2); speck(g, W, H, 1600, '0,0,0', 0.3, 3);
+    const gold = '#d9b65c'; g.strokeStyle = 'rgba(0,0,0,.6)'; g.lineWidth = u * 0.012; g.strokeRect(u * 0.07 - 1, u * 0.07 - 1, W - u * 0.14, H - u * 0.14); g.strokeStyle = gold; g.strokeRect(u * 0.07, u * 0.07, W - u * 0.14, H - u * 0.14);
+    const yr = shortYears(it), zh = String(it.zh || '').replace(/（.*?）/g, '').trim() || String(it.zh || '');
+    if (o.vertical) {                                                      // columns of single characters; a run of digits or Latin letters stays together, turned on its side
+      const tok = zh.match(/[0-9A-Za-z.\-]+|\S/g) || [], nc = tok.length > 8 ? 2 : 1, per = Math.ceil(tok.length / nc), top = H * 0.14, bot = H * (yr ? 0.86 : 0.9), cell = (bot - top) / per, size = Math.min(cell * 0.94, W * (nc > 1 ? 0.24 : 0.34));
+      for (let c = 0; c < nc; c++) tok.slice(c * per, (c + 1) * per).forEach((t, i) => { const cx = W * (nc > 1 ? 0.66 - c * 0.3 : 0.56), cy = top + cell * (i + 0.5);
+        if (t.length > 1) { g.save(); g.translate(cx, cy); g.rotate(Math.PI / 2); relief(g, t, 0, 0, size * 0.8, cell * 0.96, 'Georgia,"Times New Roman",serif', gold, false, 700); g.restore(); } else relief(g, t, cx, cy, size, size * 1.1, LI, gold, false, 700); });
+      if (yr) relief(g, yr, W / 2, H * 0.915, H * 0.06, W * 0.7, 'Georgia,"Times New Roman",serif', gold, false, 700);
+      return; }
+    const L = zhLines(zh, Math.max(6, Math.round(w / h * 3.6))), two = L.length > 1, mw = W - u * 0.4;
+    L.forEach((s, i) => relief(g, s, W / 2, H * (two ? 0.25 + i * 0.21 : yr ? 0.34 : 0.4), H * (two ? 0.18 : 0.26), mw, LI, gold, false, 700));
+    if ('letterSpacing' in g) g.letterSpacing = '2px'; relief(g, String(it.en || '').toUpperCase(), W / 2, H * (two ? 0.66 : 0.6), H * 0.07, mw, 'Georgia,"Times New Roman",serif', '#cfc7b4', false, 700); if ('letterSpacing' in g) g.letterSpacing = '0px';
+    if (yr) relief(g, yr, W / 2, H * 0.82, H * 0.1, mw, 'Georgia,"Times New Roman",serif', gold, false, 700); }, o && o.glow != null ? o.glow : 0.2);
 
-  function stand(E, it, o) {                          // a small roofed kiosk: counter in front, the story board on its back wall
-    o = o || {}; const T = E.T, K = kit(E), B = maker(E, 'place-stand'), accent = o.accent || ACCENT[it.district] || '#b7372a', shape = o.shape || (it.marker && it.marker.shape) || 'generic';
+  // ── the four markers. Each returns a group whose front looks along +Z, with userData.foot and .height ──
+  function stand(E, it, o) {                          // a festival booth: a frame tent, a cloth banner tied across its front, a skirted table, the event's poster on the back wall
+    o = o || {}; const T = E.T, K = kit(E), B = maker(E, 'place-stand'), shape = o.shape || (it.marker && it.marker.shape) || 'generic', type = eventType(it, shape), th = THEME[type];
+    const cloth = K.cloth(th.cloth), trim = K.cloth(th.trim);
     B.box(2.6, 0.18, 1.8, K.stone, 0, 0.09, 0); B.box(2.3, 0.05, 1.5, K.wood, 0, 0.205, 0);
-    [[-1.1, -0.7], [1.1, -0.7], [-1.1, 0.7], [1.1, 0.7]].forEach(([x, z]) => { B.box(0.1, 2.3, 0.1, K.woodDark, x, 1.33, z); B.box(0.16, 0.12, 0.16, K.stone, x, 0.24, z); });
-    B.box(2.2, 0.8, 0.06, K.wood, 0, 0.6, -0.7); B.box(2.2, 1.45, 0.06, K.plaster, 0, 1.73, -0.7); [-1, 1].forEach(k => { B.box(0.05, 0.95, 1.4, K.wood, k * 1.1, 0.68, 0); B.box(0.07, 0.06, 1.46, K.woodDark, k * 1.1, 1.18, 0); });
-    B.box(2.2, 0.82, 0.5, K.wood, 0, 0.61, 0.45); B.box(2.36, 0.06, 0.64, K.woodDark, 0, 1.05, 0.45);
-    for (let i = 0; i < 5; i++) B.box(0.03, 0.74, 0.02, K.woodDark, -0.88 + i * 0.44, 0.6, 0.71);                                 // the counter's battens
-    const front = titlePlate(E, it, 1.7, 0.56, accent, '#fff3d6', 0.5); B.add(front, 0, 0.6, 0.725);
-    const back = plate(E, 2.0, 1.2, 1024, (g, W, H) => { g.fillStyle = '#dccba6'; g.fillRect(0, 0, W, H); g.strokeStyle = accent; g.lineWidth = 8; g.strokeRect(16, 16, W - 32, H - 32);
-      picto(g, shape, W * 0.2, H * 0.5, H * 0.3, accent); const L = zhLines(it.zh, 8);
-      L.forEach((s, i) => text(g, s, W * 0.66, H * (L.length > 1 ? 0.26 + i * 0.2 : 0.34), H * 0.17, W * 0.58, 700, '#2a2420'));
-      text(g, it.en, W * 0.66, H * 0.66, H * 0.075, W * 0.58, 600, '#3a3028'); text(g, shortYears(it), W * 0.66, H * 0.82, H * 0.1, W * 0.58, 700, accent); }, 0.07);
-    B.add(back, 0, 1.75, -0.665);
-    B.box(2.9, 0.1, 2.2, K.woodDark, 0, 2.53, 0); const roof = B.cyl(0, 2.1, 0.78, K.tile, 0, 2.97, 0, 4); roof.rotation.y = Math.PI / 4; roof.scale.z = 0.76;
-    B.sph(0.09, K.gold, 0, 3.4, 0); [-1, 1].forEach(k => { B.box(0.06, 0.06, 2.24, K.woodDark, k * 1.42, 2.6, 0); });
-    const head = plate(E, 1.9, 0.34, 768, (g, W, H) => { g.fillStyle = '#2a2420'; g.fillRect(0, 0, W, H); text(g, zhLines(it.zh, 99)[0] + (shortYears(it) ? '  ·  ' + shortYears(it) : ''), W / 2, H * 0.54, H * 0.62, W - 40, 700, '#f3d27a'); }, 0.6);
-    B.box(1.98, 0.42, 0.05, K.woodDark, 0, 2.24, 0.99); B.add(head, 0, 2.24, 1.018);
-    [-1, 1].forEach(k => { B.cyl(0.008, 0.008, 0.2, K.dark, k * 1.22, 2.38, 0.98, 5); const l = B.sph(0.14, K.red, k * 1.22, 2.18, 0.98, true); l.scale.y = 0.86; B.cyl(0.06, 0.06, 0.03, K.dark, k * 1.22, 2.3, 0.98, 8); });
+    [[-1.1, -0.7], [1.1, -0.7], [-1.1, 0.7], [1.1, 0.7]].forEach(([x, z]) => { B.box(0.06, 2.3, 0.06, K.steel, x, 1.33, z); B.box(0.2, 0.04, 0.2, K.dark, x, 0.25, z); });
+    [[2.26, 0.05, 0.05, 0, 0.7], [2.26, 0.05, 0.05, 0, -0.7], [0.05, 0.05, 1.4, -1.1, 0], [0.05, 0.05, 1.4, 1.1, 0]].forEach(([w, h, d, x, z]) => B.box(w, h, d, K.steel, x, 2.46, z));
+    B.box(2.2, 2.2, 0.03, K.cream, 0, 1.36, -0.72); [-1, 1].forEach(k => B.box(0.03, 0.95, 1.4, cloth, k * 1.12, 0.7, 0));         // the canvas back wall and the half-height side cloths
+    B.box(2.2, 0.82, 0.5, K.woodDark, 0, 0.61, 0.45); B.box(2.36, 0.05, 0.64, K.cream, 0, 1.045, 0.45);
+    const skirt = plate(E, 2.24, 0.8, 768, (g, W, H) => clothFace(g, W, H, it, type, shape, true), 0.3); B.add(skirt, 0, 0.62, 0.705);           // the table skirt
+    const back = plate(E, 1.1, 1.6, 640, (g, W, H) => poster(g, W, H, it, type, shape), 0.16); B.add(back, 0.5, 1.78, -0.7);
+    const side = plate(E, 0.9, 1.1, 384, (g, W, H) => poster(g, W, H, it, type, shape, true), 0.14); B.add(side, -0.56, 1.82, -0.7);
+    const roof = B.cyl(0, 2.05, 0.7, cloth, 0, 2.85, 0, 4); roof.rotation.y = Math.PI / 4; roof.scale.z = 0.74;                              // the tent top and its valance
+    [[2.92, 0.26, 0.03, 0, 1.06], [2.92, 0.26, 0.03, 0, -1.06], [0.03, 0.26, 2.12, -1.46, 0], [0.03, 0.26, 2.12, 1.46, 0]].forEach(([w, h, d, x, z]) => B.box(w, h, d, trim, x, 2.4, z));
+    for (let i = 0; i < 9; i++) B.box(0.16, 0.12, 0.034, i % 2 ? cloth : trim, -1.28 + i * 0.32, 2.22, 1.06);                               // the scalloped edge of the front valance
+    const ban = sagBanner(E, 2.5, 0.46, 1024, (g, W, H) => clothFace(g, W, H, it, type, shape, false), 0.07); B.add(ban, 0, 1.9, 1.02);
+    [-1, 1].forEach(k => { B.g.add(rod(E, K.cream, [k * 1.25, 2.13, 1.02], [k * 1.1, 2.3, 0.72], 0.008), rod(E, K.cream, [k * 1.25, 1.67, 1.02], [k * 1.1, 1.5, 0.72], 0.008)); });
+    if (type === 'festival' || type === 'heritage') [-1, 1].forEach(k => { B.cyl(0.008, 0.008, 0.2, K.dark, k * 1.3, 2.18, 0.9, 5); const l = B.sph(0.13, K.red, k * 1.3, 2.0, 0.9, true); l.scale.y = 0.86; });
     B.sph(0.06, K.warm, 0, 2.4, 0.1, true);
-    const fig = B.add(figure(E, shape), -0.62, 1.08, 0.45); fig.scale.setScalar(0.42);                                             // a small bronze of the event on the counter
-    [0, 1, 2].forEach(i => B.box(0.26, 0.012, 0.19, i % 2 ? K.cream : K.flower[1], 0.5 + i * 0.012, 1.09 + i * 0.013, 0.42).rotation.y = i * 0.12);   // leaflets
-    B.box(0.2, 0.26, 0.02, K.cream, 0.86, 1.2, 0.5).rotation.x = -0.25;
-    B.add(plaque(E, 0.15), 1.1, 1.62, 0.78);
+    const fig = B.add(figure(E, shape), -0.62, 1.07, 0.45); fig.scale.setScalar(0.42);                                             // a small bronze of the event on the table
+    [0, 1, 2].forEach(i => B.box(0.26, 0.012, 0.19, i % 2 ? K.cream : K.flower[1], 0.5 + i * 0.012, 1.08 + i * 0.013, 0.42).rotation.y = i * 0.12);   // leaflets
+    B.box(0.2, 0.26, 0.02, K.cream, 0.86, 1.19, 0.5).rotation.x = -0.25;
+    B.add(plaque(E, 0.15), 1.1, 1.42, 0.78);
     B.g.userData.foot = [-1.35, 1.35, -0.95, 0.95]; B.g.userData.height = 3.4; return B.g;
   }
 
-  function board(E, it, o) {                          // 立牌: a standing sign board with the title, the date and a pictogram
-    o = o || {}; const T = E.T, K = kit(E), B = maker(E, 'place-board'), accent = o.accent || ACCENT[it.district] || '#b7372a', shape = o.shape || (it.marker && it.marker.shape) || 'generic';
-    [-1, 1].forEach(k => { B.box(0.14, 0.08, 0.86, K.dark, k * 0.66, 0.04, 0); B.box(0.08, 2.42, 0.08, K.woodDark, k * 0.66, 1.25, 0); B.g.add(rod(E, K.woodDark, [k * 0.66, 0.08, -0.4], [k * 0.66, 1.3, -0.04], 0.025)); });
-    B.box(1.4, 1.98, 0.07, K.woodDark, 0, 1.46, 0); B.box(1.24, 0.06, 0.07, K.woodDark, 0, 0.36, 0);
-    const front = plate(E, 1.26, 1.84, 768, (g, W, H) => {
-      g.fillStyle = '#dccba6'; g.fillRect(0, 0, W, H); g.fillStyle = accent; g.fillRect(0, 0, W, H * 0.13); g.fillRect(0, H * 0.925, W, H * 0.075);
-      text(g, shortYears(it) || (KIND[it.kind] || '').split(' · ')[1] || '', W / 2, H * 0.068, H * 0.075, W - 60, 700, '#fff3d6');
-      g.fillStyle = '#efe3c6'; g.beginPath(); g.arc(W / 2, H * 0.37, H * 0.2, 0, 6.2832); g.fill(); g.strokeStyle = accent; g.lineWidth = 6; g.stroke();
-      picto(g, shape, W / 2, H * 0.37, H * 0.135, accent);
-      const L = zhLines(it.zh, 7); L.forEach((s, i) => text(g, s, W / 2, H * (L.length > 1 ? 0.645 + i * 0.085 : 0.685), H * (L.length > 1 ? 0.074 : 0.092), W - 70, 700, '#2a2420'));
-      text(g, it.en, W / 2, H * 0.835, H * 0.036, W - 70, 600, '#3a3028'); g.fillStyle = accent; g.fillRect(W * 0.3, H * 0.87, W * 0.4, 3);
-      text(g, 'ⓘ 點我看故事 · Tap for the story', W / 2, H * 0.963, H * 0.032, W - 50, 700, '#fff3d6'); }, 0.06);
-    B.add(front, 0, 1.46, 0.037);
-    const rear = plate(E, 1.26, 1.84, 384, (g, W, H) => { g.fillStyle = accent; g.fillRect(0, 0, W, H); g.strokeStyle = '#fff3d6'; g.lineWidth = 5; g.strokeRect(14, 14, W - 28, H - 28);
-      picto(g, shape, W / 2, H * 0.36, H * 0.15, '#fff3d6'); zhLines(it.zh, 7).forEach((s, i) => text(g, s, W / 2, H * (0.64 + i * 0.09), H * 0.075, W - 50, 700, '#fff3d6')); text(g, shortYears(it), W / 2, H * 0.88, H * 0.06, W - 50, 700, '#fff3d6'); }, 0.3);
-    rear.rotation.y = Math.PI; B.add(rear, 0, 1.46, -0.037);
-    [-1, 1].forEach(k => { const r = B.box(0.86, 0.05, 0.36, K.tile, k * 0.38, 2.6, 0); r.rotation.z = -k * 0.3; }); B.box(0.1, 0.1, 0.4, K.woodDark, 0, 2.72, 0);   // a small roof over the board
-    B.box(1.16, 0.24, 0.34, K.wood, 0, 0.14, 0.3); B.box(1.2, 0.03, 0.38, K.woodDark, 0, 0.27, 0.3);                               // the planter at its foot
-    for (let i = 0; i < 7; i++) { const x = -0.48 + i * 0.16; B.sph(0.11, E.MATS.leaf, x, 0.33 + (i % 2) * 0.03, 0.3 + (i % 3 - 1) * 0.04); B.sph(0.035, K.flower[i % 3], x + 0.03, 0.43 + (i % 2) * 0.03, 0.36, true); }
-    [-0.4, 0.4].forEach(x => B.box(0.12, 0.04, 0.05, K.warm, x, 0.03, 0.5).castShadow = false);
-    B.add(plaque(E, 0.13), 0.62, 2.3, 0.1);
+  function board(E, it, o) {                          // 立牌: the poster board of that kind of event
+    o = o || {}; const T = E.T, K = kit(E), B = maker(E, 'place-board'), shape = o.shape || (it.marker && it.marker.shape) || 'generic', type = eventType(it, shape);
+    const front = plate(E, 1.26, 1.84, 768, (g, W, H) => poster(g, W, H, it, type, shape), type === 'heritage' ? 0.14 : type === 'concert' ? 0.26 : 0.17);
+    const rear = plate(E, 1.26, 1.84, 384, (g, W, H) => poster(g, W, H, it, type, shape, true), 0.2); rear.rotation.y = Math.PI;
+    if (type === 'festival') {                        // an A-board: two framed boards hinged at the top, a chain between them
+      [[1, front], [-1, rear]].forEach(([k, face]) => { const leaf = new T.Group(); leaf.position.set(0, 2.44, 0); leaf.rotation.x = -k * 0.13; B.g.add(leaf);
+        const put = (m, x, y, z) => { m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; leaf.add(m); };
+        put(new T.Mesh(new T.BoxGeometry(1.42, 2.0, 0.04), K.woodDark), 0, -1.04, k * 0.02); [-1, 1].forEach(s => put(new T.Mesh(new T.BoxGeometry(0.07, 2.46, 0.05), K.wood), s * 0.69, -1.22, k * 0.02));
+        put(new T.Mesh(new T.BoxGeometry(1.42, 0.07, 0.05), K.wood), 0, -0.04, k * 0.02); face.position.set(0, -1.04, k * 0.042); leaf.add(face); });
+      B.cyl(0.03, 0.03, 1.5, K.dark, 0, 2.45, 0, 8).rotation.z = Math.PI / 2; [-1, 1].forEach(s => B.g.add(rod(E, K.dark, [s * 0.69, 0.9, 0.2], [s * 0.69, 0.9, -0.2], 0.008)));
+    } else {
+      B.box(1.4, 1.98, 0.06, K.dark, 0, 1.46, 0); B.add(front, 0, 1.46, 0.032); B.add(rear, 0, 1.46, -0.032);
+      if (type === 'concert') {                       // hung in a lighting truss: two laced towers, a top chord, two cans
+        [-1, 1].forEach(k => { [-0.06, 0.06].forEach(z => B.cyl(0.018, 0.018, 2.66, K.steel, k * 0.8, 1.33, z, 6)); for (let i = 0; i < 9; i++) B.g.add(rod(E, K.steel, [k * 0.8, 0.14 + i * 0.28, i % 2 ? 0.06 : -0.06], [k * 0.8, 0.42 + i * 0.28, i % 2 ? -0.06 : 0.06], 0.009));
+          B.box(0.36, 0.03, 0.5, K.dark, k * 0.8, 0.015, 0); B.box(0.3, 0.1, 0.18, K.dark, k * 0.8, 0.08, -0.16); });
+        [-0.06, 0.06].forEach(z => { const c = B.cyl(0.018, 0.018, 1.7, K.steel, 0, 2.66, z, 6); c.rotation.z = Math.PI / 2; });
+        [-0.4, 0.4].forEach(x => { const c = B.cyl(0.07, 0.055, 0.16, K.dark, x, 2.56, 0.12, 10); c.rotation.x = 0.9; B.sph(0.05, K.warm, x, 2.5, 0.17, true); });
+      } else if (type === 'premiere') {               // a pipe-framed backdrop, a red carpet, two posts and a rope
+        [-1, 1].forEach(k => { B.cyl(0.025, 0.025, 2.56, K.steel, k * 0.74, 1.28, 0, 8); B.box(0.3, 0.02, 0.46, K.steel, k * 0.74, 0.01, 0);
+          B.cyl(0.022, 0.022, 0.86, K.gold, k * 0.6, 0.45, 0.44, 8); B.cyl(0.09, 0.1, 0.03, K.gold, k * 0.6, 0.03, 0.44, 12); B.sph(0.04, K.gold, k * 0.6, 0.9, 0.44); B.g.add(rod(E, K.red, [k * 0.6, 0.84, 0.44], [0, 0.66, 0.44], 0.014)); });
+        const top = B.cyl(0.025, 0.025, 1.52, K.steel, 0, 2.54, 0, 8); top.rotation.z = Math.PI / 2; B.box(1.5, 0.012, 0.5, K.cloth('#8f1418'), 0, 0.008, 0.26).castShadow = false;
+      } else if (type === 'sports') {                 // on crowd-barrier feet, a line of pennants over it
+        [-1, 1].forEach(k => { B.cyl(0.025, 0.025, 2.8, K.steel, k * 0.74, 1.4, 0, 8); B.box(0.05, 0.03, 0.8, K.steel, k * 0.74, 0.015, 0); });
+        B.g.add(rod(E, K.cream, [-0.74, 2.78, 0], [0.74, 2.78, 0], 0.006)); for (let i = 0; i < 8; i++) { const f = B.cyl(0, 0.07, 0.15, K.flower[i % 3], -0.63 + i * 0.18, 2.7, 0, 3); f.rotation.z = Math.PI; f.scale.z = 0.12; }
+        [0.5, 1.0].forEach(y => { const c = B.cyl(0.014, 0.014, 1.48, K.steel, 0, y * 0.3, 0, 6); c.rotation.z = Math.PI / 2; });
+      } else {                                        // an interpretive sign: two brushed-steel posts, a cap, a planter at its foot
+        [-1, 1].forEach(k => { B.box(0.07, 2.56, 0.07, K.steel, k * 0.735, 1.28, 0); B.box(0.24, 0.03, 0.3, K.steel, k * 0.735, 0.015, 0); }); B.box(1.56, 0.05, 0.12, K.steel, 0, 2.58, 0);
+        B.box(1.16, 0.24, 0.34, K.wood, 0, 0.14, 0.3); B.box(1.2, 0.03, 0.38, K.woodDark, 0, 0.27, 0.3);
+        for (let i = 0; i < 7; i++) { const x = -0.48 + i * 0.16; B.sph(0.11, E.MATS.leaf, x, 0.33 + (i % 2) * 0.03, 0.3 + (i % 3 - 1) * 0.04); B.sph(0.035, K.flower[i % 3], x + 0.03, 0.43 + (i % 2) * 0.03, 0.36, true); }
+      }
+    }
+    [-0.4, 0.4].forEach(x => B.box(0.12, 0.04, 0.05, K.warm, x, 0.03, 0.52).castShadow = false);
+    B.add(plaque(E, 0.13), 0.66, 2.36, 0.12);
     B.g.userData.foot = [-0.85, 0.85, -0.5, 0.55]; B.g.userData.height = 2.8; return B.g;
   }
 
   function statue(E, it, o) {                         // a bronze on a stone plinth, an information post beside it
     o = o || {}; const T = E.T, K = kit(E), B = maker(E, 'place-statue'), shape = o.shape || (it.marker && it.marker.shape) || 'generic';
     const info = (x, z) => { B.cyl(0.03, 0.04, 0.95, K.dark, x, 0.475, z, 8); B.cyl(0.1, 0.12, 0.04, K.dark, x, 0.02, z, 12); const p = B.add(plaque(E, 0.14), x, 1.06, z + 0.02); p.rotation.x = -0.25; };
-    if (shape === 'stone') {                          // a low, quiet memorial stone: no figure
+    if (shape === 'stone') {                          // a low, quiet memorial stone: no figure; the name cut in columns and gilded, as on a 碑
       B.box(1.9, 0.14, 1.3, K.stone, 0, 0.07, 0); B.box(1.5, 0.1, 0.9, K.granite, 0, 0.19, 0);
       B.box(1.0, 0.72, 0.3, K.granite, 0, 0.6, -0.05); const top = B.cyl(0.5, 0.5, 0.3, K.granite, 0, 0.96, -0.05, 24); top.rotation.x = Math.PI / 2; top.scale.y = 1;
-      const face = plate(E, 0.84, 0.86, 512, (g, W, H) => { g.fillStyle = '#3a3733'; g.fillRect(0, 0, W, H); const L = zhLines(it.zh, 7);
-        L.forEach((s, i) => text(g, s, W / 2, H * (L.length > 1 ? 0.3 + i * 0.2 : 0.4), H * 0.15, W - 40, 700, '#e8dcc0')); text(g, shortYears(it), W / 2, H * 0.8, H * 0.11, W - 40, 600, '#e8dcc0'); }, 0.22);
-      B.add(face, 0, 0.72, 0.103);
+      B.add(stoneFace(E, it, 0.84, 0.86, 512, { vertical: true, grey: true }), 0, 0.72, 0.103);
       [-0.5, -0.36, 0.4, 0.54].forEach((x, i) => { B.g.add(rod(E, E.MATS.leaf, [x, 0.24, 0.3], [x + 0.03, 0.5 + (i % 2) * 0.06, 0.26], 0.008)); const f = B.sph(0.045, K.flower[2], x + 0.03, 0.52 + (i % 2) * 0.06, 0.26, true); f.scale.y = 1.3; });   // white lilies
       info(1.05, 0.5); B.g.userData.foot = [-0.95, 1.2, -0.65, 0.65]; B.g.userData.height = 1.6; return B.g;
     }
     B.box(1.6, 0.18, 1.6, K.stone, 0, 0.09, 0); B.box(1.3, 0.16, 1.3, K.stone, 0, 0.26, 0); B.box(1.0, 0.84, 1.0, K.granite, 0, 0.76, 0); B.box(1.16, 0.1, 1.16, K.stone, 0, 1.23, 0); B.box(1.06, 0.05, 1.06, K.granite, 0, 1.305, 0);
-    B.box(0.86, 0.58, 0.03, K.bronze, 0, 0.78, 0.512);
-    const pl = titlePlate(E, it, 0.8, 0.52, '#3b2a18', '#f0cf86', 0.4, 512); B.add(pl, 0, 0.78, 0.53);
+    B.box(0.86, 0.58, 0.03, K.bronze, 0, 0.78, 0.512); B.add(bronzeFace(E, it, 0.84, 0.56, 640), 0, 0.78, 0.529);                // the cast plaque, bolted to the plinth
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const s = B.sph(0.016, K.gold, a * 0.345, 0.78 + b * 0.205, 0.53, true); s.scale.z = 0.5; });
     const fig = B.add(figure(E, shape), 0, 1.33, 0); if (shape === 'generic') fig.scale.setScalar(1.0);
     [[-0.74, 0.74], [0.74, 0.74]].forEach(([x, z]) => B.box(0.1, 0.04, 0.06, K.warm, x, 0.02, z).castShadow = false);
     info(1.0, 0.72); B.g.userData.foot = [-0.9, 1.15, -0.9, 0.9]; B.g.userData.height = 3.0; return B.g;
   }
 
-  function wall(E, it, o) {                           // a low memorial wall with a bronze plaque
+  function wall(E, it, o) {                           // a low memorial wall with an engraved stone set into it
     o = o || {}; const T = E.T, K = kit(E), B = maker(E, 'place-wall'), accent = o.accent || ACCENT[it.district] || '#b7372a', shape = o.shape || (it.marker && it.marker.shape) || 'generic';
     B.box(3.5, 0.16, 0.8, K.stone, 0, 0.08, 0); B.box(3.0, 1.16, 0.34, E.MATS.brick, 0, 0.74, 0); B.box(3.14, 0.1, 0.46, K.stone, 0, 1.37, 0);
     if (shape === 'fire') B.box(1.5, 1.16, 0.345, E.triMat({ color: '#3a2a22', tex: E.TEX.brick, scale: 1, rough: 0.95 }), -0.75, 0.74, 0);   // the half the fire took, the half rebuilt
     [-1, 1].forEach(k => { B.box(0.44, 1.6, 0.52, K.stone, k * 1.66, 0.96, 0); B.box(0.54, 0.08, 0.62, K.granite, k * 1.66, 1.8, 0); B.box(0.2, 0.22, 0.2, K.warm, k * 1.66, 1.95, 0).castShadow = false; B.cyl(0, 0.2, 0.12, K.dark, k * 1.66, 2.12, 0, 4).rotation.y = Math.PI / 4; });
-    B.box(1.56, 0.78, 0.04, K.bronze, 0, 0.8, 0.19);
-    B.add(titlePlate(E, it, 1.46, 0.68, '#3b2a18', '#f0cf86', 0.42), 0, 0.8, 0.213);
-    [-1, 1].forEach(k => { B.box(0.56, 0.56, 0.035, K.woodDark, k * 1.1, 0.8, 0.188);
-      B.add(plate(E, 0.48, 0.48, 256, (g, W, H) => { g.fillStyle = '#dccba6'; g.fillRect(0, 0, W, H); if (k < 0) picto(g, shape, W / 2, H / 2, H * 0.36, accent); else { text(g, shortYears(it).slice(0, 4) || '記', W / 2, H * 0.42, H * 0.34, W - 24, 700, accent); text(g, KIND[it.kind] ? KIND[it.kind].split(' · ')[1] : '', W / 2, H * 0.76, H * 0.16, W - 24, 600, '#5a4d40'); } }, 0.06), k * 1.1, 0.8, 0.207); });
+    B.box(1.62, 0.84, 0.03, K.stone, 0, 0.8, 0.183); B.box(1.52, 0.74, 0.04, K.granite, 0, 0.8, 0.195);                           // the slab in its stone surround
+    B.add(stoneFace(E, it, 1.5, 0.72, 768, { glow: 0.24 }), 0, 0.8, 0.2165);
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const c = B.cyl(0.018, 0.018, 0.02, K.steel, a * 0.71, 0.8 + b * 0.32, 0.222, 10); c.rotation.x = Math.PI / 2; });   // stand-off bolts
+    [-1, 1].forEach(k => { B.box(0.54, 0.54, 0.03, K.granite, k * 1.1, 0.8, 0.188);
+      B.add(plate(E, 0.5, 0.5, 256, (g, W, H) => { g.fillStyle = '#242326'; g.fillRect(0, 0, W, H); speck(g, W, H, 900, '225,225,235', 0.2, 2); g.strokeStyle = '#d9b65c'; g.lineWidth = 3; g.strokeRect(12, 12, W - 24, H - 24);
+        if (k < 0) picto(g, shape, W / 2, H / 2, H * 0.32, '#d9b65c'); else { relief(g, shortYears(it).slice(0, 4) || '記', W / 2, H * 0.42, H * 0.3, W - 40, 'Georgia,"Times New Roman",serif', '#d9b65c', false, 700); relief(g, KIND[it.kind] ? KIND[it.kind].split(' · ')[1] : '', W / 2, H * 0.74, H * 0.17, W - 40, LI, '#cfc7b4', false, 700); } }, 0.2), k * 1.1, 0.8, 0.2045); });
     if (HAS_FIGURE(shape)) { const f = B.add(figure(E, shape), -0.95, 1.42, 0); f.scale.setScalar(0.45); }
     if (shape === 'train') { [-0.14, 0.14].forEach(z => B.box(3.2, 0.03, 0.035, K.steel, 0, 0.175, 0.95 + z)); for (let i = 0; i < 9; i++) B.box(0.12, 0.02, 0.5, K.woodDark, -1.4 + i * 0.35, 0.165, 0.95); }   // a strip of the old track in the ground
     if (shape === 'book') for (let i = 0; i < 14; i++) B.box(0.07, 0.2 + (i % 3) * 0.04, 0.16, [K.tile, K.cream, K.woodDark, K.flower[1]][i % 4], -0.5 + i * 0.085, 1.53 + (i % 3) * 0.02, 0);                // a row of books on the cap

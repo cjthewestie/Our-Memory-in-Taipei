@@ -1,0 +1,2317 @@
+{
+ "district": "square",
+ "researched": "2026-11-21",
+ "label_key": {
+  "measured": "Read on the cited page during this research run.",
+  "inferred": "Not read on a cited page: general knowledge of the city, a search-result summary, or a reading of the evidence. Check before it goes on the public site.",
+  "unknown": "Written as (unknown — needs CJ)."
+ },
+ "notes": [
+  "Scope: things that belong to all of Taipei, 1985 to today. Nothing here repeats an item in ximen.json, dadao.json or xinyi.json (ids checked on 2026-11-21).",
+  "How pages were read: Chinese Wikipedia pages were fetched as plain text through the Wikipedia API and the quoted facts were found by text search; four pages (垃圾車, 垃圾費隨袋徵收, 統一超商, and the English pages) were read through a fetch tool that returns quotes. A fact is labelled measured only when its sentence was seen.",
+  "Photo licences were read from the Wikimedia Commons API (LicenseShortName) on 2026-11-21. The photos themselves were not opened, so every visual detail that is not quoted from a page is labelled inferred and should be checked against the photo before modelling.",
+  "The 'location' field says where the real thing is and suggests a spot on the square; every suggested spot is inferred, since the square is an invented plaza.",
+  "No-politics rule: 圓山大飯店, 大安森林公園, SARS and the 2017 Universiade each touch something political on their source page. The public text here leaves that out and each item says so in its unknowns, so CJ can drop the item.",
+  "No-logo rule: the convenience store, breakfast shop, YouBike dock, MRT sign, public phone and EasyCard reader should carry plain text or invented names only. Two reference photos show a real chain store; they are for layout only.",
+  "Three generations of place are mixed here on purpose (1980s bus, 1996 MRT, 2012 bike dock); which year the square is set in is (unknown — needs CJ).",
+  "Second run, 2026-11-21 (events): Chinese Wikipedia pages were fetched as plain text through the Wikipedia API; five news pages (CNA twice, SETN, Storm, yam) and the English MSI page were opened through a fetch tool that returns quotes. A fact taken from a web-search summary is labelled inferred.",
+  "Event reference photos are Wikimedia Commons category pages whose existence was checked through the Commons API; the files inside were not opened and their licences were not read.",
+  "tools/places/build_data.py has no \"square\" entry in DISTRICTS yet, so this file is not built into remake/place-data.js until that is added."
+ ],
+ "places": [
+  {
+   "id": "mrt-muzha-line",
+   "zh": "捷運木柵線（文湖線）高架站",
+   "en": "MRT Muzha Line elevated station (today the Wenhu Line)",
+   "years": "Works began late 1988; opened 1996-03-28; 內湖 section added 2009-07-04",
+   "history_en": "Taipei's first metro line, and the first metro to run in Taiwan. The city decided on a medium-capacity system in 1983, partly because the new zoo in 木柵 was expected to draw more than 60,000 visitors a day, and chose the French Matra system in 1987. Cracks found in the viaduct pier caps in 1993 and a fire during train tests delayed the opening. Free trial rides began on 27 February 1996 and paid service started on 28 March 1996, with 42,548 riders on the first day. The 內湖 section opened on 4 July 2009 and the whole route is now the brown 文湖線.",
+   "history_zh": "臺北第一條捷運，也是臺灣最早營運的捷運。1988年底開工，採法國馬特拉膠輪中運量系統，1996年3月28日木柵線通車；2009年7月4日內湖線通車，合稱文湖線。",
+   "facts": [
+    {
+     "text": "木柵線 opened 1996-03-28; the 內湖 section opened 2009-07-04; the line is also called 棕線 (brown line).",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "Free public trial rides from 1996-02-27; paid service from 1996-03-28.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "Medium-capacity rubber-tyred system; Matra system chosen in 1987; works formally began at the end of 1988.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "1993-04: cracks found in the viaduct pier caps at 六張犁站; 1993-05-05: a train caught fire during testing.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "Most of the line is elevated on box girders and U-shaped beams; whole line 25.7 km with 24 stations.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "First-day ridership on 1996-03-28 was 42,548.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北捷運"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "Elevated concrete viaduct on single round or rectangular piers with wide hammerhead pier caps (帽樑), running above a road.",
+     "label": "measured"
+    },
+    {
+     "text": "Short driverless train, boxy cars with a large flat front window and no driver cab, running on rubber tyres on two concrete or steel running strips rather than rails.",
+     "label": "measured"
+    },
+    {
+     "text": "Train body white or pale grey with a coloured band under the windows; the line colour is brown. Check band colour against the 1996 photo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Station is a small roofed platform box on top of the viaduct, reached by stairs and an escalator from the pavement; grey concrete, glass panels, a curved or pitched metal roof.",
+     "label": "inferred"
+    },
+    {
+     "text": "Street-level entrance sign: a tall post with the station name in white on a coloured panel; do not copy the Taipei Metro logo, use plain text 捷運.",
+     "label": "inferred"
+    },
+    {
+     "text": "For a 1996 scene there are no platform screen doors; platform edge is open with a yellow line.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: an elevated track segment with one small station crossing one edge of the plaza, with the stair down to the paving (inferred placement). Real line: 動物園站 to 南港展覽館站 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/文湖線",
+    "https://zh.wikipedia.org/zh-tw/臺北捷運"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_Metro_VAL256_train_1996-11.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "VAL256 train in November 1996, the opening year"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:VAL256_on_Taipei_MRT_Muzha_Line_20070306.jpg",
+     "licence": "Public domain",
+     "shows": "Train on the elevated 木柵線 viaduct, 2007"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_MRT_Taipei_Zoo_Station.JPG",
+     "licence": "CC BY-SA 2.5",
+     "shows": "動物園站, the elevated terminus"
+    }
+   ],
+   "unknowns": [
+    "Exact train livery in 1996 (band colour): (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "lianying-bus-stop",
+   "zh": "聯營公車站牌與老公車",
+   "en": "City bus stop with an old joint-service bus",
+   "years": "Joint service since 1977; stored-value card 1995-10-25; EasyCard on buses 2002-09-30",
+   "history_en": "Before 1976 each Taipei bus company had its own routes, numbers and paper tickets. A joint-service system (聯營) was set up so one ticket worked on every bus: routes 201 and 202 started on 1 January 1977 and the first 33 joint routes ran from 30 April 1977. Stop signs, once round, square or plum-blossom shaped depending on the company, became one round sign with a pink base. A magnetic stored-value card for buses arrived on 25 October 1995, ran alongside coin fares, and was withdrawn on 8 October 2003 after the EasyCard took over.",
+   "history_zh": "1977年臺北公車實施聯營，統一路線編號與票證，站牌統一為圓形、粉紅底色。1995年推出公車儲值票，2002年悠遊卡上線後逐漸取代，2003年停用。",
+   "facts": [
+    {
+     "text": "聯營 routes 201 and 202 started 1977-01-01; first stage of 33 joint routes began 1977-04-30.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+    },
+    {
+     "text": "Early stop signs were round (city bus office), square (光華巴士) or plum-blossom shaped (指南客運); after 聯營 all were round with a pink base, route number in red with black 聯 and 營 on either side, station name in red.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+    },
+    {
+     "text": "Bus stored-value magnetic card started 1995-10-25 in NT$300 and NT$500 values; stopped 2003-10-08.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+    },
+    {
+     "text": "Fares are by section (段票); route numbers starting with 5 and 6 were originally air-conditioned routes.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "Round stop sign on a pole: pink base colour, big red route number with small black 聯 and 營 beside it, station name in red, a list of stops below.",
+     "label": "measured"
+    },
+    {
+     "text": "Several round signs can share one pole or stand in a row, one per route.",
+     "label": "inferred"
+    },
+    {
+     "text": "Old non-air-conditioned bus: boxy body, sliding windows that open, two folding doors, a coin box beside the driver. Livery differs by company, so use an invented plain two-colour scheme and no company logo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Front and side route boards are painted plates with the route number and the two end stops in 楷書.",
+     "label": "inferred"
+    },
+    {
+     "text": "A simple metal shelter with a bench is a later addition; a 1980s stop is often just the pole on the pavement.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: at the kerb on one side of the plaza, the bus parked at the stop (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Bus_stop_of_Taipei_Bus_at_Soochow_University_Downtown_Campus_20100525.jpg",
+     "licence": "CC BY 3.0",
+     "shows": "Round stop sign, 2010"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_Bus_2U-222_20070513.jpg",
+     "licence": "CC BY 2.5",
+     "shows": "A city bus in 2007 (later than the 1980s look)"
+    }
+   ],
+   "unknowns": [
+    "A dated photo of a 1980s 聯營 bus and its livery: (unknown — needs CJ)",
+    "When bus conductors (車掌) ended in Taipei: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "garbage-truck-music",
+   "zh": "會唱歌的垃圾車",
+   "en": "The garbage truck that plays music",
+   "years": "Music boxes brought in 1980s–2000s; recycling trucks from the 1990s; per-bag fee from 2000-07-01",
+   "history_en": "In Taipei there are no street bins for household rubbish: the truck comes to the corner at a set time and neighbours walk out to meet it. It announces itself with one of two piano pieces, 少女的祈禱 (Maiden's Prayer) or 給愛麗絲 (Für Elise), played from a music box brought in from Japan between the 1980s and 2000s. Who chose the tunes is no longer known; one story credits the health official 許子秋. From the 1990s a recycling truck follows behind, often playing 酒矸倘賣無. Since 1 July 2000 the rubbish must be in the city's paid bags.",
+   "history_zh": "臺北的垃圾車沿街收垃圾時播放《少女的祈禱》或《給愛麗絲》，居民聽到音樂便提著垃圾出門。選曲由來眾說紛紜。1990年代起資源回收車跟在後面，常播《酒矸倘賣無》。",
+   "facts": [
+    {
+     "text": "Trucks play music to alert residents; the two most used pieces are 《給愛麗絲》 and 《少女的祈禱》.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/垃圾車"
+    },
+    {
+     "text": "The tunes are said to have been chosen by 許子秋, but the page says the story can no longer be checked.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/垃圾車"
+    },
+    {
+     "text": "From the 1980s to the 2000s Taiwan used a Japanese-made music box (SVM7910CF) for the truck music.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/垃圾車"
+    },
+    {
+     "text": "From the 1990s recycling trucks usually follow the garbage truck and often play 《酒矸倘賣無》.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/垃圾車"
+    },
+    {
+     "text": "The \"garbage doesn't touch the ground\" policy requires residents to bring trash to the trucks.",
+     "label": "measured",
+     "source": "https://en.wikipedia.org/wiki/Waste_management_in_Taiwan"
+    },
+    {
+     "text": "Truck colour is yellow.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "Rear-loading compactor truck, yellow body, with an open hopper at the back where people throw the bags in.",
+     "label": "inferred"
+    },
+    {
+     "text": "A loudspeaker horn on the cab roof; in the scene it should play a short music-box loop when the visitor walks near.",
+     "label": "inferred"
+    },
+    {
+     "text": "Two workers in reflective vests standing on the rear step.",
+     "label": "inferred"
+    },
+    {
+     "text": "A smaller open-sided recycling truck parked behind it, with labelled bins for paper, bottles and cans.",
+     "label": "inferred"
+    },
+    {
+     "text": "A cluster of neighbours waiting with tied bags (blue city bags after 2000) is the picture people remember.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: parked at a lane mouth at the plaza edge with a small queue (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/垃圾車",
+    "https://en.wikipedia.org/wiki/Waste_management_in_Taiwan"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Disposing_sorted_waste_to_garbage_truck_on_Beining_Road_20220726.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "Residents handing sorted waste to a truck, Taipei 2022"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Night_time_garbage_collection_from_waste_containers_in_Taipei.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "Night collection in Taipei"
+    }
+   ],
+   "unknowns": [
+    "The date Taipei began 垃圾不落地 (the cited pages give no date): (unknown — needs CJ)",
+    "Truck colour and markings were not read on a page: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "breakfast-shop",
+   "kind": "shop",
+   "zh": "早餐店",
+   "en": "Neighbourhood breakfast shop",
+   "years": "First 美而美 opened 1981 on 八德路, Taipei; over 1,100 franchise shops by 1992",
+   "history_en": "The Western-style breakfast shop on every Taipei corner began in 1981, when 林坤炎, who had worked at a plastics company, sold hamburgers from a cart beside a vocational school and then opened a shop called 美而美 on 八德路. It sold sandwiches and hamburgers; others copied the idea and the name, which led to trademark suits from 1988 that ended in 1994. By 1992 his chain had passed 1,100 shops. Today these shops also sell 蛋餅, 蘿蔔糕, milk tea and soy milk, beside the older Chinese-style shops with 燒餅, 油條 and 豆漿.",
+   "history_zh": "1981年林坤炎在臺北八德路開設第一家「美而美」，賣三明治和漢堡，西式早餐店從此遍布街角。1992年加盟店突破1,100家。店裡也賣蛋餅、蘿蔔糕、奶茶和豆漿。",
+   "facts": [
+    {
+     "text": "The first 美而美 was opened by 林坤炎 in 1981 on 八德路 in Taipei, selling sandwiches and hamburgers.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/早餐店"
+    },
+    {
+     "text": "Before the shop he sold hamburgers from a small cart beside 育達高職.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/美而美"
+    },
+    {
+     "text": "美而美 shops share a colour scheme of red with yellow diagonal stripes.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/美而美"
+    },
+    {
+     "text": "Trademark suits ran from 1988 and were settled by a 1994 court ruling; the founder's chain became 巨林美而美.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/美而美"
+    },
+    {
+     "text": "By 1992 the chain had more than 1,100 franchise shops.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/美而美"
+    },
+    {
+     "text": "Western-style breakfast shops sell hamburgers, toast, sandwiches, black tea, milk tea and coffee, and often 蛋餅, 蘿蔔糕 and 豆漿; Chinese-style shops sell 燒餅, 油條, 小籠包, 饅頭, 豆漿 and 米漿.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/早餐店"
+    },
+    {
+     "text": "About 20,000 breakfast shops in Taiwan in 2011 (天下雜誌, as cited by the page).",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/早餐店"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "Open shopfront on the ground floor of an apartment block, no door: a steel flat-top griddle (煎台) faces the street so the cook works in view.",
+     "label": "inferred"
+    },
+    {
+     "text": "Signboard in red with yellow diagonal stripes and the words 早餐店 in plain lettering; use an invented shop name, not a chain name or logo.",
+     "label": "measured"
+    },
+    {
+     "text": "On the counter: stacks of white toast, a tray of eggs, a sandwich warmer, sealed paper cups of milk tea and soy milk.",
+     "label": "inferred"
+    },
+    {
+     "text": "A backlit menu board on the wall with many small rows of items and prices.",
+     "label": "inferred"
+    },
+    {
+     "text": "Two or three small folding tables with plastic stools; scooters parked in front; takeaway in thin plastic bags with red stripes.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a ground-floor shop in the row of buildings facing the plaza (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/早餐店",
+    "https://zh.wikipedia.org/zh-tw/美而美"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:台灣省宜蘭縣宜蘭式早餐店.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "A Taiwanese breakfast shop front (Yilan, not Taipei)"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:TW_台灣_Taiwan_台北_Taipei_遼寧街_Liaoning_Street_shop_洪記豆漿大王_Hongji_Soy_Milk_King_Restaurant_Hung_Kee_morning_早餐店_breakfast_March_2024_R12S_19.jpg",
+     "licence": "CC0",
+     "shows": "A Chinese-style breakfast shop in Taipei, 2024"
+    }
+   ],
+   "unknowns": [
+    "A reference photo of a 1980s–90s Western-style breakfast shop front in Taipei: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "convenience-store",
+   "kind": "shop",
+   "zh": "便利商店",
+   "en": "24-hour convenience store",
+   "years": "First chain store opened 1980-02-09 on 長安東路; 1,000th store 1995; bill payment from 1998",
+   "history_en": "The first chain convenience store in Taiwan opened on 9 February 1980 in a lane off 長安東路 in Taipei; the page calls it the first 24-hour convenience store on the island. The business lost money at first and was folded back into its parent company in November 1982. Then it spread: the 100th store in 1986, the 1,000th in 1995, the 2,000th in 1999. In 1998 the stores began taking telephone bill payments, later adding utilities, parking fees and fines, which is how the corner store became the place where Taipei pays its bills at midnight.",
+   "history_zh": "1980年2月9日，臺灣第一家連鎖便利商店在臺北市長安東路開幕，24小時營業。1995年突破一千家；1998年起代收電話費，成為半夜也亮著燈的街角。",
+   "facts": [
+    {
+     "text": "First store opened 1980-02-09 at 長安東路一段53巷, Taipei; described as Taiwan's first 24-hour convenience store.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/統一超商"
+    },
+    {
+     "text": "Merged back into the parent company in November 1982 because of long-running losses.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/統一超商"
+    },
+    {
+     "text": "100th store April 1986; 1,000th store July 1995; 2,000th store 1999-05-24.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/統一超商"
+    },
+    {
+     "text": "Telephone bill payment service launched with 中華電信 in 1998, later extended to utilities, parking fees, insurance and traffic fines.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/統一超商"
+    },
+    {
+     "text": "Years when 茶葉蛋, 關東煮 and 御飯糰 were introduced were not on the page.",
+     "label": "unknown",
+     "source": "https://zh.wikipedia.org/zh-tw/統一超商"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "Glass shopfront with automatic sliding doors under a long backlit fascia sign; use an invented name and plain colour bands, no real chain logo or colours.",
+     "label": "inferred"
+    },
+    {
+     "text": "Bright white strip lighting inside, visible from across the plaza at night; a door chime when the door opens.",
+     "label": "inferred"
+    },
+    {
+     "text": "By the counter: a rice cooker of 茶葉蛋 (tea eggs), a steel 關東煮 (oden) pot, a hot-food cabinet.",
+     "label": "inferred"
+    },
+    {
+     "text": "Back wall of open drink fridges; low shelves of snacks; a magazine rack at the window.",
+     "label": "inferred"
+    },
+    {
+     "text": "Outside: a newspaper rack, a post-box-style bill counter sticker on the door, parked scooters, and from the 2000s a copier and ticket kiosk inside.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a corner shop on the ground floor of a building facing the plaza, lit at night (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/統一超商"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_convenience_store_(7013738751).jpg",
+     "licence": "CC BY 2.0",
+     "shows": "A Taipei convenience store; reference for layout only, do not copy branding"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Tea_eggs_of_FamilyMart_Beijie_Store_20190810.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "Tea-egg cooker at the counter; reference only, do not copy branding"
+    }
+   ],
+   "unknowns": [
+    "Years tea eggs, oden and rice balls were first sold: (unknown — needs CJ)",
+    "The page 臺灣便利商店 returned 404, so only one chain's history was read; store density figures: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "public-phone-booth",
+   "zh": "公共電話亭",
+   "en": "Public phone booth",
+   "years": "(unknown — needs CJ) for Taiwan dates; payment by coin, magnetic card and IC card",
+   "history_en": "Before mobile phones, the public phone was how Taipei met up: outside the station, at the school gate, beside the convenience store. The general page read for this item says public phones stand in streets, shops, hotels and stations, take coins, magnetic cards and IC cards, and give free emergency calls, and that mobile phones cut their use and number sharply everywhere. No page with the Taiwan dates was read in this run, so the years when card phones arrived and when booths began to be removed are unknown and need a source before this item goes public.",
+   "history_zh": "手機普及以前，車站前、校門口、巷口的公共電話是臺北人約見面的方式，可投幣，也可用磁卡或IC卡。行動電話普及後數量大減。臺灣各階段的確切年份尚待查證。",
+   "facts": [
+    {
+     "text": "Public phones are set up in streets, department stores, hotels and stations; main payments are IC card, magnetic card and coins; emergency calls are free.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/公共電話"
+    },
+    {
+     "text": "Use and number of public phones fell sharply as mobile phones spread.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/公共電話"
+    },
+    {
+     "text": "People in Taipei queued at public phones outside stations and schools in the 1980s–90s.",
+     "label": "inferred",
+     "source": ""
+    },
+    {
+     "text": "Years of the first card phones in Taiwan and of booth removal.",
+     "label": "unknown",
+     "source": ""
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "A half-height open booth or hood on a post rather than a closed box: metal frame, clear side panels, a small shelf.",
+     "label": "inferred"
+    },
+    {
+     "text": "Wall phone with a coiled steel cord, a coin slot or card slot, a square keypad and a small LCD strip.",
+     "label": "inferred"
+    },
+    {
+     "text": "Coin phones and card phones were different colours; the exact colours were not read on a page. Check against the photos.",
+     "label": "inferred"
+    },
+    {
+     "text": "A light-box sign above reading 公用電話 in plain text; do not copy the operator logo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Often in a pair or a row of three against a wall, with phone-book shelf below.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a pair of phones beside the convenience store or the bus stop (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/公共電話"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Chunghwa_Telecom_public_telephone_at_Suhua_Highway_20080927.jpg",
+     "licence": "CC BY 3.0",
+     "shows": "A Taiwan public phone, 2008"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:ROC-MOTC_Taiwan_Telecom_Administration_coins_public_telephone_light_box_20101104.jpg",
+     "licence": "CC BY 3.0",
+     "shows": "Old coin-phone light-box sign"
+    }
+   ],
+   "unknowns": [
+    "All Taiwan-specific dates (first card phone, IC card phone, removals): (unknown — needs CJ)",
+    "Phone body colours by type: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "youbike-dock",
+   "zh": "YouBike 微笑單車租借站",
+   "en": "YouBike public bicycle dock",
+   "years": "Trial from 2009 in 信義; second-generation bikes July 2012; YouBike 2.0 from 2020-01-15",
+   "history_en": "Taipei's public bicycles started in 2009 as a small trial in the 信義 district, built and run by a Taiwanese bicycle maker for the city, and at first few people used them. In late July 2012 new stations opened across the city with a second-generation bike, orange frame and yellow mudguards, rented with the same EasyCard used on the metro, and the docks beside MRT exits became part of the commute. A lighter-install version, YouBike 2.0, began a three-month test around 公館 and the 臺大 campus on 15 January 2020 and replaced the old docks.",
+   "history_zh": "2009年在信義區試辦的公共自行車，起初使用者不多。2012年7月底啟用第二代車，橘色車架配黃色泥除，成為捷運站旁的通勤風景。2020年推出2.0系統。",
+   "facts": [
+    {
+     "text": "The first-generation YouBike entered service in Taipei in 2009.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/YouBike"
+    },
+    {
+     "text": "The trial district was Xinyi and early daily use was unexpectedly low.",
+     "label": "measured",
+     "source": "https://en.wikipedia.org/wiki/YouBike"
+    },
+    {
+     "text": "YouBike 1.0 began in late July 2012 with new Taipei stations: orange frame, yellow mudguards, 3-speed hub, about 17 kg.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/YouBike"
+    },
+    {
+     "text": "YouBike 2.0 launched 2020-01-15 around 公館 station and the 臺大 main campus for a three-month test; 2.0 bikes are white with orange mudguards (stated for the e-bike variant).",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/YouBike"
+    },
+    {
+     "text": "Trial began 2009-03-11 with 5 stations and 250 bikes, growing to 11 stations and 500 bikes.",
+     "label": "inferred",
+     "source": "https://www.cardu.com.tw/news/detail.php?ns_pk=6185&nt_pk=6"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "A row of 10–20 knee-high docking posts (車柱) in a line on the pavement, each with a slot that takes the bike's front lock and a small card reader on top.",
+     "label": "inferred"
+    },
+    {
+     "text": "Bike for a 2012–2020 scene: orange frame, yellow mudguards, low step-through frame, front basket, 3-speed hub.",
+     "label": "measured"
+    },
+    {
+     "text": "A tall kiosk post at one end of the row with a screen and a station name panel.",
+     "label": "inferred"
+    },
+    {
+     "text": "Use plain text 公共自行車 on the kiosk; do not copy the smiling-wheel logo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Typical setting: under trees beside an MRT exit, a few posts empty.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item; the 2009 trial itself was in 信義 (measured), so keep this as the everyday dock, not as a 信義 event. On the square: beside the MRT stair (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/YouBike",
+    "https://en.wikipedia.org/wiki/YouBike"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:YouBike_bicycle_parking_in_Taipei_20120916.jpg",
+     "licence": "CC BY-SA 2.0",
+     "shows": "Dock row with orange bikes, September 2012"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:YouBike_kiosk_at_Taipei_Bus_Station_20131203.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "Kiosk, 2013"
+    }
+   ],
+   "unknowns": [
+    "Exact first day of the 2009 trial (2009-03-11 comes from a search summary, page not opened): (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "night-market-stalls",
+   "zh": "夜市攤位（士林夜市）",
+   "en": "Night market stall row (Shilin Night Market)",
+   "years": "士林市場 built 1913, opened 1915; city monument 1998; stalls moved 2002-10-14; rebuilt market opened December 2011",
+   "history_en": "The night market is where Taipei eats after dark, and 士林 is the largest in the city. It grew around the 士林 public market, built in 1913 and opened in 1915, beside the 慈諴宮 temple, on a spot where farm goods were once traded before going down the river. The market building became a city monument in 1998. On 14 October 2002 the food stalls moved to a temporary market across from MRT 劍潭站 because of ventilation, hygiene and safety problems; the rebuilt market was finished in December 2011 and its basement food court began trial opening on 24 December 2011.",
+   "history_zh": "士林夜市以1915年啟用的士林市場為中心，是臺北市最大的夜市。1998年市場列為市定古蹟；2002年攤販遷至劍潭站對面的臨時市場，2011年12月改建完成遷回。",
+   "facts": [
+    {
+     "text": "士林市場 built 1913, opened 1915; listed as a city monument in 1998.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/士林夜市"
+    },
+    {
+     "text": "2002-10-14: stalls moved to the 士林臨時市場 at 文林路 and 基河路, opposite MRT 劍潭站.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/士林夜市"
+    },
+    {
+     "text": "December 2011: rebuilt market finished; B1 food court trial opening 2011-12-24 with 53 shops.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/士林夜市"
+    },
+    {
+     "text": "Described as the largest night market in the city.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/士林夜市"
+    },
+    {
+     "text": "Typical stall foods: 蚵仔煎, 大雞排, 大餅包小餅, 青蛙下蛋.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "A row of 4–6 pushcart stalls under one long canopy: stainless-steel carts on wheels, each with a gas ring, a glass food case and a bare bulb or tube light hanging overhead.",
+     "label": "inferred"
+    },
+    {
+     "text": "Each stall has a vertical light-box or painted board with the dish name in big red or yellow characters and a hand-written price board.",
+     "label": "inferred"
+    },
+    {
+     "text": "Low folding tables and round plastic stools (red or blue) behind the carts; steam and a wet floor.",
+     "label": "inferred"
+    },
+    {
+     "text": "One or two game stalls between the food: a balloon-dart board, a ring toss, a goldfish scoop tank.",
+     "label": "inferred"
+    },
+    {
+     "text": "Strings of bulbs and red lanterns across the lane; this fits the lantern square.",
+     "label": "inferred"
+    },
+    {
+     "text": "Use generic dish names on the signs (蚵仔煎, 雞排, 豆花, 珍珠奶茶), not real stall names.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a stall row along one side of the plaza, lit at night (inferred placement). Real market: 士林區, around 基河路 and 文林路 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/士林夜市"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Stall_signs,_Shilin_Night_Market,_Taipei,_June_2019.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "Stall sign boards, 2019"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Yellow_food_stall_and_price_board,_Shilin_Night_Market,_Taipei,_June_2019.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "One food stall and its price board, 2019"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:2010-12-28_food_stall_at_Shilin_Temporary_Market.jpg",
+     "licence": "CC BY 2.0",
+     "shows": "Stall inside the temporary market, 2010"
+    }
+   ],
+   "unknowns": [
+    "Which dishes to name on the stalls: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "taipei-main-station",
+   "zh": "臺北車站",
+   "en": "Taipei Main Station",
+   "years": "First station about 1891; third building closed 1986-02-24; present building opened 1989-09-02",
+   "history_en": "The city's front door. The first Taipei station opened around 1891 and the present one is the fourth. The third-generation building closed on 24 February 1986 after its last Lunar New Year rush and was pulled down from 1 March as the railway through the city went underground. The present station opened on 2 September 1989, Taiwan's first underground railway station: six floors above ground and four below, 149 metres long, 110 wide and 48 high, with a large central hall. Its roof earned it the nickname 披薩屋. The metro, the high-speed rail and the airport line later joined it below ground.",
+   "history_zh": "現今的臺北車站是第四代，1989年9月2日隨鐵路地下化啟用，是臺灣第一座地下化鐵路車站。地上6層、地下4層，高48公尺，大廳是許多人約見面與返鄉的地方。",
+   "facts": [
+    {
+     "text": "First station opened about 1891; the present building opened 1989-09-02.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北車站"
+    },
+    {
+     "text": "Third-generation station closed 1986-02-24 and demolition began 1986-03-01.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北車站"
+    },
+    {
+     "text": "Fourth-generation building: 6 floors above ground, 4 below; 149 m long, 110 m wide, 48 m high.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北車站"
+    },
+    {
+     "text": "Taiwan's first underground railway station; nicknamed 披薩屋 because its outline resembled a pizza-chain logo.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北車站"
+    },
+    {
+     "text": "The ground-floor ticket office in the middle of the hall was moved west on 2011-09-19, leaving an open central hall.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北車站"
+    },
+    {
+     "text": "Ground-floor hall has three entrances on each of the four sides.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北車站"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "A large square block, 149 by 110 metres and 48 metres high, six storeys.",
+     "label": "measured"
+    },
+    {
+     "text": "A sloping Chinese-style hipped roof in orange-red tile around the top, with a raised central roof over the hall; walls in pale stone or tile with rows of small square windows. Check against the photo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Three doorways in the middle of each side, under a deep canopy.",
+     "label": "measured"
+    },
+    {
+     "text": "Inside (after 2011): a tall square hall with a black-and-white checkered floor where people sit on the ground; before 2011 a ticket-office island stood in the middle.",
+     "label": "inferred"
+    },
+    {
+     "text": "A big split-flap or LED departure board over the hall; station name 臺北車站 in gold or dark characters over the main door.",
+     "label": "inferred"
+    },
+    {
+     "text": "For the square: a reduced model on a plinth or a painted backdrop, not a walk-in building.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a scale model or far backdrop behind one side of the plaza (inferred placement). Real site: 中正區, between 北平西路, 承德路, 市民大道 and 公園路 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/臺北車站"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_main_station_exterior_2018.png",
+     "licence": "CC BY-SA 4.0",
+     "shows": "Exterior, 2018"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:TRA_Taipei_Station_&_Taipei_Station_Underground_Mall_20041227.jpg",
+     "licence": "Public domain",
+     "shows": "Exterior, 2004"
+    }
+   ],
+   "unknowns": [
+    "Roof and wall colours, and the floor pattern, were not read on a page: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "grand-hotel-yuanshan",
+   "zh": "圓山大飯店",
+   "en": "The Grand Hotel (Yuanshan)",
+   "years": "Hotel founded 1952-05; main building completed 1973; roof fire 1995-06-27; reopened 1998",
+   "history_en": "The red palace on the hill that people see from the highway on the way into the city. The hotel stands on 劍潭山 above the 基隆河; its lodging began in May 1952 and the main building was completed in 1973. At 87 metres it was the tallest building in Taiwan from 1973 to 1981, and it is one of the tallest buildings in the classical Chinese style anywhere. On the morning of 27 June 1995 a welding spark during roof-tile repairs set the roof on fire, at about 80 metres up, and the building was restored and reopened in 1998.",
+   "history_zh": "矗立在劍潭山上的宮殿式飯店，1952年創立，主樓1973年落成，高87公尺，曾是臺灣最高的建築。1995年6月27日屋頂換修時失火，1998年修復重新營運。",
+   "facts": [
+    {
+     "text": "Lodging began May 1952; main building completed 1973; on 劍潭山, 中山區.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓山大飯店"
+    },
+    {
+     "text": "Main building is 87 m high; tallest building in Taiwan 1973–1981; one of the tallest classical Chinese-style buildings in the world.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓山大飯店"
+    },
+    {
+     "text": "Roof fire on 1995-06-27, started about 10:59 during glazed-tile repairs by welding; reopened 1998.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓山大飯店"
+    },
+    {
+     "text": "Roof is 歇山式 (hip-and-gable); many dragon carvings, also stone lions and plum blossoms.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓山大飯店"
+    },
+    {
+     "text": "Voted fourth in the city's 2005 \"ten great buildings of Taipei\" poll.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓山大飯店"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "A wide slab block about 87 metres high with a huge hip-and-gable (歇山式) roof on top.",
+     "label": "measured"
+    },
+    {
+     "text": "Roof in golden-yellow glazed tile; the body wrapped in rows of red columns and red balcony rails on every floor, with white or cream panels between. Check against the photo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Dragon ornaments on the ridge and eaves.",
+     "label": "measured"
+    },
+    {
+     "text": "It sits on a green hillside; a multi-arched gateway (牌樓) stands at the foot of the drive.",
+     "label": "inferred"
+    },
+    {
+     "text": "For the square: a small far-off silhouette on a hill at the skyline, lit at night, rather than a building on the plaza.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a distant hilltop silhouette to the north (inferred placement). Real site: 劍潭山, 中山區 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/圓山大飯店"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Grand_Hotel_Taipei_front_view_20130218.jpg",
+     "licence": "Public domain",
+     "shows": "Front view, 2013"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Yuanshan_Great_Hotel_(Grand_Hotel)_in_Taipei.jpg",
+     "licence": "CC BY 4.0",
+     "shows": "View of the hotel on its hill"
+    }
+   ],
+   "unknowns": [
+    "Politics check: the hotel was founded as a state guest house and hosted state banquets, and the page ties it to political figures. This entry leaves that out. Whether the hotel fits the no-political-sites rule: (unknown — needs CJ)",
+    "Number of floors and the architect were not read on the page: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "taipei-zoo-gate",
+   "zh": "臺北市立動物園大門",
+   "en": "Taipei Zoo gate",
+   "years": "Founded 1914 at 圓山; reopened at 木柵 1986-10-31; pandas on show from 2009-01-26",
+   "history_en": "A school trip nearly every Taipei child has made. The zoo began on 5 April 1914 as a small private animal garden at 圓山 and became a public zoo in 1915. With no room to grow, it moved to 木柵 and opened there on 31 October 1986 on a site of 182 hectares, now 165, the largest zoo in Taiwan. The elephant 林旺 lived there from 1954 until he died on 26 February 2003. Koalas arrived in August 1999, the giant panda house opened on 26 January 2009, and the MRT has ended at its gate since 1996.",
+   "history_zh": "1914年創立於圓山，1986年10月31日遷至木柵開放，是全臺面積最大的動物園，也是臺北孩子校外教學的共同回憶。1999年引進無尾熊，2009年大貓熊館開幕。",
+   "facts": [
+    {
+     "text": "Founded 1914-04-05 at 圓山 as a private zoo; taken over as a government zoo in May 1915.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "Moved to 木柵; the new zoo opened to visitors 1986-10-31.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "Site originally 182 hectares, now 165; the largest zoo in Taiwan by area.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "林旺 entered the zoo in 1954 and died 2003-02-26.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "Two male koalas arrived August 1999; the giant panda house opened 2009-01-26.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "A wide entrance plaza with a low ticket-booth row and turnstile gates under a long flat canopy.",
+     "label": "inferred"
+    },
+    {
+     "text": "Large animal sculptures at the gate (elephant, giraffe) and the name 臺北市立動物園 in big characters on a wall or arch. Check against a photo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Green hills directly behind the gate; the zoo sits in a valley.",
+     "label": "inferred"
+    },
+    {
+     "text": "An elevated MRT station and the gondola station stand beside the entrance.",
+     "label": "measured"
+    },
+    {
+     "text": "For the square: a gate arch with two animal figures and a ticket window, sized as a street object.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a small gate arch at one corner, near the MRT model (inferred placement). Real site: 文山區 (木柵) (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_MRT_Taipei_Zoo_Station.JPG",
+     "licence": "CC BY-SA 2.5",
+     "shows": "The MRT station beside the zoo entrance"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Giant_Panda_Yuan_Zai_in_Taipei_Zoo,_April_27th,_2014.JPG",
+     "licence": "CC BY-SA 3.0",
+     "shows": "Inside the panda house, 2014"
+    }
+   ],
+   "unknowns": [
+    "No photo of the zoo gate was found on Commons in this run; what the gate looks like: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  },
+  {
+   "id": "daan-forest-park",
+   "zh": "大安森林公園",
+   "en": "Daan Forest Park",
+   "years": "Planned as Park No. 7 in 1932; clearance began 1992-04-01; opened 1994-03-29",
+   "history_en": "The big green block in the middle of the city, about 25.9 hectares between 信義路, 建國南路, 和平東路 and 新生南路. The land was marked as Park No. 7 in the 1932 city plan and kept that label in the 1956 plan, but for decades it held military housing and other buildings instead. The city began clearing it on 1 April 1992 and the park opened on 29 March 1994. It has a bamboo grove, a banyan area, an open-air stage and a pond, and people come to jog, walk dogs and sit under the trees.",
+   "history_zh": "位於市中心、佔地約25.9公頃的公園。1932年即規劃為七號公園預定地，1992年4月1日動工，1994年3月29日開放，有竹林、榕樹與露天音樂台。",
+   "facts": [
+    {
+     "text": "Area 25.9354 hectares, in 大安區.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/大安森林公園"
+    },
+    {
+     "text": "Marked as Park No. 7 (七號公園) in the 1932 city plan and again in the 1956 plan.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/大安森林公園"
+    },
+    {
+     "text": "Clearance of buildings began 1992-04-01; the park opened 1994-03-29.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/大安森林公園"
+    },
+    {
+     "text": "Bounded by 建國南路二段 (east), 和平東路二段 (south), 新生南路二段 (west) and 信義路三段 (north); areas include bamboo, banyan, fragrant-flower and water-plant zones.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/大安森林公園"
+    }
+   ],
+   "visual_details": [
+    {
+     "text": "Flat lawn and dense tree cover; a ring path used by joggers.",
+     "label": "inferred"
+    },
+    {
+     "text": "A round open-air stage with a shell roof and curved rows of seats.",
+     "label": "inferred"
+    },
+    {
+     "text": "A pond with a small island where egrets nest.",
+     "label": "inferred"
+    },
+    {
+     "text": "Bamboo grove and big banyan trees with hanging roots.",
+     "label": "measured"
+    },
+    {
+     "text": "For the square: a planted corner with one banyan, a bench and a park name stone.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide item. On the square: a tree-and-bench corner (inferred placement). Real site: 大安區 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/大安森林公園"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Daan_Park_Ecological_Pool_West_Zone.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "The pond"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Daan_Park_and_a_tour_bus_20120721.jpg",
+     "licence": "CC BY 3.0",
+     "shows": "Park edge from the road, 2012"
+    }
+   ],
+   "unknowns": [
+    "The page ties the land's earlier use to military housing and a disputed clearance; this entry keeps to dates. Whether to mention the clearance: (unknown — needs CJ)"
+   ],
+   "kind": "place"
+  }
+ ],
+ "events": [
+  {
+   "id": "golden-melody-arena-2006",
+   "zh": "金曲獎首度登上臺北小巨蛋",
+   "en": "The Golden Melody Awards come to Taipei Arena",
+   "kind": "event",
+   "years": "2006-06-10 (17th ceremony; Taipei Arena opened 2005-12-01)",
+   "history_en": "Taipei Arena, a 15,000-seat hall on the site of the old city baseball stadium, opened on 1 December 2005 and quickly became the stage every singer in Taiwan wanted. On the night of 10 June 2006 the 17th Golden Melody Awards, the biggest prizes in Chinese-language pop, were handed out there, hosted by 陶晶瑩 and 徐熙娣 under the theme \"Music Orz\". Fans lined the red carpet outside on 南京東路 to see the nominees walk in. The ceremony has returned to the Arena many times since, and a concert there is still a mark that a singer has made it.",
+   "history_zh": "臺北小巨蛋2005年12月1日開幕，可容納一萬五千人。2006年6月10日，第17屆金曲獎在此頒獎，由陶晶瑩、徐熙娣主持，此後小巨蛋成為歌手的指標舞台。",
+   "facts": [
+    {
+     "text": "The 17th Golden Melody Awards ceremony was held on the evening of 2006-06-10 at 臺北小巨蛋; theme \"Music Orz\"; hosts 陶晶瑩 and 徐熙娣; 32 awards.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/第17屆金曲獎"
+    },
+    {
+     "text": "臺北小巨蛋 began trial operation in October 2005 and opened officially on 2005-12-01, on the site of the 台北市立棒球場 demolished in 2000, at 南京東路 and 敦化北路 in 松山區.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+    },
+    {
+     "text": "Main hall holds up to 15,000 people; 12,477 stand seats.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+    },
+    {
+     "text": "The Arena page has a section for 金曲獎流行音樂作品類頒獎典禮暨星光大道 among the events it has hosted.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+    },
+    {
+     "text": "That the 17th ceremony was the first Golden Melody ceremony held at the Arena (the Arena opened after the 2005 ceremony).",
+     "label": "inferred",
+     "source": ""
+    },
+    {
+     "text": "Which later years the ceremony was at the Arena.",
+     "label": "unknown",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like a short red carpet running up to a stage arch, with a plain golden trophy outline (a stylised music note on a base, not the real trophy design) and the words 金曲獎 2006 小巨蛋. No singers or hosts drawn."
+   },
+   "visual_details": [
+    {
+     "text": "Taipei Arena: a wide, low oval building with a curved silver-grey metal roof and a glass front on 南京東路.",
+     "label": "inferred"
+    },
+    {
+     "text": "A very large LED screen (台北天幕) faces 南京東路 above the main entrance.",
+     "label": "measured"
+    },
+    {
+     "text": "Red carpet laid across the forecourt with crowd barriers on both sides and camera risers.",
+     "label": "inferred"
+    },
+    {
+     "text": "Use a generic gold trophy shape; the real trophy design is the award's own and should not be copied closely.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: at the foot of a small stage or beside the notice board (inferred placement). Real venue: 臺北小巨蛋, 松山區 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/第17屆金曲獎",
+    "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Taipei_Arena",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of Arena photos (62 files)"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Golden_Melody_Awards",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of ceremony photos (real people, reference only)"
+    }
+   ],
+   "unknowns": [
+    "Whether 2006 was the first Golden Melody ceremony at the Arena is inferred from the opening date, not read on a page: (unknown — needs CJ)",
+    "Two real hosts are named in text only; whether naming them is acceptable under the no-likeness rule: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "flora-expo-2010",
+   "zh": "臺北國際花卉博覽會",
+   "en": "Taipei International Flora Exposition",
+   "years": "2010-11-06 to 2011-04-25",
+   "history_en": "From 6 November 2010 to 25 April 2011 Taipei held its flower expo, the first international horticultural exposition in Taiwan to be recognised by the international growers' association and the exhibitions bureau. It filled 91.8 hectares along the 基隆河 in four linked parks: 圓山, 美術, 新生 and 大佳河濱. The city had asked to host it in April 2006 and was approved that November. For half a year families queued for the pavilions, and the 圓山 park and several halls stayed in use afterwards as a weekend place for markets and walks.",
+   "history_zh": "2010年11月6日至2011年4月25日舉行，是臺灣第一個獲國際認證的國際園藝博覽會。園區91.8公頃，分圓山、美術、新生、大佳河濱四區。",
+   "facts": [
+    {
+     "text": "Held 2010-11-06 to 2011-04-25 in Taipei; first AIPH- and BIE-recognised A2/B1 international horticultural exposition in Taiwan.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2010年臺北國際花卉博覽會"
+    },
+    {
+     "text": "Site 91.8 hectares in four areas: 圓山公園 20.8, 美術公園 7.9, 新生公園 15.1, 大佳河濱公園 48 hectares.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2010年臺北國際花卉博覽會"
+    },
+    {
+     "text": "Bid presented April 2006 at the AIPH spring meeting; approved November 2006.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2010年臺北國際花卉博覽會"
+    },
+    {
+     "text": "Halls named on the page include 流行館, 爭艷館 and 真相館.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2010年臺北國際花卉博覽會"
+    },
+    {
+     "text": "Total visitor count (about 8.96 million).",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like a big five-petal flower on a stem, each petal a different colour, with the dates 2010.11.6 – 2011.4.25 on the stem and a bed of real-looking flowers at its foot. No expo mascots."
+   },
+   "location": "City-wide event. On the square: in a flower bed at the plaza centre or edge (inferred placement). Real site: 圓山 to 大佳河濱公園 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/2010年臺北國際花卉博覽會"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:EXPO_Hall_Birdview_20110425a.jpg",
+     "licence": "CC0",
+     "shows": "Expo hall from above on closing day"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Crowds_@_Taipei_International_Flora_Expo_(5234497921).jpg",
+     "licence": "CC BY 2.0",
+     "shows": "Crowds at the expo"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:2010_Taipei_International_Flora_Exposition",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of expo photos (76 files)"
+    }
+   ],
+   "unknowns": [
+    "Total attendance was not read on the page: (unknown — needs CJ)"
+   ],
+   "kind": "event",
+   "visual_details": [
+    {
+     "text": "Four linked riverside parks with low pavilion halls among flower beds; the 圓山 hall (爭艷館) is a large oval dome hall reused from a football stadium.",
+     "label": "inferred"
+    },
+    {
+     "text": "Mass planting in bands of colour: flower carpets laid out in stripes and curves at ground level.",
+     "label": "inferred"
+    },
+    {
+     "text": "Queue barriers and ticket gates at each park entrance; families with sun umbrellas in long lines.",
+     "label": "inferred"
+    },
+    {
+     "text": "Leave out the five expo mascots (flower fairies) and the expo logo.",
+     "label": "inferred"
+    }
+   ]
+  },
+  {
+   "id": "nba-taipei-game-2013",
+   "zh": "NBA臺北賽：林書豪隨火箭來臺",
+   "en": "NBA Taipei game: Jeremy Lin comes with the Rockets",
+   "kind": "event",
+   "years": "2013-10-13 (an earlier NBA game in Taipei: 2009-10-08)",
+   "history_en": "On Sunday 13 October 2013 the Houston Rockets played the Indiana Pacers in an NBA preseason game in Taipei, with the Taiwanese-American guard 林書豪 (Jeremy Lin) leading the Rockets a year and a half after \"Linsanity\". Taiwan had no hall built to NBA standard, so the floor and the scoreboard screen were flown in and assembled, to match a game in the United States exactly. It was the second NBA game in the city after one on 8 October 2009. Tickets were gone quickly, and for a generation of students who stayed up for his games it was the first chance to watch him play at home.",
+   "history_zh": "2013年10月13日，林書豪隨休士頓火箭來臺，在臺北與印第安納溜馬打NBA季前賽。場地地板與螢幕全從美國空運組裝，是繼2009年後第二場NBA臺北賽。",
+   "facts": [
+    {
+     "text": "A news report dated 2013-10-10 says the Rockets, led by 林書豪, would play the 溜馬 on Sunday 2013-10-13, and that the screen and floor were flown to Taiwan and assembled because Taiwan had no NBA-standard hall.",
+     "label": "measured",
+     "source": "https://n.yam.com/Article/20131010809299"
+    },
+    {
+     "text": "The Arena page lists \"2009年10月8日：NBA臺北賽\" and \"NBA國際系列賽臺北站\" in 2013 among basketball events held at 臺北小巨蛋.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+    },
+    {
+     "text": "The Arena page gives the 2013 game as 10月15日, which conflicts with the 13 October in the news report; 13 October (a Sunday) is used here.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+    },
+    {
+     "text": "Rockets won 107 to 98; Lin scored 17 points; more than 13,000 fans attended; tip-off 13:30.",
+     "label": "inferred",
+     "source": "https://sports.inquirer.net/?p=124307"
+    },
+    {
+     "text": "The 2009 game was Denver Nuggets against Indiana Pacers.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "A basketball hoop on a short post with a ball resting in the net, standing on a patch of polished wooden court floor with a painted free-throw arc. Sign: NBA 臺北賽 2013.10.13. No player figure, no team or league logos; jersey number 7 may hang on a plain red vest (inferred number)."
+   },
+   "visual_details": [
+    {
+     "text": "Maple-coloured hardwood court laid in panels over the arena floor, flown in for the game.",
+     "label": "measured"
+    },
+    {
+     "text": "A four-sided scoreboard screen hung over centre court, also flown in.",
+     "label": "measured"
+    },
+    {
+     "text": "Rockets in red, Pacers in dark blue and gold; plain colours only, no logos.",
+     "label": "inferred"
+    },
+    {
+     "text": "Fans holding hand-written 林書豪 signs in the stands.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: on an open corner like a neighbourhood half court (inferred placement). Real venue: 臺北小巨蛋, 松山區 (measured from the Arena page).",
+   "sources": [
+    "https://n.yam.com/Article/20131010809299",
+    "https://zh.wikipedia.org/zh-tw/臺北小巨蛋"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Taipei_Arena",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of Arena photos; no photo of the game itself was found"
+    }
+   ],
+   "unknowns": [
+    "Final score, Lin's points and attendance come from a search summary of a wire report whose page returned HTTP 403: (unknown — needs CJ)",
+    "A real player is named in text only; whether naming him is acceptable under the no-likeness rule: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "yuanzai-first-day-2014",
+   "zh": "大貓熊圓仔首次公開亮相",
+   "en": "Panda cub Yuan Zai meets the public for the first time",
+   "years": "2014-01-06 (born 2013-07-06)",
+   "history_en": "On 6 January 2014 the panda cub 圓仔 was shown to the public for the first time at Taipei Zoo, six months after she was born there on 6 July 2013 as the first giant panda born in Taiwan. The city had watched her grow online since birth, when she weighed 183.4 grams. Her name means the child of her mother 圓圓 and also sounds like the Taiwanese word for a rice ball. For many young people a trip to the panda house that winter was the outing of the year. On 26 October 2014 she was made an honorary citizen of Taipei.",
+   "history_zh": "2014年1月6日，半歲大的大貓熊圓仔在臺北市立動物園首度公開亮相。她在2013年7月6日出生，是首隻在臺灣出生的大貓熊，同年10月獲頒榮譽市民。",
+   "facts": [
+    {
+     "text": "First public appearance 2014-01-06.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓仔"
+    },
+    {
+     "text": "Born 2013-07-06 at Taipei Zoo; female; first giant panda born in Taiwan; parents 團團 and 圓圓.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓仔"
+    },
+    {
+     "text": "Birth weight 183.4 g, length 15.5 cm.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓仔"
+    },
+    {
+     "text": "Made an honorary citizen of Taipei on 2014-10-26, the sixth animal to receive it.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/圓仔"
+    },
+    {
+     "text": "The panda house opened 2009-01-26.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "Queue length and visitor numbers on the first day.",
+     "label": "unknown",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "statue",
+    "depicts": "A round panda cub sitting on a low log, about knee height, one paw raised, in smooth painted stone, with a short queue rope and a sign post beside it. Plaque: 圓仔 首次亮相 2014.1.6. A real animal, drawn plainly; not a cartoon mascot."
+   },
+   "location": "City-wide event. On the square: beside the zoo gate arch (inferred placement). Real site: Taipei Zoo panda house, 文山區 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/圓仔",
+    "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Giant_Panda_Yuan_Zai_in_Taipei_Zoo,_April_27th,_2014.JPG",
+     "licence": "CC BY-SA 3.0",
+     "shows": "圓仔 at nine months"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Yuan_Zai",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of 圓仔 photos (24 files)"
+    }
+   ],
+   "unknowns": [
+    "How many people queued on 2014-01-06 and how long each visitor could stay at the glass: (unknown — needs CJ)",
+    "The id was panda-yuanzai-2013 in the earlier version of this file; it was renamed because the event is now the first public day."
+   ],
+   "kind": "event",
+   "visual_details": [
+    {
+     "text": "Six-month-old cub: round body, short legs, black ears, eye patches and limbs on white fur; about the size of a small dog.",
+     "label": "inferred"
+    },
+    {
+     "text": "Indoor panda enclosure behind a long glass wall, with wooden climbing frames and bamboo.",
+     "label": "inferred"
+    },
+    {
+     "text": "Visitors pass in a moving line along the glass; a rope queue outside the panda house.",
+     "label": "inferred"
+    }
+   ]
+  },
+  {
+   "id": "pokemon-go-beitou-2016",
+   "zh": "北投公園寶可夢抓寶人潮",
+   "en": "The Pokémon GO crowds at Beitou Park",
+   "kind": "event",
+   "years": "August 2016 (clean-up reported 2016-08-21)",
+   "history_en": "In August 2016, days after the phone game Pokémon GO opened in Taiwan, word spread that rare monsters appeared at 北投公園 beside 新北投 station. Night after night crowds of players filled the park and ran together across the road whenever a rare one showed up on screen. The Central News Agency reported on 21 August that the rush had brought illegal parking and bins overflowing with rubbish, and that the hot-spring association and other local groups organised volunteers to pick it up, about 100 kilograms in a day. Video of the running crowd was shown around the world.",
+   "history_zh": "2016年8月手機遊戲寶可夢GO在臺上線，傳出北投公園有稀有怪物，每晚湧入大批玩家抓寶，造成違停與垃圾滿溢，在地團體發起撿垃圾，畫面登上國際媒體。",
+   "facts": [
+    {
+     "text": "CNA, 2016-08-21: 北投公園 drew many players after rumours of rare 寶可夢 monsters, causing illegal parking and rubbish overflowing the bins; 台北市溫泉發展協會 and other groups started a rubbish pick-up.",
+     "label": "measured",
+     "source": "https://www.cna.com.tw/news/firstnews/201608210220.aspx"
+    },
+    {
+     "text": "The CNA headline says about 100 kg of rubbish was picked up.",
+     "label": "measured",
+     "source": "https://www.cna.com.tw/news/firstnews/201608210220.aspx"
+    },
+    {
+     "text": "Police wrote close to 520 parking tickets around the park between 11 and 22 August 2016; crowd estimates range from over a thousand to nearly ten thousand a night.",
+     "label": "inferred",
+     "source": "https://www.setn.com/klist/130946"
+    },
+    {
+     "text": "Time magazine and other foreign media carried the footage.",
+     "label": "inferred",
+     "source": "https://udn.com/news/story/120910/7468169"
+    },
+    {
+     "text": "The game opened in Taiwan on 2016-08-06.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like a hand holding up a smartphone; on the screen a plain street map with a location pin and a question-mark silhouette. Around its foot, a ring of footprints painted on the paving, all pointing the same way. Words: 北投抓寶 2016. No creatures, no ball symbol, no game logo."
+   },
+   "visual_details": [
+    {
+     "text": "A sloping park with old trees, a stream and a stone fountain pool, lit by street lamps at night.",
+     "label": "inferred"
+    },
+    {
+     "text": "Hundreds of people standing still, every face lit from below by a phone, power banks in hand.",
+     "label": "inferred"
+    },
+    {
+     "text": "Scooters parked two deep along the park railings.",
+     "label": "inferred"
+    },
+    {
+     "text": "Do not draw any game creature or the red-and-white ball; the name in plain text is enough.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: on the lawn or by the fountain (inferred placement). Real site: 北投公園, 北投區, beside 新北投 station (park name measured; the rest inferred).",
+   "sources": [
+    "https://www.cna.com.tw/news/firstnews/201608210220.aspx",
+    "https://udn.com/news/story/120910/7468169"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Beitou_Park",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "The park by day (48 files); no photo of the 2016 crowd was found"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Xinbeitou_Station",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "The station beside the park"
+    }
+   ],
+   "unknowns": [
+    "First night of the crowds and the peak crowd size: (unknown — needs CJ)",
+    "Which rare monster the rumour named (a search summary says 快龍): (unknown — needs CJ)",
+    "The game name is a trademark; it is used here as plain text only. Whether CJ wants the name on the marker at all: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "universiade-2017",
+   "zh": "2017 臺北世大運",
+   "en": "The 2017 Taipei Summer Universiade",
+   "years": "2017-08-19 to 2017-08-30",
+   "history_en": "From 19 to 30 August 2017 Taipei hosted the 29th Summer Universiade, the first time Taiwan held the world university games. The opening and closing ceremonies were at 臺北田徑場. The city turned out: 720,000 tickets were sold, 87 percent of all seats and the highest rate in the games' history. The home team won 26 golds, its best result, and two wins are still talked about. The weightlifter 郭婞淳 took gold at 58 kilograms with a world-record clean and jerk of 142 kilograms, and the javelin thrower 鄭兆村 won with 91.36 metres, the first Asian athlete to throw past 90.",
+   "history_zh": "2017年8月19日至30日，臺北舉辦第29屆夏季世界大學運動會，是臺灣首次主辦。開閉幕在臺北田徑場，售出72萬張票。郭婞淳挺舉破世界紀錄。",
+   "facts": [
+    {
+     "text": "Held 2017-08-19 to 2017-08-30 in Taipei; the 29th Summer Universiade; first Universiade hosted by Taiwan.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    },
+    {
+     "text": "Opening and closing ceremonies at 臺北田徑場.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    },
+    {
+     "text": "720,000 tickets sold, 87% of seats, the highest rate of any Universiade (announced 2017-08-30).",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    },
+    {
+     "text": "郭婞淳 won women's 58 kg weightlifting gold: snatch 107, clean and jerk 142 (world record), total 249 kg.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    },
+    {
+     "text": "鄭兆村 won javelin gold with 91.36 m, an Asian record and the first Asian over 90 m.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    },
+    {
+     "text": "The home team won 26 gold, 34 silver and 30 bronze medals, its best Universiade result.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    },
+    {
+     "text": "The page also records protests at the opening ceremony; left out of the public text under the no-politics rule.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "A small podium of three steps with a javelin planted upright beside it and a barbell resting on the top step; a strip of red running-track lane lines on the ground. Sign: 2017 世大運. No mascot, no logo, no athlete figures."
+   },
+   "location": "City-wide event. On the square: on an open patch of paving (inferred placement). Real venue of the ceremonies: 臺北田徑場, 松山區 (measured for the venue; district inferred).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/2017年夏季世界大學運動會"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Performance_on_the_Opening_ceremony_of_the_2017_Summer_Universiade_(2).jpg",
+     "licence": "CC BY 2.0",
+     "shows": "Opening ceremony performance"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Chinese_Taipei_athletics_on_2017_Summer_Universiade_Opening_Ceremony_(2).jpg",
+     "licence": "CC BY 2.0",
+     "shows": "Home team entering (reference only; real people, do not model)"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:2017_Summer_Universiade",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of games photos"
+    }
+   ],
+   "unknowns": [
+    "The two athletes are named in text only; whether naming real athletes is acceptable under the no-likeness rule: (unknown — needs CJ)"
+   ],
+   "kind": "event",
+   "visual_details": [
+    {
+     "text": "臺北田徑場: an open oval athletics stadium with a red running track and a curved white roof over the main stand.",
+     "label": "inferred"
+    },
+    {
+     "text": "A three-step winners' podium, a javelin and a barbell are enough to say the games without figures.",
+     "label": "inferred"
+    },
+    {
+     "text": "Leave out the bear mascot 熊讚 and the games logo; plain text 2017 世大運 only.",
+     "label": "inferred"
+    }
+   ]
+  },
+  {
+   "id": "nuit-blanche-gongguan-2017",
+   "zh": "2017臺北白晝之夜（公館）",
+   "en": "Nuit Blanche Taipei 2017 in Gongguan",
+   "kind": "event",
+   "years": "2017-10-07 18:00 to 2017-10-08 06:00",
+   "history_en": "Nuit Blanche is a free all-night arts event that began in Paris in 2002; Taipei held its first in October 2016 in the old west side. The second edition moved to the student quarter of 公館. From 6 p.m. on 7 October 2017 to 6 a.m. the next morning, close to 100 artworks and performances lined a two-kilometre route through 臺灣大學, the bookshop and café lanes of 溫羅汀, and the 客家文化主題公園. The opening parade went down the university's palm avenue and light was projected onto the main library. The event moves to a new part of the city each year.",
+   "history_zh": "2017年10月7日晚間6點到隔天清晨6點，第二屆臺北白晝之夜在公館舉行，串聯臺灣大學、溫羅汀街區與客家文化主題公園，兩公里路線上有近百場作品與演出。",
+   "facts": [
+    {
+     "text": "SETN: programme ran from 18:00 on the 7th to 06:00 on the 8th (October 2017); main route through 臺灣大學, 溫羅汀 and 客家文化主題公園; \"綿延 2 公里的路線上設置近 100 場多元藝術作品與演出\".",
+     "label": "measured",
+     "source": "https://www.setn.com/news/301998"
+    },
+    {
+     "text": "Taipei's first Nuit Blanche was in October 2016 around 北門; the 2017 edition was in 公館 (臺灣大學－羅斯福路－客家文化主題公園) under the title 「前進藝術金銀島」; the Paris event began in October 2002.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/白晝之夜"
+    },
+    {
+     "text": "Later editions: 2018 中山, 2019 大直－內湖, 2020 南港, 2022 士林, 2023 信義, 2024 大安, 2025 圓山.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/白晝之夜"
+    },
+    {
+     "text": "Opening parade on 椰林大道 and light projection on the 總圖書館.",
+     "label": "inferred",
+     "source": "https://newtalk.tw/news/view/2017-10-07/99860"
+    },
+    {
+     "text": "Attendance in 2017.",
+     "label": "unknown",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "A lamp post with a large glowing white moon-like balloon tied to it and a small clock face showing the hands sweeping from 6 to 6. A row of paper-cut palm trees at the base. Sign: 白晝之夜 2017 公館."
+   },
+   "visual_details": [
+    {
+     "text": "椰林大道: a straight avenue lined on both sides with tall royal palms, ending at a brick library building.",
+     "label": "inferred"
+    },
+    {
+     "text": "Coloured light projected across a red-brick facade; inflatable and light sculptures on the lawns.",
+     "label": "inferred"
+    },
+    {
+     "text": "Dense slow-moving night crowd, many on foot with bicycles pushed alongside.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: on a lamp post near the centre (inferred placement). Real site: 臺灣大學 and 公館, 大安區 and 中正區 (site names measured; districts inferred).",
+   "sources": [
+    "https://www.setn.com/news/301998",
+    "https://zh.wikipedia.org/zh-tw/白晝之夜"
+   ],
+   "photos": [],
+   "unknowns": [
+    "No reference photo page was found on Wikimedia Commons for the 2017 edition: (unknown — needs CJ)",
+    "Attendance in 2017 (the Wikipedia page gives 200,000 for 2016 and 400,000 for 2018): (unknown — needs CJ)",
+    "The SETN report gives the slogan 「好呀！大家都不要睡！」 while Wikipedia gives the title 「前進藝術金銀島」; which was the official theme: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "msi-2019-heping",
+   "zh": "2019英雄聯盟季中邀請賽決賽（和平籃球館）",
+   "en": "League of Legends MSI 2019 finals at Heping Gymnasium",
+   "kind": "event",
+   "years": "2019-05-17 to 2019-05-19 (final on 19 May)",
+   "history_en": "In May 2019 the knockout rounds of the League of Legends Mid-Season Invitational, one of the two world events of the year in the game, were played in Taipei at the 和平籃球館 after earlier rounds in Ho Chi Minh City and Hanoi. On 17 May Team Liquid of North America beat the reigning world champions Invictus Gaming 3 to 1, and on 18 May G2 Esports of Europe beat SK Telecom T1 3 to 2. In the final on 19 May G2 swept Team Liquid 3 to 0, giving Europe its first title at the event. For Taipei players it was a world final a metro ride from home.",
+   "history_zh": "2019年5月17日至19日，英雄聯盟季中邀請賽四強與決賽在臺北和平籃球館舉行。歐洲的G2以三比零擊敗北美Team Liquid奪冠，是歐洲首座季中邀請賽冠軍。",
+   "facts": [
+    {
+     "text": "The event ran 2019-05-01 to 05-19 in Vietnam and Taiwan; the knockout stage was held 17 to 19 May at 和平籃球館 in Taipei; semifinals 17 and 18 May, final 19 May.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/2019年英雄聯盟季中邀請賽"
+    },
+    {
+     "text": "G2 Esports beat Team Liquid 3–0 in the final, Europe's first MSI title; semifinals: Team Liquid 3–1 Invictus Gaming (17 May), G2 3–2 SK Telecom T1 (18 May).",
+     "label": "measured",
+     "source": "https://en.wikipedia.org/wiki/2019_Mid-Season_Invitational"
+    },
+    {
+     "text": "The gymnasium page lists \"2019英雄聯盟季中邀請賽（四強賽）\" among its events; the hall is at 和平實驗國民小學 in 大安區 near 辛亥路 and 基隆路.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北和平籃球館"
+    },
+    {
+     "text": "Invictus Gaming were the reigning world champions.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "A small stage riser with two facing rows of five gaming chairs and monitors, a plain silver cup on a plinth between them, and a big screen frame behind. Sign: 季中邀請賽 2019 臺北. No game characters, no team or publisher logos."
+   },
+   "visual_details": [
+    {
+     "text": "Indoor arena stage: two soundproof-style player booths of five seats each, angled towards each other.",
+     "label": "inferred"
+    },
+    {
+     "text": "A giant screen above the stage and blue and gold stage lighting through haze.",
+     "label": "inferred"
+    },
+    {
+     "text": "和平籃球館 outside: a modern box-shaped sports hall with a metal-panel facade next to a primary school.",
+     "label": "inferred"
+    },
+    {
+     "text": "Fans with inflatable cheering sticks and hand-drawn team boards.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: on a low riser by the photo wall (inferred placement). Real venue: 臺北和平籃球館, 大安區 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/2019年英雄聯盟季中邀請賽",
+    "https://en.wikipedia.org/wiki/2019_Mid-Season_Invitational",
+    "https://zh.wikipedia.org/zh-tw/臺北和平籃球館"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:2019_Mid-Season_Invitational",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of event photos (4 files)"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Taipei_Heping_Basketball_Gymnasium",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "The hall"
+    }
+   ],
+   "unknowns": [
+    "Attendance and ticket details: (unknown — needs CJ)",
+    "Game and team names are trademarks; used as plain text only."
+   ]
+  },
+  {
+   "id": "lantern-fest-shilin-2022",
+   "zh": "2022台北燈節（士林）",
+   "en": "Taipei Lantern Festival 2022 in Shilin",
+   "kind": "event",
+   "years": "2022-02-11 to 2022-02-20",
+   "history_en": "The Taipei Lantern Festival has been run by the city since 1997 and changes neighbourhood every few years. From 11 to 20 February 2022 it was held in 士林 for the first time, to bring people back to the night market and nearby shops after the pandemic. The main lantern, TAIPEI 40, was a red and white flying saucer seven metres across and four metres high; \"40\" sounds like 士林, and the designer took the idea from the planetarium and science museum nearby. It was the first main lantern to perform hanging from a crane. Lantern zones ran from the 劍潭 night market to the 芝山 riverside.",
+   "history_zh": "2022年2月11日至20日，台北燈節首度移師士林。主燈「TAIPEI 40」是直徑七公尺、高四公尺的紅白飛船，以吊車吊掛演出，燈區從劍潭夜市延伸到芝山河濱。",
+   "facts": [
+    {
+     "text": "Storm Media: the festival ran 2022-02-11 to 02-20 in 士林; main lantern \"TAIPEI 40\" is a spaceship about 7 m in diameter and 4 m tall, red and white; 40 is a homophone of 士林; design drew on the planetarium and science museum; stages in the 劍潭 night-market zone and the 芝山 riverside zone.",
+     "label": "measured",
+     "source": "https://www.storm.mg/article/4160415"
+    },
+    {
+     "text": "The festival began in 1997; in 2022 it moved from 萬華 to 士林 to bring crowds back to 士林夜市 and nearby shops; the 2022 main lantern was the first shown hanging from a crane.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北燈節"
+    },
+    {
+     "text": "A third zone at 士林 station (光彩燈區) and lighting hours 17:00 to 22:00.",
+     "label": "inferred",
+     "source": "https://supertaste.tvbs.com.tw/travel/334936"
+    },
+    {
+     "text": "Designer named in the report as Akibo (李明道).",
+     "label": "measured",
+     "source": "https://www.storm.mg/article/4160415"
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "A red and white flying-saucer lantern about a metre across hanging from a small crane arm, glowing from inside, with a ring of small round lanterns below. Sign: 台北燈節 2022 士林. No tiger mascot figure."
+   },
+   "visual_details": [
+    {
+     "text": "Main lantern: a disc-shaped spaceship, red and white, 7 m across and 4 m high.",
+     "label": "measured"
+    },
+    {
+     "text": "It hangs from a construction crane above the crowd rather than standing on a base.",
+     "label": "measured"
+    },
+    {
+     "text": "Strings of lanterns over night-market lanes with food-stall signs below.",
+     "label": "inferred"
+    },
+    {
+     "text": "Riverside zone: lit sculptures on a grass bank beside a stream.",
+     "label": "inferred"
+    },
+    {
+     "text": "Leave out the festival's tiger mascot 祥虎, which rides the real lantern.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: hung over the stall row (inferred placement). Real site: 士林區, around 劍潭, 士林 and 芝山 stations (劍潭 and 芝山 measured; 士林 station inferred).",
+   "sources": [
+    "https://www.storm.mg/article/4160415",
+    "https://zh.wikipedia.org/zh-tw/臺北燈節"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Taipei_Lantern_Festival",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category with a sub-category per year (14); the 2022 one was not opened"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Shilin_Night_Market",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "The night market the lanterns hung over"
+    }
+   ],
+   "unknowns": [
+    "Visitor numbers: (unknown — needs CJ)",
+    "No photo of the 2022 main lantern was opened; colours are from the news text: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "jay-chou-taipei-dome-2024",
+   "zh": "周杰倫「嘉年華」：大巨蛋第一場售票演唱會",
+   "en": "Jay Chou's Carnival: the first ticketed concert at Taipei Dome",
+   "kind": "event",
+   "years": "2024-12-05 to 2024-12-08 (four nights; end date inferred)",
+   "history_en": "Taipei Dome was first proposed in 1991, broke ground in 2012, stood half-built for years and finally opened on 2 December 2023 with a baseball championship. A year later, on 5 December 2024, 周杰倫 (Jay Chou) opened four nights of his Carnival tour there, the first singer to hold his own ticketed concert in the 40,000-seat stadium. About 38,000 people came on the first night; doors opened at 5 p.m. and the Central News Agency reported that the crowd moved in without crushing. 張惠妹, 五月天 and many overseas acts followed within months, and Taipei at last had a hall big enough for stadium tours.",
+   "history_zh": "臺北大巨蛋2023年12月2日啟用。2024年12月5日起，周杰倫「嘉年華」連唱四場，是大巨蛋第一場正式售票演唱會，首場約三萬八千人進場。",
+   "facts": [
+    {
+     "text": "CNA, 2024-12-05: 周杰倫 opened four consecutive nights of 嘉年華 at 台北大巨蛋 from 5 December; about 38,000 fans on the first night; \"是大巨蛋史上開唱第1人\"; entry from 5 p.m.",
+     "label": "measured",
+     "source": "https://www.cna.com.tw/news/amov/202412050356.aspx"
+    },
+    {
+     "text": "臺北大巨蛋 opened 2023-12-02; first proposed 1991; ground broken April 2012; the December 2024 周杰倫嘉年華演唱會 was its first formally ticketed concert.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北大巨蛋"
+    },
+    {
+     "text": "Baseball seating is 40,071; first ticketed concerts by a home female singer 張惠妹 and a home band 五月天 are listed on the page.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北大巨蛋"
+    },
+    {
+     "text": "The Dome is in 信義區 by address, at 忠孝東路 and 光復南路, outside the 信義計畫區 that the 信義 scene shows.",
+     "label": "inferred",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北大巨蛋"
+    },
+    {
+     "text": "The four nights were 5, 6, 7 and 8 December 2024.",
+     "label": "inferred",
+     "source": "https://www.cna.com.tw/news/amov/202412080197.aspx"
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like the Dome's low silver oval shell with its roof lifted like a lid, beams of stage light and confetti coming out, and a grand piano silhouette on a round stage inside. Words: 大巨蛋首場演唱會 2024.12.5. No singer figure or face."
+   },
+   "visual_details": [
+    {
+     "text": "Taipei Dome: a very large, low, egg-shaped dome clad in silver-grey metal panels, with a wide plaza on 忠孝東路.",
+     "label": "inferred"
+    },
+    {
+     "text": "Inside: a stage at the outfield end of a baseball field, floor seats laid over the turf, four tiers of stands.",
+     "label": "inferred"
+    },
+    {
+     "text": "Tens of thousands of light sticks in the dark; pink is the usual fan colour (guess).",
+     "label": "inferred"
+    },
+    {
+     "text": "Draw a piano and stage lights, not the singer.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: beside the stage or notice board (inferred placement). Real venue: 臺北大巨蛋, 信義區 by address but outside the 信義 scene's area (district measured).",
+   "sources": [
+    "https://www.cna.com.tw/news/amov/202412050356.aspx",
+    "https://zh.wikipedia.org/zh-tw/臺北大巨蛋"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Taipei_Dome",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category of Dome photos (11 files)"
+    }
+   ],
+   "unknowns": [
+    "The Dome's address is in 信義區. It is kept here because the 信義 research file does not use it; CJ may want it moved to the 信義 scene: (unknown — needs CJ)",
+    "Last night given as 8 December comes from a search summary: (unknown — needs CJ)",
+    "A real singer is named in text only; whether naming him is acceptable under the no-likeness rule: (unknown — needs CJ)"
+   ]
+  },
+  {
+   "id": "fancy-frontier-ff",
+   "zh": "開拓動漫祭 FF",
+   "en": "Fancy Frontier (FF), the doujin and cosplay fair",
+   "kind": "event",
+   "years": "First held 2002 (inferred); usually twice a year; FF41 on 2023-08-19 to 2023-08-21",
+   "history_en": "Fancy Frontier, known as FF, is one of the two big fan-made comic fairs in Taiwan and is held mainly in Taipei. The first two editions were at the 世貿 second hall; FF3 to FF24 filled the 臺大體育館, FF25 to FF28 moved to the 爭艷館 at 花博公園, and later editions have gone back and forth between the two. FF24 had 1,700 stalls over two days. In August 2023 FF41 ran for three days for the first time. For students it means queuing from dawn in summer or winter break, cosplayers posing outside, and going home with a bag of self-published books.",
+   "history_zh": "開拓動漫祭簡稱FF，是臺灣兩大同人誌即賣會之一，主要在臺北舉辦。FF3到FF24在臺大體育館，之後多在花博公園爭艷館；2023年FF41首度連辦三天。",
+   "facts": [
+    {
+     "text": "FF is run by 開拓動漫事業有限公司, held mainly in Taipei, and with CWT is one of the two major doujinshi fairs in Taiwan.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/開拓動漫祭"
+    },
+    {
+     "text": "FF1 and FF2 at 臺北世界貿易中心展覽二館; FF3 to FF24 at 臺大體育館; FF25 to FF28 at 花博公園爭艷館; FF29 back at 臺大體育館; FF30 at 爭艷館 and 流行館.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/開拓動漫祭"
+    },
+    {
+     "text": "FF24 had 1,700 stalls over two days.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/開拓動漫祭"
+    },
+    {
+     "text": "FF41 ran 2023-08-19 to 2023-08-21, the first three-day edition.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/開拓動漫祭"
+    },
+    {
+     "text": "FF1 was held in 2002.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like a fair stall table seen from the front, stacked with thin books and a \"新刊\" price card, with a tote bag hanging from the corner and a queue-end sign (最後尾). Words: 開拓動漫祭 FF. No characters from any real series and none of the fair's own mascot girls."
+   },
+   "visual_details": [
+    {
+     "text": "Rows of folding tables covered in cloth, each stacked with thin self-published books, with a poster stand behind.",
+     "label": "inferred"
+    },
+    {
+     "text": "Venue: 花博公園爭艷館, a large oval dome hall, or the box-shaped 臺大體育館 with wide front steps.",
+     "label": "inferred"
+    },
+    {
+     "text": "A long queue folded back and forth outside, with a staff member holding a \"最後尾\" (end of line) sign.",
+     "label": "inferred"
+    },
+    {
+     "text": "Cosplayers posing outside for a ring of photographers; use invented costumes only.",
+     "label": "inferred"
+    }
+   ],
+   "location": "City-wide event. On the square: a stall table near the photo wall (inferred placement). Real venues: 臺大體育館 in 大安區 and 花博公園爭艷館 in 中山區 (venue names measured; districts inferred).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/開拓動漫祭"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Fancy_Frontier",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "Category with one sub-category per edition (47)"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:Expo_Dome",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "花博公園爭艷館"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/Category:National_Taiwan_University_Sports_Center",
+     "licence": "Category page (existence checked through the Commons API); each file's licence was not read",
+     "shows": "臺大體育館"
+    }
+   ],
+   "unknowns": [
+    "Year and date of FF1: (unknown — needs CJ)",
+    "Where the 2026 editions were held: (unknown — needs CJ)"
+   ]
+  }
+ ],
+ "not_confirmed": [
+  "School gate (校門) as a landmark: no page was read for it in this run, so it is not in the list. (unknown — needs CJ)",
+  "垃圾不落地 start date in Taipei: neither page read gives one. (unknown — needs CJ)",
+  "YouBike first day 2009-03-11, 5 stations and 250 bikes growing to 11 and 500: from a search summary of a news page that was not opened.",
+  "Public phone history in Taiwan (first card phones, IC cards, removals): the page read is the general one and gives no Taiwan dates. (unknown — needs CJ)",
+  "The page 臺灣便利商店 and the page 臺灣垃圾車 do not exist (HTTP 404); 垃圾車 and 統一超商 were read instead.",
+  "Zoo move: the page gives 1986-09-14 to 1986-10-31 for the send-off; whether the street procession was one day is not confirmed.",
+  "NBA Taipei game 2013: the Arena page on Wikipedia says 10月15日, a news report of 2013-10-10 says Sunday 10月13日; 13 October is used. Score and attendance are from a search summary only.",
+  "Jay Chou at Taipei Dome: first night 2024-12-05 was read on the CNA page; the last night (2024-12-08) is from a search summary.",
+  "Pokémon GO at 北投公園: the first night of the crowds and their size were not read on an opened page.",
+  "Fancy Frontier: the year of FF1 (2002) is from general knowledge, not a page.",
+  "Golden Melody 2006 as the first ceremony at Taipei Arena: inferred from the Arena opening date.",
+  "Considered and left out: 臺北馬拉松 (starts and ends at 市民廣場, which is in the 信義 scene), 台北電影節 (screens partly in 西門町), YouBike launch (already a place here), a Computex visit by a company founder (no page opened), 2009 Deaflympics (not researched).",
+  "捷運淡水線 opening (1997) was considered and not researched."
+ ],
+ "events_old_history": [
+  {
+   "id": "zoo-move-1986",
+   "zh": "動物園大搬家",
+   "en": "The zoo moves to Muzha",
+   "years": "Move from 1986-09-14; new zoo opened 1986-10-31",
+   "history_en": "In autumn 1986 the animals of the old 圓山 zoo left for a new home in 木柵, because the old site could not be enlarged. The page gives the move as 14 September to 31 October 1986: the animals travelled 14.3 kilometres south across the city, in a procession of about twenty animal trucks led by police cars and flag cars, while hundreds of thousands of people lined the roads to wave them off and the journey was broadcast live on television. The new zoo opened to visitors on 31 October 1986.",
+   "history_zh": "1986年秋天，圓山動物園的動物們在數十萬市民夾道歡送下，由二十輛運送車一路南下14.3公里遷往木柵，電視全程轉播。木柵新園於10月31日開放。",
+   "facts": [
+    {
+     "text": "1986-09-14 to 1986-10-31: the animals were sent off by hundreds of thousands of citizens along a 14.3 km route to the new zoo; 20 animal transport trucks, police escort, flag cars; broadcast live by 中視.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "The new 木柵 zoo opened to visitors 1986-10-31.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "The move was made because the 圓山 site could not be expanded.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+    },
+    {
+     "text": "The parade itself took place on one day, 14 September.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "statue",
+    "depicts": "A small bronze-style group: an open truck with an elephant looking over the side and a giraffe neck rising from a second truck, with a line of tiny waving figures along the kerb. A plaque reads 動物搬家 1986."
+   },
+   "location": "City-wide event. On the square: beside the zoo gate arch (inferred placement). Real route: 圓山 to 木柵, 14.3 km (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/臺北市立動物園"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_MRT_Taipei_Zoo_Station.JPG",
+     "licence": "CC BY-SA 2.5",
+     "shows": "The 木柵 zoo entrance area today (no 1986 parade photo found)"
+    }
+   ],
+   "unknowns": [
+    "Whether the parade was on 14 September only (the page gives a date range): (unknown — needs CJ)",
+    "A photo of the 1986 procession: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  },
+  {
+   "id": "mrt-first-line-1996",
+   "zh": "捷運木柵線通車",
+   "en": "The first MRT line opens",
+   "years": "1996-03-28",
+   "history_en": "On 28 March 1996 the 木柵線 began paid service and Taipei finally had a metro, after eight years of roadworks that people called the dark age of traffic. The line had been ready late: cracks were found in its pier caps in 1993, a train caught fire in testing that May, and a full safety review ran in 1995. Free trial rides from 27 February 1996 let the city try it first. On opening day 42,548 people rode. Ten years later the whole network carried more than a million riders a day, and by 2019 more than two million.",
+   "history_zh": "1996年3月28日木柵線正式通車收費，臺北有了第一條捷運，首日運量42,548人次。通車前歷經帽樑裂縫、試車火警與總體檢，2月27日起先開放免費試乘。",
+   "facts": [
+    {
+     "text": "木柵線 opened for paid service 1996-03-28; free public trial rides from 1996-02-27.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "Pier-cap cracks found April 1993; train fire in testing 1993-05-05; overall safety review from 1995-03-10.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/文湖線"
+    },
+    {
+     "text": "First-day ridership 42,548; daily average passed one million ten years later and two million in 2019.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北捷運"
+    },
+    {
+     "text": "The construction years were popularly called 交通黑暗期.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like the front of the boxy driverless train, with a big paper-ticket stub reading 木柵線 通車 1996.3.28 and the first-day rider count."
+   },
+   "location": "City-wide event. On the square: at the foot of the MRT station stair (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/文湖線",
+    "https://zh.wikipedia.org/zh-tw/臺北捷運"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_Metro_VAL256_train_1996-11.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "Train in the opening year"
+    }
+   ],
+   "unknowns": [],
+   "kind": "event"
+  },
+  {
+   "id": "earthquake-921-1999",
+   "zh": "九二一大地震（臺北）",
+   "en": "The 921 earthquake as felt in Taipei",
+   "years": "1999-09-21, 01:47",
+   "history_en": "At 1:47 in the morning on 21 September 1999 a magnitude 7.3 earthquake struck 集集 in 南投, about two hundred kilometres away, and shook for around 102 seconds. Taipei felt intensity 4 to 5 and the whole island lost power at once when a main substation and a transmission tower failed. In the city one building fell: the twelve-storey 東星大樓 at 八德路 and 虎林街, where 87 people died or were never found. It was rebuilt on the same site and finished in August 2009. Across Taiwan 2,415 people died.",
+   "history_zh": "1999年9月21日凌晨1時47分，南投集集發生規模7.3地震，臺北震度4到5級，全臺瞬間停電。臺北市唯一倒塌的是松山區東星大樓，87人罹難或失蹤。",
+   "facts": [
+    {
+     "text": "Earthquake at 01:47:15.9 on 1999-09-21, epicentre 集集, 南投; magnitude 7.3; lasted about 102 seconds; 2,415 dead across Taiwan.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/九二一大地震"
+    },
+    {
+     "text": "Taipei City recorded intensity 5 in the page's list; the 東星大樓 page says Taipei felt 4 to 5.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/九二一大地震"
+    },
+    {
+     "text": "All of Taiwan lost power immediately after the quake (中寮 substation damaged, a 345 kV tower collapsed).",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/九二一大地震"
+    },
+    {
+     "text": "東星大樓 (12 floors above ground, 2 below, at 八德路 and 虎林街, 松山區) was the only building to collapse in Taipei City; 87 dead (73 bodies found, 14 missing).",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/東星大樓"
+    },
+    {
+     "text": "東星大樓 was rebuilt on the same site, completed August 2009.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/東星大樓"
+    }
+   ],
+   "marker": {
+    "type": "small wall",
+    "depicts": "A low grey memorial wall with a stopped clock face reading 1:47 and a row of small unlit windows, one candle-coloured light at the base. Quiet in tone; no image of the collapsed building."
+   },
+   "location": "City-wide event. On the square: a quiet corner away from the stalls (inferred placement). Real site of the collapse: 八德路 and 虎林街, 松山區 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/九二一大地震",
+    "https://zh.wikipedia.org/zh-tw/東星大樓"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Rebuild_Tonshin_Building_20161126.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "The rebuilt 東星大樓, 2016"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Tonshin_Building_collapsed_after_921_earthquake.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "The collapse, 1999 (reference only; do not show)"
+    }
+   ],
+   "unknowns": [
+    "How long Taipei was without power and the rationing that followed: (unknown — needs CJ)",
+    "Tone check: this is a disaster with deaths; whether CJ wants it on the square: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  },
+  {
+   "id": "trash-bag-fee-2000",
+   "zh": "垃圾費隨袋徵收",
+   "en": "Pay-per-bag trash fee begins",
+   "years": "2000-07-01",
+   "history_en": "On 1 July 2000 Taipei began charging for rubbish by the bag. From that day household waste could only go into the truck in official city bags sold at convenience stores and other shops, so the more a family threw away, the more it paid, and anything sorted for recycling went free. The page read for the date says the policy brought a considerable drop in waste; an English page says the compulsory bags cut Taipei's household refuse by two thirds. The blue bag and the evening walk to the truck became a daily habit across the city.",
+   "history_zh": "2000年7月1日起，臺北市實施垃圾費隨袋徵收，家戶垃圾必須裝進專用垃圾袋才能交給垃圾車，丟得越多付得越多，資源回收則免費，垃圾量大幅減少。",
+   "facts": [
+    {
+     "text": "Taipei City implemented 垃圾費隨袋徵收 on 2000-07-01 with considerable waste reduction.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/垃圾費隨袋徵收"
+    },
+    {
+     "text": "Compulsory government-issued bags have reduced Taipei's household refuse by two-thirds; the colour-coded bags are bought at convenience stores.",
+     "label": "measured",
+     "source": "https://en.wikipedia.org/wiki/Waste_management_in_Taiwan"
+    },
+    {
+     "text": "The Taipei bag is blue with printed city markings and comes in several litre sizes.",
+     "label": "inferred",
+     "source": ""
+    },
+    {
+     "text": "Before 2000 the fee was collected with the water bill.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board cut in the shape of a tied blue rubbish bag, taller than a person, with the words 垃圾費隨袋徵收 2000.7.1 and a small row of bag sizes drawn like a ruler."
+   },
+   "location": "City-wide event. On the square: next to the garbage truck (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/垃圾費隨袋徵收",
+    "https://en.wikipedia.org/wiki/Waste_management_in_Taiwan"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Special_plastic_bags_that_have_to_be_bought_for_garbage_disposal_in_Taipei.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "The official Taipei bags"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:新北市環保兩用袋10公升_臺北市環保兩用袋_臺北市專用垃圾袋5公升_20190429.jpg",
+     "licence": "Attribution",
+     "shows": "Bag sizes, 2019"
+    }
+   ],
+   "unknowns": [
+    "Bag colour, sizes and price per litre in 2000 were not read on a page: (unknown — needs CJ)",
+    "What the fee replaced: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  },
+  {
+   "id": "typhoon-nari-2001",
+   "zh": "納莉颱風淹沒捷運",
+   "en": "Typhoon Nari floods the MRT",
+   "years": "2001-09-16 to 09-18; metro fully back 2001-12-15",
+   "history_en": "Typhoon Nari came ashore on the night of 16 September 2001 and stayed over Taiwan for 49 hours and 20 minutes, a record. On 17 September the Taipei weather station measured 425 millimetres of rain in one day, the most in its 105 years. River water poured into the east of the city through an unfinished dike near 南湖大橋, hit 昆陽站 first and ran down the tunnels, flooding the 板南線, the 淡水線 and Taipei Main Station. Repairs took three months and the whole network was running again on 15 December. Flood-line markers remain in sixteen stations.",
+   "history_zh": "2001年9月16日晚間納莉颱風登陸。17日臺北單日雨量425公釐，洪水灌入捷運，板南線、淡水線與台北車站遭淹沒，12月15日才全線恢復營運。",
+   "facts": [
+    {
+     "text": "Landfall 2001-09-16 21:40 between 三貂角 and 頭城; left near 安平 on 09-18 about 23:00; 49 h 20 min over the island.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北捷運"
+    },
+    {
+     "text": "Water entered through an unfinished dike near 南湖大橋; 昆陽站 was hit first; 板南線, 淡水線 and 台北車站 were flooded; full service restored 2001-12-15 after three months; the metro company lost NT$2.245 billion.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北捷運"
+    },
+    {
+     "text": "Taipei weather station recorded 425 mm on 2001-09-17, the highest daily figure in its 105 years.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/颱風納莉_(2001年)"
+    },
+    {
+     "text": "16 南港線 stations have flood-line markers, from 150 cm at 市政府站 to 540 cm at 西門站; Taipei Main Station has a bilingual plaque titled 「記得九一七嗎？」.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/颱風納莉_(2001年)"
+    },
+    {
+     "text": "At least 94 people died in Taiwan.",
+     "label": "measured",
+     "source": "https://en.wikipedia.org/wiki/Typhoon_Nari_(2001)"
+    }
+   ],
+   "marker": {
+    "type": "small wall",
+    "depicts": "A section of tiled station wall with a painted blue water line high above head height and a small plate reading 記得九一七嗎？ 2001, like the real flood-line markers in the stations."
+   },
+   "location": "City-wide event. On the square: on the wall of the MRT stair (inferred placement). Real markers: 16 stations of the 南港線 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/臺北捷運",
+    "https://zh.wikipedia.org/zh-tw/颱風納莉_(2001年)",
+    "https://en.wikipedia.org/wiki/Typhoon_Nari_(2001)"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Flood_depth_record_of_Typhoon_Nari,_MRT_Taipei_Main_Station_20190914a.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "The flood-line marker at Taipei Main Station"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Flood_depth_record_of_Typhoon_Nari,_MRT_Taipei_Main_Station_20170624.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "The same marker, 2017"
+    }
+   ],
+   "unknowns": [
+    "Height of the flood line at Taipei Main Station: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  },
+  {
+   "id": "easycard-2002",
+   "zh": "悠遊卡上線",
+   "en": "The EasyCard arrives",
+   "years": "Full issue 2002-06-12; on all buses and metro 2002-09-30",
+   "history_en": "In June 2002 Taipei began issuing a contactless stored-value card, first at ten metro stations and then everywhere from 12 June. On 30 September 2002 it went live on all buses in greater Taipei as well as the metro, so one tap covered a whole commute and the paper bus tickets and magnetic cards faded out; the bus stored-value card was withdrawn on 8 October 2003. The company behind it had been set up by the metro operator on 6 March 2000. More than a hundred and ten million cards have been issued since.",
+   "history_zh": "2002年6月12日悠遊卡全面發行，9月30日在大臺北地區公車與捷運全面上線，一張卡「嗶」一聲就能轉乘。公車儲值票於2003年10月8日停用。",
+   "facts": [
+    {
+     "text": "2000-03-06: 台北智慧卡票證公司 (later 悠遊卡公司) founded by the metro company.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/悠遊卡"
+    },
+    {
+     "text": "June 2002: cards first issued at ten metro stations; 2002-06-12: full issue.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/悠遊卡"
+    },
+    {
+     "text": "2002-09-30: live on all greater-Taipei buses and the metro; a silver commemorative edition was issued.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/悠遊卡"
+    },
+    {
+     "text": "Over 110 million cards issued.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/悠遊卡"
+    },
+    {
+     "text": "Bus stored-value magnetic card fully stopped 2003-10-08.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "A waist-high post like a ticket gate reader with a round sensor pad on top that lights up when touched, and a blank card shape drawn beside it (no real card art or logo). Text: 嗶！ 2002."
+   },
+   "location": "City-wide event. On the square: at the bus stop or the MRT stair (inferred placement).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/悠遊卡",
+    "https://zh.wikipedia.org/zh-tw/臺北市市區公車"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_Metro_Zhongyuan_Station_Entrance_2020-02-14.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "A metro station entrance (no card-reader photo was searched)"
+    }
+   ],
+   "unknowns": [
+    "A reference photo of a 2002 gate reader: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  },
+  {
+   "id": "sars-2003",
+   "zh": "SARS 疫情",
+   "en": "SARS: the spring of masks",
+   "years": "First suspected case reported 2003-03-14; removed from the WHO list 2003-07-05",
+   "history_en": "Taiwan's first suspected SARS case was reported on 14 March 2003. For a month the cases came from abroad; then infection spread inside the city-run 和平醫院 on 中華路, and on 24 April the hospital was sealed with people inside. The first death in Taiwan came on 27 April, and 仁濟醫院 was sealed on 29 April. In May the government requisitioned masks, and passengers on flights had to wear them. On 5 July 2003 the WHO removed Taiwan from its list of affected areas, the last place in the world to come off it.",
+   "history_zh": "2003年3月14日通報首例疑似個案，4月24日臺北市立和平醫院因院內感染封院，全城戴起口罩、量起體溫。7月5日世界衛生組織宣布臺灣自感染區除名。",
+   "facts": [
+    {
+     "text": "2003-03-14: first suspected SARS case reported.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/嚴重急性呼吸道症候群臺灣疫情"
+    },
+    {
+     "text": "2003-04-24: 台北市立和平醫院 sealed; 04-27: first SARS death in Taiwan; 04-29: 仁濟醫院 sealed.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/嚴重急性呼吸道症候群臺灣疫情"
+    },
+    {
+     "text": "May 2003: mask procurement meetings and requisition of masks; from 05-02 masks required on listed flights.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/嚴重急性呼吸道症候群臺灣疫情"
+    },
+    {
+     "text": "2003-07-05: WHO removed Taiwan from the list of SARS-affected areas, the last area removed.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/嚴重急性呼吸道症候群臺灣疫情"
+    },
+    {
+     "text": "和平醫院 address: 中華路二段33號, 中正區.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/臺北市立聯合醫院"
+    },
+    {
+     "text": "Temperature checks at the doors of schools, offices and metro stations were part of daily life that spring.",
+     "label": "inferred",
+     "source": ""
+    }
+   ],
+   "marker": {
+    "type": "立牌",
+    "depicts": "A standing board shaped like a doorway sign: a plain face mask, an ear thermometer and the words 請戴口罩 量體溫 2003. No hospital building, no faces."
+   },
+   "location": "City-wide event. On the square: by the school gate or the convenience-store door (inferred placement). Real hospital: 中華路二段, 中正區 (measured), close to 西門町 but not in its file.",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/嚴重急性呼吸道症候群臺灣疫情",
+    "https://zh.wikipedia.org/zh-tw/臺北市立聯合醫院"
+   ],
+   "photos": [],
+   "unknowns": [
+    "No reference photo found on Commons in this run: (unknown — needs CJ)",
+    "Sensitivity check: the hospital sealing is still disputed and was later reviewed as a rights case; this entry gives dates only. Whether CJ wants it on the square: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  },
+  {
+   "id": "maokong-gondola-2007",
+   "zh": "貓空纜車啟用",
+   "en": "The Maokong Gondola opens",
+   "years": "Opened 2007-07-04; stopped 2008-10-01; back in March 2010",
+   "history_en": "On 4 July 2007 Taipei opened its first sightseeing cable car, 4.03 kilometres from the zoo up to the tea hills of 貓空, with four passenger stations and a French-built system. The first weeks were rough: it stopped several times on opening day, and on 21 July a failed drive wheel left 322 riders hanging in their cabins for two hours. After a typhoon in September 2008 washed away ground beside a tower, the line shut from 1 October and returned in March 2010. Glass-floored cabins called 貓纜之眼 were added on 2 November 2010.",
+   "history_zh": "2007年7月4日貓空纜車通車，全長4.03公里，從動物園到貓空共四站，是臺北市首座觀光纜車。2008年因颱風停駛，2010年3月恢復營運。",
+   "facts": [
+    {
+     "text": "Opened 2007-07-04; 4.03 km; 4 passenger stations (動物園, 動物園南, 指南宮, 貓空) plus 2 angle stations; first sightseeing gondola in Taipei.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/貓空纜車"
+    },
+    {
+     "text": "2007-07-21: drive-wheel failure left 322 passengers stranded for 2 hours.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/貓空纜車"
+    },
+    {
+     "text": "Stopped from 2008-10-01 after typhoon damage near tower 16; normal service resumed March 2010.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/貓空纜車"
+    },
+    {
+     "text": "2010-11-02: 20 glass-floor 貓纜之眼 cabins added, 5 riders each; 31 in service by 11-05.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/貓空纜車"
+    },
+    {
+     "text": "French POMA monocable system; NT$1.08 billion.",
+     "label": "measured",
+     "source": "https://zh.wikipedia.org/zh-tw/貓空纜車"
+    }
+   ],
+   "marker": {
+    "type": "stand",
+    "depicts": "One small gondola cabin hanging from a short curved mast at head height, rounded box with big windows and a see-through floor panel, swaying slightly. Sign: 貓空纜車 2007.7.4."
+   },
+   "location": "City-wide event. On the square: beside the zoo gate arch (inferred placement). Real line: 文山區, zoo to 貓空 (measured).",
+   "sources": [
+    "https://zh.wikipedia.org/zh-tw/貓空纜車"
+   ],
+   "photos": [
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Maokong-Gondola-01.jpg",
+     "licence": "CC BY-SA 3.0",
+     "shows": "Cabins on the line"
+    },
+    {
+     "url": "https://commons.wikimedia.org/wiki/File:Maokong_Gondola_2014_6.jpg",
+     "licence": "CC BY-SA 4.0",
+     "shows": "Cabin and tower, 2014"
+    }
+   ],
+   "unknowns": [
+    "Cabin colours: (unknown — needs CJ)"
+   ],
+   "kind": "event"
+  }
+ ],
+ "events_note": "CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」. The events list is now held activities and visits, 2006 to 2024, none of them in ximen.json, dadao.json or xinyi.json. The eight civic-history events of the earlier version (zoo move, first metro line, 921, bag fee, typhoon, EasyCard, SARS, gondola) are kept under events_old_history, which tools/places/build_data.py does not read."
+}

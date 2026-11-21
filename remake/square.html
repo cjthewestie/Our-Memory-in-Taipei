@@ -19,6 +19,179 @@
 <script src="noticeboard.js"></script>
 <script src="landmarks-square.js"></script>
 <script>
+// ── the square's signs ───────────────────────────────────────────────────────────────────────
+// CJ, 2026-11-21: 「每個招牌要根據他的作用跟含義還有真實的招牌去對應」, 「整個專案都是」. Each sign of the hub is built as the real
+// sign type it stands for, with a body and not only a face: a carved lacquer 匾額 in a gilt frame, a cinema marquee in a
+// steel case ringed with bulbs, a backlit panel on stand-offs, acrylic light boxes on wall brackets, enamelled tin plates
+// with rivets, cloth banners that sag on their ties. What each one is for, the reference it follows and how sure that is
+// (measured / inferred / guess) is in docs/signage/sources-square.md. Plain words only: no logo, mascot or likeness.
+window.SQ_SIGNS = function (E) {
+const { T, scene } = E, PI = Math.PI;
+const SANS = '"PingFang TC","Heiti TC","Noto Sans TC",system-ui,sans-serif', KAI = '"Kaiti TC","BiauKai","DFKai-SB","KaiTi",' + SANS, WEI = '"Weibei TC",' + KAI, LI = '"Libian TC","Baoli TC",' + KAI, YUAN = '"Yuanti TC",' + SANS, SONG = '"Songti TC","LiSong Pro","PMingLiU",serif';
+const std = (c, r = 0.7, m = 0) => new T.MeshStandardMaterial({ color: E.col(c), roughness: r, metalness: m });
+const MAT = { case: std('#2a2c30', 0.5, 0.4), steel: std('#b9bcc0', 0.3, 0.7), wood: std('#3a2416', 0.6), lacquer: std('#6e2418', 0.5), gilt: std('#c9a14a', 0.35, 0.6), iron: std('#1c1a18', 0.6, 0.5), rope: std('#cdbb94', 0.9), bamboo: std('#b89a5a', 0.7), alu: std('#3b4046', 0.35, 0.8), red: std('#4a1210', 0.5, 0.2), stone: std('#8e877a', 0.9),
+  bulb: E.GLOW(3.6, 2.4, 1.0), led: E.GLOW(1.2, 2.2, 3.0), lamp: E.GLOW(2.2, 1.9, 1.4), glass: new T.MeshStandardMaterial({ color: 0xbfe0ea, roughness: 0.08, metalness: 0.3, transparent: true, opacity: 0.3, depthWrite: false }) };
+const UNIT = new T.BoxGeometry(1, 1, 1);
+const FONTS = document.fonts && document.fonts.load ? Promise.all(['Weibei TC', 'Kaiti TC', 'Libian TC', 'Yuanti TC', 'Songti TC'].map(f => document.fonts.load('40px "' + f + '"'))) : Promise.resolve();
+const tex = (w, h, draw, ppm) => { const cv = document.createElement('canvas'), p = ppm || Math.max(64, Math.min(240, 1000 / Math.max(w, h))); cv.width = Math.round(w * p); cv.height = Math.round(h * p); const g = cv.getContext('2d'); draw(g, cv.width, cv.height);
+  const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8; FONTS.then(() => { g.setTransform(1, 0, 0, 1, 0, 0); g.shadowBlur = 0; draw(g, cv.width, cv.height); t.needsUpdate = true; }, () => {}); return t; };   // drawn again once the brush fonts are ready
+const lum = c => { const k = new T.Color(c); return k.r * 0.3 + k.g * 0.6 + k.b * 0.1; };
+const faceMat = (t, glow) => new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow });
+const bx = (grp, mat, w, h, d, x, y, z, rz) => { const m = new T.Mesh(UNIT, mat); m.scale.set(w, h, d); m.position.set(x, y, z); if (rz) m.rotation.z = rz; m.castShadow = true; grp.add(m); return m; };
+const plane = (grp, mat, w, h, x, y, z, ry) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), mat); m.position.set(x, y, z); m.rotation.y = ry || 0; grp.add(m); return m; };
+const faces = (grp, mat, w, h, d, one) => { plane(grp, mat, w, h, 0, 0, d / 2 + 0.004, 0); if (!one) plane(grp, mat, w, h, 0, 0, -d / 2 - 0.004, PI); };
+const sp = (g, px) => { if ('letterSpacing' in g) g.letterSpacing = Math.round(px) + 'px'; };
+const fit = (g, txt, size, maxW, font, wt) => { g.font = `${wt || 400} ${size}px ${font}`; const mw = g.measureText(txt).width; if (mw > maxW) { size *= maxW / mw; g.font = `${wt || 400} ${size}px ${font}`; } return size; };
+const column = (g, txt, cx, y0, y1, size, font, wt) => { const ch = [...txt], cell = (y1 - y0) / ch.length, s = Math.min(size, cell * 0.94); g.font = `${wt || 400} ${s}px ${font}`; ch.forEach((c, i) => g.fillText(c, cx, y0 + cell * (i + 0.5))); };
+const grain = (g, W, H, n, rgb, a) => { for (let i = 0; i < n; i++) { g.fillStyle = `rgba(${rgb},${Math.random() * a})`; g.fillRect(Math.random() * W - 40, Math.random() * H, 40 + Math.random() * W * 0.3, 1 + Math.random() * 2); } };
+const gold = (g, y, s) => { const gr = g.createLinearGradient(0, y - s / 2, 0, y + s / 2); gr.addColorStop(0, '#fff0c0'); gr.addColorStop(0.5, '#e8c060'); gr.addColorStop(1, '#b98a2e'); return gr; };
+const seal = (g, x, y, s, a, b) => { g.save(); g.translate(x, y); g.rotate(-0.05); g.fillStyle = '#b7372a'; g.fillRect(-s / 2, -s / 2, s, s); g.strokeStyle = '#f6ead0'; g.lineWidth = s * 0.05; g.strokeRect(-s * 0.4, -s * 0.4, s * 0.8, s * 0.8); g.fillStyle = '#f6ead0'; g.font = `400 ${s * 0.4}px ${WEI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(a, 0, -s * 0.19); g.fillText(b, 0, s * 0.22); g.restore(); };
+const tag = (grp, w, h, arm) => { grp.userData.size = [w, h]; grp.userData.arm = arm || 0; return grp; };
+
+// 匾額: a lacquer board with carved, gilded brush lettering inside a 回紋 band, a small column of 上款 on the right and a seal on
+// the left, held in a raised red-lacquer frame with a gilt bead and gilt corner blocks; iron straps when it hangs
+function plaque(text, w, h, o = {}) { const grp = new T.Group(), d = 0.16, r = o.rail || Math.min(0.16, h * 0.085);
+  const t = tex(w, h, (g, W, H) => { g.fillStyle = o.bg || '#15100d'; g.fillRect(0, 0, W, H); grain(g, W, H, 240, '255,214,150', 0.05);
+    const m = ENGINE.signTrim(g, W, H, { dark: true, trim: '#d9b25a', seed: text, style: 0, ground: o.ground == null ? 2 : o.ground });
+    g.textAlign = 'center'; g.textBaseline = 'middle'; const ch = [...text], span = W * (o.span || 0.66), s = Math.min(H * 0.62, span / ch.length * 0.98); g.font = `${o.weight || 400} ${s}px ${o.font || WEI}`;
+    g.shadowColor = 'rgba(0,0,0,.75)'; g.shadowBlur = s * 0.05; g.shadowOffsetY = s * 0.045; g.fillStyle = gold(g, H * 0.5, s); ch.forEach((c, i) => g.fillText(c, W / 2 - span / 2 + span / ch.length * (i + 0.5), H * 0.51));
+    g.shadowColor = 'rgba(0,0,0,0)'; g.shadowBlur = 0; g.shadowOffsetY = 0; g.fillStyle = '#d9b25a';
+    if (o.right) column(g, o.right, W - m * 3.3, H * 0.2, H * 0.8, H * 0.105, KAI);
+    if (o.seal) seal(g, m * 3.3, H * 0.7, H * 0.16, o.seal[0], o.seal[1]); }, o.ppm);
+  bx(grp, MAT.wood, w, h, d, 0, 0, 0); faces(grp, faceMat(t, o.glow == null ? 0.4 : o.glow), w, h, d, o.oneSide);
+  [[0, h / 2 + r / 2, w + 2 * r, r], [0, -h / 2 - r / 2, w + 2 * r, r], [-w / 2 - r / 2, 0, r, h], [w / 2 + r / 2, 0, r, h]].forEach(([x, y, bw, bh]) => bx(grp, MAT.lacquer, bw, bh, d + 0.1, x, y, 0));
+  [[0, h / 2 + r * 0.16, w, r * 0.32], [0, -h / 2 - r * 0.16, w, r * 0.32], [-w / 2 - r * 0.16, 0, r * 0.32, h], [w / 2 + r * 0.16, 0, r * 0.32, h]].forEach(([x, y, bw, bh]) => bx(grp, MAT.gilt, bw, bh, d + 0.13, x, y, 0));
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => bx(grp, MAT.gilt, r * 1.12, r * 1.12, d + 0.15, a * (w / 2 + r / 2), b * (h / 2 + r / 2), 0));
+  if (o.hang) [-1, 1].forEach(k => { bx(grp, MAT.iron, 0.05, o.hang, 0.03, k * w * 0.32, h / 2 + r + o.hang / 2, 0); bx(grp, MAT.iron, 0.14, 0.05, 0.1, k * w * 0.32, h / 2 + r + 0.02, 0); });
+  return tag(grp, w + 2 * r, h + 2 * r); }
+
+// the title of the square: the 匾額 on a timber post with a cradle beam and two braces, and the English name on a brass strip under it
+function titleStand() { const grp = new T.Group();
+  bx(grp, MAT.stone, 0.62, 0.5, 0.62, 0, 0.84, 0); bx(grp, MAT.wood, 0.26, 2.5, 0.26, 0, 2.05, 0); bx(grp, MAT.wood, 5.4, 0.36, 0.3, 0, 3.2, 0);
+  [-1, 1].forEach(k => { bx(grp, MAT.wood, 1.9, 0.14, 0.2, k * 0.95, 2.6, 0, k * 0.56); bx(grp, MAT.gilt, 0.2, 0.2, 0.34, k * 2.72, 3.2, 0); });
+  const brass = faceMat(tex(4.6, 0.26, (g, W, H) => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#e6c874'); gr.addColorStop(0.5, '#c9a14a'); gr.addColorStop(1, '#a88236'); g.fillStyle = gr; g.fillRect(0, 0, W, H); grain(g, W, H, 120, '255,255,255', 0.08);
+    g.strokeStyle = 'rgba(60,35,10,.6)'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.1, H * 0.1, W - H * 0.2, H - H * 0.2); [[H * 0.3, H / 2], [W - H * 0.3, H / 2]].forEach(([x, y]) => { g.fillStyle = '#5a3d14'; g.beginPath(); g.arc(x, y, H * 0.08, 0, 7); g.fill(); });
+    g.fillStyle = '#2a1a0a'; g.textAlign = 'center'; g.textBaseline = 'middle'; sp(g, H * 0.16); fit(g, 'OUR MEMORY IN TAIPEI', H * 0.56, W * 0.84, 'Georgia,"Times New Roman",serif', 700); g.fillText('OUR MEMORY IN TAIPEI', W / 2, H * 0.54); sp(g, 0); }, 220), 0.3);
+  plane(grp, brass, 4.6, 0.26, 0, 3.2, 0.156, 0); plane(grp, brass, 4.6, 0.26, 0, 3.2, -0.156, PI);
+  const p = plaque('台北記憶', 6.6, 2.0, { right: '三門四十年', seal: ['台', '北'], glow: 0.42, ppm: 155 }); p.position.y = 4.55; grp.add(p); scene.add(grp); return grp; }
+
+// 西門町: a cinema marquee. A steel case, the name in cream 魏碑 with a red neon edge on a dark red ground, a white letter board
+// with black slide-in letters under it, a ring of bulbs, and a small 電影街 light box as its crown
+function marquee(zh, en) { const w = 6.6, h = 2.5, d = 0.5, grp = new T.Group(), split = 0.66;
+  const t = tex(w, h, (g, W, H) => { const hh = H * split, gr = g.createLinearGradient(0, 0, 0, hh); gr.addColorStop(0, '#3a0b0a'); gr.addColorStop(1, '#6a1410'); g.fillStyle = gr; g.fillRect(0, 0, W, hh);
+    g.save(); g.beginPath(); g.rect(0, 0, W, hh); g.clip(); g.translate(W / 2, hh * 1.05); g.fillStyle = 'rgba(255,190,80,.07)'; for (let i = 0; i < 24; i++) { g.rotate(PI / 12); g.beginPath(); g.moveTo(0, 0); g.lineTo(-W * 0.03, -W); g.lineTo(W * 0.03, -W); g.fill(); } g.restore();
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; const ch = [...zh], s = Math.min(hh * 0.76, W * 0.6 / ch.length); g.font = `400 ${s}px ${WEI}`;
+    ch.forEach((c, i) => { const x = W / 2 + (i - (ch.length - 1) / 2) * s * 1.12, y = hh * 0.53; g.shadowColor = '#ff3a20'; g.shadowBlur = s * 0.18; g.strokeStyle = '#ff4a30'; g.lineWidth = s * 0.085; g.strokeText(c, x, y); g.shadowBlur = 0; g.fillStyle = '#ffe9a0'; g.fillText(c, x, y); });
+    [W * 0.09, W * 0.91].forEach(x => { g.save(); g.translate(x, hh * 0.5); g.shadowColor = '#ffb020'; g.shadowBlur = hh * 0.1; g.fillStyle = '#ffd24a'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * PI / 5 - PI / 2, rr = hh * (i % 2 ? 0.07 : 0.17); g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } g.fill(); g.restore(); });
+    g.shadowColor = '#40d0ff'; g.shadowBlur = H * 0.03; g.fillStyle = '#9fe8ff'; g.fillRect(W * 0.03, hh - H * 0.022, W * 0.94, H * 0.012); g.shadowBlur = 0;
+    g.fillStyle = '#1c1210'; g.fillRect(0, hh, W, H - hh); g.fillStyle = '#f4efdc'; g.fillRect(W * 0.025, hh + H * 0.035, W * 0.95, H - hh - H * 0.075);
+    g.fillStyle = 'rgba(0,0,0,.16)'; for (let i = 1; i < 3; i++) g.fillRect(W * 0.025, hh + H * 0.035 + (H - hh - H * 0.075) * i / 3, W * 0.95, Math.max(1, H * 0.004));
+    g.fillStyle = '#1a1614'; sp(g, H * 0.02); fit(g, en, (H - hh) * 0.5, W * 0.84, '"Arial Narrow","Helvetica Neue",Arial,sans-serif', 700); g.fillText(en, W / 2, hh + (H - hh) * 0.52); sp(g, 0); }, 150);
+  bx(grp, MAT.red, w + 0.16, h + 0.16, d, 0, 0, 0); plane(grp, faceMat(t, 1.0), w, h, 0, 0, d / 2 + 0.005, 0);
+  const pts = []; for (let x = -w / 2 + 0.06; x <= w / 2 - 0.04; x += 0.3) pts.push([x, h / 2 + 0.03], [x, -h / 2 - 0.03]); for (let y = -h / 2 + 0.3; y < h / 2 - 0.2; y += 0.3) pts.push([-w / 2 - 0.03, y], [w / 2 + 0.03, y]);
+  const im = new T.InstancedMesh(new T.SphereGeometry(0.055, 8, 6), MAT.bulb, pts.length), M4 = new T.Matrix4(); pts.forEach(([x, y], i) => im.setMatrixAt(i, M4.makeTranslation(x, y, d / 2 + 0.03))); grp.add(im);
+  const crown = lightbox('電影街', { vertical: false, w: 2.4, h: 0.56, bg: '#f2c832', fg: '#b3271e', font: WEI, weight: 400, oneSide: true, d: 0.3 }); crown.position.set(0, h / 2 + 0.44, 0.06); grp.add(crown);
+  [-1, 1].forEach(k => { const c = cloth(k < 0 ? '冷氣開放' : '隆重獻映', 0.8, 3.4, { vertical: true, bg: k < 0 ? '#b3271e' : '#f3ecd9', fg: k < 0 ? '#ffe14a' : '#b3271e' }); c.position.set(k * 5.0, -3.3, -0.5); grp.add(c); });   // hand-painted cloth banners down the piers
+  return grp; }
+
+// 大稻埕: a carved shop 匾額 hung on iron straps, its English and years on a small wooden tablet on chains under it, and two
+// upright light boxes off the piers in the red-and-white and yellow-and-red of the Dihua Street shop signs
+function shopGate(zh, en) { const grp = new T.Group();
+  const p = plaque(zh, 6.0, 1.8, { font: KAI, weight: 700, span: 0.6, right: '迪化街', seal: ['稻', '埕'], bg: '#1a120c', hang: 0.5, oneSide: true, glow: 0.5, ppm: 160 }); p.position.y = 0.2; grp.add(p);
+  const tb = faceMat(tex(3.6, 0.46, (g, W, H) => { g.fillStyle = '#3a2416'; g.fillRect(0, 0, W, H); grain(g, W, H, 120, '255,214,150', 0.06); g.strokeStyle = '#d9b25a'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.12, H * 0.12, W - H * 0.24, H - H * 0.24);
+    g.fillStyle = '#e8c060'; g.textAlign = 'center'; g.textBaseline = 'middle'; sp(g, H * 0.1); fit(g, en, H * 0.5, W * 0.84, 'Georgia,"Times New Roman",serif', 700); g.fillText(en, W / 2, H * 0.54); sp(g, 0); }, 200), 0.5);
+  bx(grp, MAT.wood, 3.7, 0.56, 0.08, 0, -1.25, 0); plane(grp, tb, 3.6, 0.46, 0, -1.25, 0.045, 0); [-1, 1].forEach(k => bx(grp, MAT.iron, 0.025, 0.36, 0.025, k * 1.5, -0.85, 0));
+  [[-1, '南北貨', '#c4261d', '#ffffff'], [1, '茶行', '#f2c12e', '#b3271e']].forEach(([k, txt, bg, fg]) => { const lb = lightbox(txt, { bg, fg, arm: 0.5, w: 0.66, h: txt.length * 0.7 + 0.2 }); lb.rotation.y = -PI / 2; lb.position.set(k * 5.0, -2.4, 0.5 + lb.userData.size[0] / 2 - 0.55); grp.add(lb); });
+  return grp; }
+
+// 信義: a backlit sign. Brushed dark aluminium panels on steel stand-offs, white halo-lit letters in a modern sans, a hairline
+// rule, LED lines along the top and bottom edges and a glass fin at each end
+function backlit(zh, en) { const w = 6.4, h = 2.0, grp = new T.Group();
+  const t = tex(w, h, (g, W, H) => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#2b3138'); gr.addColorStop(1, '#1a1e23'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 500; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.035})`; g.fillRect(Math.random() * W, Math.random() * H, 30 + Math.random() * W * 0.3, 1); }
+    g.fillStyle = 'rgba(0,0,0,.5)'; [1 / 3, 2 / 3].forEach(k => g.fillRect(W * k, 0, Math.max(1, W * 0.0015), H));
+    g.textAlign = 'center'; g.textBaseline = 'middle'; const s = H * 0.5; g.font = `600 ${s}px ${SANS}`; sp(g, s * 0.2);
+    g.shadowColor = '#9fd8ff'; g.shadowBlur = s * 0.4; g.fillStyle = '#eaf6ff'; g.fillText(zh, W / 2 + s * 0.1, H * 0.4); g.shadowBlur = s * 0.12; g.fillText(zh, W / 2 + s * 0.1, H * 0.4); g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.fillText(zh, W / 2 + s * 0.1, H * 0.4);
+    g.fillStyle = '#8fd3ff'; g.fillRect(W * 0.32, H * 0.7, W * 0.36, Math.max(2, H * 0.008));
+    g.font = `300 ${H * 0.13}px "Helvetica Neue","Avenir Next",${SANS}`; sp(g, H * 0.07); g.fillStyle = '#dfeaf2'; g.fillText(en, W / 2 + H * 0.035, H * 0.84); sp(g, 0); }, 150);
+  bx(grp, MAT.alu, w, h, 0.14, 0, 0, 0); plane(grp, faceMat(t, 0.95), w, h, 0, 0, 0.075, 0);
+  [1, -1].forEach(k => { bx(grp, MAT.led, w, 0.035, 0.05, 0, k * (h / 2 + 0.05), 0.03).castShadow = false; bx(grp, MAT.glass, 0.05, h + 0.6, 0.6, k * (w / 2 + 0.12), 0, 0.12).castShadow = false; });
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => bx(grp, MAT.steel, 0.08, 0.08, 0.6, a * w * 0.42, b * h * 0.34, -0.36));
+  return grp; }
+
+// an acrylic light box: a lit face on both sides of a metal case with a rain cap; upright (直招) or lying (橫招); o.arm hangs it
+// off the wall on two square tubes and a stay; o.emblem(g, cx, cy, r) draws a plain picture in the head of the box
+function lightbox(text, o = {}) { const v = o.vertical !== false, n = [...text].length, w = o.w || (v ? 0.62 : 0.5 * n + 0.5), h = o.h || (v ? 0.56 * n + (o.emblem ? 0.62 : 0.16) : 0.6), d = o.d || 0.2, grp = new T.Group(), bg = o.bg || '#c4261d', fg = o.fg || '#ffffff';
+  const t = tex(w, h, (g, W, H) => { g.fillStyle = bg; g.fillRect(0, 0, W, H); const u = Math.min(W, H), gr = v ? g.createLinearGradient(0, 0, W, 0) : g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(0,0,0,.10)'); gr.addColorStop(0.5, 'rgba(255,255,255,.14)'); gr.addColorStop(1, 'rgba(0,0,0,.12)'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.strokeStyle = o.line || fg; g.lineWidth = u * 0.025; g.strokeRect(u * 0.07, u * 0.07, W - u * 0.14, H - u * 0.14); g.textAlign = 'center'; g.textBaseline = 'middle'; let top = u * 0.13, x0 = 0;
+    if (o.emblem) { const e = v ? W : H; g.save(); o.emblem(g, e / 2, v ? e * 0.56 : e / 2, e * 0.34); g.restore(); if (v) top = e; else x0 = e * 0.9; }
+    g.fillStyle = fg;
+    if (v) { column(g, text, W / 2, top, H - u * 0.13 - (o.sub ? H * 0.1 : 0), W * 0.76, o.font || KAI, o.weight || 700); if (o.sub) { fit(g, o.sub, W * 0.2, W * 0.78, SANS, 700); g.fillStyle = o.subFg || fg; g.fillText(o.sub, W / 2, H - u * 0.13 - H * 0.045); } }
+    else { fit(g, text, H * (o.sub ? 0.5 : 0.64), (W - x0) * 0.84, o.font || KAI, o.weight || 700); g.fillText(text, x0 + (W - x0) / 2, H * (o.sub ? 0.4 : 0.53)); if (o.sub) { fit(g, o.sub, H * 0.17, (W - x0) * 0.84, SANS, 700); g.fillStyle = o.subFg || fg; g.fillText(o.sub, x0 + (W - x0) / 2, H * 0.8); } } }, o.ppm);
+  bx(grp, o.caseMat || MAT.case, w + 0.07, h + 0.07, d, 0, 0, 0); faces(grp, faceMat(t, (o.glow == null ? 0.85 : o.glow) * (lum(bg) > 0.6 ? 0.45 : 1)), w, h, d, o.oneSide); bx(grp, MAT.steel, w + 0.13, 0.025, d + 0.05, 0, h / 2 + 0.05, 0);
+  if (o.arm) { const L = o.arm, x = -(w / 2 + L); [-1, 1].forEach(k => bx(grp, MAT.iron, L, 0.045, 0.045, -(w / 2 + L / 2), k * h * 0.32, 0)); bx(grp, MAT.iron, 0.03, h * 0.8, 0.14, x, 0, 0);
+    const ax = x, ay = h * 0.32 + 0.5, bxx = w * 0.3, by = h / 2 + 0.06, len = Math.hypot(bxx - ax, by - ay); bx(grp, MAT.iron, len, 0.02, 0.02, (ax + bxx) / 2, (ay + by) / 2, 0, Math.atan2(by - ay, bxx - ax)); }
+  return tag(grp, w + 0.07, h + 0.07, o.arm); }
+
+// an enamelled tin plate: a flat colour, a rivet in every few centimetres of the rim, plain 楷書, rust running from the top edge
+function tinPlate(text, w, h, o = {}) { const v = h > w, grp = new T.Group();
+  const t = tex(w, h, (g, W, H) => { g.fillStyle = o.bg || '#1f4f9c'; g.fillRect(0, 0, W, H); const m = ENGINE.signTrim(g, W, H, { dark: true, trim: o.fg || '#f4f1e6', seed: text, style: 2, ground: -1 });
+    for (let i = 0; i < 12; i++) { g.fillStyle = `rgba(120,60,20,${0.12 + Math.random() * 0.2})`; g.fillRect(Math.random() * W, 0, 2 + Math.random() * 4, H * (0.04 + Math.random() * 0.2)); }
+    g.fillStyle = o.fg || '#f4f1e6'; g.textAlign = 'center'; g.textBaseline = 'middle'; if (v) column(g, text, W / 2, m * 2.2, H - m * 2.2, W * 0.7, o.font || KAI, 700); else { fit(g, text, H * 0.6, W - m * 5, o.font || KAI, 700); g.fillText(text, W / 2, H * 0.53); }
+    const gl = g.createLinearGradient(0, 0, W, H); gl.addColorStop(0.3, 'rgba(255,255,255,0)'); gl.addColorStop(0.5, 'rgba(255,255,255,.13)'); gl.addColorStop(0.7, 'rgba(255,255,255,0)'); g.fillStyle = gl; g.fillRect(0, 0, W, H); });
+  bx(grp, MAT.iron, w, h, 0.03, 0, 0, 0); faces(grp, faceMat(t, o.glow == null ? 0.3 : o.glow), w, h, 0.03, o.oneSide); return tag(grp, w, h); }
+
+// a cloth banner (布條): a sheet that sags or ripples, stitched hem, eyelets, brush lettering; upright ones hang from a bamboo
+// pole with a weight rod in the bottom hem, lying ones are tied off at the four corners
+function cloth(text, w, h, o = {}) { const v = !!o.vertical, grp = new T.Group(), geo = new T.PlaneGeometry(w, h, v ? 3 : 16, v ? 12 : 3), P = geo.attributes.position, sag = o.sag == null ? 0.14 : o.sag;
+  for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i); if (v) P.setZ(i, Math.sin((y / h + 0.5) * 5.2) * 0.04 * (0.5 - y / h)); else { P.setY(i, y - sag * (1 - Math.pow(2 * x / w, 2))); P.setZ(i, Math.sin(x * 3.1) * 0.04); } } geo.computeVertexNormals();
+  const t = tex(w, h, (g, W, H) => { g.fillStyle = o.bg || '#f3ecd9'; g.fillRect(0, 0, W, H); const u = Math.min(W, H);
+    for (let i = 0; i < 9; i++) { const a = 0.05 + ((i * 37) % 7) * 0.01, p = (i + 0.5) / 9, gr = v ? g.createLinearGradient(0, H * (p - 0.06), 0, H * (p + 0.06)) : g.createLinearGradient(W * (p - 0.06), 0, W * (p + 0.06), 0); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.5, `rgba(0,0,0,${a})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+    g.setLineDash([u * 0.05, u * 0.04]); g.strokeStyle = 'rgba(0,0,0,.3)'; g.lineWidth = Math.max(1, u * 0.012); g.strokeRect(u * 0.05, u * 0.05, W - u * 0.1, H - u * 0.1); g.setLineDash([]);
+    g.fillStyle = o.fg || '#b3271e'; g.textAlign = 'center'; g.textBaseline = 'middle'; if (v) column(g, text, W / 2, u * 0.22, H - u * 0.22, W * 0.76, o.font || WEI); else { fit(g, text, H * 0.62, W * 0.86, o.font || WEI); g.fillText(text, W / 2, H * 0.52); }
+    g.fillStyle = 'rgba(40,30,20,.7)'; [[0.1, 0.1], [0.9, 0.1], [0.1, 0.9], [0.9, 0.9]].forEach(([a, b]) => { g.beginPath(); g.arc(v ? W * a : u * a * 0.9 + (a > 0.5 ? W - u : 0), v ? (b > 0.5 ? H - u * 0.1 : u * 0.1) : H * b, u * 0.022, 0, 7); g.fill(); }); });
+  const m = new T.Mesh(geo, new T.MeshStandardMaterial({ map: t, roughness: 0.9, side: T.DoubleSide, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: o.glow == null ? 0.25 : o.glow })); m.castShadow = true; grp.add(m);
+  if (v) { bx(grp, MAT.bamboo, w + 0.3, 0.04, 0.04, 0, h / 2 + 0.01, 0); bx(grp, MAT.bamboo, w + 0.06, 0.03, 0.03, 0, -h / 2, 0.035); [-1, 1].forEach(k => bx(grp, MAT.rope, 0.012, 0.2, 0.012, k * (w / 2 + 0.1), h / 2 + 0.1, 0)); }
+  else [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(([a, b]) => bx(grp, MAT.rope, 0.3, 0.012, 0.012, a * (w / 2 + 0.14), b * h / 2 + (b > 0 ? 0.04 : -0.04), 0, a * b * -0.3));
+  return tag(grp, w, h); }
+
+// a barber's pole: the red, white and blue spiral in a glass tube between two chrome caps, on a wall arm
+function barberPole() { const grp = new T.Group(), t = tex(0.4, 0.8, (g, W, H) => { g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, W, H); g.lineWidth = H * 0.09; ['#c22d22', '#1f4f9c'].forEach((c, k) => { g.strokeStyle = c; for (let y = -H; y < H * 2; y += H * 0.5) { g.beginPath(); g.moveTo(0, y + k * H * 0.25); g.lineTo(W, y + k * H * 0.25 - W * 0.9); g.stroke(); } }); }, 160);
+  const c = new T.Mesh(new T.CylinderGeometry(0.09, 0.09, 0.7, 16, 1, true), faceMat(t, 0.8)); grp.add(c); [-1, 1].forEach(k => { const s = new T.Mesh(new T.SphereGeometry(0.11, 12, 8), MAT.steel); s.position.y = k * 0.4; s.scale.y = 0.6; grp.add(s); });
+  bx(grp, MAT.iron, 0.5, 0.03, 0.03, -0.3, 0.42, 0); bx(grp, MAT.iron, 0.5, 0.03, 0.03, -0.3, -0.42, 0); return tag(grp, 0.2, 0.9, 0.45); }
+
+// the exhibition's title strip: a printed panel on round stand-offs, the title in 明體 and thin capitals as a gallery sets it
+function exhibitHeader(w, h, zh, en, sub) { const grp = new T.Group();
+  const t = tex(w, h, (g, W, H) => { g.fillStyle = '#1f2a44'; g.fillRect(0, 0, W, H); grain(g, W, H, 120, '255,255,255', 0.03); g.fillStyle = '#b7372a'; g.fillRect(H * 0.3, H * 0.2, H * 0.09, H * 0.6);
+    g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillStyle = '#f6efdc'; g.font = `900 ${H * 0.5}px ${SONG}`; sp(g, H * 0.06); g.fillText(zh, H * 0.6, H * 0.52); const x1 = H * 0.6 + g.measureText(zh).width + H * 0.35;
+    g.font = `300 ${H * 0.3}px "Helvetica Neue","Avenir Next",${SANS}`; sp(g, H * 0.07); g.fillText(en, x1, H * 0.4); sp(g, 0); g.fillStyle = '#b9c2d6'; g.font = `400 ${H * 0.17}px "Helvetica Neue",${SANS}`; g.fillText(sub, x1, H * 0.74);
+    g.fillStyle = 'rgba(246,239,220,.5)'; g.fillRect(H * 0.3, H * 0.93, W - H * 0.6, Math.max(1, H * 0.012)); }, 230);
+  bx(grp, MAT.alu, w, h, 0.07, 0, 0, 0); faces(grp, faceMat(t, 0.45), w, h, 0.07); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { bx(grp, MAT.steel, 0.07, 0.07, 0.11, a * (w / 2 - 0.14), b * (h / 2 - 0.12), 0); });
+  [-1, 1].forEach(k => bx(grp, MAT.alu, 0.07, 0.5, 0.07, k * (w / 2 - 0.6), -h / 2 - 0.2, 0)); return grp; }
+// a gallery caption card, and a picture light on an arm over a frame
+function caption(text, w, h) { const t = tex(w, h, (g, W, H) => { g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H); g.strokeStyle = 'rgba(40,30,20,.35)'; g.lineWidth = Math.max(1, H * 0.03); g.strokeRect(H * 0.08, H * 0.08, W - H * 0.16, H - H * 0.16); g.fillStyle = '#2a2420'; g.textAlign = 'center'; g.textBaseline = 'middle'; fit(g, text, H * 0.56, W * 0.86, SONG, 700); g.fillText(text, W / 2, H * 0.54); }, 260);
+  const grp = new T.Group(); bx(grp, MAT.steel, w + 0.03, h + 0.03, 0.02, 0, 0, 0); plane(grp, faceMat(t, 0.15), w, h, 0, 0, 0.012, 0); return grp; }
+function pictureLight(grp, x, y, z) { bx(grp, MAT.iron, 0.03, 0.03, 0.42, x, y, z + 0.2); bx(grp, MAT.iron, 0.6, 0.06, 0.1, x, y - 0.02, z + 0.42); bx(grp, MAT.lamp, 0.52, 0.015, 0.06, x, y - 0.055, z + 0.42).castShadow = false; }
+
+// a stall's signs: a light box hung between the front posts under the awning, and hand-written price strips beside it
+function stallSigns(x, z, rot, name, items, bg, fg) { const grp = new T.Group(); grp.position.set(x, 0, z); grp.rotation.y = rot;
+  const lb = lightbox(name, { vertical: false, w: 1.9, h: 0.42, bg, fg, font: KAI, d: 0.14, ppm: 300 }); lb.position.set(0, 2.2, 0.52); grp.add(lb); [-1, 1].forEach(k => bx(grp, MAT.iron, 0.012, 0.16, 0.012, k * 0.8, 2.5, 0.52));
+  items.forEach((it, i) => { const t = tex(0.16, 0.6, (g, W, H) => { g.fillStyle = i % 2 ? '#f6e27a' : '#f3ecd9'; g.fillRect(0, 0, W, H); g.fillStyle = '#b3271e'; g.textAlign = 'center'; g.textBaseline = 'middle'; column(g, it, W / 2, H * 0.05, H * 0.95, W * 0.8, KAI, 700); }, 260);
+    const m = new T.Mesh(new T.PlaneGeometry(0.16, 0.6), new T.MeshStandardMaterial({ map: t, roughness: 0.9, side: T.DoubleSide, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.3 })); m.position.set(-0.86 + i * 0.2, 1.62, 0.56); m.rotation.z = (i % 2 ? 1 : -1) * 0.03; grp.add(m); });
+  scene.add(grp); return grp; }
+
+// hang a sign on an arcade front. side: S, N, E or W; t: the place along that side; flat: on the wall, otherwise off it on its arm
+function mount(obj, side, t, y, flat) { const n = { S: [0, -1], N: [0, 1], E: [-1, 0], W: [1, 0] }[side], D = 17.0, px = n[0] ? -n[0] * D : t, pz = n[1] ? -n[1] * D : t, off = flat ? 0.14 : (obj.userData.arm || 0) + obj.userData.size[0] / 2;
+  obj.position.set(px + n[0] * off, y, pz + n[1] * off); obj.rotation.y = flat ? Math.atan2(n[0], n[1]) : Math.atan2(-n[1], n[0]); scene.add(obj); return obj; }
+// plain pictures for the heads of the light boxes
+const EMB = {
+  clock: (g, x, y, r) => { g.fillStyle = '#fffdf4'; g.strokeStyle = '#2a2420'; g.lineWidth = r * 0.14; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.stroke(); for (let i = 0; i < 12; i++) { const a = i * PI / 6; g.fillStyle = '#2a2420'; g.beginPath(); g.arc(x + Math.sin(a) * r * 0.78, y - Math.cos(a) * r * 0.78, r * (i % 3 ? 0.035 : 0.07), 0, 7); g.fill(); } g.lineCap = 'round'; g.lineWidth = r * 0.1; g.beginPath(); g.moveTo(x, y); g.lineTo(x - r * 0.42, y - r * 0.3); g.moveTo(x, y); g.lineTo(x + r * 0.2, y - r * 0.62); g.stroke(); },
+  glasses: (g, x, y, r) => { g.strokeStyle = '#1c2f5c'; g.lineWidth = r * 0.16; [-1, 1].forEach(k => { g.beginPath(); g.arc(x + k * r * 0.56, y, r * 0.42, 0, 7); g.stroke(); }); g.beginPath(); g.arc(x, y - r * 0.02, r * 0.16, PI, 0); g.stroke(); },
+  disc: (ch, c) => (g, x, y, r) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${r * 1.3}px ${KAI}`; g.fillText(ch, x, y + r * 0.04); } };
+return { plaque, titleStand, marquee, shopGate, backlit, lightbox, tinPlate, cloth, barberPole, exhibitHeader, caption, pictureLight, stallSigns, mount, EMB, MAT, fonts: { KAI, WEI, LI, YUAN, SONG, SANS } };
+};
+</script>
+<script>
 // The hub square: three gates, forty years. Only this block's layout lives here. The light, sky,
 // ground, builders, finishing chain, camera and controls are in engine.js, shared with every block page.
 const H = 19.5;                                                  // centre to the arcade fronts
@@ -26,7 +199,7 @@ const inGate = (a, b) => Math.abs(b) < 3.4 && Math.abs(a) > 13;  // a gate's ope
 ENGINE.create({
   title: '廣場 · The Square', subtitle: 'Three gates, forty years. Walk through one.',
   shadowCenter: [0, 0, 0], start: { x: 0, z: 11.5, heading: Math.PI },
-  views: [[0, 1.5, 16.5, 0, 4.5, 0], [6.6, 1.4, 2.4, -17, 5, -1.5], [-5.5, 1.3, 4, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-10, 1.4, -9, -21, 10, -18], [-3, 1.5, 14.5, 9.5, 2.2, 9]],
+  views: [[0, 1.5, 16.5, 0, 4.5, 0], [6.6, 1.4, 2.4, -17, 5, -1.5], [-3.4, 1.5, 0.6, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-10, 1.4, -9, -21, 10, -18], [-3, 1.5, 14.5, 9.5, 2.2, 9]],
   ground: { strips: [{ w: 2.8, len: 37 }, { w: 2.8, len: 37, turn: true }],               // a terrazzo cross, gate to gate
     puddle: (rr) => { let x = rr(-14, 14); if (Math.abs(x) < 2.4) x += 5; let z = rr(-14, 14); if (Math.abs(z) < 2.4) z += 5; return [x, z, rr(0, 3)]; } },
   dust: { x: [-18, 18], y: [0.3, 9], z: [-18, 18] },
@@ -41,7 +214,7 @@ ENGINE.create({
     else if (p.z < -18) E.leave('dadao.html?from=square', '大稻埕 · 2000–2019', 700); else if (p.x > 18) E.leave('xinyi.html?from=square', '信義 · 2020–', 700); },
   models: ['bundle-core', 'bundle-square'],
   build(E, [core, sq]) {
-  const { T, scene, rr, TEX, MATS, triMat, dress, get, place, board, sign, canopy, banyans, lanternString, stall, city, uTime } = E;
+  const { T, scene, rr, TEX, MATS, triMat, dress, get, place, board, sign, canopy, banyans, lanternString, stall, city, uTime } = E, S = SQ_SIGNS(E);
   // 騎樓 arcades on all four sides, left open where the three gates stand
   const arcade = get(sq, 'sq-arcade'), tints = ['#d8c8ac', '#c9b08c', '#b9a99e', '#a9b5a2', '#c9a583', '#b3ada1'];
   const sides = [[0, 1, Math.PI, false], [0, -1, 0, true], [1, 0, -Math.PI / 2, true], [-1, 0, Math.PI / 2, true]];   // south, north, east, west
@@ -54,7 +227,8 @@ ENGINE.create({
   const gates = get(sq, 'sq-gate');
   [['ximen', -1, 0, Math.PI / 2, '西門町', 'XIMENDING', '1985–1999', '#b7372a', [3.0, 0.9, 0.4]], ['dadao', 0, -1, 0, '大稻埕', 'DADAOCHENG', '2000–2019', '#8a5a34', [3.0, 1.9, 0.6]], ['xinyi', 1, 0, -Math.PI / 2, '信義', 'XINYI', '2020–', '#1f5e8c', [0.6, 1.9, 3.0]]].forEach(([node, nx, nz, ry, zh, en, years, bg, glow]) => {
     const g = dress(get(gates, node).clone()); g.position.set(nx * (H - 1.2), 0, nz * (H - 1.2)); g.rotation.y = ry; scene.add(g);
-    const b = board([[zh, 150, 0.36], [en + '  ' + years, 62, 0.76, 600]], 6.4, 2.0, bg, '#fff3d6', 0.9); b.position.set(nx * (H - 2.4), 8.6, nz * (H - 2.4)); b.rotation.y = ry; scene.add(b);
+    const b = node === 'ximen' ? S.marquee(zh, en + '  ' + years) : node === 'dadao' ? S.shopGate(zh, en + ' · ' + years) : S.backlit(zh, en + '  ' + years);   // each gate's board is its district's own sign: a cinema marquee, a carved shop 匾額, a backlit panel
+    b.position.set(nx * (H - 2.4), 8.6, nz * (H - 2.4)); b.rotation.y = ry; scene.add(b);
     const portal = new T.Mesh(new T.PlaneGeometry(7.4, 6.8), new T.ShaderMaterial({ transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, uniforms: { uTime, uCol: { value: new T.Color(...glow) } },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: 'uniform float uTime; uniform vec3 uCol; varying vec2 vUv; void main(){ float e = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x) * smoothstep(1.0, 0.25, vUv.y); gl_FragColor = vec4(uCol * e * (0.32 + 0.12 * sin(uTime * 1.3)), 1.0); }' }));
@@ -63,21 +237,20 @@ ENGINE.create({
   // the centre: a terrazzo stone, and the title board on its post
   const stone = triMat({ color: '#b9b2a6', tex: TEX.concrete, scale: 1.2, rough: 0.45 });
   [[2.4, 0.32, 0.16], [1.8, 0.28, 0.46]].forEach(([r, h, y]) => { const c = new T.Mesh(new T.CylinderGeometry(r, r + 0.08, h, 40), stone); c.position.y = y; c.castShadow = c.receiveShadow = true; scene.add(c); });
-  const post = new T.Mesh(new T.CylinderGeometry(0.11, 0.13, 3.0, 12), MATS.ink); post.position.y = 2.1;   // stops under the board, so it no longer crosses the lettering post.castShadow = true; scene.add(post);
-  const title = board([['台北記憶', 176, 0.38], ['OUR MEMORY IN TAIPEI', 58, 0.78, 600]], 6.8, 2.1, '#1d1410', '#f3d98a', 0.42, 1024, { kind: 'plaque' }); /* a black-lacquer plaque with gold lettering, like a 匾額 */ title.position.y = 4.6; scene.add(title);
+  S.titleStand();   // 台北記憶 as a carved black-lacquer 匾額 with gilt lettering on a timber post; OUR MEMORY IN TAIPEI on the brass strip under it (CJ, 2026-11-21: 「叫做台北記憶不要叫我們的 然後英文保持」)
   // the opening exhibition wall in the south-west; the visitors' photos now hang on one small showcase per topic (below)
   const texLoader = new T.TextureLoader();
   const wall = (x, ry, head, sub, frames) => { const faces = [];
     const g = new T.Group(); g.position.set(x, 0, 8.6); g.rotation.y = -ry;
     const w = new T.Mesh(new T.BoxGeometry(8.4, 3.3, 0.32), triMat({ color: '#e9dfca', tex: TEX.plaster, scale: 0.5, rough: 0.9 })); w.position.y = 1.65; w.castShadow = w.receiveShadow = true; g.add(w);
-    const hd = board([[head, 84, 0.4], [sub, 40, 0.8, 500]], 8.4, 0.8, '#1f2a44', '#f1e7d2', 0.5, 2048); hd.position.set(0, 3.7, 0); g.add(hd);
+    const hd = S.exhibitHeader(8.0, 0.8, '開幕展', head, sub); hd.position.set(0, 3.95, 0); g.add(hd);   // a printed title panel on posts above the wall, as a gallery sets its title
     frames.forEach((f, i) => { const fx = (i - (frames.length - 1) / 2) * 2.6;
-      const fr = new T.Mesh(new T.BoxGeometry(2.25, 1.95, 0.08), new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 })); fr.position.set(fx, 1.8, 0.19); fr.castShadow = true; g.add(fr);
+      const fr = new T.Mesh(new T.BoxGeometry(2.25, 1.95, 0.08), new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 })); fr.position.set(fx, 1.8, 0.19); fr.castShadow = true; g.add(fr); S.pictureLight(g, fx, 3.05, 0.16);
       let face;
       if (f.img) { const t = texLoader.load('../asset/photos/' + f.img); t.encoding = T.sRGBEncoding; face = new T.Mesh(new T.PlaneGeometry(2.0, 1.35), new T.MeshStandardMaterial({ map: t, roughness: 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.18 })); face.position.set(fx, 1.92, 0.235); faces.push({ hit: face, photo: { id: f.img.replace(/\.\w+$/, ''), url: '../asset/photos/' + f.img, caption: f.cap, year: f.year, place: f.place, credit: f.credit } }); }
       else { face = board(f.add ? [['＋', 250, 0.42], ['Add your photo', 70, 0.8, 600]] : [['', 10, 0.5]], 2.0, 1.7, '#f4ecdb', f.add ? '#b7372a' : '#cdbfa5', 0.2); face.position.set(fx, 1.8, 0.24); }
       g.add(face);
-      if (f.cap) { const c = board([[f.cap, 46, 0.5, 500]], 2.0, 0.26, '#f4ecdb', '#3a2a1c', 0.15); c.position.set(fx, 1.05, 0.24); g.add(c); }
+      if (f.cap) { const c = S.caption(f.cap, 1.3, 0.2); c.position.set(fx, 0.62, 0.175); g.add(c); }   // a gallery caption card under the frame
     });
     scene.add(g); PHOTOWALL.block({ x, z: 8.6, facing: -ry, hw: 4.2, hd: 0.2 });
     if (faces.length) PHOTOWALL.attach({ THREE: T, scene, camera: E.camera, canvas: E.canvas, keys: E.keys, section: 'square', label: 'Opening exhibition · 開幕展', frames: faces });   // a click on a photograph opens it large, with its credit
@@ -99,17 +272,25 @@ ENGINE.create({
   E.buildLanterns();
   // street life: scooters nose-in along the south arcade, planters at the piers, two stalls, shop signs
   const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
-  for (let i = 0; i < 9; i++) { if (i % 4 === 3) continue; const sx = -15 + i * 3.7 + rr(-0.5, 0.5), sz = H - 3.6 + rr(-0.3, 0.3), sr = Math.PI + rr(-0.3, 0.3); if (i === 5 || i === 6) continue;   // the old city bus stands at the kerb there
+  for (let i = 0; i < 9; i++) { if (i % 4 === 3) continue; const sx = -15 + i * 3.7 + rr(-0.5, 0.5), sz = H - 3.6 + rr(-0.3, 0.3), sr = Math.PI + rr(-0.3, 0.3); if (i === 4 || i === 5 || i === 6) continue;   // the old city bus stands at the kerb there; i 4 would park on the end of the path, in front of the start view
     const sc = dress(scooters.children[i % 3].clone()); sc.position.set(sx, 0, sz); sc.rotation.y = sr; scene.add(sc); }
   [[-7.5, -16.5], [7.5, -16.5], [-16.5, -7.5], [-16.5, 7.5], [16.5, -7.5], [16.5, 7.5], [-14, 16.5], [14, 16.5]].forEach(([x, z], i) => { if (i === 2 || i === 4 || i === 5) return;   // the zoo gate, the garbage truck and the convenience store stand at those piers now
     const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
   stall(-13.2, 2.6, 1.3, 8); stall(13.4, -3.2, -1.3, 205);
-  const words = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊', '眼鏡', '書局'];
-  words.forEach((w, i) => { const side = i % 4, t = -15 + Math.floor(i / 4) * 8.5 + (side % 2) * 3, d = H - 2.5;
-    if (side === 0) sign(w, t, 3.7 + (i % 3) * 0.5, d, 0, [4, 210, 38, 150][i % 4], i % 3 === 0);
-    else if (side === 1 && Math.abs(t) > 9) sign(w, t, 3.7 + (i % 3) * 0.5, -d, 0, [350, 28, 210, 150][i % 4], i % 3 === 0);
-    else if (side === 2 && Math.abs(t) > 9) sign(w, d, 3.7 + (i % 3) * 0.5, t, Math.PI / 2, [4, 150, 38, 210][i % 4], i % 3 === 0);
-    else if (side === 3 && Math.abs(t) > 9) sign(w, -d, 3.7 + (i % 3) * 0.5, t, Math.PI / 2, [28, 350, 150, 4][i % 4], i % 3 === 0); });
+  S.stallSigns(-13.2, 2.6, 1.3, '蚵仔麵線', ['大碗', '小碗', '臭豆腐', '甜不辣'], '#f2c12e', '#b3271e'); S.stallSigns(13.4, -3.2, -1.3, '豆花', ['花生', '紅豆', '粉圓', '薑汁'], '#f6f3ea', '#1f4f9c');
+  // the shop signs along the arcades, each the kind of sign its trade hangs (docs/signage/sources-square.md): upright light boxes off the wall on arms,
+  // an enamelled tin plate, a cloth banner, a small carved board, a barber's pole. They hang where no landmark stands.
+  const F = S.fonts;
+  S.mount(S.lightbox('牛肉麵', { bg: '#c4261d', fg: '#ffffff', arm: 0.4 }), 'S', -15, 4.7);
+  S.mount(S.lightbox('西藥房', { bg: '#f6f3ea', fg: '#c4261d', line: '#2f8a5a', arm: 0.4, emblem: S.EMB.disc('藥', '#c4261d') }), 'S', -10.8, 4.9);
+  S.mount(S.cloth('布莊', 0.8, 2.0, { vertical: true, bg: '#1f3a6e', fg: '#f3ecd9', font: F.KAI }), 'S', -6.6, 4.3, true);
+  S.mount(S.plaque('茶莊', 1.5, 0.62, { font: F.LI, span: 0.5, oneSide: true, ground: 0 }), 'S', -2.4, 4.3, true);
+  S.mount(S.lightbox('冰果室', { bg: '#e9f3f6', fg: '#1f6fb0', font: F.YUAN, arm: 0.4, emblem: S.EMB.disc('冰', '#c4261d') }), 'S', 1.8, 4.9);
+  S.mount(S.tinPlate('雜貨', 0.62, 1.3), 'S', 11, 4.3, true);
+  S.mount(S.lightbox('鐘錶行', { bg: '#f4ecd2', fg: '#1d4a39', arm: 0.4, emblem: S.EMB.clock }), 'E', -15.5, 4.9);
+  S.mount(S.lightbox('眼鏡', { bg: '#f6f6f0', fg: '#1c2f5c', font: F.YUAN, arm: 0.4, emblem: S.EMB.glasses }), 'E', 12.6, 4.8);
+  S.mount(S.lightbox('理髮廳', { bg: '#f6f6f0', fg: '#1f4f9c', line: '#c22d22', arm: 0.4 }), 'W', 8.3, 4.8); S.mount(S.barberPole(), 'W', 7.5, 3.4);
+  S.mount(S.tinPlate('書局', 0.62, 1.3, { bg: '#1d4a39', fg: '#f3d27a' }), 'W', 14.9, 4.4, true);
   // what each gate looks toward, far off in the haze: 萬年大樓 to the west, old blocks to the north, a tall tower to the east
   place(core, 'wannian', -70, 10, Math.PI / 2, 1.3); place(core, 'chunghwa', -52, -30, Math.PI / 2, 1.3); place(core, 'lux', -20, -62, 0, 1.2); place(core, 'chunghwa', 24, -60, 0, 1.3);
   { const tm = triMat({ color: '#7fa3ad', tex: TEX.metal, scale: 0.3, rough: 0.35, metal: 0.3 }), tw = new T.Group();           // a stepped tower, eight flared tiers and a spire
