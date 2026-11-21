@@ -36,7 +36,8 @@ const CSS = `
   #stick { position: fixed; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%; border: 1.5px solid rgba(246,234,216,.35); background: rgba(20,16,14,.18); opacity: 0; transition: opacity .2s; pointer-events: none; }
   #stick.on { opacity: 1; }
   #stick i { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(246,234,216,.55); }
-  @media (pointer: coarse) { #keys { font-size: 11px; padding: 6px 12px; opacity: .8; } }`;
+  @media (pointer: coarse) { #keys { font-size: 11px; padding: 6px 12px; opacity: .8; } }
+  @media (max-width: 640px) { #keys { white-space: normal; text-align: center; width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; font-size: 11px; line-height: 1.45; border-radius: 14px; } }`;   /* on a narrow window the hint wraps inside the screen instead of running off both sides */
 const el = (tag, id, html) => { let e = document.getElementById(id); if (!e) { e = document.createElement(tag); e.id = id; document.body.appendChild(e); } if (html != null) e.innerHTML = html; return e; };
 
 // signTrim: the border and the ground pattern of a sign. CJ, 2026-11-21: 「全部的招牌應該都要翻新邊框或花紋」.
