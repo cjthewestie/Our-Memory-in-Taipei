@@ -24,7 +24,7 @@
 <script src="../three.min.js"></script>
 <script src="../GLTFLoader.js"></script>
 <script src="../meshopt_decoder.js"></script>
-<script src="character.js"></script>
+<script src="hero.js"></script>
 <script>
 // Remake test (CJ, 2026-11-21: 「我要整個場景的重制達成風格的轉換 先做完整的一個小區塊讓我看看」).
 // One block, the 西門紅樓 front plaza, rebuilt for the "light and air" look: a low sun behind the
@@ -289,32 +289,7 @@ function points(n, init, size, colour, opacity) {
 const loader = new T.GLTFLoader(); if (window.MeshoptDecoder) loader.setMeshoptDecoder(window.MeshoptDecoder);
 const loadGLB = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', g => res(g.scene), undefined, rej));
 const loadGLTF = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', res, undefined, rej));
-// The Blender-built character (tools/character/build_girl.py): a skinned model with Idle, Walk, Run and Wave.
-// The three loops play together and are mixed by how fast she is moving; walk and run are driven by the
-// distance she covers, so her feet keep pace with the ground.
-function rigged(gltf) {
-  const group = gltf.scene, mixer = new T.AnimationMixer(group), act = {}; let eyes = null;
-  group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; if (o.morphTargetDictionary && 'blink' in o.morphTargetDictionary) eyes = o; } });
-  gltf.animations.forEach(c => { act[c.name] = mixer.clipAction(c); act[c.name].play(); act[c.name].setEffectiveWeight(c.name === 'Idle' ? 1 : 0); });
-  if (act.Wave) { act.Wave.setLoop(T.LoopOnce, 1); act.Wave.clampWhenFinished = false; }
-  const S = { move: 0, run: 0, phase: 0, idleT: 0, wave: -1, blink: 2, blinkT: 0 };
-  const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-  function update(dt, speed) {
-    S.move += (sm(0.05, 0.6, speed) - S.move) * Math.min(1, dt * 8); S.run += (sm(1.9, 3.6, speed) - S.run) * Math.min(1, dt * 6);
-    S.phase = (S.phase + speed * dt / (0.8 + (1.56 - 0.8) * S.run)) % 1; S.idleT += dt;
-    if (S.wave >= 0) { S.wave += dt; if (S.wave > act.Wave.getClip().duration || S.move > 0.3) S.wave = -1; }
-    const wv = S.wave >= 0 ? Math.min(1, S.wave * 5) * Math.min(1, (act.Wave.getClip().duration - S.wave) * 5) : 0, idle = (1 - S.move) * (1 - wv);
-    act.Idle.time = S.idleT % act.Idle.getClip().duration; act.Idle.setEffectiveWeight(idle);
-    act.Walk.time = S.phase * act.Walk.getClip().duration; act.Walk.setEffectiveWeight(S.move * (1 - S.run));
-    act.Run.time = S.phase * act.Run.getClip().duration; act.Run.setEffectiveWeight(S.move * S.run);
-    if (act.Wave) { act.Wave.time = Math.max(0, S.wave); act.Wave.setEffectiveWeight(wv); }
-    mixer.update(0);
-    S.blink -= dt; if (S.blink < 0) { S.blinkT = 0.14; S.blink = 2.2 + Math.random() * 3.5; }
-    S.blinkT = Math.max(0, S.blinkT - dt); if (eyes) eyes.morphTargetInfluences[eyes.morphTargetDictionary.blink] = S.blinkT > 0 ? 1 - Math.abs(S.blinkT / 0.14 * 2 - 1) : 0;
-  }
-  update(0, 0);
-  return { group, update, state: S, wave() { if (act.Wave) S.wave = 0; }, actions: Object.keys(act) };
-}
+const rigged = (gltf) => HERO.rigged(T, gltf);
 let walker = null, hero = null, lanterns = null, dust = null, steam = null;
 const state = { ready: false, error: null, fps: 0 };
 Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-rigged')]).then(([core, sq, girl]) => {
@@ -441,8 +416,8 @@ const VIEWS = [[0, 1.6, 47, 0, 7.5, 0], [-9, 1.5, 33, 7, 6, 4], [15, 1.3, 36, -8
 let yaw = 0, pitch = 0; const pos = new T.Vector3(), keys = {};
 function setView(i) { const v = VIEWS[i]; pos.set(v[0], v[1], v[2]); const dx = v[3] - v[0], dy = v[4] - v[1], dz = v[5] - v[2]; yaw = Math.atan2(-dx, -dz); pitch = Math.atan2(dy, Math.hypot(dx, dz)); mode = 'fixed'; }
 // follow: the camera rides behind the character; fixed: it stands at a viewpoint and she still walks
-let mode = 'follow', camYaw = 0, camPitch = 0.13, camDist = 4.2;
-const heroPos = new T.Vector3(0, 0, 43), camTarget = new T.Vector3(0, 1.0, 43); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
+let mode = 'follow', camYaw = 0, camPitch = 0.13, camDist = 3.4;
+const heroPos = new T.Vector3(0, 0, 43), camTarget = new T.Vector3(0, 0.72, 43); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
 if (QS.get('view')) setView(Math.max(0, Math.min(5, (parseInt(QS.get('view'), 10) || 1) - 1)));
 if (QS.get('close')) { camDist = 1.9; camYaw = Math.PI - 0.5; camPitch = 0.06; }            // ?close=1 looks at her face
 let drag = null;
@@ -460,14 +435,14 @@ const sunV = new T.Vector3(); let last = performance.now(), fpsAcc = 0, fpsN = 0
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000; uTime.value = t; sky.material.uniforms.uTime.value = t;
   const f = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0), sd = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
-  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? (keys.shift ? 4.1 : 1.45) : 0;
+  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? (keys.shift ? HERO.RUN : HERO.WALK) : 0;
   let turnRate = 0;
   if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
   heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);
   heroPos.x = Math.max(-21, Math.min(21, heroPos.x + Math.sin(heroHead) * heroSpeed * dt)); heroPos.z = Math.max(11, Math.min(60, heroPos.z + Math.cos(heroHead) * heroSpeed * dt));
   if (hero) { hero.group.position.copy(heroPos); hero.group.rotation.y = heroHead; hero.update(dt, heroSpeed, heroTurn); }
   if (mode === 'follow') {
-    camTarget.lerp(new T.Vector3(heroPos.x, 0.95, heroPos.z), Math.min(1, dt * 7));
+    camTarget.lerp(new T.Vector3(heroPos.x, 0.72, heroPos.z), Math.min(1, dt * 7));
     const cp = Math.cos(camPitch); camera.position.set(camTarget.x + Math.sin(camYaw) * cp * camDist, Math.max(0.22, camTarget.y + Math.sin(camPitch) * camDist), camTarget.z + Math.cos(camYaw) * cp * camDist);
     camera.lookAt(camTarget.x, camTarget.y + 0.12 + camDist * 0.08, camTarget.z);
   } else { camera.position.copy(pos); camera.position.y += Math.sin(t * 0.6) * 0.015; camera.rotation.set(pitch, yaw, 0, 'YXZ'); }
