@@ -41,6 +41,8 @@ CJ, 2026-11-21: 「還有這些招牌都怪怪的請出搜尋真實招牌 海報
 | S25 | https://commons.wikimedia.org/wiki/File:Chengdu_Rd,_Taipei_-_Tianhou_Temple_-_exterior_(2025)_-_img_01.jpg | 2025: 台北天后宮 (台, not 臺) left to right in white brush letters on red brick; two yellow uprights with the name in red |
 | S26 | https://commons.wikimedia.org/wiki/File:Lions'_Plaza_Commercial_Building_20171111.jpg | 2017: a dark-blue banner, 刺青 in yellow-green brush characters with TATTOO |
 | S27 | https://commons.wikimedia.org/wiki/File:Red_House_Theater_20231109.jpg | 2023: the Red House carries only a small stone plaque over the door, no banner |
+| S28 | https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Media&id=702804 | 國家文化記憶庫, newsreel 「樂聲戲院開幕」, 1964-08-02 (國家電影及視聽文化中心). Opening frame: a framed board on the 樂聲 front above the canopy, 《西部開拓史》 in heavy block characters read right to left, HOW THE WEST WAS WON under it, a lower line with 彩色 and 70; a second pictorial board beside it; lettering along the canopy edge. Page text: 豪華 opened 1965-01-08, 日新 1966-09-27 |
+| S29 | https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Object&id=301967 | 國家文化記憶庫, modern photo of 獅子林: golden-yellow panel facade, 獅子林 with LION'S PLAZA at street level |
 
 ## Sign by sign
 
@@ -52,7 +54,7 @@ CJ, 2026-11-21: 「還有這些招牌都怪怪的請出搜尋真實招牌 海報
 | 中華商場 | End walls: numeral 1 under 中華商場 | S2 (信棟 shows "5") | inferred |
 | 中華商場 | Top board 中華商場, read right to left | none for a board in that place | guess |
 | 中華商場 | Roof: 黑松汽水 in red neon; two bare frames; the bare National tower frame (unchanged, it belongs to the 1985 event marker) | S7, S6 | brand measured, colour and lettering guess |
-| 電影街 | Billboard 《畢業生》, strip 本院獨家獻映, 20 panels four by five with seams, no star names | S10, S8, S9 | title and panel count measured; the painting itself is ours; strip wording inferred |
+| 電影街 | Billboard 《畢業生》: title in block characters read right to left, THE GRADUATE under it, strip 本院獨家獻映, 20 panels four by five with seams, no star names | S10, S8, S9, S28 | title and panel count measured; block title, right-to-left and English line measured on 樂聲 in 1964 and carried to 豪華 in 1973: inferred; the painting itself is ours; strip wording inferred |
 | 電影街 | Cloth banners 冷氣開放, 獨家獻映 | S13 (cloth banners hung there) | wording inferred |
 | 電影街 | Name signs 豪華大戲院 (neon), 日新大戲院, 樂聲大戲院 | names S10, S11 | names measured for 樂聲, inferred for the other two; look is a guess (no photo of the name signs was found) |
 | 電影街 | Marquee 本院獨家獻映 畢業生 / 下期 真善美; poster cases 真善美, 回到未來; 售票處, 全票 半票 軍警票 | S10 | titles measured; wording of the boards inferred; the invented prices are gone |
@@ -71,6 +73,8 @@ CJ, 2026-11-21: 「還有這些招牌都怪怪的請出搜尋真實招牌 海報
 ## Not done
 
 - 西門紅樓 itself has no sign in the scene; the real one is a small stone plaque over the door (S27).
-- No period photo was found for the cinema name signs, for 來來 in colour, or for 萬年 and 獅子林 before 2008. `memory.culture.tw`, the 文獻館 and 報時光 are the likeliest places and were not searched.
+- 國家文化記憶庫 was searched on 2026-11-21 (西門町 戲院, 豪華戲院, 來來百貨, 獅子林, 武昌街 電影街, 萬年大樓, 西門町 街景): it gave S28 and S29. Still no period photo of the cinema name signs, of 來來 in colour, or of 萬年 and 獅子林 before 2008.
+- Two 國史館 press sets would likely settle the cinema signs and 萬年: 「春節期間電影街人潮洶湧」 1978-02-08 (典藏號 150-031700-0002-029) and the 萬年大樓 fire 1980-07-26 (150-031900-0003-028). 國家文化記憶庫 shows only their negative sleeves; the 國史館 online viewer (ahonline.drnh.gov.tw) hung on 系統處理中 for a guest and was not seen.
+- The 106 「1950至2006年臺灣常民生活」 street photos matched by 西門町 街景 carry no captions and watermarked thumbnails; they were not opened one by one.
 - The brush typefaces (Kaiti TC, Weibei TC, Xingkai TC, Yuanti TC) are macOS system fonts. On a device without them the signs fall back to 黑體; shipping a font file is `(unknown — needs CJ)`.
 - The photo showcases and event markers (`photowall.js`, `places.js`) are interface, not street signs, and are unchanged.

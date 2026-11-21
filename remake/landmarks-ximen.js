@@ -134,7 +134,11 @@ function filmPoster(title, tag, hue, grid) {
     bust(W * 0.36, H * 0.4, W * 0.17, `hsl(${hue + 10},70%,42%)`, true); bust(W * 0.66, H * 0.33, W * 0.2, `hsl(${hue + 215},45%,30%)`, false);
     for (let i = 0; i < 260; i++) { g.strokeStyle = `rgba(${rnd() < 0.5 ? '255,240,210' : '40,20,30'},${0.03 + rnd() * 0.07})`; g.lineWidth = 2 + rnd() * 7; const x = rnd() * W, y = rnd() * H; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * W * 0.18, y + (rnd() - 0.5) * H * 0.05); g.stroke(); }   // brush marks
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-    const size = Math.min(W * 0.92 / [...title].length, H * 0.2); g.font = `900 ${size}px ${WEI}`; g.lineWidth = size * 0.2; g.strokeStyle = '#fff6e0'; g.strokeText(title, W / 2, H * 0.76); g.lineWidth = size * 0.1; g.strokeStyle = '#7a120c'; g.strokeText(title, W / 2, H * 0.76); g.fillStyle = '#ffd21f'; g.fillText(title, W / 2, H * 0.76);
+    // a foreign film's board, as on 樂聲 in the 1964 opening newsreel: the title in heavy block characters read right to left, the English title under it
+    const en = grid && grid.en, tt = en ? [...title].reverse().join('　') : title, ty = H * (en ? 0.725 : 0.76), size = Math.min(W * 0.92 / [...tt].length, H * 0.2);
+    if (en) { g.fillStyle = 'rgba(20,12,30,.72)'; g.fillRect(0, H * 0.6, W, H * 0.28); }
+    g.font = `900 ${size}px ${en ? FONT : WEI}`; g.lineWidth = size * 0.2; g.strokeStyle = '#fff6e0'; if (!en) g.strokeText(tt, W / 2, ty); g.lineWidth = size * 0.1; g.strokeStyle = '#7a120c'; g.strokeText(tt, W / 2, ty); g.fillStyle = en ? '#fff6e0' : '#ffd21f'; g.fillText(tt, W / 2, ty);
+    if (en) { g.font = `800 ${H * 0.045}px "Arial Narrow", "Helvetica Neue", Arial, sans-serif`; g.fillStyle = '#ffd21f'; g.fillText(en.split('').join(' '), W / 2, H * 0.842); }
     g.font = `800 ${H * 0.062}px ${KAI}`; g.fillStyle = '#fff'; g.fillRect(W * 0.2, H * 0.885, W * 0.6, H * 0.085); g.fillStyle = '#b3271e'; g.fillText(tag, W / 2, H * 0.93);
     if (grid) { g.fillStyle = 'rgba(20,10,5,.4)'; for (let i = 1; i < grid.cols; i++) g.fillRect(W * i / grid.cols - 1.5, 0, 3, H); for (let i = 1; i < grid.rows; i++) g.fillRect(0, H * i / grid.rows - 1.5, W, 3); }   // the seams between the 6尺 canvas panels
     g.strokeStyle = '#f3e6c8'; g.lineWidth = Math.max(3, W * 0.012); g.strokeRect(g.lineWidth / 2, g.lineWidth / 2, W - g.lineWidth, H - g.lineWidth);
@@ -310,7 +314,7 @@ function cinema() {
   K.bx(x0, x1, G, H, -D, -0.1, M.cream); K.bx(x0, x1, 0, G, -D, -3.0, M.dark); K.bx(x0, x0 + 0.5, 0, H + 1, -D, 0, M.ochre); K.bx(x1 - 0.5, x1, 0, H + 1, -D, 0, M.ochre);
   K.bx(x0, x1, H, H + 1, -0.5, 0, M.ochre); K.bx(x0 - 0.06, x1 + 0.06, H + 1, H + 1.15, -0.6, 0.1, M.concDk); for (let i = 0; i < 7; i++) K.bx(x0 + 0.5, x1 - 0.5, 5.6 + i * 1.9, 5.7 + i * 1.9, -0.1, -0.02, M.ochre);
   // the hand-painted billboard over the whole upper front, cloth banners either side
-  K.bx(-3.75, 3.75, 6.3, 16.5, -0.1, 0.14, M.woodDk); K.mesh(paint(7.2, 9.0, filmPoster('畢業生', '本院獨家獻映', 0, { cols: 4, rows: 5 }), { glow: 0.42, oneSide: true, ppm: 100, depth: 0.08 }), 0, 11.4, 0.18);   // 豪華 ran 《畢業生》 alone in 1973, queues for a month; a board is 20 panels of 6尺, four across and five up
+  K.bx(-3.75, 3.75, 6.3, 16.5, -0.1, 0.14, M.woodDk); K.mesh(paint(7.2, 9.0, filmPoster('畢業生', '本院獨家獻映', 0, { cols: 4, rows: 5, en: 'THE GRADUATE' }), { glow: 0.42, oneSide: true, ppm: 100, depth: 0.08 }), 0, 11.4, 0.18);   // 豪華 ran 《畢業生》 alone in 1973, queues for a month; a board is 20 panels of 6尺, four across and five up
   [[-4.25, '冷氣開放', '#b3271e', '#ffe14a'], [4.25, '獨家獻映', '#f3ecd9', '#b3271e']].forEach(([x, t, bg, fg]) => K.mesh(sign(t, 0.8, 6.4, { vertical: true, kind: 'cloth', font: WEI, bg, fg, glow: 0.7, depth: 0.03 }), x, 11.6, 0.12));
   K.mesh(sign('豪華大戲院', 6.4, 1.6, { kind: 'neon', bg: '#1a0d0b', fg: '#ffd24a', font: WEI, spread: true, glow: 1.5, oneSide: true }), 0, 17.6, 0.06);
   K.mesh(sign('豪華大戲院', 1.15, 7.5, { vertical: true, kind: 'neon', font: WEI, bg: '#151515', fg: '#ff5a48', glow: 1.7 }), x1 + 0.1, 11.4, 1.0, Math.PI / 2); [9.2, 13.6].forEach(y => K.bx(x1 + 0.07, x1 + 0.13, y, y + 0.06, 0, 0.45, M.frame));
