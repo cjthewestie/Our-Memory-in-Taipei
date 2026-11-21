@@ -70,6 +70,10 @@ CJ, 2026-11-21: 「還有這些招牌都怪怪的請出搜尋真實招牌 海報
 | 捷運6號出口 | 西門 Ximen / 出口 6 Exit, white on Metro blue | none opened | inferred |
 | Fill-in shophouses | 世運食品, 美觀園, 老天祿, 雪王冰淇淋, 大車輪, 楊記冰店, 鴨肉扁, 謝謝魷魚羹, 金園排骨, 天天利, 張記排骨酥 | none opened this session | inferred (old Ximending shops from general knowledge; not at their real addresses) |
 
+## Poster pictures
+
+CJ, 2026-11-21: 「需要圖的話也可以去midjourney做」, then "You pick". The painted pictures on the 豪華 billboard, the two poster cases, the three 獅子林 posters and the 來來 poster are Midjourney images made for this scene, in `asset/textures/posters/` (`billboard`, `case-a`, `case-b`, `kids`, `army`, `denim`, `lailai`). They show generic faces, no real actor and no lettering; the titles on top are still drawn in code. Each prompt asked for a hand-painted Taiwanese cinema poster of the period; the pictures are in period style, not copies of the real posters of those films. Jobs: `0b22f3d5` (images 2, 0, 3), `ab6bc0bf` (2), `7fccaf54` (0), `b1074ce2` (2), `bc9efd63` (2).
+
 ## Not done
 
 - 西門紅樓 itself has no sign in the scene; the real one is a small stone plaque over the door (S27).

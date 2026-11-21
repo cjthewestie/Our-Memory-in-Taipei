@@ -68,7 +68,7 @@ const world = (g, x, y, z) => g.localToWorld(new T.Vector3(x, y, z));
 // ── signs and painted boards (canvas text; no logo is copied) ────────────────────────────────
 const EDGE = std('#231f1c', 0.6);
 function boardMesh(cv, w, h, o) {
-  const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+  const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8; cv.__tex = t;
   const m = new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: (o.glow == null ? 0.4 : o.glow) * (o.light ? 0.42 : 1) });
   const mesh = new T.Mesh(new T.BoxGeometry(w, h, o.depth || 0.1), [EDGE, EDGE, EDGE, EDGE, m, o.oneSide ? EDGE : m]); mesh.castShadow = !o.noCast; return mesh;
 }
@@ -114,8 +114,14 @@ function sign(text, w, h, o = {}) {
   }, o);
 }
 // a hand-painted film billboard: a dusk sky, two painted figures, a title in fat brushed characters (titles are made up)
+// The painted pictures are Midjourney images made for this scene (CJ, 2026-11-21: 「需要圖的話也可以去midjourney做」), in asset/textures/posters/: generic faces,
+// no real actor, no lettering. Each board draws its code-painted version first and repaints itself when its picture has loaded; titles stay our own lettering.
+const POSTERS = '../asset/textures/posters/';
+const coverImg = (g, W, H, im) => { const k = Math.max(W / im.width, H / im.height), w = im.width * k, h = im.height * k; g.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); };
+const onImg = (g, file, cb) => { const im = new Image(); im.onload = () => { cb(im); if (g.canvas.__tex) g.canvas.__tex.needsUpdate = true; }; im.src = POSTERS + file; };
 function filmPoster(title, tag, hue, grid) {
-  return (g, W, H) => {
+  return function inner(g, W, H, im) {
+    if (grid && grid.img && !im) onImg(g, grid.img, i => inner(g, W, H, i));
     const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, `hsl(${hue + 200},55%,24%)`); sky.addColorStop(0.5, `hsl(${hue + 330},60%,46%)`); sky.addColorStop(0.78, `hsl(${hue + 28},85%,58%)`); sky.addColorStop(1, `hsl(${hue + 45},90%,70%)`);
     g.fillStyle = sky; g.fillRect(0, 0, W, H);
     g.fillStyle = 'rgba(255,236,170,.9)'; g.beginPath(); g.arc(W * 0.3, H * 0.62, W * 0.11, 0, 7); g.fill();
@@ -133,13 +139,14 @@ function filmPoster(title, tag, hue, grid) {
       g.strokeStyle = 'rgba(255,235,200,.25)'; g.lineWidth = s * 0.04; g.beginPath(); g.moveTo(cx - s * 0.3, cy - s * 0.62); g.quadraticCurveTo(cx, cy - s * 0.72, cx + s * 0.3, cy - s * 0.58); g.stroke(); };
     bust(W * 0.36, H * 0.4, W * 0.17, `hsl(${hue + 10},70%,42%)`, true); bust(W * 0.66, H * 0.33, W * 0.2, `hsl(${hue + 215},45%,30%)`, false);
     for (let i = 0; i < 260; i++) { g.strokeStyle = `rgba(${rnd() < 0.5 ? '255,240,210' : '40,20,30'},${0.03 + rnd() * 0.07})`; g.lineWidth = 2 + rnd() * 7; const x = rnd() * W, y = rnd() * H; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * W * 0.18, y + (rnd() - 0.5) * H * 0.05); g.stroke(); }   // brush marks
+    if (im) coverImg(g, W, H, im);
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
     // a foreign film's board, as on 樂聲 in the 1964 opening newsreel: the title in heavy block characters read right to left, the English title under it
-    const en = grid && grid.en, tt = en ? [...title].reverse().join('　') : title, ty = H * (en ? 0.725 : 0.76), size = Math.min(W * 0.92 / [...tt].length, H * 0.2);
-    if (en) { g.fillStyle = 'rgba(20,12,30,.72)'; g.fillRect(0, H * 0.6, W, H * 0.28); }
-    g.font = `900 ${size}px ${en ? FONT : WEI}`; g.lineWidth = size * 0.2; g.strokeStyle = '#fff6e0'; if (!en) g.strokeText(tt, W / 2, ty); g.lineWidth = size * 0.1; g.strokeStyle = '#7a120c'; g.strokeText(tt, W / 2, ty); g.fillStyle = en ? '#fff6e0' : '#ffd21f'; g.fillText(tt, W / 2, ty);
-    if (en) { g.font = `800 ${H * 0.045}px "Arial Narrow", "Helvetica Neue", Arial, sans-serif`; g.fillStyle = '#ffd21f'; g.fillText(en.split('').join(' '), W / 2, H * 0.842); }
-    g.font = `800 ${H * 0.062}px ${KAI}`; g.fillStyle = '#fff'; g.fillRect(W * 0.2, H * 0.885, W * 0.6, H * 0.085); g.fillStyle = '#b3271e'; g.fillText(tag, W / 2, H * 0.93);
+    const en = grid && grid.en, tt = en ? [...title].reverse().join('　') : title, side = en && im, tx = side ? W * 0.25 : W / 2, ty = H * (side ? 0.885 : en ? 0.725 : 0.76), size = Math.min(W * (side ? 0.44 : 0.92) / [...tt].length, H * 0.2);   // with the picture in, the title sits in the dark band the painter left at lower left
+    if (en && !im) { g.fillStyle = 'rgba(20,12,30,.72)'; g.fillRect(0, H * 0.6, W, H * 0.28); }
+    g.font = `900 ${size}px ${en ? FONT : WEI}`; g.lineWidth = size * 0.2; g.strokeStyle = '#fff6e0'; if (!en) g.strokeText(tt, tx, ty); g.lineWidth = size * 0.1; g.strokeStyle = '#7a120c'; g.strokeText(tt, tx, ty); g.fillStyle = en ? '#fff6e0' : '#ffd21f'; g.fillText(tt, tx, ty);
+    if (en) { g.font = `800 ${H * (side ? 0.03 : 0.045)}px "Arial Narrow", "Helvetica Neue", Arial, sans-serif`; g.fillStyle = '#ffd21f'; g.fillText(en.split('').join(' '), tx, H * (side ? 0.962 : 0.842)); }
+    g.font = `800 ${H * 0.062}px ${KAI}`; const gy = side ? 0.015 : 0.885; g.fillStyle = '#fff'; g.fillRect(W * 0.2, H * gy, W * 0.6, H * 0.085); g.fillStyle = '#b3271e'; g.fillText(tag, W / 2, H * (gy + 0.045));
     if (grid) { g.fillStyle = 'rgba(20,10,5,.4)'; for (let i = 1; i < grid.cols; i++) g.fillRect(W * i / grid.cols - 1.5, 0, 3, H); for (let i = 1; i < grid.rows; i++) g.fillRect(0, H * i / grid.rows - 1.5, W, 3); }   // the seams between the 6尺 canvas panels
     g.strokeStyle = '#f3e6c8'; g.lineWidth = Math.max(3, W * 0.012); g.strokeRect(g.lineWidth / 2, g.lineWidth / 2, W - g.lineWidth, H - g.lineWidth);
   };
@@ -314,7 +321,7 @@ function cinema() {
   K.bx(x0, x1, G, H, -D, -0.1, M.cream); K.bx(x0, x1, 0, G, -D, -3.0, M.dark); K.bx(x0, x0 + 0.5, 0, H + 1, -D, 0, M.ochre); K.bx(x1 - 0.5, x1, 0, H + 1, -D, 0, M.ochre);
   K.bx(x0, x1, H, H + 1, -0.5, 0, M.ochre); K.bx(x0 - 0.06, x1 + 0.06, H + 1, H + 1.15, -0.6, 0.1, M.concDk); for (let i = 0; i < 7; i++) K.bx(x0 + 0.5, x1 - 0.5, 5.6 + i * 1.9, 5.7 + i * 1.9, -0.1, -0.02, M.ochre);
   // the hand-painted billboard over the whole upper front, cloth banners either side
-  K.bx(-3.75, 3.75, 6.3, 16.5, -0.1, 0.14, M.woodDk); K.mesh(paint(7.2, 9.0, filmPoster('畢業生', '本院獨家獻映', 0, { cols: 4, rows: 5, en: 'THE GRADUATE' }), { glow: 0.42, oneSide: true, ppm: 100, depth: 0.08 }), 0, 11.4, 0.18);   // 豪華 ran 《畢業生》 alone in 1973, queues for a month; a board is 20 panels of 6尺, four across and five up
+  K.bx(-3.75, 3.75, 6.3, 16.5, -0.1, 0.14, M.woodDk); K.mesh(paint(7.2, 9.0, filmPoster('畢業生', '本院獨家獻映', 0, { cols: 4, rows: 5, en: 'THE GRADUATE', img: 'billboard.jpg' }), { glow: 0.42, oneSide: true, ppm: 100, depth: 0.08 }), 0, 11.4, 0.18);   // 豪華 ran 《畢業生》 alone in 1973, queues for a month; a board is 20 panels of 6尺, four across and five up
   [[-4.25, '冷氣開放', '#b3271e', '#ffe14a'], [4.25, '獨家獻映', '#f3ecd9', '#b3271e']].forEach(([x, t, bg, fg]) => K.mesh(sign(t, 0.8, 6.4, { vertical: true, kind: 'cloth', font: WEI, bg, fg, glow: 0.7, depth: 0.03 }), x, 11.6, 0.12));
   K.mesh(sign('豪華大戲院', 6.4, 1.6, { kind: 'neon', bg: '#1a0d0b', fg: '#ffd24a', font: WEI, spread: true, glow: 1.5, oneSide: true }), 0, 17.6, 0.06);
   K.mesh(sign('豪華大戲院', 1.15, 7.5, { vertical: true, kind: 'neon', font: WEI, bg: '#151515', fg: '#ff5a48', glow: 1.7 }), x1 + 0.1, 11.4, 1.0, Math.PI / 2); [9.2, 13.6].forEach(y => K.bx(x1 + 0.07, x1 + 0.13, y, y + 0.06, 0, 0.45, M.frame));
@@ -328,7 +335,7 @@ function cinema() {
   K.mesh(sign('售票處', 1.9, 0.5, { kind: 'box', font: KAI, bg: '#ffe14a', fg: '#7a120c', spread: true, glow: 0.9, oneSide: true }), -3.3, 2.5, -0.14); K.mesh(sign('全票　半票　軍警票', 1.9, 0.26, { bg: '#f3ecd9', fg: '#1a1a1a', glow: 0.6, oneSide: true, border: false }), -3.3, 0.8, -0.14);
   [-0.55, 1.1].forEach(x => { K.bx(x - 0.75, x + 0.75, 0, 2.6, -2.2, -2.1, M.red); K.bx(x - 0.03, x + 0.03, 0, 2.6, -2.1, -2.06, M.gold); [-0.38, 0.38].forEach(d => { K.cyl(0.2, 0.2, 0.05, M.winLit, x + d, 1.7, -2.08, 12, [Math.PI / 2, 0, 0]); K.bx(x + d * 0.2 - 0.02, x + d * 0.2 + 0.02, 0.9, 1.3, -2.08, -2.0, M.gold); }); });
   K.bx(-1.5, 2.1, 2.6, 3.0, -2.2, -2.05, M.gold); K.bx(-1.9, 4.7, 0.05, 3.6, -2.98, -2.94, M.shopLit);
-  [['真善美', 2.9, 120], ['回到未來', 4.05, 220]].forEach(([t, x, hue]) => { K.bx(x - 0.52, x + 0.52, 0.55, 2.35, -0.4, -0.2, M.woodDk); K.mesh(paint(0.9, 1.6, filmPoster(t, '下期上映', hue), { glow: 0.75, oneSide: true, ppm: 160, depth: 0.04 }), x, 1.45, -0.18); });
+  [['真善美', 2.9, 120, 'case-a.jpg'], ['回到未來', 4.05, 220, 'case-b.jpg']].forEach(([t, x, hue, img]) => { K.bx(x - 0.52, x + 0.52, 0.55, 2.35, -0.4, -0.2, M.woodDk); K.mesh(paint(0.9, 1.6, filmPoster(t, '下期上映', hue, { img }), { glow: 0.75, oneSide: true, ppm: 160, depth: 0.04 }), x, 1.45, -0.18); });
   for (let i = 0; i < 4; i++) { const x = -4.4 + i * 0.95; K.cyl(0.035, 0.035, 0.95, M.gold, x, 0.475, 1.3, 8); K.cyl(0.14, 0.16, 0.04, M.gold, x, 0.02, 1.3, 10); K.sph(0.06, M.gold, x, 0.98, 1.3); if (i) K.box(0.95, 0.04, 0.04, M.redDk, x - 0.475, 0.82, 1.3, 0, 0, 0); }
   person(K, -3.9, 0.6, Math.PI, {}); person(K, -3.2, 1.0, Math.PI + 0.2, {}); person(K, -2.6, 0.7, Math.PI - 0.3, {}); person(K, 3.4, 0.5, Math.PI + 0.1, { reach: true });
   K.cyl(1.0, 1.0, 2.6, M.steel, 0, H + 2.3, -7, 14);
@@ -435,7 +442,7 @@ function lions() {
   K.bx(x0, x1, G, G + P * 3.2, -D, -0.05, M.tan); for (let i = 0; i <= 13; i++) K.bx(x0 + i - 0.06, x0 + i + 0.06, G, G + P * 3.2, -0.05, 0.05, M.tanDk);
   const top = facade(K, { x0, x1, y0: G + P * 3.2, floors: 5, fh: 3.2, bays: 8, wall: M.tan, band: M.tanDk, depth: D, pier: 0.34, sill: 1.0, lit: 0.2 });
   K.bx(x0, x1, top, top + 1.0, -0.4, 0, M.tan); K.bx(x0, x1, top, top + 0.2, -D, -0.4, M.concDk); waterTank(K, -3, top + 0.2, -6); K.bx(1, 5, top + 0.2, top + 3, -8, -4, M.tanDk);
-  [['好小子', -4.1, 40], ['大頭兵', 0, 150], ['七匹狼', 4.1, 260]].forEach(([t, x, hue]) => { K.bx(x - 1.85, x + 1.85, G + 4.5, G + 11.3, -0.05, 0.1, M.woodDk); K.mesh(paint(3.5, 6.5, filmPoster(t, '樓上戲院上映', hue), { glow: 0.42, oneSide: true, ppm: 110, depth: 0.06 }), x, G + 7.9, 0.13); });
+  [['好小子', -4.1, 40, 'kids.jpg'], ['大頭兵', 0, 150, 'army.jpg'], ['七匹狼', 4.1, 260, 'denim.jpg']].forEach(([t, x, hue, img]) => { K.bx(x - 1.85, x + 1.85, G + 4.5, G + 11.3, -0.05, 0.1, M.woodDk); K.mesh(paint(3.5, 6.5, filmPoster(t, '樓上戲院上映', hue, { img }), { glow: 0.42, oneSide: true, ppm: 110, depth: 0.06 }), x, G + 7.9, 0.13); });
   K.mesh(sign('獅子林商業大樓', 10.5, 1.7, { bg: '#8f6f4e', fg: '#d9261c', font: WEI, spread: true, border: false, glow: 0.8, oneSide: true }), 0, G + 2.2, 0.12);
   K.mesh(sign('獅子林', 1.3, 9, { vertical: true, kind: 'neon', font: WEI, bg: '#151515', fg: '#ffb23a', glow: 1.6 }), x1 + 0.1, top - 6, 1.0, Math.PI / 2);
   // street level: a wide mouth, two escalators rising inside a lit lobby
@@ -465,7 +472,8 @@ function lailai() {
     g.fillStyle = '#eec3a0'; g.beginPath(); g.ellipse(W * 0.5, H * 0.4, W * 0.23, H * 0.2, 0, 0, 7); g.fill(); g.fillRect(W * 0.42, H * 0.55, W * 0.16, H * 0.12); g.fillStyle = 'rgba(170,90,60,.3)'; g.beginPath(); g.ellipse(W * 0.6, H * 0.42, W * 0.12, H * 0.17, 0, 0, 7); g.fill();
     g.fillStyle = '#2a1a14'; g.beginPath(); g.ellipse(W * 0.5, H * 0.27, W * 0.25, H * 0.09, 0, Math.PI, 0); g.fill(); g.strokeStyle = '#2a1a14'; g.lineCap = 'round'; g.lineWidth = W * 0.014; [-1, 1].forEach(k => { g.beginPath(); g.moveTo(W * (0.5 + k * 0.14), H * 0.385); g.quadraticCurveTo(W * (0.5 + k * 0.09), H * 0.37, W * (0.5 + k * 0.045), H * 0.385); g.stroke(); });
     g.fillStyle = '#b3271e'; g.beginPath(); g.ellipse(W * 0.5, H * 0.5, W * 0.06, H * 0.013, 0, 0, 7); g.fill(); g.fillStyle = '#16306e'; g.beginPath(); g.ellipse(W * 0.5, H * 0.78, W * 0.42, H * 0.13, 0, Math.PI, 0); g.fill(); g.fillRect(0, H * 0.78, W, H * 0.22);
-    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${H * 0.13}px Georgia, "Times New Roman", serif`; [...'OPEN'].forEach((c, i) => g.fillText(c, W * (0.2 + i * 0.2), H * 0.89)); }, { glow: 0.4, oneSide: true, depth: 0.04 }), 0, G + fh + 7.4, 0.14);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${H * 0.13}px Georgia, "Times New Roman", serif`; [...'OPEN'].forEach((c, i) => g.fillText(c, W * (0.2 + i * 0.2), H * 0.89));
+    onImg(g, 'lailai.jpg', im => { coverImg(g, W, H, im); g.fillStyle = '#16306e'; g.fillRect(0, H * 0.83, W, H * 0.17); g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${H * 0.11}px Georgia, "Times New Roman", serif`; [...'OPEN'].forEach((c, i) => g.fillText(c, W * (0.2 + i * 0.2), H * 0.915)); }); }, { glow: 0.4, oneSide: true, depth: 0.04 }), 0, G + fh + 7.4, 0.14);
   // street level: display windows with mannequins, glass doors under a canopy
   K.bx(x0, x1, 0, G, -D, -2.6, M.dark); [x0, -2.2, 1.7, x1 - 0.5].forEach(x => K.bx(x, x + 0.5, 0, G, -2.6, 0, M.white)); K.bx(x0, x1, G - 0.6, G, -2.6, 0, M.white); K.bx(-2.6, 2.6, 3.5, 3.8, 0, 1.9, M.blue);
   K.bx(-1.7, 1.7, 0, 3.4, -0.5, -0.45, M.glassBlue); [-1.7, -0.85, 0, 0.85, 1.67].forEach(x => K.bx(x - 0.03, x + 0.03, 0, 3.4, -0.45, -0.4, M.steel)); K.bx(-1.6, 1.6, 0.1, 3.3, -2.58, -2.54, M.shopLit);
