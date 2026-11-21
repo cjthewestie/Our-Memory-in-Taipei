@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · 西門紅樓 plaza, Ink poster</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #e9dcb8; overflow: hidden; font: 500 13px/1.4 system-ui, sans-serif; color: #23282a; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 14px; top: 12px; padding: 8px 12px 9px; background: #efe3c4; border: 2px solid #23282a; box-shadow: 3px 3px 0 #23282a; text-shadow: 0 1px 0 rgba(246,236,208,.8); pointer-events: none; }
+  #hud b { display: block; font: 700 20px/1.1 system-ui, sans-serif; letter-spacing: .02em; }
+  #hud span { opacity: .82; }
+  #keys { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: rgba(35,40,42,.82); color: #f1e6c8; padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(6px); white-space: nowrap; }
+  #load { position: fixed; inset: 0; display: grid; place-items: center; background: #e9dcb8; transition: opacity .25s; }
+  #load.gone { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><b>西門紅樓 · Ink poster</b><span>Remake test: the plaza redrawn as a flat ink-and-paper poster</span></div>
+<div id="keys">W A S D walk · Shift run · H wave · drag to look · scroll to zoom · 1–6 viewpoints · 0 follow</div>
+<div id="load">Building the plaza…</div>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="hero.js"></script>
+<script>
+// Ink poster remake of the 西門紅樓 plaza (CJ, 2026-11-21: 「我不是只要風格換 我要整個場景的重制達成風格的轉換」).
+// Same block as index.html, rebuilt as a flat-shaded adventure-game poster: every surface is a flat
+// colour from a small muted palette and lit in three hard tones, the trees are chunky faceted blobs,
+// the sky is cream bands with a pale disc, the lanterns are the one vivid red, distance fades in flat
+// steps, whatever is close to the camera drops to a dark silhouette, and the finishing pass draws
+// ink outlines (from depth, surface direction and colour changes) and lays paper grain over it all.
+(() => {
+'use strict';
+const T = THREE, QS = new URLSearchParams(location.search);
+const canvas = document.getElementById('c');
+const renderer = new T.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+const PR = Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2)   // drawn larger than shown, so the ink lines come out smooth;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFShadowMap;
+renderer.debug.checkShaderErrors = QS.get('debug') === '1';
+const scene = new T.Scene();
+const camera = new T.PerspectiveCamera(52, 1, 0.1, 500);
+const col = (hex) => new T.Color(hex).convertSRGBToLinear();
+const R = (() => { let s = 20261121; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; })();
+const rr = (a, b) => a + (b - a) * R();
+
+// ── light: one sun from the front-left and one flat cool fill, so every face lands in one of three tones ──
+const SUN_DIR = new T.Vector3(-40, 34, 30).normalize();            // from the ground toward the sun
+const sun = new T.DirectionalLight(new T.Color(1.0, 0.93, 0.80), 0.66);
+sun.position.copy(SUN_DIR).multiplyScalar(130).add(new T.Vector3(0, 0, 22)); sun.target.position.set(0, 0, 22);
+sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.05;
+Object.assign(sun.shadow.camera, { left: -62, right: 62, top: 62, bottom: -62, near: 10, far: 260 }); sun.shadow.camera.updateProjectionMatrix();
+scene.add(sun, sun.target);
+scene.add(new T.AmbientLight(new T.Color(0.45, 0.58, 0.62), 1.0));   // the shadow tone: every colour, cooled and darkened by the same amount
+
+// ── procedural surfaces ──────────────────────────────────────────────────────────────────────
+function canvasTex(size, draw, repeat) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size; draw(cv.getContext('2d'), size);
+  const t = new T.CanvasTexture(cv); t.wrapS = t.wrapT = T.RepeatWrapping; t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+  if (repeat) t.repeat.set(repeat, repeat); return t;
+}
+const speckle = (g, s, n, a, dark) => { for (let i = 0; i < n; i++) { g.fillStyle = `rgba(${dark ? '0,0,0' : '255,255,255'},${Math.random() * a})`; const r = Math.random() * 3 + 0.5; g.fillRect(Math.random() * s, Math.random() * s, r, r); } };
+// ── flat poster materials ────────────────────────────────────────────────────────────────────
+// Three hard tones instead of smooth shading: facing away from the sun, facing it a little, facing it.
+const ramp = (vals) => { const a = []; vals.forEach(v => a.push(v, v, v, 255)); const t = new T.DataTexture(new Uint8Array(a), vals.length, 1); t.minFilter = t.magFilter = T.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true; return t; };
+const RAMP = ramp([0, 0, 150, 255]), RAMP_HERO = ramp([110, 110, 255, 255]);
+// Every material also writes a tag into the alpha channel, which the finishing pass reads:
+// 0.5 = scenery (can fall into the foreground silhouette), 0.25 = the red accent (kept vivid), 1 = the character.
+const tagIt = (m, tag) => { m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n gl_FragColor.a = ' + tag.toFixed(2) + ';'); }; m.customProgramCacheKey = () => 'tag' + tag; return m; };
+function toon(color, o = {}) {
+  const m = new T.MeshToonMaterial({ color: color && color.isColor ? color : col(color), gradientMap: o.ramp || RAMP, map: o.map || null, side: o.side || T.FrontSide });
+  if (o.flat) m.flatShading = true;
+  if (o.emissive) { m.emissive = col(o.emissive); m.emissiveIntensity = o.eI === undefined ? 1 : o.eI; }
+  return tagIt(m, o.tag === undefined ? 0.5 : o.tag);
+}
+const TEX = {};   // the old surface textures are gone; flat colour only
+const triMat = ({ color = '#d9cfb4' }) => toon(color);
+const GLOW = () => tagIt(new T.MeshBasicMaterial({ color: col('#f6ecc6') }), 0.5);
+// the whole palette: cream, warm browns, teal greens, ink. Red is saved for the lanterns.
+const MATS = {
+  brick: toon('#b0633c'), bone: toon('#e4d5b0'), ink: toon('#2a2e30'), walk: toon('#d2c19c'), haze: toon('#6f918c'),
+  verm: toon('#b87446'), lamp: GLOW(), leaf: toon('#3f7468'), road: toon('#5b4b3e'), glass: toon('#5f9a94'),
+};
+// anything still built with a smooth-lit material becomes flat too
+function toonify(root) {
+  const cv = (m) => m.isMeshStandardMaterial ? toon(m.color, { map: m.map, side: m.side }) : (m.isMeshBasicMaterial && !m.userData.tagged ? (m.userData.tagged = true, tagIt(m, 0.5)) : m);
+  root.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(cv) : cv(o.material); });
+}
+function dress(node, opts = {}) {
+  node.traverse(o => {
+    if (!o.isMesh) return;
+    const name = o.material && o.material.name; o.material = (opts.swap && opts.swap[name]) || MATS[name] || MATS.walk;
+    o.castShadow = !(opts.noCast && opts.noCast.includes(name)); o.receiveShadow = true;
+  });
+  return node;
+}
+
+// ── sky: cream paper in flat bands, cut-out clouds, one pale disc ────────────────────────────
+const sky = new T.Mesh(new T.SphereGeometry(400, 48, 24), new T.ShaderMaterial({
+  side: T.BackSide, depthWrite: false, uniforms: { uDisc: { value: new T.Vector3(0.22, 0.3, -1).normalize() }, uTime: { value: 0 } },
+  vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform vec3 uDisc; uniform float uTime; varying vec3 vD;
+    vec3 S(vec3 c){ return pow(c, vec3(2.2)); }
+    float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h(i), h(i+vec2(1,0)), f.x), mix(h(i+vec2(0,1)), h(i+vec2(1,1)), f.x), f.y); }
+    float fbm(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * n(p); p = p * 2.03 + 11.0; a *= 0.5; } return s; }
+    void main(){
+      vec3 d = normalize(vD); float az = atan(d.x, -d.z), up = d.y + 0.025 * sin(az * 3.0) + 0.012 * sin(az * 7.0 + 1.3);
+      vec3 c = up < 0.09 ? vec3(0.965, 0.925, 0.815) : up < 0.24 ? vec3(0.945, 0.895, 0.765) : up < 0.46 ? vec3(0.915, 0.86, 0.715) : vec3(0.88, 0.82, 0.665);
+      vec2 q = vec2(az * 2.2 + uTime * 0.003, d.y * 9.0);
+      float cl = fbm(q) * smoothstep(0.03, 0.12, d.y) * (1.0 - smoothstep(0.45, 0.7, d.y));
+      if (cl > 0.5) c = vec3(0.975, 0.945, 0.86); if (cl > 0.6) c = vec3(0.99, 0.975, 0.92);
+      float sd = dot(d, uDisc); if (sd > 0.9915) c = vec3(0.985, 0.955, 0.85); if (sd > 0.9935) c = vec3(0.995, 0.985, 0.93);
+      gl_FragColor = vec4(S(c), 0.0);
+    }` }));
+sky.frustumCulled = false; scene.add(sky);
+
+// ── ground: flat tan paving with a few pavers picked out, flat teal puddles ──────────────────
+{
+  const gt = canvasTex(1024, (g, s) => {
+    const cols = 16, rows = 32, w = s / cols, h = s / rows;
+    g.fillStyle = '#dcc69c'; g.fillRect(0, 0, s, s);
+    for (let r = 0; r < rows; r++) for (let c = -1; c <= cols; c++) {
+      const v = Math.random(); if (v > 0.2) continue;
+      g.fillStyle = v < 0.1 ? '#cdb388' : '#e6d3ad'; g.fillRect(c * w + (r % 2) * w / 2 + 2, r * h + 2, w - 4, h - 4);
+    }
+  }, 66);
+  const ground = new T.Mesh(new T.PlaneGeometry(240, 240), toon('#ffffff', { map: gt }));
+  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+  const PUD = tagIt(new T.MeshBasicMaterial({ color: col('#8db3a9') }), 0.5);
+  for (let i = 0; i < 9; i++) {
+    const sh = new T.Shape(), n = 32, r0 = rr(0.7, 2.2), ph = rr(0, 6); for (let k = 0; k <= n; k++) { const a = k / n * 6.283, r = r0 * (0.75 + 0.3 * Math.sin(a * 3 + ph) + 0.12 * Math.sin(a * 5 + ph * 2)); k ? sh.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.62) : sh.moveTo(Math.cos(a) * r, Math.sin(a) * r * 0.62); }
+    const pm = new T.Mesh(new T.ShapeGeometry(sh, 6), PUD);
+    let x = rr(-19, 19); if (Math.abs(x) < 2.4) x += 5; pm.rotation.set(-Math.PI / 2, 0, rr(0, 3)); pm.position.set(x, 0.02, rr(13, 56)); scene.add(pm);
+  }
+  const strip = new T.Mesh(new T.PlaneGeometry(3.2, 60), toon('#efe4c4'));
+  strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0.012, 34); strip.receiveShadow = true; scene.add(strip);   // the pale path to the door
+}
+
+// ── foliage: each crown is a handful of big faceted blobs in three teal greens ───────────────
+const uTime = { value: 0 };
+const BLOB = new T.IcosahedronGeometry(1, 1), LEAF = ['#2f6a60', '#3d8072', '#27564f'].map(c => toon(c, { flat: true }));
+const blobs = [];
+function canopy(cx, cz, cy, rx, ry) {
+  const n = 12;
+  for (let i = 0; i < n; i++) {
+    const a = i / n * 6.283 + rr(0, 0.6), r = i < 3 ? rr(0, 0.25) : rr(0.5, 0.82), m = new T.Mesh(BLOB, LEAF[i % 3]);
+    m.position.set(cx + Math.cos(a) * rx * r, cy + rr(-0.3, 0.45) * ry + (i < 3 ? ry * 0.4 : 0), cz + Math.sin(a) * rx * r);
+    const s = rr(0.34, 0.5) * rx; m.scale.set(s, s * rr(0.55, 0.72), s); m.rotation.set(rr(0, 6), rr(0, 6), 0);
+    m.castShadow = m.receiveShadow = true; m.userData.y0 = m.position.y; m.userData.ph = rr(0, 6); scene.add(m); blobs.push(m);
+  }
+}
+
+// ── lanterns on strings ──────────────────────────────────────────────────────────────────────
+const lanternPts = [];
+function lanternString(a, b, sag) {
+  const pts = []; const n = Math.max(6, Math.round(a.distanceTo(b) / 0.5));
+  for (let i = 0; i <= n; i++) { const t = i / n, p = a.clone().lerp(b, t); p.y -= Math.sin(Math.PI * t) * sag; pts.push(p); }
+  scene.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), n, 0.014, 4), new T.MeshStandardMaterial({ color: 0x15120f, roughness: 0.8 })));
+  const every = Math.max(2, Math.round(1.7 / (a.distanceTo(b) / n)));
+  for (let i = every; i < n; i += every) lanternPts.push(pts[i]);
+}
+function buildLanterns() {
+  const body = new T.SphereGeometry(0.3, 14, 10); body.scale(1, 0.84, 1);
+  const im = new T.InstancedMesh(body, toon('#ffffff', { tag: 0.25, emissive: '#e3261b', eI: 0.22 }), lanternPts.length);
+  const cap = new T.InstancedMesh(new T.CylinderGeometry(0.11, 0.11, 0.6, 8), new T.MeshStandardMaterial({ color: 0x2a1c12, roughness: 0.7 }), lanternPts.length);
+  const d = new T.Object3D(), c = new T.Color();
+  lanternPts.forEach((p, i) => {
+    d.position.set(p.x, p.y - 0.36, p.z); d.rotation.set(0, 0, 0); d.scale.setScalar(rr(0.88, 1.12)); d.updateMatrix(); im.setMatrixAt(i, d.matrix); cap.setMatrixAt(i, d.matrix);
+    c.setHSL(rr(0.0, 0.012), 0.84, rr(0.47, 0.52)).convertSRGBToLinear(); im.setColorAt(i, c);   // every lantern red: the one loud colour on the page
+  });
+  im.castShadow = true; cap.castShadow = false; im.frustumCulled = cap.frustumCulled = false; scene.add(im, cap); return im;
+}
+
+// ── street stalls, with steam ────────────────────────────────────────────────────────────────
+const steamSrc = [];
+function stall(x, z, rot, hue) {
+  const g = new T.Group(); g.position.set(x, 0, z); g.rotation.y = rot;
+  const wood = triMat({ color: '#8a6a48', tex: TEX.bark, scale: 2, rough: 0.8 }), steel = triMat({ color: '#b9bcc0', tex: TEX.metal, scale: 3, rough: 0.28, metal: 0.85 });
+  const add = (geo, mat, px, py, pz) => { const m = new T.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+  add(new T.BoxGeometry(2.4, 0.9, 1.1), wood, 0, 0.55, 0); add(new T.BoxGeometry(2.5, 0.06, 1.2), steel, 0, 1.03, 0);
+  [[-1.15, -0.5], [1.15, -0.5], [-1.15, 0.5], [1.15, 0.5]].forEach(([px, pz]) => add(new T.CylinderGeometry(0.03, 0.03, 2.5, 6), steel, px, 1.25, pz));
+  [-0.9, 0.9].forEach(px => add(new T.CylinderGeometry(0.2, 0.2, 0.1, 14), new T.MeshStandardMaterial({ color: 0x1b1b1b, roughness: 0.6 }), px, 0.2, 0).rotation.set(0, 0, Math.PI / 2));
+  const awn = canvasTex(256, (c, s) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#f1e6c8' : ({ 8: '#b06a42', 205: '#4f8a84', 135: '#6f9a7c', 28: '#c79a55' })[hue]; c.fillRect(i * s / 8, 0, s / 8, s); } });
+  const am = toon('#ffffff', { map: awn, side: T.DoubleSide });
+  const a = add(new T.BoxGeometry(2.9, 0.04, 1.9), am, 0, 2.55, 0.15); a.rotation.x = 0.16;
+  [0.55, -0.1, -0.75].forEach((px, i) => { const pot = add(new T.CylinderGeometry(0.24, 0.2, 0.32, 16), steel, px, 1.22, 0.05); steamSrc.push(new T.Vector3(px, 1.45, 0.05).applyAxisAngle(new T.Vector3(0, 1, 0), rot).add(g.position)); });
+  [-0.9, 0, 0.9].forEach(px => add(new T.SphereGeometry(0.07, 8, 6), GLOW(4.5, 3.0, 1.3), px, 2.28, -0.55).castShadow = false);
+  [[-0.7, 1.3], [0.2, 1.4], [1.0, 1.25]].forEach(([px, pz]) => { add(new T.CylinderGeometry(0.17, 0.17, 0.04, 12), new T.MeshStandardMaterial({ color: 0x6b4a32, roughness: 0.5 }), px, 0.46, pz); [[-.13, -.13], [.13, -.13], [-.13, .13], [.13, .13]].forEach(([lx, lz]) => add(new T.CylinderGeometry(0.012, 0.012, 0.45, 5), steel, px + lx, 0.22, pz + lz)); });
+  scene.add(g);
+}
+
+// ── shop signs ───────────────────────────────────────────────────────────────────────────────
+const SIGN_PAL = [['#e9dcb8', '#2a2e30'], ['#3f7468', '#f1e6c8'], ['#8a5a3c', '#f1e6c8'], ['#2a2e30', '#e9dcb8'], ['#c79a55', '#2a2e30'], ['#6f918c', '#f6ecd0']];
+function sign(text, x, y, z, rotY, pi) {
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128 * text.length; const g = cv.getContext('2d'), [bg, fg] = SIGN_PAL[pi];
+  g.fillStyle = bg; g.fillRect(0, 0, cv.width, cv.height); g.strokeStyle = fg; g.lineWidth = 7; g.strokeRect(7, 7, cv.width - 14, cv.height - 14);
+  g.fillStyle = fg; g.font = '900 92px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  [...text].forEach((ch, i) => g.fillText(ch, 64, 64 + i * 128));
+  const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+  const m = toon('#ffffff', { map: t }), edge = toon('#2a2e30');
+  const h = 0.62 * text.length, mesh = new T.Mesh(new T.BoxGeometry(0.62, h, 0.1), [edge, edge, edge, edge, m, m]);
+  mesh.position.set(x, y, z); mesh.rotation.y = rotY; mesh.castShadow = true; scene.add(mesh);
+}
+
+// ── air: dust and steam ──────────────────────────────────────────────────────────────────────
+function points(n, init, size, colour, opacity) {
+  const pos = new Float32Array(n * 3), seed = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const p = init(i); pos.set([p.x, p.y, p.z], i * 3); seed[i] = Math.random(); }
+  const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setAttribute('seed', new T.BufferAttribute(seed, 1));
+  const mat = new T.ShaderMaterial({ 
+    uniforms: { uTime, uSize: { value: size }, uCol: { value: colour }, uOp: { value: opacity }, uPx: { value: 1 }, uSteam: { value: 0 } },
+    vertexShader: `uniform float uTime, uSize, uPx, uSteam; attribute float seed; varying float vA;
+      void main(){ vec3 p = position; float life = fract(uTime * (0.10 + seed * 0.08) + seed * 7.0);
+        if (uSteam > 0.5) { p.y += life * 2.6; p.x += sin(life * 5.0 + seed * 20.0) * 0.28 * life + life * 0.5; p.z += cos(life * 4.0 + seed * 11.0) * 0.22 * life; vA = sin(life * 3.14159) * (1.0 - life * 0.4); }
+        else { p += vec3(sin(uTime * 0.21 + seed * 40.0), sin(uTime * 0.13 + seed * 17.0) * 0.6, cos(uTime * 0.17 + seed * 29.0)) * 1.4; vA = 0.45 + 0.55 * sin(uTime * (0.8 + seed * 2.2) + seed * 50.0); }
+        vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_Position = projectionMatrix * mv;
+        gl_PointSize = uSize * uPx * (uSteam > 0.5 ? (0.45 + life * 1.0) * vA : (0.5 + seed)) / max(-mv.z, 0.5); }`,
+    fragmentShader: 'uniform vec3 uCol; varying float vA; void main(){ if (length(gl_PointCoord - 0.5) > 0.5) discard; gl_FragColor = vec4(uCol, 1.0); }' });   // flat paper-white puffs, outlined by the ink pass
+  const p = new T.Points(geo, mat); p.frustumCulled = false; scene.add(p); return p;
+}
+
+// ── build ────────────────────────────────────────────────────────────────────────────────────
+const loader = new T.GLTFLoader(); if (window.MeshoptDecoder) loader.setMeshoptDecoder(window.MeshoptDecoder);
+const loadGLB = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', g => res(g.scene), undefined, rej));
+const loadGLTF = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', res, undefined, rej));
+const rigged = (gltf) => HERO.rigged(T, gltf);
+let walker = null, hero = null, lanterns = null, dust = null, steam = null;
+const state = { ready: false, error: null, fps: 0 };
+Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-rigged')]).then(([core, sq, girl]) => {
+  const get = (root, name) => root.children.find(c => c.name === name);
+  // the Red House, front door facing the plaza (+z)
+  scene.add(dress(get(core, 'red-house').clone()));
+  // 騎樓 shophouse rows, left and right
+  const arcade = get(sq, 'sq-arcade'), tints = ['#e4d5b0', '#cfae82', '#b9c0a6', '#8fb0a4', '#c4956c', '#d9c59a'];
+  for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 11; i++) {
+    const a = arcade.clone(); a.position.set(side * 26.5, 0, 6 + i * 4.5); a.rotation.y = -side * Math.PI / 2;
+    dress(a, { swap: { bone: triMat({ color: tints[(i * 5 + (side > 0 ? 2 : 0)) % tints.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }) } });
+    a.scale.y = 1 + ((i * 7 + side) % 3) * 0.14; scene.add(a);
+  }
+  // what stands behind and beside: the tall 萬年大樓, the old cinema, a 中華商場 block
+  const far = (name, x, z, ry, s = 1) => { const o = dress(get(core, name).clone()); o.position.set(x, 0, z); o.rotation.y = ry; o.scale.setScalar(s); scene.add(o); };
+  far('wannian', -44, -34, 0.4); far('lux', 46, -22, -0.5); far('chunghwa', -46, 22, Math.PI / 2, 1.2); far('chunghwa', 46, 34, -Math.PI / 2, 1.2);
+  // a hazy city behind everything
+  { const n = 150, im = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), triMat({ color: '#7f9a94', tex: TEX.concrete, scale: 0.15, rough: 0.9 }), n), d = new T.Object3D();
+    for (let i = 0; i < n; i++) { const a = rr(0, 6.283), r = rr(95, 210), h = rr(8, 30); d.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r); d.scale.set(rr(8, 18), h, rr(8, 18)); d.rotation.y = rr(0, 1.5); d.updateMatrix(); im.setMatrixAt(i, d.matrix); }
+    im.castShadow = false; im.receiveShadow = true; scene.add(im); }
+  // banyans: the models' trunks and branches, the leaves replaced one by one
+  const CANOPY = triMat({ color: '#213b1e' }); CANOPY.userData.canopy = true;
+  const banyan = get(sq, 'sq-banyan'), BARK = triMat({ color: '#5a4636', tex: TEX.bark, scale: 1.2, rough: 0.95 }), BARK2 = triMat({ color: '#3b2e25', tex: TEX.bark, scale: 1.2, rough: 0.95 });
+  [[-13.5, 21, 'banyanL', 1.0], [14.5, 25, 'banyanM', 1.05], [-16, 41, 'banyanM', 1.15], [16.5, 43, 'banyanL', 1.0]].forEach(([x, z, kind, s], i) => {
+    const b = dress(get(banyan, kind).clone(), { noCast: ['leaf'], swap: { leaf: CANOPY, haze: BARK, ink: BARK2, road: BARK2 } });
+    b.traverse(o => { if (o.isMesh && o.material.userData.canopy) o.visible = false; });
+    b.position.set(x, 0, z); b.rotation.y = i * 1.7; b.scale.setScalar(s); scene.add(b);
+    canopy(x, z, 6.4 * s, 6.0 * s, 2.9 * s);
+  });
+  // street furniture
+  const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter'), lampPost = get(core, 'lamp'), props = get(core, 'props');
+  for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 9; i++) {
+    if ((i + (side > 0 ? 1 : 0)) % 3 === 2) continue;
+    const s = dress(scooters.children[i % 3].clone()); s.position.set(side * (22.6 + rr(-0.3, 0.3)), 0, 9 + i * 4.6 + rr(-0.6, 0.6)); s.rotation.y = side * (Math.PI / 2 + rr(-0.35, 0.35)); scene.add(s);
+  }
+  [[-21, 12], [21, 16], [-21, 30], [21, 34], [-21, 48], [21, 50], [-7, 12], [7, 12]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
+  [[-19, 18, 1], [19, 20, -1], [-19, 36, 1], [19, 38, -1]].forEach(([x, z, f]) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.rotation.y = f * Math.PI / 2; scene.add(l); });
+  props.children.forEach((p, i) => { for (let k = 0; k < 2; k++) { const o = dress(p.clone()); o.position.set((k ? 1 : -1) * rr(20.5, 22), 0, 8 + (i * 2 + k) * 3.4 + rr(-1, 1)); o.rotation.y = rr(0, 6.28); scene.add(o); } });
+  // lantern strings: from the gable out over the plaza, and across between the arcades
+  for (let i = 0; i < 7; i++) { const t = i / 6; lanternString(new T.Vector3(-9 + t * 18, 13.2, 8.6), new T.Vector3(-23.5 + t * 47, 6.4, 30 + Math.sin(t * Math.PI) * 14), 1.6); }
+  [18, 27, 36, 45].forEach((z, i) => lanternString(new T.Vector3(-23.5, 6.2 + (i % 2) * 0.5, z), new T.Vector3(23.5, 6.2 + ((i + 1) % 2) * 0.5, z + 3), 1.9));
+  lanterns = buildLanterns();
+  // stalls and signs
+  stall(8.5, 30, -0.5, 8); stall(-9, 35, 0.6, 205); stall(12, 43, -1.0, 135); stall(-13, 46.5, 1.1, 28);
+  const words = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊'];
+  words.forEach((w, i) => { const side = i % 2 ? 1 : -1; sign(w, side * 23.9, 3.6 + (i % 3) * 0.5, 8.5 + Math.floor(i / 2) * 6.3, side > 0 ? -Math.PI / 2 : Math.PI / 2, i % 6); });
+  // someone walking the plaza
+  toonify(scene);
+  // someone walking the plaza, shaded in two flat tones like the rest of the page
+  hero = rigged(girl);
+  hero.group.traverse(o => { if (!o.isMesh) return; const cv = (m) => { if (!m.isMeshStandardMaterial) return m;
+    const t = new T.MeshToonMaterial({ color: m.color, map: m.map, gradientMap: RAMP_HERO, side: m.side, transparent: m.transparent, opacity: m.opacity, alphaTest: m.alphaTest, vertexColors: m.vertexColors }); t.name = m.name; return t; };
+    o.material = Array.isArray(o.material) ? o.material.map(cv) : cv(o.material); });
+  scene.add(hero.group);
+  // air
+  steam = points(steamSrc.length * 7, (i) => steamSrc[i % steamSrc.length].clone().add(new T.Vector3(rr(-0.1, 0.1), 0, rr(-0.1, 0.1))), 250, col('#f6eed8'), 1);
+  steam.material.uniforms.uSteam.value = 1;
+  state.ready = true; document.getElementById('load').classList.add('gone');
+}).catch(e => { state.error = String(e); document.getElementById('load').textContent = 'Could not load the models: ' + e; });
+
+// ── the finishing chain ──────────────────────────────────────────────────────────────────────
+const fsTri = new T.Mesh(new T.PlaneGeometry(2, 2)); const fsScene = new T.Scene(); fsScene.add(fsTri); const fsCam = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+const COMMON = `precision highp float; varying vec2 vUv; uniform sampler2D tDepth; uniform mat4 uProjInv, uCamWorld; uniform vec3 uCamPos, uSunDir; uniform float uNear, uFar, uTime;
+  float viewZ(float d){ float z = d * 2.0 - 1.0; return 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear)); }
+  vec3 worldAt(vec2 uv, float d){ vec4 v = uProjInv * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); v /= v.w; return (uCamWorld * v).xyz; }
+  float ign(vec2 p){ return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }`;
+const shared = { tDepth: { value: null }, uProjInv: { value: new T.Matrix4() }, uCamWorld: { value: new T.Matrix4() }, uCamPos: { value: new T.Vector3() }, uSunDir: { value: SUN_DIR }, uNear: { value: 0.1 }, uFar: { value: 500 }, uTime };
+const pass = (frag, uniforms) => new T.ShaderMaterial({ vertexShader: VS, fragmentShader: frag, uniforms: Object.assign({}, shared, uniforms), depthTest: false, depthWrite: false });
+
+// One pass does the drawing: ink lines, the dark foreground, the stepped haze, then paper.
+const finalMat = pass(COMMON + `uniform sampler2D tScene; uniform vec2 uRes; uniform float uFg;
+  vec3 S(vec3 c){ return pow(c, vec3(2.2)); }
+  float h2(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h2(i), h2(i+vec2(1,0)), f.x), mix(h2(i+vec2(0,1)), h2(i+vec2(1,1)), f.x), f.y); }
+  float W(vec2 uv){ return 1.0 / viewZ(texture2D(tDepth, uv).x); }
+  vec3 P(vec2 uv){ return worldAt(uv, texture2D(tDepth, uv).x); }
+  vec3 N(vec2 uv, vec2 o){ vec3 p = P(uv); return normalize(cross(P(uv + vec2(o.x, 0.0)) - p, P(uv + vec2(0.0, o.y)) - p)); }
+  vec3 chroma(vec3 c){ return c / (c.r + c.g + c.b + 0.02); }
+  void main(){
+    vec4 s = texture2D(tScene, vUv); vec3 c = min(s.rgb, vec3(1.15)); float tag = s.a;
+    float d = texture2D(tDepth, vUv).x; bool isSky = d >= 0.99999; vec3 wp = worldAt(vUv, d); float dist = length(wp - uCamPos);
+    bool env = tag > 0.4 && tag < 0.75, accent = tag > 0.1 && tag < 0.4;
+    // INK: a line wherever depth jumps, the surface turns a corner, or the colour family changes
+    vec2 o = 1.7 / uRes, ox = vec2(o.x, 0.0), oy = vec2(0.0, o.y);
+    float w0 = 1.0 / viewZ(d), wl = W(vUv - ox), wr = W(vUv + ox), wu = W(vUv + oy), wd = W(vUv - oy);
+    float ink = smoothstep(0.006, 0.02, max(abs(wl + wr - 2.0 * w0), abs(wu + wd - 2.0 * w0)) / w0);
+    float nearest = 1.0 / max(max(w0, max(wl, wr)), max(wu, wd));
+    if (!isSky) {
+      vec3 n0 = N(vUv, o); float eN = max(max(1.0 - dot(n0, N(vUv - ox, o)), 1.0 - dot(n0, N(vUv + ox, o))), max(1.0 - dot(n0, N(vUv + oy, o)), 1.0 - dot(n0, N(vUv - oy, o))));
+      ink = max(ink, smoothstep(0.35, 0.6, eN) * (1.0 - smoothstep(45.0, 100.0, dist)));
+      vec3 k0 = chroma(c); float eC = max(max(length(chroma(texture2D(tScene, vUv - ox).rgb) - k0), length(chroma(texture2D(tScene, vUv + ox).rgb) - k0)), max(length(chroma(texture2D(tScene, vUv + oy).rgb) - k0), length(chroma(texture2D(tScene, vUv - oy).rgb) - k0)));
+      ink = max(ink, smoothstep(0.07, 0.12, eC));
+    }
+    // FOREGROUND: scenery close to the camera drops to a dark silhouette with a torn edge
+    if (!isSky && env) { float fg = 1.0 - smoothstep(uFg - 0.12, uFg + 0.12, dist + (n2(wp.xz * 0.8) - 0.5) * 1.5); c = mix(c, S(vec3(0.15, 0.185, 0.19)) + c * 0.07, fg * 0.94); }
+    // HAZE: distance in flat steps (smooth only on the ground, where steps would draw rings)
+    if (!isSky) {
+      float f = 1.0 - exp(-max(dist - 30.0, 0.0) * 0.0115), fb = floor(f * 6.0 + 0.5) / 6.0, fs = mix(f, fb, smoothstep(0.0, 1.2, wp.y));
+      c = mix(c, mix(S(vec3(0.56, 0.76, 0.72)), S(vec3(0.93, 0.88, 0.75)), fs), fs * (accent ? 0.3 : 0.92));
+    }
+    c = mix(c, S(vec3(0.12, 0.13, 0.14)), ink * mix(1.0, 0.4, smoothstep(40.0, 170.0, nearest)));
+    c = pow(clamp(c, 0.0, 1.0), vec3(1.0 / 2.2));
+    float l = dot(c, vec3(0.299, 0.587, 0.114)); if (!accent) c = mix(vec3(l), c, 0.96);   // everything but the lanterns a little muted
+    // PAPER: blotchy tooth, fibres, fine grain, warm stock, darker toward the edges
+    vec2 fp = gl_FragCoord.xy * (800.0 / uRes.y);
+    float blot = n2(fp * 0.012) * 0.6 + n2(fp * 0.06) * 0.4, fib = n2(fp * vec2(0.04, 0.9)) * 0.5 + n2(fp * vec2(1.1, 0.06)) * 0.5, gr = h2(floor(fp * 1.25));
+    c *= 0.925 + 0.075 * blot + 0.065 * fib; c += (gr - 0.5) * 0.05;
+    c *= vec3(1.0, 0.985, 0.95);
+    vec2 q = vUv - 0.5; c *= 1.0 - dot(q, q) * 0.25;
+    gl_FragColor = vec4(c, 1.0);
+  }`, { tScene: { value: null }, uRes: { value: new T.Vector2(1, 1) }, uFg: { value: 6.5 } });
+
+const hdr = (w, h, depth) => { const rt = new T.WebGLRenderTarget(w, h, { type: T.HalfFloatType, depthBuffer: !!depth, minFilter: T.LinearFilter, magFilter: T.LinearFilter });
+  if (depth) { rt.depthTexture = new T.DepthTexture(w, h); rt.depthTexture.type = T.UnsignedIntType; } return rt; };
+const rtScene = hdr(4, 4, true);
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight, W = Math.floor(w * PR), H = Math.floor(h * PR);
+  renderer.setPixelRatio(PR); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  rtScene.setSize(W, H);
+  finalMat.uniforms.uRes.value.set(W, H);
+}
+window.addEventListener('resize', resize); resize();
+const draw = (mat, target) => { fsTri.material = mat; renderer.setRenderTarget(target); renderer.render(fsScene, fsCam); };
+
+
+// ── camera: six viewpoints, drag to look, keys to walk ───────────────────────────────────────
+const VIEWS = [[0, 1.6, 47, 0, 7.5, 0], [-9, 1.5, 33, 7, 6, 4], [15, 1.3, 36, -8, 6.5, 6], [0, 10, 56, 0, 5, 6], [-11, 1.5, 30, -22, 12, -8], [21, 1.7, 44, -12, 4.5, 14]];
+let yaw = 0, pitch = 0; const pos = new T.Vector3(), keys = {};
+function setView(i) { const v = VIEWS[i]; pos.set(v[0], v[1], v[2]); const dx = v[3] - v[0], dy = v[4] - v[1], dz = v[5] - v[2]; yaw = Math.atan2(-dx, -dz); pitch = Math.atan2(dy, Math.hypot(dx, dz)); mode = 'fixed'; }
+// follow: the camera rides behind the character; fixed: it stands at a viewpoint and she still walks
+let mode = 'follow', camYaw = 0, camPitch = 0.13, camDist = 3.4;
+const heroPos = new T.Vector3(0, 0, 43), camTarget = new T.Vector3(0, 0.72, 43); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
+if (QS.get('view')) setView(Math.max(0, Math.min(5, (parseInt(QS.get('view'), 10) || 1) - 1)));
+if (QS.get('close')) { camDist = 1.9; camYaw = Math.PI - 0.5; camPitch = 0.06; }            // ?close=1 looks at her face
+let drag = null;
+canvas.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag[0], dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY];
+  if (mode === 'follow') { camYaw -= dx * 0.005; camPitch = Math.max(-0.12, Math.min(1.25, camPitch + dy * 0.004)); }
+  else { yaw -= dx * 0.0035; pitch = Math.max(-1.2, Math.min(1.35, pitch - dy * 0.0035)); } });
+canvas.addEventListener('pointerup', () => { drag = null; });
+canvas.addEventListener('wheel', e => { e.preventDefault(); camDist = Math.max(1.3, Math.min(11, camDist * (1 + Math.sign(e.deltaY) * 0.08))); }, { passive: false });
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key >= '1' && e.key <= '6') setView(+e.key - 1); if (e.key === '0' || e.key.toLowerCase() === 'f') mode = 'follow'; if (e.key.toLowerCase() === 'h' && hero && hero.wave) hero.wave(); });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// ── frame ────────────────────────────────────────────────────────────────────────────────────
+const sunV = new T.Vector3(); let last = performance.now(), fpsAcc = 0, fpsN = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000; uTime.value = t; sky.material.uniforms.uTime.value = t;
+  const f = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0), sd = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
+  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? (keys.shift ? HERO.RUN : HERO.WALK) : 0;
+  let turnRate = 0;
+  if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
+  heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);
+  heroPos.x = Math.max(-21, Math.min(21, heroPos.x + Math.sin(heroHead) * heroSpeed * dt)); heroPos.z = Math.max(11, Math.min(60, heroPos.z + Math.cos(heroHead) * heroSpeed * dt));
+  if (heroPos.z > 59.5 && !window.__leaving) { window.__leaving = true; location.href = 'square.html'; }                 // out of the south end, back to the square
+  if (hero) { hero.group.position.copy(heroPos); hero.group.rotation.y = heroHead; hero.update(dt, heroSpeed, heroTurn); }
+  if (mode === 'follow') {
+    camTarget.lerp(new T.Vector3(heroPos.x, 0.72, heroPos.z), Math.min(1, dt * 7));
+    const cp = Math.cos(camPitch); camera.position.set(camTarget.x + Math.sin(camYaw) * cp * camDist, Math.max(0.22, camTarget.y + Math.sin(camPitch) * camDist), camTarget.z + Math.cos(camYaw) * cp * camDist);
+    camera.lookAt(camTarget.x, camTarget.y + 0.12 + camDist * 0.08, camTarget.z);
+  } else { camera.position.copy(pos); camera.position.y += Math.sin(t * 0.6) * 0.015; camera.rotation.set(pitch, yaw, 0, 'YXZ'); }
+  camera.updateMatrixWorld();
+  sky.position.copy(camera.position);
+  if (false && walker) { const a = t * 0.11; walker.position.set(Math.sin(a) * 6.5, 0, 31 + Math.cos(a) * 9); walker.rotation.y = a + Math.PI / 2; const k = Math.floor(t * 3.4) % 2; walker.children[0].visible = !k; if (walker.children[1]) walker.children[1].visible = !!k; }
+  if (lanterns) lanterns.rotation.z = 0;                                                    // (strings are fixed; the leaves carry the wind)
+  blobs.forEach(b => { b.position.y = b.userData.y0 + Math.sin(t * 0.9 + b.userData.ph) * 0.05; });   // the crowns breathe a little
+  if (steam) steam.material.uniforms.uPx.value = PR;
+
+  renderer.setRenderTarget(rtScene); renderer.render(scene, camera);
+  shared.tDepth.value = rtScene.depthTexture; shared.uProjInv.value.copy(camera.projectionMatrixInverse); shared.uCamWorld.value.copy(camera.matrixWorld); shared.uCamPos.value.copy(camera.position);
+  finalMat.uniforms.tScene.value = rtScene.texture; finalMat.uniforms.uFg.value = mode === 'follow' ? 4.6 : 6.5;   // the dark foreground stops short of her when the camera follows
+  draw(finalMat, null);
+  fpsAcc += dt; fpsN++; if (fpsAcc > 1) { state.fps = Math.round(fpsN / fpsAcc); fpsAcc = 0; fpsN = 0; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__remake = Object.assign(state, { setView, VIEWS, renderer, scene, camera, sun, keys, cam(y, p, d) { mode = 'follow'; camYaw = y; camPitch = p; camDist = d; } });
+Object.defineProperty(window.__remake, 'hero', { get() { return hero; } });
+})();
+</script>
+</body>
+</html>
