@@ -882,5 +882,7 @@
       return showcase(E, Object.assign({ section: o.section, topic: t.key, place: o.place, at: [s[0], s[1]], facing: s[2] || 0, kind: s[3] }, s[4] || {})); }).filter(Boolean);
   }
 
-  window.PHOTOWALL = { attach, shelf, row, showcase, showcases, block, keepOut, topics: topicsOf, ONLINE };
+  // unblock(f) drops a footprint block() returned; feet() lists them all, so a module in lm/ that replaces old geometry can remove the old one's walls
+  const unblock = f => { const i = FOOT.indexOf(f); if (i >= 0) FOOT.splice(i, 1); return i >= 0; }, feet = () => FOOT.slice();
+  window.PHOTOWALL = { attach, shelf, row, showcase, showcases, block, unblock, feet, keepOut, topics: topicsOf, ONLINE };
 })();
