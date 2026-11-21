@@ -54,6 +54,40 @@ const burst = (B, mat, x, y, z, r, n) => { for (let i = 0; i < n; i++) { const a
 // face(tex, w, h, glow, both): a plane carrying a texture from the kit (a real sign's material plus lettering)
 const face = (tex, w, h, glow, both) => { const m = new T.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow == null ? 0.3 : glow, roughness: 0.7 }), mesh = new T.Mesh(new T.PlaneGeometry(w, h), m);
   if (!both) return mesh; const pair = new T.Group(), back = new T.Mesh(mesh.geometry, m); back.rotation.y = PI; mesh.position.z = 0.012; back.position.z = -0.012; pair.add(mesh, back); return pair; };
+// ── real signs (CJ, 2026-11-22: 「每個招牌要根據他的作用跟含義還有真實的招牌去對應」): each one built as its true type, with depth,
+// on a Midjourney material from asset/textures/signs/ (DESIGN.signTexture). Where each comes from: docs/signage/sources-xinyi.md.
+const KAI = '"Kaiti TC","BiauKai","DFKai-SB","KaiTi",' + FONT, LI = '"Libian TC","Baoli TC",' + KAI, DIDOT = 'Didot,"Bodoni 72","Songti TC",Georgia,serif', HEI = '"PingFang TC","Helvetica Neue",Arial,sans-serif';
+// ink(lines, o): lettering for a sign face. lines = [[text, size (share of H), y 0..1, font, colour, weight, x 0..1, tracking px]]
+//   o.fill paints the face (inset o.inset) before the letters, o.rule draws a border line, o.carve cuts the letters in (a dark offset under each)
+const ink = (lines, o) => (g, W, H) => { o = o || {}; const ins = o.inset || 0;
+  if (o.fill) { g.fillStyle = o.fill; g.fillRect(W * ins, H * ins, W * (1 - 2 * ins), H * (1 - 2 * ins)); }
+  if (o.rule) { const m = Math.min(W, H) * (o.ruleAt || 0.07); g.strokeStyle = o.rule; g.lineWidth = Math.max(2, Math.min(W, H) * 0.03); g.strokeRect(m, m, W - 2 * m, H - 2 * m); }
+  if (o.draw) o.draw(g, W, H); g.textAlign = 'center'; g.textBaseline = 'middle';
+  lines.forEach(([t, size, y, font, c, wt, x, tr]) => { const px = Math.round(size * H); g.font = `${wt || 800} ${px}px ${font || FONT}`; g.letterSpacing = (tr || 0) + 'px'; const tw = g.measureText(t).width, max = W * (o.max || 0.9);
+    g.save(); g.translate((x == null ? 0.5 : x) * W, y * H); if (tw > max) g.scale(max / tw, 1);
+    if (o.carve) { g.fillStyle = 'rgba(0,0,0,.6)'; g.fillText(t, px * 0.035, px * 0.045); g.fillStyle = 'rgba(255,255,255,.18)'; g.fillText(t, -px * 0.02, -px * 0.025); }
+    g.fillStyle = o.only || c || '#fff'; g.fillText(t, 0, 0); g.restore(); g.letterSpacing = '0px'; }); };
+let signN = 0;
+// rs(kind, material, w, h, letter, o): 'box' a backlit light box in a metal case with a lip · 'plate' an enamel / brass / tin plate with
+//   four rivets · 'board' a wooden or stone board in a frame. o.d depth, o.both lettered on both faces, o.glow, o.case (the case material)
+function rs(kind, mat, w, h, letter, o) { o = o || {}; const ppm = o.ppm || Math.min(300, 1400 / Math.max(w, h)), tex = DESIGN.signTexture(E, mat, Math.max(16, Math.round(w * ppm)), Math.max(16, Math.round(h * ppm)), letter, 'xinyi' + (signN++));
+  const d = o.d || (kind === 'box' ? 0.26 : kind === 'plate' ? 0.025 : 0.09), rim = kind === 'box' ? 0.07 : kind === 'board' ? 0.09 : 0, g = new T.Group();
+  const fm = new T.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: new T.Color(1, 1, 1), emissiveIntensity: o.glow == null ? (kind === 'box' ? 0.95 : 0.22) : o.glow, roughness: kind === 'plate' ? 0.35 : 0.75, metalness: mat === 'brass' ? 0.45 : 0 });
+  const cm = o.case || (kind === 'box' ? M.char : kind === 'plate' ? M.steel : M.woodD), body = new T.Mesh(new T.BoxGeometry(w + rim * 2, h + rim * 2, d), cm); body.castShadow = body.receiveShadow = true; g.add(body);
+  const sides = o.both ? [1, -1] : [1];
+  sides.forEach(k => { const f = new T.Mesh(new T.PlaneGeometry(w, h), fm); f.position.z = k * (d / 2 + 0.004); if (k < 0) f.rotation.y = PI; g.add(f);
+    if (kind === 'box') [[0, h / 2 + rim / 2, w + rim * 2, rim], [0, -h / 2 - rim / 2, w + rim * 2, rim], [w / 2 + rim / 2, 0, rim, h], [-w / 2 - rim / 2, 0, rim, h]].forEach(([x, y, bw, bh]) => { const l = new T.Mesh(new T.BoxGeometry(bw, bh, 0.05), cm); l.position.set(x, y, k * (d / 2 + 0.02)); g.add(l); });   // the case lip proud of the acrylic
+    if (kind === 'plate') { const r = Math.min(w, h) * 0.06; [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { const s = new T.Mesh(new T.SphereGeometry(Math.max(0.008, r * 0.45), 8, 6), M.silver); s.scale.z = 0.5; s.position.set(a * (w / 2 - r * 1.3), b * (h / 2 - r * 1.3), k * (d / 2 + 0.004)); g.add(s); }); } });
+  return g; }
+// chan(lines, w, h, o): channel letters, each letter a shell with a lit face and metal returns (stacked cut-outs), on a raceway if o.race
+function chan(lines, w, h, o) { o = o || {}; const W = o.px || 1024, H = Math.max(16, Math.round(W * h / w));
+  const mk = only => { const cv = document.createElement('canvas'); cv.width = W; cv.height = H; ink(lines, { only, max: 0.96 })(cv.getContext('2d'), W, H); const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8; return t; };
+  const ft = mk(null), st = mk(o.side || '#3a3d44'), g = new T.Group(), geo = new T.PlaneGeometry(w, h), dep = o.depth || 0.12, n = o.layers || 5;
+  const fm = new T.MeshStandardMaterial({ map: ft, emissiveMap: ft, emissive: new T.Color(1, 1, 1), emissiveIntensity: o.glow == null ? 1.0 : o.glow, alphaTest: 0.4, roughness: 0.45, metalness: o.metal || 0 });
+  const sm = new T.MeshStandardMaterial({ map: st, alphaTest: 0.4, roughness: 0.4, metalness: 0.5, emissiveMap: st, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.05 });
+  for (let i = n; i >= 1; i--) { const m = new T.Mesh(geo, sm); m.position.z = -dep * i / n; g.add(m); } const f = new T.Mesh(geo, fm); f.position.z = 0.002; g.add(f);
+  if (o.race) { const r = new T.Mesh(new T.BoxGeometry(w * 0.94, h * (o.raceH || 0.12), 0.12), M.char); r.position.set(0, h * (o.raceY || 0), -dep - 0.06); r.castShadow = true; g.add(r); }
+  return g; }
 // a curtain wall drawn pane by pane: cols x rows, sky colour up top, the warm street lower down, some panes lit
 function glass(cols, rows, o) { o = o || {}; const lit = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) lit.push([rnd() < (o.litFn ? o.litFn(r, c) : (o.lit == null ? 0.16 : o.lit)), rnd()]);
   const a = o.top || [62, 108, 140], b = o.bot || [150, 122, 100], gx = o.gx == null ? 1.5 : o.gx, gy = o.gy == null ? 0.2 : o.gy;
@@ -117,16 +151,16 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   for (let i = 0; i <= 5; i++) B.box(M.stone, 0.55, 5.0, 0.6, -W / 2 + 0.3 + i * (W - 0.6) / 5, 2.5, fz + 0.1);
   B.box(M.dark, W + 0.8, 0.55, 3.2, 0, 5.2, fz + 1.5); B.box(M.redGlow, W + 0.84, 0.07, 0.07, 0, 4.92, fz + 3.1); for (const k of [-1, 1]) B.box(M.redGlow, 0.07, 0.07, 3.2, k * (W / 2 + 0.4), 4.92, fz + 1.5);          // the marquee, a red line of light round its edge
   for (let i = 0; i < 18; i++) B.sph(M.warm, 0.07, -W / 2 + 0.3 + i * (W - 0.6) / 17, 4.86, fz + 3.0);
-  B.add(label([['現正熱映 · NOW SHOWING', 0.5, 0.52, 800]], W - 1.5, 0.5, { bg: '#1a1114', fg: '#ffd9a0', glow: 0.9 }), 0, 5.2, fz + 3.12);
+  B.add(rs('box', 'neonback', W - 1.5, 0.5, ink([['現正熱映　NOW SHOWING', 0.6, 0.53, HEI, '#ffb53a', 800, 0.5, 6]], { fill: 'rgba(10,6,8,.72)' }), { d: 0.12, glow: 1.1 }), 0, 5.2, fz + 3.12);   // the marquee's amber LED strip in its black case
   ['夏日午後|ONE SUMMER AFTERNOON', '星際旅人|THE LONG ORBIT', '台北物語|A TAIPEI STORY', '夜行列車|NIGHT TRAIN SOUTH', '山海之間|BETWEEN HILL AND SEA'].forEach((s, i) => { const [a, b] = s.split('|'), x = -5.6 + i * 2.8;
     B.box(M.dark, 2.3, 3.4, 0.16, x, 8.0, fz + 0.08); B.add(poster(2.1, 3.2, a, b, [18, 215, 330, 265, 150][i]), x, 8.0, fz + 0.17); B.box(M.warm, 2.1, 0.05, 0.06, x, 9.78, fz + 0.2); });
   B.box(M.dark, 8.6, 3.9, 0.3, 0, 12.6, fz + 0.15);                                                                    // the LED screen
   B.add(label([['COMING SOON', 0.2, 0.3, 800, '#ffe9c4'], ['即將上映', 0.3, 0.66, 800, '#ffffff']], 8.2, 3.5, { glow: 0.95, bg: '#201030', draw(g, W, H) { const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#5a1a6a'); gr.addColorStop(0.5, '#b03050'); gr.addColorStop(1, '#f09040'); g.fillStyle = gr; g.fillRect(0, 0, W, H); for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.5})`; g.fillRect(Math.random() * W, Math.random() * H, 3, 3); } } }), 0, 12.6, fz + 0.31);
   for (const k of [-1, 1]) for (let i = 0; i < 3; i++) B.box(M.steel, 0.12, 7.4, 0.3, k * (4.9 + i * 0.75), 11.3, fz + 0.15);  // metal fins either side of the screen
-  B.add(label([['VIESHOW CINEMAS', 0.42, 0.3, 800], ['威秀影城 · 信義', 0.4, 0.74, 700]], 9.5, 2.0, { fg: '#fff3d6', glow: 0.9 }), 0, 16.2, fz + 0.06);
+  B.add(chan([['VIESHOW CINEMAS', 0.36, 0.28, HEI, '#ffffff', 900, 0.5, 10], ['信義威秀影城', 0.42, 0.74, HEI, '#ffffff', 800, 0.5, 24]], 9.5, 2.0, { side: '#9a1c24', depth: 0.16, race: true, raceH: 0.08, raceY: -0.02, glow: 1.0 }), 0, 16.2, fz + 0.24);   // white-faced channel letters with red returns on a raceway
   // the ticket booth on the forecourt, a red carpet to the doors, stanchions
   B.box(M.char, 2.6, 2.5, 1.3, -4.6, 1.25, fz + 0.75); B.box(M.dark, 3.0, 0.14, 1.7, -4.6, 2.57, fz + 0.75); B.add(plane(2.2, 1.0, M.doors), -4.6, 1.5, fz + 1.41);
-  B.add(label([['售票處 TICKETS', 0.6, 0.52, 800]], 2.4, 0.42, { bg: '#7a1f2a', fg: '#fff0d2', glow: 0.8 }), -4.6, 2.3, fz + 1.42);
+  B.add(rs('box', 'lightbox', 2.4, 0.42, ink([['售票處　TICKETS', 0.62, 0.54, HEI, '#ffffff', 800, 0.5, 4]], { fill: 'rgba(150,24,34,.88)' }), { d: 0.14 }), -4.6, 2.3, fz + 1.47);
   B.add(plane(3.4, 3.4, M.doors), 1.2, 2.2, fz + 0.06); for (let i = 0; i < 3; i++) B.box(M.dark, 0.08, 3.4, 0.08, 1.2 + (i - 1) * 1.1, 2.2, fz + 0.1);
   B.box(M.red, 3.0, 0.03, 3.6, 1.2, 0.03, fz + 1.8);
   for (const k of [-1, 1]) for (let i = 0; i < 3; i++) { B.cyl(M.gold, 0.035, 0.035, 0.95, 1.2 + k * 1.75, 0.475, fz + 0.5 + i * 1.3, 8); B.sph(M.gold, 0.06, 1.2 + k * 1.75, 0.97, fz + 0.5 + i * 1.3); if (i) B.rod(M.red, [1.2 + k * 1.75, 0.86, fz + 0.5 + (i - 1) * 1.3], [1.2 + k * 1.75, 0.86, fz + 0.5 + i * 1.3], 0.025); }
@@ -148,8 +182,8 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   for (let i = 0; i <= 7; i++) B.box(M.silver, 0.12, 22.5, 0.4, -4.2 + i * 1.2, 17.2, fz + 0.2); for (let i = 0; i <= 6; i++) B.box(M.silver, 8.6, 0.14, 0.3, 0, 5.95 + i * 3.75, fz + 0.15);
   B.add(plane(18.2, 4.6, shop(6)), 0, 2.7, fz + 0.03); for (let i = 0; i <= 6; i++) B.box(M.stone, 0.5, 5.3, 0.5, -9.2 + i * 3.07, 2.65, fz + 0.1);
   B.box(M.steel, 19.6, 0.22, 2.6, 0, 5.5, fz + 1.2); B.box(M.warm, 19.2, 0.04, 0.04, 0, 5.36, fz + 2.4);
-  B.add(label([['微風南山', 0.5, 0.33, 800], ['BREEZE NAN SHAN', 0.26, 0.77, 700]], 5.2, 2.5, { fg: '#fff3d6', glow: 0.9 }), -6.6, 26.6, fz + 0.06);
-  B.add(label([['南山廣場', 0.46, 0.34, 800], ['TAIPEI NAN SHAN PLAZA', 0.2, 0.76, 600]], 5.2, 2.0, { fg: '#fff3d6', glow: 0.8 }), 6.6, 26.8, fz + 0.06);
+  B.add(chan([['BREEZE', 0.46, 0.32, DIDOT, '#fff6e6', 700, 0.5, 14], ['微風南山　NAN SHAN', 0.22, 0.76, HEI, '#fff6e6', 600, 0.5, 8]], 4.7, 2.3, { side: '#8a7550', depth: 0.1, glow: 0.95 }), -7.0, 26.6, fz + 0.16);   // the serif BREEZE wordmark in lit channel letters
+  B.add(chan([['南山廣場', 0.46, 0.34, HEI, '#ffffff', 800, 0.5, 16], ['TAIPEI NAN SHAN PLAZA', 0.18, 0.76, HEI, '#dfe8ee', 600, 0.5, 6]], 5.2, 2.0, { side: '#5a6670', depth: 0.1, glow: 0.85 }), 6.6, 26.8, fz + 0.16);
   B.add(poster(3.6, 8, '春季新裝', 'SPRING COLLECTION', 28, 0.7), -7, 14.5, fz + 0.07); B.add(poster(3.6, 8, '品味生活', 'TASTE OF THE CITY', 190, 0.7), 7, 14.5, fz + 0.07);
   // the small faceted glass pavilion at the corner entrance, cut like a diamond
   { const px = -10.4, pz = fz + 1.4, dg = new T.Mesh(new T.OctahedronGeometry(2.3, 0), triMat({ color: '#9fd3e6', tex: TEX.metal, scale: 1, rough: 0.08, metal: 0.6, emissive: '#27485a', eI: 0.6 })); dg.scale.set(1, 1.25, 1); dg.rotation.y = 0.4; dg.castShadow = true; B.add(dg, px, 2.6, pz, 0.4);
@@ -163,10 +197,10 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   B.box(M.dark, 11.2, 13.6, 0.4, 2.4, 22.5, fz + 0.3);                                                                   // the big LED wall
   B.add(label([['4', 0.5, 0.42, 900, '#ffffff'], ['FUN · FOOD · FASHION · FILM', 0.07, 0.8, 700, '#ffe9c4']], 10.6, 13, { px: 512, glow: 0.95, bg: '#101020', draw(g, W, H) { const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#0c2a6a'); gr.addColorStop(0.55, '#7a2aa0'); gr.addColorStop(1, '#f0508a'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 9; i++) { g.strokeStyle = `rgba(255,255,255,${0.08 + 0.05 * i})`; g.lineWidth = 6; g.beginPath(); g.arc(W / 2, H * 0.42, 40 + i * 34, 0, 7); g.stroke(); } } }), 2.4, 22.5, fz + 0.52);
-  B.add(label([['ATT 4 FUN', 0.7, 0.52, 900]], 12, 3.0, { fg: '#ffffff', glow: 1.0 }), 0, 41.4, fz + 0.32);
-  B.add(label([['ATT', 0.3, 0.2, 900], ['4', 0.3, 0.5, 900], ['FUN', 0.3, 0.8, 900]], 2.4, 9, { bg: '#0d0f14', fg: '#ffd9a0', glow: 0.9, border: '#ffd9a0' }), -7.4, 20, fz + 0.32);
+  B.add(chan([['ATT 4 FUN', 0.72, 0.52, HEI, '#ffffff', 900, 0.5, 18]], 12, 3.0, { side: '#c2185b', depth: 0.22, race: true, raceH: 0.1, glow: 1.05 }), 0, 41.4, fz + 0.55);   // the crown sign: white channel letters, magenta returns
+  B.add(rs('box', 'lightbox', 2.4, 9, ink([['ATT', 0.13, 0.2, HEI, '#ffffff', 900], ['4', 0.22, 0.5, HEI, '#ff4f9a', 900], ['FUN', 0.13, 0.8, HEI, '#ffffff', 900]], { fill: 'rgba(14,15,22,.9)', inset: 0.04 }), { d: 0.32 }), -7.4, 20, fz + 0.48);   // the upright light box on the corner
   B.add(plane(W - 1, 4.6, shop(6, '#e8f0ff')), 0, 2.7, fz + 0.3); B.box(M.dark, W + 0.8, 0.3, 2.6, 0, 5.6, fz + 1.2); B.box(M.white, W, 0.05, 0.05, 0, 5.42, fz + 2.45);
-  B.add(label([['新光三越 · 威秀 ← 2F 空橋 SKYBRIDGE', 0.5, 0.52, 700]], 7, 0.5, { bg: '#22262e', fg: '#e8eef6', glow: 0.7 }), 5, 5.6, fz + 2.52);
+  B.add(rs('plate', 'tin', 7, 0.5, ink([['←  新光三越 · 威秀　2F 空橋 SKYBRIDGE', 0.56, 0.53, HEI, '#f2f5f8', 700]], { fill: 'rgba(30,34,42,.9)' }), { glow: 0.6 }), 5, 5.6, fz + 2.52);   // a painted aluminium wayfinding plate
   // the restaurant terraces on the two top floors, facing the tower (local -x) and the plaza
   [36.2, 40.7].forEach((y, j) => { B.box(M.char, 3.0, 0.25, D + 0.6, -W / 2 - 1.5, y, 0); B.add(plane(D + 0.6, 1.1, M.pane), -W / 2 - 3.0, y + 0.67, 0, -PI / 2); B.box(M.steel, 0.06, 0.06, D + 0.6, -W / 2 - 3.0, y + 1.24, 0);
     for (let i = 0; i < 6; i++) { const z = -8.5 + i * 3.4; B.cyl(M.woodD, 0.5, 0.5, 0.05, -W / 2 - 1.6, y + 0.85, z, 10); B.cyl(M.steel, 0.03, 0.03, 0.75, -W / 2 - 1.6, y + 0.48, z, 6); B.cyl(M.cloth[(i + j) % 5], 0.05, 1.1, 0.5, -W / 2 - 1.6, y + 2.5, z, 8); B.cyl(M.steel, 0.025, 0.025, 2.3, -W / 2 - 1.6, y + 1.3, z, 6); B.sph(M.warm, 0.07, -W / 2 - 1.6, y + 1.0, z); } });
@@ -181,7 +215,7 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   for (const k of [-1, 1]) { B.add(plane(L, 1.15, M.pane), x + k * 1.25, y + 0.6, zc, PI / 2); B.box(M.steel, 0.06, 0.06, L, x + k * 1.25, y + 1.2, zc); for (let z = z0; z <= z1 + 0.01; z += L / 6) B.box(M.steel, 0.08, 3.0, 0.08, x + k * 1.25, y + 1.5, z); }
   for (const z of [z0 + 1.2, zc, z1 - 1.2]) B.cyl(M.steel, 0.24, 0.28, y - 0.4, x, (y - 0.4) / 2, z, 12);
   B.box(M.stone, 1.9, 0.4, 2.4, x + 1.0, y - 0.2, z1 - 1.2);
-  B.add(label([['ATT 4 FUN →', 0.55, 0.5, 700]], 2.2, 0.4, { bg: '#22262e', fg: '#e8eef6', glow: 0.7, both: true }), x, y + 2.6, z0 + 0.4);
+  B.add(rs('plate', 'tin', 2.2, 0.4, ink([['ATT 4 FUN  →', 0.6, 0.53, HEI, '#f2f5f8', 700]], { fill: 'rgba(30,34,42,.9)' }), { both: true, glow: 0.6 }), x, y + 2.6, z0 + 0.4);
   B.done(0, 0, 0); }
 
 // ══ 4. 誠品信義店, south-west of the gate, its front (north face) to the plaza ═════════════════════════════
@@ -196,8 +230,8 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   B.add(plane(W - 1.4, 3.6, new T.MeshStandardMaterial((() => { const t = canvasTex(1024, (g, s) => { g.fillStyle = '#e9b874'; g.fillRect(0, 0, s, s); for (let b = 0; b < 8; b++) { const x = b * s / 8; g.fillStyle = '#6a4424'; g.fillRect(x + 8, s * 0.08, s / 8 - 16, s * 0.86); for (let r = 0; r < 5; r++) { let px = x + 14; const y = s * (0.12 + r * 0.165); g.fillStyle = '#f6d9a0'; g.fillRect(x + 12, y, s / 8 - 24, s * 0.135); while (px < x + s / 8 - 22) { const bw = 5 + Math.random() * 8; g.fillStyle = `hsl(${Math.random() * 360},${30 + Math.random() * 40}%,${30 + Math.random() * 35}%)`; g.fillRect(px, y + s * 0.02 + Math.random() * 8, bw, s * 0.115); px += bw + 1; } } g.fillStyle = '#2a2420'; g.fillRect(x, 0, 6, s); } }, 1); return { map: t, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.85, roughness: 0.3 }; })())), 0, 2.2, fz + 0.36);
   for (let i = 0; i <= 8; i++) B.box(M.beige, 0.6, 4.3, 0.7, -W / 2 + 0.3 + i * (W - 0.6) / 8, 2.15, fz + 0.35);
   B.box(M.woodD, 9, 0.2, 2.6, 0, 4.2, fz + 1.5); B.box(M.warm, 8.6, 0.04, 0.04, 0, 4.08, fz + 2.7);
-  B.box(M.dark, 3.3, 1.25, 0.12, -8.6, 6.0, fz + 0.42); B.add(label([['誠品 eslite', 0.5, 0.36, 700], ['信義店 XINYI STORE', 0.2, 0.76, 600]], 3.1, 1.1, { bg: '#1f5a46', fg: '#ffffff', glow: 0.75 }), -8.6, 6.0, fz + 0.49);
-  B.add(label([['24H BOOKSTORE · 書店 3F', 0.5, 0.52, 600]], 4.2, 0.4, { bg: '#2a2420', fg: '#f6d9a0', glow: 0.6 }), 0, 4.2, fz + 2.82);
+  B.box(M.dark, 3.3, 1.25, 0.12, -8.6, 6.0, fz + 0.42); B.add(chan([['eslite', 0.5, 0.36, DIDOT, '#ffffff', 400, 0.5, 4], ['誠品信義店', 0.3, 0.8, HEI, '#ffffff', 600, 0.5, 10]], 3.1, 1.1, { side: '#6a6a6a', depth: 0.06, glow: 0.9 }), -8.6, 6.0, fz + 0.56);   // the lower-case serif eslite and 誠品 in lit letters on the dark panel
+  B.add(rs('board', 'teak', 4.2, 0.4, ink([['24H BOOKSTORE · 書店 3F', 0.5, 0.53, DIDOT, '#f6e7c4', 600, 0.5, 3]], {}), { d: 0.06, glow: 0.4 }), 0, 4.2, fz + 2.82);   // a timber fascia board under the wooden canopy
   B.box(M.stone, 10, 0.16, 1.2, 0, 0.08, fz + 1.2); B.box(M.stone, 9.4, 0.16, 0.7, 0, 0.24, fz + 0.9);
   person(B, -2.2, 0.32, fz + 0.9, { s: 0.92, top: M.cloth[1], ry: PI * 0.1, arms: [[0.12, -0.3, 0.28], [-0.12, -0.3, 0.28]] }); B.box(M.cloth[5], 0.3, 0.03, 0.22, -2.2, 1.28, fz + 1.2, 0, 0.5);
   person(B, 2.6, 0.32, fz + 1.0, { s: 0.88, top: M.cloth[3], arms: [[0.14, -0.28, 0.26], [-0.02, -0.5, 0.05]] }); B.box(M.wood, 0.34, 0.4, 0.12, 2.95, 0.6, fz + 1.15);
@@ -210,18 +244,18 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   B.box(M.roof, W + 0.6, 0.5, D + 0.6, 0, H + 0.25, 0); B.box(M.pale, W, 0.6, D, 0, 5.3, 0);
   B.box(M.char, W - 1, 5, D - 7, 0, 2.5, -3.4);                                                                          // the open coach hall, the back wall dark
   for (let i = 0; i <= 4; i++) { const x = -W / 2 + 0.5 + i * (W - 1) / 4; B.box(M.pale, 0.9, 5.2, 0.9, x, 2.6, fz - 0.5); B.box(M.pale, 0.9, 5.2, 0.9, x, 2.6, 0.2);
-    if (i < 4) { const cx = x + (W - 1) / 8; B.add(label([[String(i + 1), 0.8, 0.54, 900]], 0.8, 0.8, { bg: '#f2c230', fg: '#1a1a1a', glow: 0.8 }), cx, 4.4, fz - 0.42); B.box(M.dark, 1.0, 1.0, 0.1, cx, 4.4, fz - 0.5); B.box(M.white, 4.4, 0.06, 0.3, cx, 4.95, 3); } }
+    if (i < 4) { const cx = x + (W - 1) / 8; B.add(rs('box', 'lightbox', 0.8, 0.8, ink([[String(i + 1), 0.72, 0.56, HEI, '#1a1a1a', 900]], { fill: 'rgba(242,194,48,.92)' }), { d: 0.12, glow: 0.8 }), cx, 4.4, fz - 0.38); B.box(M.dark, 1.0, 1.0, 0.1, cx, 4.4, fz - 0.5); B.box(M.white, 4.4, 0.06, 0.3, cx, 4.95, 3); } }
   // one coach waiting in bay 2: body, window band, wheels, the destination blind
   { const bx = -3, bz = 3.6; B.box(M.bus, 10.5, 2.7, 2.5, bx, 1.85, bz); B.box(M.win, 9.8, 1.0, 2.54, bx - 0.2, 2.35, bz); B.box(M.cloth[1], 10.52, 0.35, 2.52, bx, 1.05, bz); B.box(M.dark, 10.3, 0.3, 2.3, bx, 0.45, bz);
     for (const wx of [-3.6, 3.2, 4.2]) for (const k of [-1, 1]) B.cyl(M.dark, 0.48, 0.48, 0.3, bx + wx, 0.48, bz + k * 1.12, 14, PI / 2);
     B.add(label([['台北 → 桃園機場', 0.6, 0.52, 700]], 2.2, 0.36, { bg: '#111', fg: '#ffb23a', glow: 1.0 }), bx - 5.27, 2.9, bz, -PI / 2); B.box(M.warm, 0.05, 0.16, 0.3, bx - 5.27, 0.9, bz + 0.9); B.box(M.warm, 0.05, 0.16, 0.3, bx - 5.27, 0.9, bz - 0.9); }
-  B.add(label([['市府轉運站', 0.52, 0.36, 800], ['TAIPEI CITY HALL BUS STATION', 0.2, 0.78, 600]], 8.4, 1.5, { bg: '#1c4f7a', fg: '#ffffff', glow: 0.8 }), -4, 5.9, fz + 0.36); B.box(M.dark, 8.7, 1.7, 0.12, -4, 5.9, fz + 0.28);
-  B.add(label([['統一時代百貨', 0.5, 0.36, 800], ['UNI-USTYLE DEPARTMENT STORE', 0.18, 0.78, 600]], 7.6, 2.2, { fg: '#fff3d6', glow: 0.9 }), 6.4, 26.8, fz + 0.36);
+  B.add(rs('box', 'lightbox', 8.4, 1.5, ink([['市府轉運站', 0.5, 0.38, HEI, '#ffffff', 800, 0.5, 30], ['Taipei City Hall Bus Station', 0.2, 0.78, HEI, '#ffffff', 600, 0.5, 2]], { fill: 'rgba(22,74,128,.9)' }), { d: 0.3 }), -4, 5.9, fz + 0.45);   // a long backlit box, white on transit blue
+  B.add(chan([['統一時代百貨', 0.46, 0.36, HEI, '#ffffff', 800, 0.5, 14], ['UNI-USTYLE', 0.22, 0.78, HEI, '#ffd9a0', 700, 0.5, 12]], 7.6, 2.2, { side: '#555a60', depth: 0.14, race: true, raceH: 0.07, raceY: 0.06 }), 6.4, 26.8, fz + 0.56);
   B.add(poster(3.2, 7.5, '週年慶', 'ANNIVERSARY', 345, 0.7), -8.6, 16, fz + 0.36);
   // the hotel: about thirty storeys of glass rising out of the podium
   curtain(B, 12, 78, 11, 4, H, -1.5, 10, 23, { top: [70, 112, 150], bot: [170, 148, 132], lit: 0.24, gx: 2, gy: 0.16 }, M.silver, { p: 0.2, slabEvery: 1, slabH: 0.12, finEvery: 5, finW: 0.3 });
   B.box(M.char, 12.4, 4, 11.4, 4, H + 80, -1.5); B.box(M.silver, 10, 1.2, 9, 4, H + 82.6, -1.5);
-  B.add(label([['W', 0.74, 0.5, 300], ['TAIPEI', 0.16, 0.9, 600]], 4.4, 4.4, { fg: '#ffffff', glow: 1.0 }), 4, H + 74.5, 4.25);
+  B.add(chan([['W', 0.78, 0.48, HEI, '#ffffff', 300], ['TAIPEI', 0.14, 0.9, HEI, '#ffffff', 600, 0.5, 14]], 4.4, 4.4, { side: '#8a8f96', depth: 0.25, glow: 1.1 }), 4, H + 74.5, 4.4);   // the plain W letter high on the hotel (a letter, not the hotel's logo artwork)
   out.bus = B.done(18.5, 31, PI);
   PLACES.add(E, P('city-hall-bus-station'), { target: out.bus, near: [13.5, 18.4], radius: 6, plaque: { position: [10.5, 1.7, 22.75], rotation: PI } }); }
 
@@ -238,7 +272,7 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
       B.box(M.dark, 0.5, 0.03, 0.02, ux - 0.9, 1.5, fz + 0.075); B.sph(M.gold, 0.035, ux - 0.6, 1.02, fz + 0.09); B.box(M.damp, 1.4, 0.14, 0.5, ux - 0.9, 0.07, fz + 0.27);
       B.box((i + n0) % 2 ? M.doors : M.win, 1.3, 1.0, 0.05, ux + 0.95, 1.6, fz + 0.02); for (const k of [-1, 1]) { B.box(pm, 0.08, 1.1, 0.09, ux + 0.95 + k * 0.65, 1.6, fz + 0.04); B.box(pm, 1.38, 0.08, 0.09, ux + 0.95, 1.6 + k * 0.52, fz + 0.04); }
       B.box(pm, 0.05, 1.0, 0.07, ux + 0.95, 1.6, fz + 0.04); B.box(pm, 1.3, 0.05, 0.07, ux + 0.95, 1.6, fz + 0.04); B.box(M.damp, 1.5, 0.07, 0.16, ux + 0.95, 1.04, fz + 0.07);
-      B.add(label([['南村 ' + (n0 * 5 + i + 1) + ' 號', 0.62, 0.54, 700]], 0.42, 0.17, { bg: '#2c4a78', fg: '#f4efe0', glow: 0.25, px: 128 }), ux - 0.18, 2.02, fz + 0.03);
+      B.add(rs('plate', 'enamel', 0.34, 0.2, ink([['松勤街', 0.24, 0.27, HEI, '#f4f4ee', 700], [(n0 * 5 + i + 1) * 2 + '號', 0.44, 0.67, HEI, '#ffffff', 800]], { fill: 'rgba(32,74,150,.92)', rule: '#f4f4ee', ruleAt: 0.05 }), { ppm: 400, glow: 0.18 }), ux - 0.18, 2.04, fz + 0.06);   // the blue 門牌 by each door: street on top, number large
       B.sph(M.warm, 0.05, ux - 0.9, 2.3, fz + 0.22); B.cyl(M.dark, 0.02, 0.12, 0.08, ux - 0.9, 2.37, fz + 0.22, 8); B.rod(M.dark, [ux - 0.9, 2.4, fz], [ux - 0.9, 2.4, fz + 0.22], 0.012);
       B.cyl(M.damp, 0.045, 0.045, Hw, ux + 1.98, Hw / 2, fz + 0.06, 6);
       B.box(M.win, 1.0, 0.8, 0.05, ux, 1.7, bz - 0.02); for (const k of [-1, 1]) { B.box(pm, 0.07, 0.9, 0.08, ux + k * 0.5, 1.7, bz - 0.04); B.box(pm, 1.07, 0.07, 0.08, ux, 1.7 + k * 0.42, bz - 0.04); } B.box(pm, 0.05, 0.8, 0.07, ux, 1.7, bz - 0.04);
@@ -251,7 +285,7 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   B.cyl(M.brick, 0.34, 0.26, 0.6, 1.2, 0.3, -1.1, 12); B.cyl(M.win, 0.3, 0.3, 0.02, 1.2, 0.57, -1.1, 12); B.box(M.wood, 0.36, 0.05, 0.3, -2.6, 0.4, 1.1); for (const k of [-1, 1]) B.box(M.woodD, 0.04, 0.4, 0.28, -2.6 + k * 0.15, 0.2, 1.1);
   B.box(M.wood, 1.5, 0.06, 0.4, 8.4, 0.44, 6.5); for (const k of [-1, 1]) B.box(M.damp, 0.12, 0.44, 0.4, 8.4 + k * 0.6, 0.22, 6.5);
   for (const k of [-1, 1]) B.box(M.woodD, 0.14, 2.3, 0.14, 11.8 + k * 1.1, 1.15, 6.6); B.box(M.woodD, 2.6, 0.12, 0.2, 11.8, 2.3, 6.6);
-  B.add(label([['四四南村', 0.4, 0.34, 800, '#2a2420'], ['Forty-Four South Village · 1948', 0.13, 0.7, 600, '#3a3028'], ['信義公民會館', 0.13, 0.88, 600, '#3a3028']], 2.06, 1.3, { bg: '#d8ccb0', border: '#5b4433', glow: 0.25, both: true }), 11.8, 1.55, 6.6);
+  B.add(rs('board', 'teak', 2.06, 1.3, ink([['四四南村', 0.34, 0.36, LI, '#f3e6c6', 800, 0.5, 6], ['信義公民會館', 0.13, 0.7, KAI, '#f3e6c6', 700, 0.5, 8], ['Xinyi Public Assembly Hall', 0.08, 0.86, HEI, '#e8d8b4', 600]], { carve: true }), { both: true, d: 0.1 }), 11.8, 1.55, 6.6);   // a carved timber name board, light letters cut into dark wood
   B.sph(M.grass, 2.6, 13.2, 0, -3.4, 1, 0.34, 1); B.box(M.wood, 1.4, 0.06, 0.4, 12.6, 0.44, -0.4, 0.5); B.box(M.damp, 0.8, 0.44, 0.3, 12.6, 0.22, -0.4, 0.5);
   out.village = B.done(-26, -43.25, 0);
   solid(-26, -39.5, 10.35, 2.6); solid(-14.2, -36.65, 1.4, 0.25);
@@ -262,7 +296,7 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   for (const k of [-1, 1]) B.box(M.stone, 1.1, 7.2, 1.0, x + k * 4.6, 3.6, z); B.box(M.stone, 10.3, 1.5, 1.0, x, 7.2, z); B.box(M.silver, 10.7, 0.2, 1.3, x, 8.05, z);
   B.add(plane(8.1, 5.2, shop(6, '#fff2d4')), x, 2.75, z + 0.38); for (let i = 0; i <= 6; i++) B.box(M.steel, 0.08, 5.3, 0.1, x - 4.05 + i * 1.35, 2.7, z + 0.42); B.box(M.steel, 8.2, 0.1, 0.1, x, 2.5, z + 0.42);
   B.box(M.pane, 9.4, 0.1, 3.0, x, 5.55, z + 2.0); B.box(M.steel, 9.5, 0.14, 0.14, x, 5.5, z + 3.5); for (const k of [-1, 1]) { B.cyl(M.steel, 0.09, 0.09, 5.5, x + k * 4.5, 2.75, z + 3.4, 10); B.rod(M.steel, [x + k * 4.5, 5.5, z + 3.4], [x + k * 4.5, 7.4, z + 0.5], 0.03); solid(x + k * 4.5, z + 3.4, 0.1, 0.1); }
-  B.add(label([['TAIPEI 101 · 台北101', 0.7, 0.54, 800]], 8.2, 0.95, { fg: '#fff3d6', glow: 0.95 }), x, 7.35, z + 0.53);
+  B.add(chan([['TAIPEI 101', 0.72, 0.54, HEI, '#e9edf0', 700, 0.5, 26]], 8.2, 0.95, { side: '#7d858c', depth: 0.1, glow: 0.55, metal: 0.5 }), x, 7.35, z + 0.62);   // brushed-metal letters fixed to the stone lintel
   for (let i = -1; i <= 1; i++) { B.cyl(M.gold, 0.62, 0.62, 0.14, x + i * 1.5, 9.2, z + 0.25, 28, PI / 2); B.cyl(M.gold, 0.66, 0.66, 0.06, x + i * 1.5, 9.2, z + 0.25, 28, PI / 2); B.box(M.dark, 0.34, 0.34, 0.18, x + i * 1.5, 9.2, z + 0.25); }   // three old coins with square holes
   // a ruyi (the curled cloud-head) in silver above the coins
   { const tor = (r, cx, cy, a0, arc) => { const g = new T.TorusGeometry(r, 0.09, 6, 22, arc); B.geo(M.silver, g, x + cx, cy, z + 0.3, 0, 0, a0); };
@@ -295,7 +329,7 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   for (let i = 0; i < N; i++) { const y = -Rb + (i + 0.5) * 2 * Rb / N, r = Math.sqrt(Math.max(0.02, Rb * Rb - y * y)); Pn.cyl(M.gold, r, r, 2 * Rb / N * 0.8, 0, y - (4.6 - cy), 0, 28); }
   for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2 + 0.39, c = Math.cos(a), s = Math.sin(a); Pn.rod(M.steel, [c * 0.3, 0, s * 0.3], [c * Rb * 1.0, -(4.6 - cy), s * Rb * 1.0], 0.022); Pn.rod(M.steel, [c * Rb, -(4.6 - cy), s * Rb], [c * 0.55, -(4.6 - cy) - Rb * 0.86, s * 0.55], 0.022); }
   const pend = Pn.done(0, 0, 0, B.g, 4.6); pend.children[0].onBeforeRender = () => { const t = uTime.value; pend.rotation.z = Math.sin(t * 0.8) * 0.03; pend.rotation.x = Math.sin(t * 0.57 + 1) * 0.02; };
-  B.add(label([['風阻尼器', 0.34, 0.26, 800, '#2a2420'], ['TUNED MASS DAMPER', 0.14, 0.52, 700, '#3a3028'], ['660 t · 5.5 m · 87–92F', 0.14, 0.76, 600, '#3a3028']], 1.5, 0.95, { bg: '#e6c860', border: '#2a2420', glow: 0.35, both: true }), 1.75, 1.15, 1.75, 0.6);
+  B.add(rs('plate', 'brass', 1.5, 0.95, ink([['風阻尼器', 0.28, 0.26, KAI, '#2a1c0c', 800, 0.5, 8], ['TUNED MASS DAMPER', 0.12, 0.52, HEI, '#2a1c0c', 700, 0.5, 4], ['660 t · 5.5 m · 87–92F', 0.12, 0.76, HEI, '#3a2a14', 600]], { carve: true, rule: '#3a2a14' }), { both: true, d: 0.03, glow: 0.3 }), 1.75, 1.15, 1.75, 0.6);   // an etched brass plaque
   B.box(M.dark, 0.08, 0.7, 0.08, 1.75, 0.35, 1.75);
   out.damper = B.done(21.5, -40.9, 0); solid(21.5, -40.9, 2.2, 2.2);
   PLACES.add(E, P('taipei-101-damper'), { target: out.damper, near: [21.5, -38], radius: 3.5, plaque: { position: [21.5, 1.3, -38.76], rotation: 0, size: 0.16 } }); }
@@ -323,21 +357,23 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   for (let i = 0; i < 4; i++) H.box(M.stone, 2.0, 0.2, 0.5, 0.6, 0.1 + i * 0.2, -0.3 - i * 0.45); H.rod(M.steel, [1.65, 0.9, 0.1], [1.65, 1.65, -1.8], 0.03); for (const z of [0.1, -1.8]) H.cyl(M.steel, 0.03, 0.03, z ? 1.65 : 0.9, 1.65, (z ? 1.65 : 0.9) / 2, z, 6);
   H.geo(M.rock, new T.DodecahedronGeometry(0.75, 1), -1.0, 0.5, -0.9, 0.4, 1, 0, 1.2, 0.85, 1); H.geo(M.rock, new T.DodecahedronGeometry(0.5, 1), -0.5, 0.35, 0.1, 1, 2, 0); H.sph(M.leaf, 0.5, 1.3, 0.3, -2.0, 1.4, 0.8, 1); H.sph(M.leaf, 0.6, -0.2, 0.4, -2.1, 1.5, 0.9, 1);
   H.cyl(M.woodD, 0.07, 0.08, 2.9, -1.4, 1.45, 0.5, 8);
-  H.add(label([['象山步道 →', 0.5, 0.32, 800, '#2a2420'], ['Xiangshan Trail · Six Giant Rocks 六巨石', 0.17, 0.74, 600, '#3a3028']], 2.3, 0.8, { bg: '#d8c49a', border: '#5b4433', glow: 0.3, both: true }), -0.45, 2.4, 0.5);
-  H.add(label([['往山頂 20 分鐘 · 20 min to the top', 0.5, 0.52, 600, '#2a2420']], 1.9, 0.32, { bg: '#c9b78c', border: '#5b4433', glow: 0.25, both: true }), -0.6, 1.75, 0.5);
+  H.add(rs('board', 'teak', 2.3, 0.8, ink([['象山親山步道  →', 0.4, 0.34, KAI, '#fff4d8', 800, 0.5, 6], ['Xiangshan Hiking Trail · 六巨石 Six Giant Rocks', 0.14, 0.75, HEI, '#f3e6c6', 600]], { carve: true }), { both: true, d: 0.08 }), -0.45, 2.4, 0.63);   // a timber fingerpost arm, the letters routed and painted cream
+  H.add(rs('board', 'teak', 1.9, 0.32, ink([['往山頂 約 20 分鐘 · 20 min to the top', 0.5, 0.54, HEI, '#fff4d8', 700]], { carve: true }), { both: true, d: 0.06 }), -0.6, 1.75, 0.62);
   out.trailhead = H.done(33.6, -41.4, 0); solid(33.6, -41.9, 1.9, 1.5);
   PLACES.add(E, P('xiangshan'), { target: [out.trailhead, hill, trail], near: [33.4, -39.2], radius: 4, plaque: { position: [32.2, 1.15, -40.8], rotation: 0, size: 0.16 } }); }
 
 // ══ 11. the skywalk, 新光三越 A11 and 香堤大道's street performer: existing models made clickable, with what they lacked ══
 { const B = maker('wayfinding');                                                                                       // a wayfinding pylon at the foot of the east stair
   B.box(M.dark, 0.7, 2.6, 0.18, 0, 1.3, 0); B.box(M.steel, 0.9, 0.08, 0.3, 0, 0.04, 0); B.box(M.white, 0.7, 0.05, 0.19, 0, 2.62, 0);
-  for (const k of [1, -1]) { const l = label([['空橋 SKYWALK ↑', 0.085, 0.1, 800, '#ffd9a0'], ['台北101 Taipei 101  ↑', 0.062, 0.3, 600], ['新光三越 A11 · A9 · A8 · A4  ←', 0.062, 0.44, 600], ['威秀影城 Vieshow  ←', 0.062, 0.58, 600], ['ATT 4 FUN · 微風南山  →', 0.062, 0.72, 600], ['市府轉運站 Bus Station  ↓', 0.062, 0.86, 600]], 0.66, 2.3, { bg: '#1c2028', fg: '#eef2f8', glow: 0.6, px: 256 }); B.add(l, 0, 1.38, k * 0.095, k > 0 ? 0 : PI); }
+  { const L = ink([['空橋 SKYWALK ↑', 0.05, 0.1, HEI, '#ffd9a0', 800], ['台北101 Taipei 101  ↑', 0.036, 0.3, HEI, '#eef2f8', 600], ['新光三越 A11 · A9 · A8 · A4  ←', 0.036, 0.44, HEI, '#eef2f8', 600], ['威秀影城 Vieshow  ←', 0.036, 0.58, HEI, '#eef2f8', 600], ['ATT 4 FUN · 微風南山  →', 0.036, 0.72, HEI, '#eef2f8', 600], ['市府轉運站 Bus Station  ↓', 0.036, 0.86, HEI, '#eef2f8', 600]], { fill: 'rgba(26,30,38,.92)', draw: (g, W, H) => { g.fillStyle = '#ffd9a0'; g.fillRect(0, H * 0.19, W, H * 0.008); } });
+    B.add(rs('box', 'lightbox', 0.66, 2.3, L, { both: true, d: 0.2, glow: 0.7, ppm: 420 }), 0, 1.38, 0); }   // a backlit wayfinding pylon, lettered both sides
   out.pylon = B.done(4.7, 5.0, 0.25); solid(4.7, 5.0, 0.4, 0.2);
   const sk = scene.children.filter(c => c.name === 'crossing' || c.name === 'segment');
   PLACES.add(E, P('xinyi-skywalk'), { target: sk.concat([out.pylon]), near: [4.7, 6.2], radius: 3.5, plaque: { position: [4.52, 2.95, 5.2], rotation: 0.25, size: 0.16 } });
   // A11: its building code high on the front, two tall banners, and the busker's circle on 香堤大道
   const A = maker('a11-dress');
-  A.add(label([['A11', 0.8, 0.54, 900]], 4.2, 2.2, { fg: '#fff0d2', glow: 0.9 }), -18.9, 29.5, 4, PI / 2);
+  A.add(chan([['A11', 0.8, 0.54, HEI, '#ffffff', 900, 0.5, 10]], 4.2, 2.2, { side: '#8a8f96', depth: 0.2 }), -18.7, 29.5, 4, PI / 2);
+  A.add(chan([['新光三越', 0.6, 0.4, HEI, '#e8202a', 900, 0.5, 30], ['SHIN KONG MITSUKOSHI', 0.2, 0.84, HEI, '#e8202a', 700, 0.5, 10]], 7.2, 1.9, { side: '#7a0c12', depth: 0.18, race: true, raceH: 0.06, raceY: 0.12, glow: 1.1 }), -18.65, 26.2, 4, PI / 2);   // the store's red name in channel letters (no logo mark)
   [[-2.3, '週年慶', 'ANNIVERSARY SALE', 350], [10.4, '冬季美妝', 'WINTER BEAUTY', 300]].forEach(([z, a, b, h]) => { A.box(M.dark, 0.14, 8.4, 2.5, -18.8, 14.2, z); A.add(poster(2.3, 8.2, a, b, h, 0.65), -18.72, 14.2, z, PI / 2); });
   A.done(0, 0, 0);
   const S = maker('busker');
@@ -365,7 +401,7 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
     B.box(M.roof, w - 0.03, 0.012, d - 0.03, x, y0 + H + 0.006, z); };
   for (const cx of [-0.52, 0.52]) { bar(1.04, 0.3, cx, zc); bar(0.3, 0.92, cx, zc); B.box(M.stone, 0.2, 0.05, 0.2, cx, y0 + H + 0.03, zc); B.cyl(M.steel, 0.006, 0.006, 0.12, cx, y0 + H + 0.11, zc, 5); }   // two plus-signs side by side
   B.box(M.pale, 0.44, 0.11, 0.22, 0, y0 + 0.055, zc + 0.26); for (const k of [-1, 0, 1]) B.box(M.doors, 0.09, 0.07, 0.01, k * 0.13, y0 + 0.04, zc + 0.375); B.box(M.stone, 0.5, 0.012, 0.3, 0, y0 + 0.116, zc + 0.28);   // the central entrance and its canopy
-  B.add(label([['臺北市政府', 0.7, 0.54, 800, '#3a2a12']], 0.5, 0.07, { glow: 0.5, px: 256 }), 0, y0 + 0.2, zc + 0.158);
+  B.add(chan([['臺北市政府', 0.72, 0.54, KAI, '#d9b24a', 800, 0.5, 6]], 0.5, 0.07, { px: 512, side: '#5a4416', depth: 0.008, layers: 2, glow: 0.5, metal: 0.4 }), 0, y0 + 0.2, zc + 0.165);   // gilt letters over the doors, at model scale
   B.box(M.stone, 2.3, 0.008, 0.62, 0, y0 + 0.004, 0.45); for (let i = 0; i < 9; i++) { const x = -0.8 + i * 0.2; B.cyl(M.steel, 0.005, 0.005, 0.3, x, y0 + 0.15, 0.3, 5); B.box(i % 2 ? M.cloth[1] : M.red, 0.07, 0.045, 0.004, x + 0.04, y0 + 0.27, 0.3); }   // the paved plaza in front, a row of flagpoles
   for (let i = 0; i < 8; i++) for (const k of [-1, 1]) B.sph(M.leaf, 0.045, k * (1.12 - (i % 2) * 0.08), y0 + 0.05, -0.62 + i * 0.17, 1, 1.2, 1);
   for (let i = 0; i < 7; i++) B.sph(M.leaf, 0.04, -0.9 + i * 0.3, y0 + 0.045, 0.72, 1, 1.2, 1);
