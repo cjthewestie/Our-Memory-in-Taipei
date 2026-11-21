@@ -17,6 +17,7 @@
 <script src="place-data.js"></script>
 <script src="design-kit.js"></script>
 <script src="places.js"></script>
+<script src="lm/loader.js" data-district="xinyi" data-shared="kit-people" data-modules="skm cityhall village44 ornaments101 people"></script>
 <script src="landmarks-xinyi.js"></script>
 <script>
 // 信義, the 2020s: a compact stone plaza at the foot of Taipei 101, the skywalk crossing overhead,
@@ -153,6 +154,7 @@ ENGINE.create({
   // ── the researched places and events: buildings, sculptures and markers, each one clickable (landmarks-xinyi.js) ──
   LANDMARKS_XINYI(E, { solid });
   PLACES.mount(E, { district: 'xinyi' });
+  if (window.LM_RUN) LM_RUN(E, 'xinyi');   // the landmark modules in lm/, one file per builder
 
   // ── the way back: the 信義 gate at the south end, glowing toward the square ──
   { const g = dress(get(get(sq, 'sq-gate'), 'xinyi').clone()); g.position.set(0, 0, 21); scene.add(g);

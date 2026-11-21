@@ -17,6 +17,7 @@
 <script src="place-data.js"></script>
 <script src="design-kit.js"></script>
 <script src="places.js"></script>
+<script src="lm/loader.js" data-district="dadao" data-shared="kit-people" data-modules="yongle goods arcade people"></script>
 <script src="landmarks-dadao.js"></script>
 <script>
 // 大稻埕: 迪化街 at Lunar New Year (年貨大街), 2000s–2010s. A STREET, not a plaza: 9 m between the arcades,
@@ -222,6 +223,7 @@ ENGINE.create({
   // ── the researched places and events: landmark buildings, their signs, and a clickable marker for every event ──
   LANDMARKS_DADAO(E, { FX, sq, temple: templeM, yongle: yongleM, houses: HOUSES, BLOCKS, AREAS });
   PLACES.mount(E, { district: 'dadao' });
+  if (window.LM_RUN) LM_RUN(E, 'dadao');   // the landmark modules in lm/, one file per builder
 
   // ── trees: banyans outside the archway, in the forecourt's corner and at the end of the lane ──
   banyans(get(sq, 'sq-banyan'), [[-10.5, 36.2, 'banyanM', 0.95], [10.8, 36.6, 'banyanM', 0.9], [-22.5, -6.8, 'banyanM', 0.85]]);

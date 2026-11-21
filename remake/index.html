@@ -17,6 +17,7 @@
 <script src="place-data.js"></script>
 <script src="design-kit.js"></script>
 <script src="places.js"></script>
+<script src="lm/loader.js" data-district="ximen" data-shared="kit-people" data-modules="exit6 people lions redhouse tattoo-lane america-lane chunghwa"></script>
 <script src="landmarks-ximen.js"></script>
 <script>
 // The 西門紅樓 front plaza (CJ, 2026-11-21: 「我要整個場景的重制達成風格的轉換 先做完整的一個小區塊讓我看看」).
@@ -24,7 +25,7 @@
 // controls are in engine.js, shared with every other block page.
 ENGINE.create({
   title: '西門紅樓 · golden hour', subtitle: '西門町: click a building or a marker, or walk up and press E',
-  shadowCenter: [0, 0, 22], start: { x: 0, z: 43, heading: Math.PI }, clamp(p) { p.x = Math.max(-21, Math.min(21, p.x)); p.z = Math.max(11, Math.min(60, p.z)); PHOTOWALL.keepOut(p); },   // the plaza's edge, and round the topic showcases
+  shadowCenter: [0, 0, 22], start: { x: 0, z: 43, heading: Math.PI }, clamp(p) { const lane = (window.LM_AREAS || []).some(r => p.x >= r.x0 && p.x <= r.x1 && p.z >= r.z0 && p.z <= r.z1); if (!lane) { p.x = Math.max(-21, Math.min(21, p.x)); p.z = Math.max(11, Math.min(60, p.z)); } PHOTOWALL.keepOut(p); },   // window.LM_AREAS: extra walkable rectangles {x0,x1,z0,z1} a module in lm/ opens (a lane off the plaza); its own walls go in with PHOTOWALL.block   // the plaza's edge, and round the topic showcases
   views: [[0, 1.6, 47, 0, 7.5, 0], [-6, 2.2, 31, 23, 7, 37], [6, 2.4, 34, -23, 4.2, 27], [3.5, 11.5, 20, 0.5, 8, 62], [9, 1.7, 14.5, 24, 3.6, 14], [9.5, 2.4, 55.5, 24, 8, 48.5]],   // 1 the Red House · 2 萬年 and the west row · 3 中華商場 · 4 the whole plaza toward 獅子林 and 來來 · 5 天后宮, 楊桃冰, 蜂大 · 6 電影街 and 阿宗
   ground: { strips: [{ w: 3.2, len: 60, x: 0, z: 34 }],                                   // the terrazzo path to the door
     puddle: (rr) => { let x = rr(-19, 19); if (Math.abs(x) < 2.4) x += 5; const rot = rr(0, 3); return [x, rr(13, 56), rot]; } },
@@ -65,6 +66,7 @@ ENGINE.create({
   // the researched places and events: buildings you can click, and a marker for every event (landmarks-ximen.js)
   LANDMARKS_XIMEN(E, { redHouse });
   PLACES.mount(E, { district: 'ximen' });
+  if (window.LM_RUN) LM_RUN(E, 'ximen');   // the landmark modules in lm/, one file per builder
   // the poncho bear (CJ, 2026-11-21: "Yes, add it", then "Yes, rig it"): a Tripo model from his Midjourney views, retopologized, rigged and
   // finished by tools/character/finish_tripo_girl.py (asset/models/bear-poncho.glb). Open the page with ?hero=bear-poncho to play as the bear;
   // otherwise it stands beside the path.

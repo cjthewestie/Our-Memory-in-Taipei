@@ -17,6 +17,7 @@
 <script src="place-data.js"></script>
 <script src="design-kit.js"></script>
 <script src="places.js"></script>
+<script src="lm/loader.js" data-district="square" data-shared="kit-people" data-modules="life people"></script>
 <script src="noticeboard.js"></script>
 <script src="landmarks-square.js"></script>
 <script>
@@ -298,6 +299,7 @@ ENGINE.create({
   // CJ, 2026-11-21: 「把告示牌放進廣場給我看，放在一進來就看得到的地方」
   NOTICEBOARD.add(E, { position: [3.3, 5.4], rotation: -0.5, district: 'square' });
   if (!window.__places) PLACES.mount(E, { district: 'square' });
+  if (window.LM_RUN) LM_RUN(E, 'square');   // the landmark modules in lm/, one file per builder
   },
 });
 </script>
