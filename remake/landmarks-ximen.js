@@ -412,6 +412,7 @@ function starfruit() {
   [-1.5, -0.85, -0.2, 0.45].forEach(x => jar(K, x, 1.0, 0.5, 0.26, 0.62, M.amber, M.tileGreen)); for (let i = 0; i < 3; i++) for (let k = 0; k < 3 - i; k++) K.cyl(0.05, 0.04, 0.11, M.whiteP, 0.95 + k * 0.12 + i * 0.06, 1.055 + i * 0.11, 0.6, 8);
   K.cyl(0.05, 0.04, 0.11, M.amber, 1.25, 1.055, 0.3, 8); person(K, -0.5, -0.4, 0, { apron: true, shirt: SHIRT[1] }); person(K, 0.9, 1.6, Math.PI, { bowl: true });
   K.mesh(sign('楊桃湯', 0.42, 1.05, { vertical: true, bg: '#1f7a4a', fg: '#fff3d6', glow: 0.6 }), 1.95, 0.6, 1.1, 0.25); K.mesh(sign('鳳梨冰', 0.5, 1.5, { vertical: true, kind: 'box', font: KAI, bg: '#f6f3ea', fg: '#1f7a4a', glow: 0.7 }), x1 - 0.05, 5.6, 0.75, Math.PI / 2);
+  dressSigns(K, x0, x1 - 0.8, S.G, S.top, { yMin: S.G + 1.6, pavement: false });
   return K.done();
 }
 
@@ -462,6 +463,7 @@ function aychung() {
   K.mesh(sign('辣椒 蒜泥 烏醋', 1.1, 0.2, { bg: '#f3ecd9', fg: '#1a1a1a', glow: 0.5, oneSide: true, border: false }), 1.9, 0.6, 0.77);
   person(K, -1.9, -0.3, 0, { apron: true, reach: true, shirt: SHIRT[0] }); person(K, -0.6, -0.4, 0.1, { apron: true, shirt: SHIRT[0] });
   [[-2.4, 1.7, 2.6], [-1.5, 2.2, 3.4], [-0.5, 1.75, 2.9], [0.4, 2.25, -2.8], [1.2, 1.5, 3.3], [2.2, 2.1, -2.6], [2.6, 1.3, 3.6]].forEach(([x, z, ry]) => person(K, x, z, ry, { bowl: true }));
+  dressSigns(K, x0 + 1.0, x1, S.G, S.top, { yMin: S.G + 2.2, pavement: false });
   const g = K.done(); g.userData.pots = pots; return g;
 }
 
@@ -569,17 +571,65 @@ function american() {
   return K.done();
 }
 
+// ── 琳瑯滿目: the upper floors of an old 西門町 shophouse were let room by room, and every tenant hung a sign (CJ, 2026-11-21: 「其他店的著排也是要琳瑯滿目接近真實」).
+// Trades are the kinds the district was known for; the mix of painted boards, light boxes, neon and cloth is what the street photos show. dressSigns adds, to a front
+// that runs x0..x1 at z 0: projecting uprights at staggered heights, a board on each floor band, sometimes a cloth banner down the wall and an A-board on the pavement.
+const TRADES = ['牙科', '當舖', '眼鏡行', '鐘錶行', '西服號', '照相館', '理髮廳', '旅社', '補習班', '撞球', '冰果室', '唱片行', '委託行', '西藥房', '皮鞋店', '咖啡廳', '歌廳', '書局', '獎券行', '刻印', '電器行', '賓館', '集郵社', '樂器行', '純喫茶', '燙髮', '洋裁', '珠寶銀樓', '茶莊', '中醫診所'];
+const BOARDS = ['大減價', '冷氣開放', '學生優待', '二樓請上', '代客修改', '快速沖印', '歡迎參觀', '新貨到', '批發零售', '日夜營業'];
+const PAL = [['#b3221a', '#fff3d6'], ['#f4f0e4', '#b3221a'], ['#f4f0e4', '#141414'], ['#f2c832', '#b3221a'], ['#1f4f9c', '#ffffff'], ['#1f5a3a', '#fff3d6'], ['#141414', '#ffd24a'], ['#f4f0e4', '#1f4f9c'], ['#7a1a22', '#f1dfb4']];
+let tradeI = 3;
+function dressSigns(K, x0, x1, G, top, o = {}) {
+  const w = x1 - x0, n = o.n || Math.max(2, Math.round(w / 1.6)), fh = o.fh || 3.1, yMin = o.yMin || G + 1.2;
+  for (let i = 0; i < n; i++) {                                                                                  // uprights off the wall, each on two brackets
+    const t = TRADES[tradeI++ % TRADES.length], c = pick(PAL), h = 0.5 * [...t].length + 0.25 + rr(0, 0.5), x = x0 + (i + rr(0.25, 0.75)) * w / n, y = rr(yMin + h / 2, Math.max(yMin + h / 2 + 0.1, top - h / 2 - 0.2)), k = rnd();
+    K.mesh(sign(t, rr(0.48, 0.66), h, { vertical: true, kind: k < 0.45 ? 'box' : k < 0.62 ? 'neon' : 'paint', font: k < 0.45 ? (rnd() < 0.5 ? KAI : FONT) : k < 0.62 ? WEI : KAI, bg: k >= 0.45 && k < 0.62 ? '#151515' : c[0], fg: k >= 0.45 && k < 0.62 ? pick(['#ff5a48', '#ffd24a', '#7fd8ff', '#7dff9a']) : c[1], glow: k >= 0.45 && k < 0.62 ? 1.5 : 0.6 }), x, y, rr(0.6, 0.95), Math.PI / 2);
+    [y - h / 2 + 0.25, y + h / 2 - 0.25].forEach(yy => K.bx(x - 0.02, x + 0.02, yy, yy + 0.04, 0, 0.5, M.frame));
+  }
+  const floors = Math.max(1, Math.round((top - G) / fh));
+  for (let f = 1; f < floors; f++) if (rnd() < 0.75) { const t = TRADES[tradeI++ % TRADES.length], c = pick(PAL), bw = rr(w * 0.4, w * 0.8);       // a board on the band between floors
+    K.mesh(sign(t, bw, 0.62, { bg: c[0], fg: c[1], font: rnd() < 0.5 ? KAI : WEI, spread: true, rtl: rnd() < 0.4, glow: 0.5, oneSide: true, depth: 0.05 }), rr(x0 + bw / 2 + 0.1, x1 - bw / 2 - 0.1), G + f * fh + 0.33, 0.1); }
+  if (rnd() < 0.5) { const t = pick(BOARDS), h = Math.min(top - G - 1.2, 0.62 * [...t].length + 0.5);                                                 // a cloth banner tied down the wall
+    K.mesh(sign(t, 0.62, h, { vertical: true, kind: 'cloth', font: WEI, bg: pick(['#b3221a', '#f2c832', '#efe9da']), fg: pick(['#141414', '#7a120c']), glow: 0.35, depth: 0.02, noCast: true }), rr(x0 + 0.5, x1 - 0.5), top - h / 2 - 0.3, 0.13); }
+  if (o.pavement !== false && rnd() < 0.6) { const t = pick(BOARDS), c = pick(PAL), x = rr(x0 + 0.6, x1 - 0.6);                                  // an A-board out on the pavement
+    const b = K.mesh(sign(t, 0.5, 0.95, { vertical: true, bg: c[0], fg: c[1], glow: 0.4, depth: 0.04 }), x, 0.52, 1.3, rr(-0.3, 0.3)); b.rotation.x = -0.18; }
+}
+
 // ══ the fill-in shophouses between and beyond the landmarks (not clickable) ═══════════════════════════════
 function fill() {
   const K = Kit('ximen-fill'), walls = [M.cream, M.concLt, M.pink, M.conc, M.ochre, M.white];
   const unit = (x, z, ry, w, floors, text, hue) => { K.at(x, 0, z, ry); const S = shophouse(K, w, floors, pick(walls), { depth: 9, ground: 3.6 });
     K.bx(S.x0 + 0.4, S.x1 - 0.4, 0.2, 3.0, -2.58, -2.54, M.shopLit); K.bx(S.x0 + 0.35, S.x1 - 0.9, 0, 0.9, -0.9, -0.3, pick([M.wood, M.steel, M.woodDk])); for (let k = 0; k < 5; k++) K.bx(S.x0 + 0.5 + k * 0.4, S.x0 + 0.8 + k * 0.4, 0.9, rr(1.05, 1.4), -0.8, -0.4, pick(CLOTH));
-    K.mesh(sign(text, w - 0.5, 0.8, { bg: `hsl(${hue},50%,24%)`, fg: '#f6ecd2', font: hue % 3 ? KAI : WEI, spread: true, glow: 0.6, oneSide: true }), 0, 3.15, 0.08); K.mesh(sign(text, 0.55, 0.62 * [...text].length, { vertical: true, kind: 'box', font: KAI, bg: '#f4f0e4', fg: `hsl(${hue},70%,28%)`, glow: 0.45 }), S.x1 - 0.5, 6.2, 0.75, Math.PI / 2); K.at(); };
+    K.mesh(sign(text, w - 0.5, 0.8, { bg: `hsl(${hue},50%,24%)`, fg: '#f6ecd2', font: hue % 3 ? KAI : WEI, spread: true, glow: 0.6, oneSide: true }), 0, 3.15, 0.08); K.mesh(sign(text, 0.55, 0.62 * [...text].length, { vertical: true, kind: 'box', font: KAI, bg: '#f4f0e4', fg: `hsl(${hue},70%,28%)`, glow: 0.45 }), S.x1 - 0.5, 6.2, 0.75, Math.PI / 2); dressSigns(K, S.x0, S.x1 - 0.9, S.G, S.top); K.at(); };
   const R = -Math.PI / 2, L = Math.PI / 2;
   [[1.5, 4, '世運食品', 210], [-2.7, 4, '美觀園', 150], [-7, 4, '老天祿', 8]].forEach(([z, f, t, h]) => unit(23.5, z, R, 4.3, f, t, h));
   [[60.3, 3, '雪王冰淇淋', 350], [64.6, 4, '大車輪', 28]].forEach(([z, f, t, h]) => unit(23.5, z, R, 4.3, f, t, h));
   [[4.5, 3, '楊記冰店', 150], [0.2, 4, '鴨肉扁', 8], [-4.1, 3, '謝謝魷魚羹', 210]].forEach(([z, f, t, h]) => unit(-23.5, z, L, 4.3, f, t, h));
   [[57.6, 4, '金園排骨', 28], [61.9, 3, '天天利', 350], [66.2, 4, '張記排骨酥', 150]].forEach(([z, f, t, h]) => unit(-23.5, z, L, 4.3, f, t, h));
+  return K.done();
+}
+
+// ══ round the 行人徒步區 photo wall: what marks the mouth of a car-free street (CJ, 2026-11-21: 「這個行人徒步區的招牌也要更豐富」) ═══════════════════════
+// A round blue pedestrians-only sign with its plate, green street-name plates for the two streets of the zone, a brown finger-post to the sights, a cloth banner
+// overhead between the two posts, bollards and a chain across the road. Wording on the plate and banner is ours; the street names and sights are the district's own.
+function pedZone() {
+  const K = Kit('ped-zone-dressing'), pole = (x, h) => { K.cyl(0.05, 0.05, h, M.steel, x, h / 2, 0, 10); K.cyl(0.16, 0.2, 0.08, M.steelDk, x, 0.04, 0, 12); };
+  const disc = (r, draw, glowI) => { const cv = document.createElement('canvas'); cv.width = cv.height = 256; draw(cv.getContext('2d'), 256); const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    const m = new T.Mesh(new T.CircleGeometry(r, 36), new T.MeshStandardMaterial({ map: t, roughness: 0.5, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glowI, side: T.DoubleSide })); m.castShadow = true; return m; };
+  pole(-2.3, 4.6); pole(2.3, 4.6);
+  K.mesh(sign('西門町行人徒步區', 4.4, 0.7, { kind: 'cloth', font: WEI, bg: '#b3221a', fg: '#ffe14a', spread: true, glow: 0.5, depth: 0.03 }), 0, 4.15, 0.02);
+  for (let i = 0; i < 13; i++) { const x = -2.2 + i * 0.367; K.box(0.26, 0.3, 0.01, pick([M.red, M.gold, M.blue, M.tileGreen, M.whiteP]), x, 3.55 - Math.sin(i / 12 * Math.PI) * 0.18, 0.02, 0, 0, Math.PI / 4); }   // a string of pennants under the banner
+  // the left post: the round sign, its plate, the street names
+  K.mesh(disc(0.42, (g, n) => { g.fillStyle = '#0a4fa8'; g.fillRect(0, 0, n, n); g.strokeStyle = '#fff'; g.lineWidth = 10; g.beginPath(); g.arc(n / 2, n / 2, n / 2 - 9, 0, 7); g.stroke(); g.fillStyle = '#fff'; g.lineCap = 'round'; g.strokeStyle = '#fff';
+    [[0.4, 1], [0.64, 0.72]].forEach(([x, k]) => { const cx = n * x, top = n * (0.5 - 0.27 * k); g.beginPath(); g.arc(cx, top, n * 0.055 * k, 0, 7); g.fill(); g.lineWidth = n * 0.06 * k; g.beginPath(); g.moveTo(cx, top + n * 0.08 * k); g.lineTo(cx, top + n * 0.3 * k); g.stroke();
+      g.lineWidth = n * 0.045 * k; g.beginPath(); g.moveTo(cx, top + n * 0.3 * k); g.lineTo(cx - n * 0.07 * k, top + n * 0.52 * k); g.moveTo(cx, top + n * 0.3 * k); g.lineTo(cx + n * 0.07 * k, top + n * 0.52 * k); g.moveTo(cx - n * 0.09 * k, top + n * 0.2 * k); g.lineTo(cx + n * 0.09 * k, top + n * 0.17 * k); g.stroke(); }); }, 0.6), -2.3, 3.0, 0.07);
+  K.mesh(sign('行人徒步區', 0.9, 0.3, { font: FONT, weight: 800, bg: '#ffffff', fg: '#141414', border: false, glow: 0.4, depth: 0.03 }), -2.3, 2.36, 0.07);
+  K.mesh(sign('車輛禁止進入', 0.9, 0.26, { font: FONT, weight: 800, bg: '#ffffff', fg: '#c21f1a', border: false, glow: 0.4, depth: 0.03 }), -2.3, 2.06, 0.07);
+  K.mesh(sign('漢中街', 1.15, 0.36, { font: FONT, weight: 800, bg: '#0f6b3c', fg: '#ffffff', sub: 'Hanzhong St.', border: false, glow: 0.6, depth: 0.03 }), -2.3 + 0.62, 3.75, 0);
+  K.mesh(sign('峨眉街', 1.15, 0.36, { font: FONT, weight: 800, bg: '#0f6b3c', fg: '#ffffff', sub: 'Emei St.', border: false, glow: 0.6, depth: 0.03 }), -2.3, 3.36, 0.62, Math.PI / 2);
+  // the right post: a finger-post to the sights of this plaza
+  [['西門紅樓　The Red House', 3.55, 0.2], ['電影街　Movie Street', 3.15, -0.5], ['萬年商業大樓', 2.75, -0.15], ['捷運西門站　6號出口', 2.35, 0.45], ['成都路　天后宮', 1.95, -0.7]].forEach(([t, y, ry]) => { const m = K.mesh(sign(t, 1.7, 0.32, { font: FONT, weight: 800, bg: '#6b3f1c', fg: '#ffffff', border: false, glow: 0.5, depth: 0.03 }), 2.3 + Math.cos(ry) * 0.9, y, -Math.sin(ry) * 0.9, ry); });
+  // bollards and a chain across the mouth of the street
+  for (let i = 0; i < 5; i++) { const x = -3.4 + i * 0.55 - (i > 1 ? 0 : 0), bx = i < 2 ? -3.6 + i * 0.7 : 2.9 + (i - 2) * 0.7; K.cyl(0.07, 0.07, 0.8, M.red, bx, 0.4, 1.1, 10); K.cyl(0.075, 0.075, 0.14, M.whiteP, bx, 0.55, 1.1, 10); K.sph(0.08, M.red, bx, 0.82, 1.1); if (i !== 1 && i !== 4) K.box(0.7, 0.025, 0.025, M.steelDk, bx + 0.35, 0.66, 1.1); }
   return K.done();
 }
 
@@ -610,7 +660,7 @@ G['zhonghua-market'] = put(zhonghua(), -XE, 30, L); put(G['zhonghua-market'].use
 G['lions-plaza'] = put(lions(), 13.5, 63, Math.PI);
 G['lai-lai'] = put(lailai(), -13.5, 63, Math.PI);
 G['pedestrian-zone-exit6'] = put(mrt(), -11, 53.5, Math.PI);
-put(fill(), 0, 0, 0); put(tracks(), 0, 0, 0);
+put(fill(), 0, 0, 0); put(tracks(), 0, 0, 0); put(pedZone(), -10.5, 38.5, 0.45);
 if (opt.redHouse) G['red-house'] = opt.redHouse;
 // steam off the noodle pots and smoke off the incense burner
 G['ay-chung'].userData.pots.forEach(([x, z]) => E.steamSrc.push(world(G['ay-chung'], x, 1.55, z))); E.steamSrc.push(world(G['tianhou-temple'], 0, 1.5, -0.7));
