@@ -52,12 +52,12 @@ const rr = (a, b) => a + (b - a) * R();
 // ── light ────────────────────────────────────────────────────────────────────────────────────
 const SUN_DIR = new T.Vector3(-34, 30, -40).normalize();           // from the ground toward the sun
 const SUN_COL = new T.Color(1.0, 0.62, 0.32);
-const sun = new T.DirectionalLight(SUN_COL, 4.2);
+const sun = new T.DirectionalLight(SUN_COL, 2.7);
 sun.position.copy(SUN_DIR).multiplyScalar(130); sun.target.position.set(0, 0, 0);
 sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.05;
 Object.assign(sun.shadow.camera, { left: -62, right: 62, top: 62, bottom: -62, near: 10, far: 260 }); sun.shadow.camera.updateProjectionMatrix();
 scene.add(sun, sun.target);
-scene.add(new T.HemisphereLight(new T.Color(0.42, 0.56, 0.78), new T.Color(0.42, 0.26, 0.18), 0.85));
+scene.add(new T.HemisphereLight(new T.Color(0.42, 0.56, 0.78), new T.Color(0.42, 0.26, 0.18), 0.78));
 
 // ── procedural surfaces ──────────────────────────────────────────────────────────────────────
 function canvasTex(size, draw, repeat) {
@@ -146,7 +146,7 @@ const sky = new T.Mesh(new T.SphereGeometry(400, 48, 24), new T.ShaderMaterial({
       vec2 q = d.xz / (d.y + 0.22) * 1.6 + vec2(uTime * 0.004, 0.0);
       float cl = smoothstep(0.52, 0.78, fbm(q)) * smoothstep(0.02, 0.25, d.y);
       c = mix(c, mix(vec3(0.55, 0.42, 0.5), vec3(2.2, 1.25, 0.75), pow(sd, 2.0) * 0.8 + 0.15), cl * 0.75);   // clouds, lit from the sun's side
-      c += vec3(1.0, 0.75, 0.45) * (pow(sd, 1200.0) * 26.0 + pow(sd, 60.0) * 0.55);             // the sun and its halo
+      c += vec3(1.0, 0.75, 0.45) * (pow(sd, 1200.0) * 18.0 + pow(sd, 60.0) * 0.32);             // the sun and its halo
       gl_FragColor = vec4(c, 1.0);
     }` }));
 sky.frustumCulled = false; scene.add(sky);
@@ -171,11 +171,11 @@ sky.frustumCulled = false; scene.add(sky);
   const rough = mk('rough'); rough.encoding = T.LinearEncoding; const bump = mk('bump'); bump.encoding = T.LinearEncoding;
   const ground = new T.Mesh(new T.PlaneGeometry(240, 240), new T.MeshStandardMaterial({ map: mk('col'), roughnessMap: rough, roughness: 1, metalness: 0, bumpMap: bump, bumpScale: 0.012 }));
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-  const strip = new T.Mesh(new T.PlaneGeometry(3.2, 54), new T.MeshStandardMaterial({ map: canvasTex(512, (g, s) => { g.fillStyle = '#8f8a82'; g.fillRect(0, 0, s, s); speckle(g, s, 22000, 0.35, true); speckle(g, s, 12000, 0.4, false); }, 1), roughness: 0.38 }));
+  const strip = new T.Mesh(new T.PlaneGeometry(2.8, 37), new T.MeshStandardMaterial({ map: canvasTex(512, (g, s) => { g.fillStyle = '#8f8a82'; g.fillRect(0, 0, s, s); speckle(g, s, 22000, 0.35, true); speckle(g, s, 12000, 0.4, false); }, 1), roughness: 0.38 }));
   for (let i = 0; i < 9; i++) {                                                            // puddles left by the afternoon rain
     const sh = new T.Shape(), n = 9, r0 = rr(0.7, 2.2), ph = rr(0, 6); for (let k = 0; k <= n; k++) { const a = k / n * 6.283, r = r0 * (0.75 + 0.3 * Math.sin(a * 3 + ph) + 0.12 * Math.sin(a * 5 + ph * 2)); k ? sh.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.62) : sh.moveTo(Math.cos(a) * r, Math.sin(a) * r * 0.62); }
     const pm = new T.Mesh(new T.ShapeGeometry(sh, 6), new T.MeshStandardMaterial({ color: 0x3a2a20, roughness: 0.03, metalness: 0.0, transparent: true, opacity: 0.38 }));
-    let x = rr(-21, 21); if (Math.abs(x) < 2.6) x += 6; let z = rr(-21, 21); if (Math.abs(z) < 2.6) z += 6; pm.rotation.set(-Math.PI / 2, 0, rr(0, 3)); pm.position.set(x, 0.006, z); pm.receiveShadow = true; scene.add(pm);
+    let x = rr(-14, 14); if (Math.abs(x) < 2.4) x += 5; let z = rr(-14, 14); if (Math.abs(z) < 2.4) z += 5; pm.rotation.set(-Math.PI / 2, 0, rr(0, 3)); pm.position.set(x, 0.006, z); pm.receiveShadow = true; scene.add(pm);
   }
   strip.material.map.repeat.set(2, 30); strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0.012, 0); strip.receiveShadow = true; scene.add(strip);
   const strip2 = strip.clone(); strip2.rotation.z = Math.PI / 2; strip2.position.y = 0.013; scene.add(strip2);   // the terrazzo path to the door
@@ -296,9 +296,9 @@ const loadGLTF = (n) => new Promise((res, rej) => loader.load('../asset/models/'
 const rigged = (gltf) => HERO.rigged(T, gltf);
 let walker = null, hero = null, lanterns = null, dust = null, steam = null;
 const state = { ready: false, error: null, fps: 0 };
-Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-rigged')]).then(([core, sq, girl]) => {
+Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('noodles-girl')]).then(([core, sq, girl]) => {
   const get = (root, name) => root.children.find(c => c.name === name);
-  const H = 28.5;                                                  // centre to the arcade fronts
+  const H = 19.5;                                                  // centre to the arcade fronts
   // a text board made on a canvas
   const board = (lines, w, h, bg, fg, glow = 0.25, cw = 1024) => {
     const cv = document.createElement('canvas'); cv.width = cw; cv.height = Math.round(1024 * h / w); const g = cv.getContext('2d');
@@ -311,8 +311,8 @@ Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-ri
   // 騎樓 arcades on all four sides, left open where the three gates stand
   const arcade = get(sq, 'sq-arcade'), tints = ['#d8c8ac', '#c9b08c', '#b9a99e', '#a9b5a2', '#c9a583', '#b3ada1'];
   const sides = [[0, 1, Math.PI, false], [0, -1, 0, true], [1, 0, -Math.PI / 2, true], [-1, 0, Math.PI / 2, true]];   // south, north, east, west
-  sides.forEach(([nx, nz, ry, gate], si) => { for (let i = 0; i < 13; i++) {
-    const t = -27 + i * 4.5; if (gate && Math.abs(t) < 8) continue;
+  sides.forEach(([nx, nz, ry, gate], si) => { for (let i = 0; i < 9; i++) {
+    const t = -18 + i * 4.5; if (gate && Math.abs(t) < 7) continue;
     const a = arcade.clone(); a.position.set(nx ? nx * H : t, 0, nz ? nz * H : t); a.rotation.y = ry;
     dress(a, { swap: { bone: triMat({ color: tints[(i * 5 + si * 2) % tints.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }) } }); a.scale.y = 1 + ((i * 7 + si) % 3) * 0.16; scene.add(a);
   } });
@@ -320,7 +320,7 @@ Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-ri
   const gates = get(sq, 'sq-gate');
   [['ximen', -1, 0, Math.PI / 2, '西門町', 'XIMENDING', '1985–1999', '#b7372a', [3.0, 0.9, 0.4]], ['dadao', 0, -1, 0, '大稻埕', 'DADAOCHENG', '2000–2019', '#8a5a34', [3.0, 1.9, 0.6]], ['xinyi', 1, 0, -Math.PI / 2, '信義', 'XINYI', '2020–', '#1f5e8c', [0.6, 1.9, 3.0]]].forEach(([node, nx, nz, ry, zh, en, years, bg, glow]) => {
     const g = dress(get(gates, node).clone()); g.position.set(nx * (H - 1.2), 0, nz * (H - 1.2)); g.rotation.y = ry; scene.add(g);
-    const b = board([[zh, 150, 0.36], [en + '  ' + years, 62, 0.76, 600]], 6.4, 2.0, bg, '#fff3d6', 0.9); b.position.set(nx * (H - 2.4), 9.3, nz * (H - 2.4)); b.rotation.y = ry; scene.add(b);
+    const b = board([[zh, 150, 0.36], [en + '  ' + years, 62, 0.76, 600]], 6.4, 2.0, bg, '#fff3d6', 0.9); b.position.set(nx * (H - 2.4), 8.6, nz * (H - 2.4)); b.rotation.y = ry; scene.add(b);
     const portal = new T.Mesh(new T.PlaneGeometry(7.4, 6.8), new T.ShaderMaterial({ transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, uniforms: { uTime, uCol: { value: new T.Color(...glow) } },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: 'uniform float uTime; uniform vec3 uCol; varying vec2 vUv; void main(){ float e = smoothstep(0.0, 0.35, vUv.x) * smoothstep(1.0, 0.65, vUv.x) * smoothstep(1.0, 0.25, vUv.y); gl_FragColor = vec4(uCol * e * (0.32 + 0.12 * sin(uTime * 1.3)), 1.0); }' }));
@@ -328,49 +328,49 @@ Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-ri
   });
   // the centre: a terrazzo stone, and the title board on its post
   const stone = triMat({ color: '#b9b2a6', tex: TEX.concrete, scale: 1.2, rough: 0.45 });
-  [[3.4, 0.35, 0.175], [2.6, 0.3, 0.5]].forEach(([r, h, y]) => { const c = new T.Mesh(new T.CylinderGeometry(r, r + 0.08, h, 40), stone); c.position.y = y; c.castShadow = c.receiveShadow = true; scene.add(c); });
+  [[2.4, 0.32, 0.16], [1.8, 0.28, 0.46]].forEach(([r, h, y]) => { const c = new T.Mesh(new T.CylinderGeometry(r, r + 0.08, h, 40), stone); c.position.y = y; c.castShadow = c.receiveShadow = true; scene.add(c); });
   const post = new T.Mesh(new T.CylinderGeometry(0.11, 0.13, 4.2, 12), MATS.ink); post.position.y = 2.7; post.castShadow = true; scene.add(post);
   const title = board([['我們的台北記憶', 132, 0.38], ['OUR MEMORY IN TAIPEI', 58, 0.76, 600]], 6.8, 2.1, '#f1e7d2', '#2a2420', 0.35); title.position.y = 4.6; scene.add(title);
   // the two photo walls in the south half: the opening exhibition, and the visitors' wall
   const texLoader = new T.TextureLoader();
   const wall = (x, ry, head, sub, frames) => {
-    const g = new T.Group(); g.position.set(x, 0, 12.5); g.rotation.y = -ry;
-    const w = new T.Mesh(new T.BoxGeometry(11, 3.5, 0.35), triMat({ color: '#e9dfca', tex: TEX.plaster, scale: 0.5, rough: 0.9 })); w.position.y = 1.75; w.castShadow = w.receiveShadow = true; g.add(w);
-    const hd = board([[head, 84, 0.4], [sub, 40, 0.8, 500]], 11, 0.95, '#1f2a44', '#f1e7d2', 0.5, 2048); hd.position.set(0, 3.98, 0); g.add(hd);
-    frames.forEach((f, i) => { const fx = (i - (frames.length - 1) / 2) * 3.3;
-      const fr = new T.Mesh(new T.BoxGeometry(2.7, 2.2, 0.08), new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 })); fr.position.set(fx, 1.85, 0.2); fr.castShadow = true; g.add(fr);
+    const g = new T.Group(); g.position.set(x, 0, 8.6); g.rotation.y = -ry;
+    const w = new T.Mesh(new T.BoxGeometry(8.4, 3.3, 0.32), triMat({ color: '#e9dfca', tex: TEX.plaster, scale: 0.5, rough: 0.9 })); w.position.y = 1.65; w.castShadow = w.receiveShadow = true; g.add(w);
+    const hd = board([[head, 84, 0.4], [sub, 40, 0.8, 500]], 8.4, 0.8, '#1f2a44', '#f1e7d2', 0.5, 2048); hd.position.set(0, 3.7, 0); g.add(hd);
+    frames.forEach((f, i) => { const fx = (i - (frames.length - 1) / 2) * 2.6;
+      const fr = new T.Mesh(new T.BoxGeometry(2.25, 1.95, 0.08), new T.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 0.5 })); fr.position.set(fx, 1.8, 0.19); fr.castShadow = true; g.add(fr);
       let face;
-      if (f.img) { const t = texLoader.load('../asset/photos/' + f.img); t.encoding = T.sRGBEncoding; face = new T.Mesh(new T.PlaneGeometry(2.4, 1.6), new T.MeshStandardMaterial({ map: t, roughness: 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.18 })); face.position.set(fx, 2.0, 0.245); }
-      else { face = board(f.add ? [['＋', 250, 0.42], ['Add your photo', 70, 0.8, 600]] : [['', 10, 0.5]], 2.4, 1.9, '#f4ecdb', f.add ? '#b7372a' : '#cdbfa5', 0.2); face.position.set(fx, 1.85, 0.25); }
+      if (f.img) { const t = texLoader.load('../asset/photos/' + f.img); t.encoding = T.sRGBEncoding; face = new T.Mesh(new T.PlaneGeometry(2.0, 1.35), new T.MeshStandardMaterial({ map: t, roughness: 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.18 })); face.position.set(fx, 1.92, 0.235); }
+      else { face = board(f.add ? [['＋', 250, 0.42], ['Add your photo', 70, 0.8, 600]] : [['', 10, 0.5]], 2.0, 1.7, '#f4ecdb', f.add ? '#b7372a' : '#cdbfa5', 0.2); face.position.set(fx, 1.8, 0.24); }
       g.add(face);
-      if (f.cap) { const c = board([[f.cap, 46, 0.5, 500]], 2.4, 0.3, '#f4ecdb', '#3a2a1c', 0.15); c.position.set(fx, 0.95, 0.25); g.add(c); }
+      if (f.cap) { const c = board([[f.cap, 46, 0.5, 500]], 2.0, 0.26, '#f4ecdb', '#3a2a1c', 0.15); c.position.set(fx, 1.05, 0.24); g.add(c); }
     });
     scene.add(g);
   };
-  wall(-11.5, 0.32, 'OPENING EXHIBITION', 'Taipei, photographed · credits on each frame', [{ img: 'chunghwa-1961.webp', cap: '中華商場 · 1961' }, { img: 'yongle-2012.webp', cap: '永樂市場 · 2012' }, {}]);
-  wall(11.5, -0.32, "你的照片 VISITORS' WALL", 'Photos left by people who walked here', [{ add: true }, {}, {}]);
+  wall(-7.4, 0.34, 'OPENING EXHIBITION', 'Taipei, photographed · credits on each frame', [{ img: 'chunghwa-1961.webp', cap: '中華商場 · 1961' }, { img: 'yongle-2012.webp', cap: '永樂市場 · 2012' }, {}]);
+  wall(7.4, -0.34, "你的照片 VISITORS' WALL", 'Photos left by people who walked here', [{ add: true }, {}, {}]);
   // banyans in the four corners, single leaves for crowns
   const CANOPY = triMat({ color: '#213b1e' }); CANOPY.userData.canopy = true;
   const banyan = get(sq, 'sq-banyan'), BARK = triMat({ color: '#8a7460', tex: TEX.bark, scale: 1.2, rough: 0.95 }), BARK2 = triMat({ color: '#4a3d33', tex: TEX.bark, scale: 1.2, rough: 0.95 });
-  [[-18, -17.5, 'banyanL', 1.1], [18, -18, 'banyanM', 1.15], [-18.5, 19.5, 'banyanM', 1.05], [18.5, 20, 'banyanL', 1.0]].forEach(([x, z, kind, s], i) => {
+  [[-12, -11.5, 'banyanL', 0.9], [12, -12, 'banyanM', 0.95], [-12.5, 13.5, 'banyanM', 0.85], [12.5, 13.8, 'banyanL', 0.85]].forEach(([x, z, kind, s], i) => {
     const b = dress(get(banyan, kind).clone(), { noCast: ['leaf'], swap: { leaf: CANOPY, haze: BARK, ink: BARK2, road: BARK2 } });
     b.traverse(o => { if (o.isMesh && o.material.userData.canopy) o.visible = false; });
     b.position.set(x, 0, z); b.rotation.y = i * 1.7; b.scale.setScalar(s); scene.add(b); canopy(x, z, 6.4 * s, 6.0 * s, 2.9 * s);
   });
   // lamp posts, and lantern strings between them, out to each gate and round the edge
-  const lampPost = get(core, 'lamp'), LP = [[-12, -12], [12, -12], [12, 12], [-12, 12]];
-  LP.forEach(([x, z], i) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.scale.setScalar(1.9); l.rotation.y = Math.atan2(-x, -z); scene.add(l); });
-  const top = (x, z) => new T.Vector3(x, 9.6, z);
-  LP.forEach(([x, z], i) => { const n = LP[(i + 1) % 4]; lanternString(top(x, z), top(n[0], n[1]), 1.5); lanternString(top(x, z), new T.Vector3(0, 6.3, 0), 1.2); });
-  [[-1, 0], [0, -1], [1, 0]].forEach(([nx, nz]) => { [-1, 1].forEach(k => { const lp = nx ? [nx * 12, k * 12] : [k * 12, nz * 12]; lanternString(top(lp[0], lp[1]), new T.Vector3(nx * (H - 3) + (nx ? 0 : k * 4.5), 8.4, nz * (H - 3) + (nz ? 0 : k * 4.5)), 1.0); }); });
+  const lampPost = get(core, 'lamp'), LP = [[-8, -8], [8, -8], [8, 8], [-8, 8]];
+  LP.forEach(([x, z], i) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.scale.setScalar(1.55); l.rotation.y = Math.atan2(-x, -z); scene.add(l); });
+  const top = (x, z) => new T.Vector3(x, 7.9, z);
+  LP.forEach(([x, z], i) => { const n = LP[(i + 1) % 4]; lanternString(top(x, z), top(n[0], n[1]), 1.5); lanternString(top(x, z), new T.Vector3(0, 5.5, 0), 0.9); });
+  [[-1, 0], [0, -1], [1, 0]].forEach(([nx, nz]) => { [-1, 1].forEach(k => { const lp = nx ? [nx * 8, k * 8] : [k * 8, nz * 8]; lanternString(top(lp[0], lp[1]), new T.Vector3(nx * (H - 3) + (nx ? 0 : k * 4.5), 7.2, nz * (H - 3) + (nz ? 0 : k * 4.5)), 0.8); }); });
   lanterns = buildLanterns();
   // street life: scooters nose-in along the south arcade, planters at the piers, two stalls, shop signs
   const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
-  for (let i = 0; i < 11; i++) { if (i % 4 === 3) continue; const sc = dress(scooters.children[i % 3].clone()); sc.position.set(-22 + i * 4.3 + rr(-0.5, 0.5), 0, H - 3.6 + rr(-0.3, 0.3)); sc.rotation.y = Math.PI + rr(-0.3, 0.3); scene.add(sc); }
-  [[-9, -24.5], [9, -24.5], [-24.5, -9], [-24.5, 9], [24.5, -9], [24.5, 9], [-21, 24.5], [21, 24.5]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
-  stall(-19, 4.5, 1.25, 8); stall(19.5, -5, -1.3, 205);
+  for (let i = 0; i < 9; i++) { if (i % 4 === 3) continue; const sc = dress(scooters.children[i % 3].clone()); sc.position.set(-15 + i * 3.7 + rr(-0.5, 0.5), 0, H - 3.6 + rr(-0.3, 0.3)); sc.rotation.y = Math.PI + rr(-0.3, 0.3); scene.add(sc); }
+  [[-7.5, -16.5], [7.5, -16.5], [-16.5, -7.5], [-16.5, 7.5], [16.5, -7.5], [16.5, 7.5], [-14, 16.5], [14, 16.5]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
+  stall(-13.2, 2.6, 1.3, 8); stall(13.4, -3.2, -1.3, 205);
   const words = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊', '眼鏡', '書局'];
-  words.forEach((w, i) => { const side = i % 4, t = -22 + Math.floor(i / 4) * 12 + (side % 2) * 5, d = H - 2.5;
+  words.forEach((w, i) => { const side = i % 4, t = -15 + Math.floor(i / 4) * 8.5 + (side % 2) * 3, d = H - 2.5;
     if (side === 0) sign(w, t, 3.7 + (i % 3) * 0.5, d, 0, [4, 210, 38, 150][i % 4], i % 3 === 0);
     else if (side === 1 && Math.abs(t) > 9) sign(w, t, 3.7 + (i % 3) * 0.5, -d, 0, [350, 28, 210, 150][i % 4], i % 3 === 0);
     else if (side === 2 && Math.abs(t) > 9) sign(w, d, 3.7 + (i % 3) * 0.5, t, Math.PI / 2, [4, 150, 38, 210][i % 4], i % 3 === 0);
@@ -387,7 +387,7 @@ Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-ri
     for (let i = 0; i < n; i++) { const a = rr(0, 6.283), r = rr(80, 200), h = rr(8, 30); d.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r); d.scale.set(rr(8, 18), h, rr(8, 18)); d.rotation.y = rr(0, 1.5); d.updateMatrix(); im.setMatrixAt(i, d.matrix); }
     im.castShadow = true; im.receiveShadow = true; scene.add(im); }
   hero = rigged(girl); scene.add(hero.group);
-  dust = points(2600, () => new T.Vector3(rr(-26, 26), rr(0.3, 11), rr(-26, 26)), 34, new T.Color(1.0, 0.72, 0.36), 0.85);
+  dust = points(2600, () => new T.Vector3(rr(-18, 18), rr(0.3, 9), rr(-18, 18)), 34, new T.Color(1.0, 0.72, 0.36), 0.85);
   steam = points(steamSrc.length * 26, (i) => steamSrc[i % steamSrc.length].clone().add(new T.Vector3(rr(-0.1, 0.1), 0, rr(-0.1, 0.1))), 520, new T.Color(1.0, 0.82, 0.62), 0.085);
   steam.material.uniforms.uSteam.value = 1;
   state.ready = true; document.getElementById('load').classList.add('gone');
@@ -412,7 +412,7 @@ const volMat = pass(COMMON + `uniform sampler2D tShadow; uniform mat4 uShadowMat
     const int N = 44; float stp = dist / float(N), t = stp * ign(gl_FragCoord.xy + fract(uTime) * 61.0), acc = 0.0;
     for (int i = 0; i < N; i++) { vec3 p = uCamPos + rd * t; acc += sh(p) * exp(-max(p.y, 0.0) * 0.055) * stp; t += stp; }
     float cs = dot(rd, uSunDir), g = 0.72, phase = (1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * cs, 1.5) * 0.25 + 0.12;
-    gl_FragColor = vec4(vec3(1.0, 0.62, 0.30) * acc * phase * 0.014, 1.0);
+    gl_FragColor = vec4(vec3(1.0, 0.62, 0.30) * acc * phase * 0.0095, 1.0);
   }`, { tShadow: { value: null }, uShadowMat: { value: new T.Matrix4() } });
 const brightMat = pass(COMMON + 'uniform sampler2D tScene; void main(){ vec3 c = texture2D(tScene, vUv).rgb; float l = max(c.r, max(c.g, c.b)); gl_FragColor = vec4(c * smoothstep(1.0, 2.2, l), 1.0); }', { tScene: { value: null } });
 const blurMat = pass(COMMON + `uniform sampler2D tSrc; uniform vec2 uDir;
@@ -433,10 +433,10 @@ const finalMat = pass(COMMON + `uniform sampler2D tScene, tVol, tBloomA, tBloomB
     vec3 v = vec3(0.0); vec2 px = 2.0 / uRes;
     for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) v += texture2D(tVol, vUv + vec2(float(i), float(j)) * px * 1.5).rgb;
     c += v / 9.0;
-    c += texture2D(tBloomA, vUv).rgb * 0.35 + texture2D(tBloomB, vUv).rgb * 0.45;
+    c += texture2D(tBloomA, vUv).rgb * 0.24 + texture2D(tBloomB, vUv).rgb * 0.3;
     // FINISH: corners, film curve, a little contrast, cool shadows and warm highlights, grain
     vec2 q = vUv - 0.5; c *= 1.0 - dot(q, q) * 0.75;
-    c = aces(c * 0.92);
+    c = aces(c * 0.74);
     float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
     c *= mix(l, l * l * (3.0 - 2.0 * l), 0.45) / max(l, 1e-4);
     c += vec3(-0.012, 0.006, 0.02) * (1.0 - smoothstep(0.0, 0.4, l)) + vec3(0.02, 0.008, -0.015) * smoothstep(0.5, 1.0, l);
@@ -460,12 +460,12 @@ const draw = (mat, target) => { fsTri.material = mat; renderer.setRenderTarget(t
 const blur = (src, tmp, dst, r) => { blurMat.uniforms.tSrc.value = src.texture; blurMat.uniforms.uDir.value.set(r / tmp.width, 0); draw(blurMat, tmp); blurMat.uniforms.tSrc.value = tmp.texture; blurMat.uniforms.uDir.value.set(0, r / dst.height); draw(blurMat, dst); };
 
 // ── camera: six viewpoints, drag to look, keys to walk ───────────────────────────────────────
-const VIEWS = [[0, 1.6, 24, 0, 5.5, 0], [10, 1.5, 9, -24, 6, -2], [-8, 1.4, 6, 4, 7, -26], [0, 16, 34, 0, 3, 0], [-15, 1.5, -13, -30, 13, -26], [-4, 1.6, 21, 14, 2.4, 13]];
+const VIEWS = [[0, 1.5, 16.5, 0, 4.5, 0], [7, 1.4, 6, -17, 5, -1.5], [-5.5, 1.3, 4, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-10, 1.4, -9, -21, 10, -18], [-3, 1.5, 14.5, 9.5, 2.2, 9]];
 let yaw = 0, pitch = 0; const pos = new T.Vector3(), keys = {};
 function setView(i) { const v = VIEWS[i]; pos.set(v[0], v[1], v[2]); const dx = v[3] - v[0], dy = v[4] - v[1], dz = v[5] - v[2]; yaw = Math.atan2(-dx, -dz); pitch = Math.atan2(dy, Math.hypot(dx, dz)); mode = 'fixed'; }
 // follow: the camera rides behind the character; fixed: it stands at a viewpoint and she still walks
 let mode = 'follow', camYaw = 0, camPitch = 0.13, camDist = 3.4;
-const heroPos = new T.Vector3(0, 0, 22), camTarget = new T.Vector3(0, 0.72, 22); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
+const heroPos = new T.Vector3(0, 0, 11.5), camTarget = new T.Vector3(0, 0.72, 11.5); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
 if (QS.get('view')) setView(Math.max(0, Math.min(5, (parseInt(QS.get('view'), 10) || 1) - 1)));
 if (QS.get('close')) { camDist = 1.9; camYaw = Math.PI - 0.5; camPitch = 0.06; }            // ?close=1 looks at her face
 let drag = null, leaving = false, toastT = 0; const toastEl = document.getElementById('toast');
@@ -489,12 +489,12 @@ function frame(now) {
   if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
   heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);
   heroPos.x += Math.sin(heroHead) * heroSpeed * dt; heroPos.z += Math.cos(heroHead) * heroSpeed * dt;
-  const inGate = (a, b) => Math.abs(b) < 3.6 && Math.abs(a) > 20;                      // a gate's opening lets her past the wall line
-  heroPos.x = Math.max(inGate(heroPos.x, heroPos.z) ? -27.5 : -24.5, Math.min(inGate(heroPos.x, heroPos.z) ? 27.5 : 24.5, heroPos.x));
-  heroPos.z = Math.max(inGate(heroPos.z, heroPos.x) && heroPos.z < 0 ? -27.5 : -24.5, Math.min(24.5, heroPos.z));
-  { const cr = Math.hypot(heroPos.x, heroPos.z); if (cr < 3.7) { heroPos.x *= 3.7 / Math.max(cr, 1e-3); heroPos.z *= 3.7 / Math.max(cr, 1e-3); } }   // walk round the centre stone
-  if (heroPos.x < -26.5 && !leaving) { leaving = true; toast('西門町 · 1985–1999'); setTimeout(() => { location.href = 'index.html?from=square'; }, 700); }
-  else if (heroPos.z < -26.5) toast('大稻埕 · the next block to build'); else if (heroPos.x > 26.5) toast('信義 · the block after that');
+  const inGate = (a, b) => Math.abs(b) < 3.4 && Math.abs(a) > 13;                      // a gate's opening lets her past the wall line
+  heroPos.x = Math.max(inGate(heroPos.x, heroPos.z) ? -18.8 : -16, Math.min(inGate(heroPos.x, heroPos.z) ? 18.8 : 16, heroPos.x));
+  heroPos.z = Math.max(inGate(heroPos.z, heroPos.x) && heroPos.z < 0 ? -18.8 : -16, Math.min(13.6, heroPos.z));   // stops short of the scooters parked along the south arcade
+  { const cr = Math.hypot(heroPos.x, heroPos.z); if (cr < 2.7) { heroPos.x *= 2.7 / Math.max(cr, 1e-3); heroPos.z *= 2.7 / Math.max(cr, 1e-3); } }   // walk round the centre stone
+  if (heroPos.x < -18 && !leaving) { leaving = true; toast('西門町 · 1985–1999'); setTimeout(() => { location.href = 'index.html?from=square'; }, 700); }
+  else if (heroPos.z < -18) toast('大稻埕 · the next block to build'); else if (heroPos.x > 18) toast('信義 · the block after that');
   if (hero) { hero.group.position.copy(heroPos); hero.group.rotation.y = heroHead; hero.update(dt, heroSpeed, heroTurn); }
   if (mode === 'follow') {
     camTarget.lerp(new T.Vector3(heroPos.x, 0.72, heroPos.z), Math.min(1, dt * 7));

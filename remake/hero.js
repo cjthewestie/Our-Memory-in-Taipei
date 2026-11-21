@@ -15,7 +15,7 @@
   const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   // Loose things lag behind the body: when she speeds up, stops or turns, the braids and the satchel
   // swing on a spring, on top of the swing that is baked into each loop. She also leans into turns.
-  const loose = []; group.traverse(o => { if (o.isBone && /^(braid|bag)/.test(o.name)) loose.push({ b: o, k: /2$/.test(o.name) ? 1.6 : /^bag/.test(o.name) ? 0.6 : 1 }); });
+  const loose = []; group.traverse(o => { if (o.isBone && /^(hair|braid|bag)/.test(o.name)) loose.push({ b: o, k: /2$/.test(o.name) ? 1.6 : /^bag/.test(o.name) ? 0.6 : 1 }); });
   const SP = { fx: 0, fv: 0, sx: 0, sv: 0, last: 0, lean: 0, pitch: 0 }; group.rotation.order = 'YXZ';
   function update(dt, speed, turn) {
     turn = turn || 0;

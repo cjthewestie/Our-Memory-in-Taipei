@@ -49,12 +49,12 @@ const rr = (a, b) => a + (b - a) * R();
 // ── light ────────────────────────────────────────────────────────────────────────────────────
 const SUN_DIR = new T.Vector3(-34, 30, -40).normalize();           // from the ground toward the sun
 const SUN_COL = new T.Color(1.0, 0.62, 0.32);
-const sun = new T.DirectionalLight(SUN_COL, 4.2);
+const sun = new T.DirectionalLight(SUN_COL, 2.7);
 sun.position.copy(SUN_DIR).multiplyScalar(130).add(new T.Vector3(0, 0, 22)); sun.target.position.set(0, 0, 22);
 sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.05;
 Object.assign(sun.shadow.camera, { left: -62, right: 62, top: 62, bottom: -62, near: 10, far: 260 }); sun.shadow.camera.updateProjectionMatrix();
 scene.add(sun, sun.target);
-scene.add(new T.HemisphereLight(new T.Color(0.42, 0.56, 0.78), new T.Color(0.42, 0.26, 0.18), 0.85));
+scene.add(new T.HemisphereLight(new T.Color(0.42, 0.56, 0.78), new T.Color(0.42, 0.26, 0.18), 0.78));
 
 // ── procedural surfaces ──────────────────────────────────────────────────────────────────────
 function canvasTex(size, draw, repeat) {
@@ -143,7 +143,7 @@ const sky = new T.Mesh(new T.SphereGeometry(400, 48, 24), new T.ShaderMaterial({
       vec2 q = d.xz / (d.y + 0.22) * 1.6 + vec2(uTime * 0.004, 0.0);
       float cl = smoothstep(0.52, 0.78, fbm(q)) * smoothstep(0.02, 0.25, d.y);
       c = mix(c, mix(vec3(0.55, 0.42, 0.5), vec3(2.2, 1.25, 0.75), pow(sd, 2.0) * 0.8 + 0.15), cl * 0.75);   // clouds, lit from the sun's side
-      c += vec3(1.0, 0.75, 0.45) * (pow(sd, 1200.0) * 26.0 + pow(sd, 60.0) * 0.55);             // the sun and its halo
+      c += vec3(1.0, 0.75, 0.45) * (pow(sd, 1200.0) * 18.0 + pow(sd, 60.0) * 0.32);             // the sun and its halo
       gl_FragColor = vec4(c, 1.0);
     }` }));
 sky.frustumCulled = false; scene.add(sky);
@@ -292,7 +292,7 @@ const loadGLTF = (n) => new Promise((res, rej) => loader.load('../asset/models/'
 const rigged = (gltf) => HERO.rigged(T, gltf);
 let walker = null, hero = null, lanterns = null, dust = null, steam = null;
 const state = { ready: false, error: null, fps: 0 };
-Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-rigged')]).then(([core, sq, girl]) => {
+Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('noodles-girl')]).then(([core, sq, girl]) => {
   const get = (root, name) => root.children.find(c => c.name === name);
   // the Red House, front door facing the plaza (+z)
   scene.add(dress(get(core, 'red-house').clone()));
@@ -364,7 +364,7 @@ const volMat = pass(COMMON + `uniform sampler2D tShadow; uniform mat4 uShadowMat
     const int N = 44; float stp = dist / float(N), t = stp * ign(gl_FragCoord.xy + fract(uTime) * 61.0), acc = 0.0;
     for (int i = 0; i < N; i++) { vec3 p = uCamPos + rd * t; acc += sh(p) * exp(-max(p.y, 0.0) * 0.055) * stp; t += stp; }
     float cs = dot(rd, uSunDir), g = 0.72, phase = (1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * cs, 1.5) * 0.25 + 0.12;
-    gl_FragColor = vec4(vec3(1.0, 0.62, 0.30) * acc * phase * 0.014, 1.0);
+    gl_FragColor = vec4(vec3(1.0, 0.62, 0.30) * acc * phase * 0.0095, 1.0);
   }`, { tShadow: { value: null }, uShadowMat: { value: new T.Matrix4() } });
 const brightMat = pass(COMMON + 'uniform sampler2D tScene; void main(){ vec3 c = texture2D(tScene, vUv).rgb; float l = max(c.r, max(c.g, c.b)); gl_FragColor = vec4(c * smoothstep(1.0, 2.2, l), 1.0); }', { tScene: { value: null } });
 const blurMat = pass(COMMON + `uniform sampler2D tSrc; uniform vec2 uDir;
@@ -385,10 +385,10 @@ const finalMat = pass(COMMON + `uniform sampler2D tScene, tVol, tBloomA, tBloomB
     vec3 v = vec3(0.0); vec2 px = 2.0 / uRes;
     for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) v += texture2D(tVol, vUv + vec2(float(i), float(j)) * px * 1.5).rgb;
     c += v / 9.0;
-    c += texture2D(tBloomA, vUv).rgb * 0.35 + texture2D(tBloomB, vUv).rgb * 0.45;
+    c += texture2D(tBloomA, vUv).rgb * 0.24 + texture2D(tBloomB, vUv).rgb * 0.3;
     // FINISH: corners, film curve, a little contrast, cool shadows and warm highlights, grain
     vec2 q = vUv - 0.5; c *= 1.0 - dot(q, q) * 0.75;
-    c = aces(c * 0.92);
+    c = aces(c * 0.74);
     float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
     c *= mix(l, l * l * (3.0 - 2.0 * l), 0.45) / max(l, 1e-4);
     c += vec3(-0.012, 0.006, 0.02) * (1.0 - smoothstep(0.0, 0.4, l)) + vec3(0.02, 0.008, -0.015) * smoothstep(0.5, 1.0, l);
