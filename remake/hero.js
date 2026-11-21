@@ -4,12 +4,12 @@
 // walk and run are driven by the distance she covers, so her feet keep pace with the ground.
 (function () {
   'use strict';
-  const WALK = 0.8, RUN = 2.1;                  // metres per second
+  const WALK = 1.4, RUN = 3.0;                  // metres per second (CJ, 2026-11-22: 「人物走路太慢」; was 0.8 and 2.1)
   const WALK_CYCLE = 0.56, RUN_CYCLE = 1.15;    // metres covered by one full cycle (two steps) of each loop
   // A model can say how far one play of its walk and run clips carries it (the Tripo-rigged girl does,
   // in her armature's extras). Her legs are short, so true pace would be very slow; SLIDE lets the ground
   // pass a little faster than her feet, which reads better than tiny frantic steps.
-  const SLIDE = 1.9;
+  const SLIDE = 2.3;                           // raised with the speed, so her legs speed up by about a third rather than doubling
   function rigged(T, gltf) {
     let walkClip = WALK_CYCLE, runClip = RUN_CYCLE;
     gltf.scene.traverse(o => { const u = o.userData || {}; if (u.walkCycle) { walkClip = u.walkCycle * (u.walkCycles || 1) * SLIDE; runClip = u.runCycle * (u.runCycles || 1) * SLIDE; } });
