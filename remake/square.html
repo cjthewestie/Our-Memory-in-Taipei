@@ -17,6 +17,7 @@
 <script src="place-data.js"></script>
 <script src="places.js"></script>
 <script src="noticeboard.js"></script>
+<script src="landmarks-square.js"></script>
 <script>
 // The hub square: three gates, forty years. Only this block's layout lives here. The light, sky,
 // ground, builders, finishing chain, camera and controls are in engine.js, shared with every block page.
@@ -25,7 +26,7 @@ const inGate = (a, b) => Math.abs(b) < 3.4 && Math.abs(a) > 13;  // a gate's ope
 ENGINE.create({
   title: '廣場 · The Square', subtitle: 'Three gates, forty years. Walk through one.',
   shadowCenter: [0, 0, 0], start: { x: 0, z: 11.5, heading: Math.PI },
-  views: [[0, 1.5, 16.5, 0, 4.5, 0], [7, 1.4, 6, -17, 5, -1.5], [-5.5, 1.3, 4, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-10, 1.4, -9, -21, 10, -18], [-3, 1.5, 14.5, 9.5, 2.2, 9]],
+  views: [[0, 1.5, 16.5, 0, 4.5, 0], [6.6, 1.4, 2.4, -17, 5, -1.5], [-5.5, 1.3, 4, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-10, 1.4, -9, -21, 10, -18], [-3, 1.5, 14.5, 9.5, 2.2, 9]],
   ground: { strips: [{ w: 2.8, len: 37 }, { w: 2.8, len: 37, turn: true }],               // a terrazzo cross, gate to gate
     puddle: (rr) => { let x = rr(-14, 14); if (Math.abs(x) < 2.4) x += 5; let z = rr(-14, 14); if (Math.abs(z) < 2.4) z += 5; return [x, z, rr(0, 3)]; } },
   dust: { x: [-18, 18], y: [0.3, 9], z: [-18, 18] },
@@ -63,7 +64,7 @@ ENGINE.create({
   const stone = triMat({ color: '#b9b2a6', tex: TEX.concrete, scale: 1.2, rough: 0.45 });
   [[2.4, 0.32, 0.16], [1.8, 0.28, 0.46]].forEach(([r, h, y]) => { const c = new T.Mesh(new T.CylinderGeometry(r, r + 0.08, h, 40), stone); c.position.y = y; c.castShadow = c.receiveShadow = true; scene.add(c); });
   const post = new T.Mesh(new T.CylinderGeometry(0.11, 0.13, 3.0, 12), MATS.ink); post.position.y = 2.1;   // stops under the board, so it no longer crosses the lettering post.castShadow = true; scene.add(post);
-  const title = board([['我們的台北記憶', 132, 0.38], ['OUR MEMORY IN TAIPEI', 58, 0.76, 600]], 6.8, 2.1, '#f1e7d2', '#2a2420', 0.35); title.position.y = 4.6; scene.add(title);
+  const title = board([['台北記憶', 176, 0.38], ['OUR MEMORY IN TAIPEI', 58, 0.78, 600]], 6.8, 2.1, '#1d1410', '#f3d98a', 0.42, 1024, { kind: 'plaque' }); /* a black-lacquer plaque with gold lettering, like a 匾額 */ title.position.y = 4.6; scene.add(title);
   // the opening exhibition wall in the south-west; the visitors' photos now hang on one small showcase per topic (below)
   const texLoader = new T.TextureLoader();
   const wall = (x, ry, head, sub, frames) => { const faces = [];
@@ -88,7 +89,7 @@ ENGINE.create({
     family: [7.4, 9.0, -0.4, 'wall'],                 // where the visitors' wall stood, across the path from the exhibition
     school: [-9.5, -5.0, 0.5, 'shop'],                // a small shop front in the north-west quarter, looking at the centre
     food: [9.5, -5.0, -0.5, 'stand'] } });            // a market stand in the north-east quarter, beside the food stall
-  banyans(get(sq, 'sq-banyan'), [[-12, -11.5, 'banyanL', 0.9], [12, -12, 'banyanM', 0.95], [-12.5, 13.5, 'banyanM', 0.85], [12.5, 13.8, 'banyanL', 0.85]]);   // banyans in the four corners, single leaves for crowns
+  banyans(get(sq, 'sq-banyan'), [[12, -12, 'banyanM', 0.95], [-12.5, 13.5, 'banyanM', 0.85], [12.5, 13.8, 'banyanL', 0.85]]);   // banyans in three corners, single leaves for crowns; the north-west corner is the elevated 木柵線 station (landmarks-square.js)
   // lamp posts, and lantern strings between them, out to each gate and round the edge
   const lampPost = get(core, 'lamp'), LP = [[-8, -8], [8, -8], [8, 8], [-8, 8]];
   LP.forEach(([x, z], i) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.scale.setScalar(1.55); l.rotation.y = Math.atan2(-x, -z); scene.add(l); });
@@ -98,8 +99,10 @@ ENGINE.create({
   E.buildLanterns();
   // street life: scooters nose-in along the south arcade, planters at the piers, two stalls, shop signs
   const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
-  for (let i = 0; i < 9; i++) { if (i % 4 === 3) continue; const sc = dress(scooters.children[i % 3].clone()); sc.position.set(-15 + i * 3.7 + rr(-0.5, 0.5), 0, H - 3.6 + rr(-0.3, 0.3)); sc.rotation.y = Math.PI + rr(-0.3, 0.3); scene.add(sc); }
-  [[-7.5, -16.5], [7.5, -16.5], [-16.5, -7.5], [-16.5, 7.5], [16.5, -7.5], [16.5, 7.5], [-14, 16.5], [14, 16.5]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
+  for (let i = 0; i < 9; i++) { if (i % 4 === 3) continue; const sx = -15 + i * 3.7 + rr(-0.5, 0.5), sz = H - 3.6 + rr(-0.3, 0.3), sr = Math.PI + rr(-0.3, 0.3); if (i === 5 || i === 6) continue;   // the old city bus stands at the kerb there
+    const sc = dress(scooters.children[i % 3].clone()); sc.position.set(sx, 0, sz); sc.rotation.y = sr; scene.add(sc); }
+  [[-7.5, -16.5], [7.5, -16.5], [-16.5, -7.5], [-16.5, 7.5], [16.5, -7.5], [16.5, 7.5], [-14, 16.5], [14, 16.5]].forEach(([x, z], i) => { if (i === 2 || i === 4 || i === 5) return;   // the zoo gate, the garbage truck and the convenience store stand at those piers now
+    const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
   stall(-13.2, 2.6, 1.3, 8); stall(13.4, -3.2, -1.3, 205);
   const words = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊', '眼鏡', '書局'];
   words.forEach((w, i) => { const side = i % 4, t = -15 + Math.floor(i / 4) * 8.5 + (side % 2) * 3, d = H - 2.5;
@@ -115,6 +118,8 @@ ENGINE.create({
     const cap = new T.Mesh(new T.CylinderGeometry(3, 7, 9, 4), tm); cap.position.y = 126.5; tw.add(cap); const spire = new T.Mesh(new T.CylinderGeometry(0.3, 1.4, 26, 6), tm); spire.position.y = 144; tw.add(spire);
     tw.traverse(o => { if (o.isMesh) { o.rotation.y = Math.PI / 4; o.castShadow = true; } }); tw.position.set(150, 0, 8); scene.add(tw); }
   city(80, 200);
+  // the researched places and events of the square: real objects round its edges, each one clickable (landmarks-square.js, from docs/places/square.json)
+  LANDMARKS_SQUARE(E);
   // the memory notice board, the first thing she sees: just right of the path, turned toward where she starts.
   // CJ, 2026-11-21: 「把告示牌放進廣場給我看，放在一進來就看得到的地方」
   NOTICEBOARD.add(E, { position: [3.3, 5.4], rotation: -0.5, district: 'square' });

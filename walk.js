@@ -179,7 +179,7 @@
     const title = (g, W, H) => {
       g.fillStyle = P.bone; g.fillRect(0, 0, W, H);
       g.fillStyle = P.ink; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = `700 ${Math.round(H * 0.3)}px ${FONT_ZH}`; g.fillText('我們的台北記憶', W / 2, H * 0.3);
+      g.font = `700 ${Math.round(H * 0.3)}px ${FONT_ZH}`; g.fillText('台北記憶', W / 2, H * 0.3);
       g.font = `700 ${Math.round(H * 0.2)}px ${FONT_EN}`; g.fillText('OUR MEMORY IN TAIPEI', W / 2, H * 0.6);
       g.font = `400 ${Math.round(H * 0.12)}px ${FONT_EN}`; g.fillText('Three gates · forty years · walk through one', W / 2, H * 0.84);
     };

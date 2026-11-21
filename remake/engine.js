@@ -39,6 +39,97 @@ const CSS = `
   @media (pointer: coarse) { #keys { font-size: 11px; padding: 6px 12px; opacity: .8; } }`;
 const el = (tag, id, html) => { let e = document.getElementById(id); if (!e) { e = document.createElement(tag); e.id = id; document.body.appendChild(e); } if (html != null) e.innerHTML = html; return e; };
 
+// signTrim: the border and the ground pattern of a sign. CJ, 2026-11-21: 「全部的招牌應該都要翻新邊框或花紋」.
+// Four borders (回紋 key-fret band, bracketed corners with 如意 curls, enamel-sign rivets, scalloped valance) and four
+// faint ground patterns (菱格 lattice, 海波 waves, 方勝 nested squares, pinstripe), picked from the sign's own text so
+// every sign keeps its look between visits and neighbours differ. Any canvas can call it: ENGINE.signTrim(g, W, H, { dark, trim, seed }).
+// Returns the margin it used, so lettering can stay clear of the border.
+function signTrim(g, W, H, o) {
+  o = o || {}; const dark = !!o.dark, trim = o.trim || (dark ? '#d9b25a' : '#2a2420'); let h = 2166136261; for (const ch of String(o.seed || '')) h = Math.imul(h ^ ch.codePointAt(0), 16777619) >>> 0;
+  const style = o.style != null ? o.style : h % 4, ground = o.ground != null ? o.ground : (h >>> 3) % 4, m = Math.max(10, Math.round(Math.min(W, H) * 0.058)), a = m * 0.5, b = m * 1.5;
+  g.save(); g.beginPath(); g.rect(b, b, W - 2 * b, H - 2 * b); g.clip(); g.strokeStyle = trim; g.globalAlpha = dark ? 0.1 : 0.085; g.lineWidth = Math.max(1, m * 0.06);
+  const u = Math.max(18, Math.min(W, H) * 0.16);
+  if (ground < 0) { /* a plain ground */ }
+  else if (ground === 0) { g.beginPath(); for (let x = -H; x < W + H; x += u) { g.moveTo(x, 0); g.lineTo(x + H, H); g.moveTo(x + H, 0); g.lineTo(x, H); } g.stroke(); }
+  else if (ground === 1) { for (let r = 0, y = b; y < H + u; y += u * 0.5, r++) for (let x = b - (r % 2 ? u / 2 : 0); x < W + u; x += u) { g.beginPath(); g.arc(x, y, u / 2, Math.PI, 0); g.stroke(); g.beginPath(); g.arc(x, y, u / 3.2, Math.PI, 0); g.stroke(); } }
+  else if (ground === 2) { for (let y = b; y < H; y += u) for (let x = b; x < W; x += u) { g.strokeRect(x + u * 0.12, y + u * 0.12, u * 0.76, u * 0.76); g.strokeRect(x + u * 0.32, y + u * 0.32, u * 0.36, u * 0.36); } }
+  else { g.beginPath(); for (let x = b; x < W; x += u * 0.28) { g.moveTo(x, 0); g.lineTo(x, H); } g.stroke(); }
+  g.restore();
+  g.strokeStyle = trim; g.fillStyle = trim; g.lineJoin = 'miter';
+  if (style === 4) {                                                    // modern: one hairline rule and four corner ticks, nothing else (a backlit steel-and-glass sign)
+    g.lineWidth = Math.max(1.5, m * 0.07); g.globalAlpha = 0.7; g.strokeRect(b * 0.8, b * 0.8, W - 1.6 * b, H - 1.6 * b); g.globalAlpha = 1; g.lineWidth = Math.max(3, m * 0.22); const L = m * 1.1;
+    [[b * 0.8, b * 0.8, 1, 1], [W - b * 0.8, b * 0.8, -1, 1], [b * 0.8, H - b * 0.8, 1, -1], [W - b * 0.8, H - b * 0.8, -1, -1]].forEach(([x, y, sx, sy]) => { g.beginPath(); g.moveTo(x + sx * L, y); g.lineTo(x, y); g.lineTo(x, y + sy * L); g.stroke(); });
+    return m * 0.9; }
+  g.lineWidth = Math.max(3, m * 0.26); g.strokeRect(a, a, W - 2 * a, H - 2 * a);
+  g.lineWidth = Math.max(1.5, m * 0.09); g.strokeRect(b, b, W - 2 * b, H - 2 * b);
+  const band = b - a, c = (a + b) / 2;
+  if (style === 0) {                                                    // 回紋: a key fret running in the band, top and bottom
+    const k = band * 0.62, n = Math.max(3, Math.floor((W - 2 * b) / (k * 1.9))), step = (W - 2 * b) / n; g.lineWidth = Math.max(1.5, m * 0.1);
+    [c - k / 2, H - c - k / 2].forEach(y0 => { g.beginPath(); for (let i = 0; i < n; i++) { const x = b + i * step + (step - k) / 2; g.moveTo(x, y0 + k); g.lineTo(x, y0); g.lineTo(x + k, y0); g.lineTo(x + k, y0 + k * 0.72); g.lineTo(x + k * 0.36, y0 + k * 0.72); g.lineTo(x + k * 0.36, y0 + k * 0.36); g.lineTo(x + k * 0.68, y0 + k * 0.36); } g.stroke(); });
+    const nv = Math.max(1, Math.floor((H - 2 * b) / (k * 2.4))), sv = (H - 2 * b) / nv; [c, W - c].forEach(x0 => { for (let i = 0; i < nv; i++) { g.save(); g.translate(x0, b + i * sv + sv / 2); g.rotate(Math.PI / 4); g.fillRect(-k * 0.22, -k * 0.22, k * 0.44, k * 0.44); g.restore(); } });
+  } else if (style === 1) {                                             // bracketed corners with a 如意 curl, and a bead at each midpoint
+    const L = Math.min(W, H) * 0.2; g.lineWidth = Math.max(3, m * 0.3);
+    [[b, b, 1, 1], [W - b, b, -1, 1], [b, H - b, 1, -1], [W - b, H - b, -1, -1]].forEach(([x, y, sx, sy]) => { g.beginPath(); g.moveTo(x + sx * L, y + sy * band * 0.9); g.lineTo(x + sx * band * 0.9, y + sy * band * 0.9); g.lineTo(x + sx * band * 0.9, y + sy * L); g.stroke();
+      g.beginPath(); g.arc(x + sx * (band * 0.9 + L * 0.22), y + sy * (band * 0.9 + L * 0.22), L * 0.13, 0, Math.PI * 1.5); g.stroke(); });
+    [[W / 2, c], [W / 2, H - c], [c, H / 2], [W - c, H / 2]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, band * 0.3, 0, Math.PI * 2); g.fill(); });
+  } else if (style === 2) {                                             // enamel sign: a row of rivets all the way round
+    if (o.bulbs) g.fillStyle = '#ffe9a8'; const r = band * (o.bulbs ? 0.3 : 0.2), per = 2 * (W + H - 4 * c), n = Math.max(12, Math.round(per / (band * 1.5))); for (let i = 0; i < n; i++) { let d = i / n * per, x, y; const w = W - 2 * c, hh = H - 2 * c;
+      if (d < w) { x = c + d; y = c; } else if (d < w + hh) { x = W - c; y = c + d - w; } else if (d < 2 * w + hh) { x = W - c - (d - w - hh); y = H - c; } else { x = c; y = H - c - (d - 2 * w - hh); } g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+  } else {                                                              // a scalloped valance along the top and the bottom, like a cloth-edged board
+    const n = Math.max(4, Math.round((W - 2 * b) / (band * 1.5))), step = (W - 2 * b) / n; g.lineWidth = Math.max(1.5, m * 0.1);
+    for (let i = 0; i < n; i++) { const x = b + i * step + step / 2; g.beginPath(); g.arc(x, b, step / 2, 0, Math.PI); g.stroke(); g.beginPath(); g.arc(x, H - b, step / 2, Math.PI, 0); g.stroke(); g.beginPath(); g.arc(x, c, band * 0.16, 0, Math.PI * 2); g.fill(); g.beginPath(); g.arc(x, H - c, band * 0.16, 0, Math.PI * 2); g.fill(); }
+  }
+  return m * (style === 3 ? 1.25 : 1);
+}
+// ── painted signs ────────────────────────────────────────────────────────────────────────────
+// CJ, 2026-11-21: 「這些招牌也都太單調了」. Old Taipei signs were written with a brush and framed, not typeset on a flat
+// colour. paintSign draws one onto a canvas: wood or lacquer grain, a framed edge with corner studs, 魏碑 for the
+// largest Chinese line and 楷書 for the rest (macOS system fonts; elsewhere they fall back to 黑體), spaced capitals
+// for Latin lines, gold lettering on dark boards, and a small red seal on the tall ones.
+// lines = [[text, px, y 0..1, weight], ...] with px measured against a 1024-wide canvas.
+// Which sign a text is. CJ, 2026-11-21: 「每個招牌要根據他的作用跟含義還有真實的招牌去對應」. Each kind follows a real Taipei sign type
+// (from general knowledge of them, not from a measured reference): 
+//   plaque   匾額: black or dark lacquer, gold brush lettering, 回紋 border, a seal: temples, old shops, the title of a place
+//   marquee  a cinema or festival board ringed with light bulbs: cinemas, 西門町, fireworks and other night events
+//   enamel   an enamelled iron plate with rivets and plain 楷書: school gates, bus stops, street and wharf name plates
+//   awning   a market or food stall board with a scalloped cloth valance: food, markets, New Year goods
+//   studio   a framed studio card with bracketed corners and a seal: family photos, portrait studios, the Red House
+//   modern   a clean backlit sign, sans-serif, one hairline rule: 信義, department stores, exhibitions, anything from the 2010s on
+const SIGN_KINDS = {
+  plaque: { style: 0, ground: 2, brush: true, seal: true }, marquee: { style: 2, ground: 3, brush: true, seal: false, bulbs: true }, enamel: { style: 2, ground: -1, brush: true, seal: false, kai: true },
+  awning: { style: 3, ground: 3, brush: true, seal: false }, studio: { style: 1, ground: 0, brush: true, seal: true }, modern: { style: 4, ground: -1, brush: false, seal: false } };
+const SIGN_RULES = [
+  [/101|信義|xinyi|百貨|天橋|skywalk|安靜|quiet|exhibition|展覽|攀登|climb|捷運|MRT/i, 'modern'],
+  [/戲院|電影|cinema|movie|煙火|跨年|firework|演唱|concert|西門|ximen/i, 'marquee'],
+  [/吃|food|市場|market|商場|年貨|麵|冰|小吃|布|fabric/i, 'awning'],
+  [/學|school|通勤|commute|徒步|pedestrian|碼頭|wharf|站|station/i, 'enamel'],
+  [/廟|宮|temple|城隍|茶|tea|藥|大稻埕|dadao|台北記憶|memory in taipei/i, 'plaque'],
+  [/家|family|照相|photo|紅樓|red house/i, 'studio'],
+  [/街|路|巷|street|road/i, 'enamel'] ];
+function signKind(text, dark) { for (const [re, k] of SIGN_RULES) if (re.test(text)) return k; return dark ? 'plaque' : 'studio'; }
+const SIGN_SANS = '"PingFang TC","Heiti TC","Noto Sans TC",system-ui,sans-serif', SIGN_KAI = '"Kaiti TC","BiauKai","DFKai-SB","KaiTi",' + SIGN_SANS, SIGN_WEI = '"Weibei TC",' + SIGN_KAI;
+function paintSign(g, W, H, lines, bg, fg, o) {
+  o = o || {}; const hex = /^#([0-9a-f]{6})$/i.exec(String(bg)), n = hex ? parseInt(hex[1], 16) : 0x808080;
+  const lum = (0.3 * (n >> 16 & 255) + 0.59 * (n >> 8 & 255) + 0.11 * (n & 255)) / 255, dark = lum < 0.45, k = W / 1024;
+  g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 260; i++) { g.fillStyle = dark ? `rgba(255,214,150,${Math.random() * 0.05})` : `rgba(70,45,20,${Math.random() * 0.07})`; g.fillRect(Math.random() * W - 60, Math.random() * H, 60 + Math.random() * 360, 1 + Math.random() * 2.5); }
+  const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.62); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, dark ? 'rgba(0,0,0,.34)' : 'rgba(70,40,10,.2)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  const all = lines.map(l => l[0] || '').join('|'), kind = SIGN_KINDS[o.kind] ? o.kind : signKind(all, dark), K = SIGN_KINDS[kind];
+  const m = signTrim(g, W, H, { dark, trim: dark && kind !== 'modern' ? '#d9b25a' : fg, seed: all, style: K.style, ground: K.ground, bulbs: K.bulbs });
+  const big = Math.max.apply(null, lines.map(l => (l[0] ? l[1] : 0)).concat([1])); g.textAlign = 'center'; g.textBaseline = 'middle';
+  lines.forEach(([txt, size, y, weight]) => { if (!txt) return;
+    const cjk = /[㐀-鿿]/.test(txt), lead = cjk && size === big; let px = size * k * (cjk ? 1.12 : 0.84);
+    const font = q => cjk ? (K.brush ? `400 ${q}px ${lead && !K.kai ? SIGN_WEI : SIGN_KAI}` : `700 ${Math.round(q * 0.88)}px ${SIGN_SANS}`) : `${weight && weight < 700 ? weight : 600} ${q}px "Avenir Next","Gill Sans",${SIGN_SANS}`;
+    const sp = !cjk && 'letterSpacing' in g; if ('letterSpacing' in g) g.letterSpacing = sp ? Math.round(px * 0.09) + 'px' : '0px';
+    g.font = font(px); const mw = g.measureText(txt).width, max = W - m * 4.6; if (mw > max) { px = px * max / mw; if (sp) g.letterSpacing = Math.round(px * 0.09) + 'px'; g.font = font(px); }
+    g.shadowColor = dark ? 'rgba(0,0,0,.6)' : 'rgba(70,35,10,.28)'; g.shadowBlur = px * 0.07; g.shadowOffsetY = px * 0.035;
+    if (dark && cjk && K.brush) { const gr = g.createLinearGradient(0, H * y - px / 2, 0, H * y + px / 2); gr.addColorStop(0, '#fff3cf'); gr.addColorStop(1, '#e0b25a'); g.fillStyle = gr; } else g.fillStyle = fg;
+    g.fillText(txt, W / 2, H * y); });
+  g.shadowColor = 'rgba(0,0,0,0)'; g.shadowBlur = 0; g.shadowOffsetY = 0; if ('letterSpacing' in g) g.letterSpacing = '0px';
+  if (o.seal !== false && K.seal && H >= 280 * k && lines.filter(l => l[0]).length >= 2) {                       // the red seal, pressed a little crooked in the lower right
+    const s = H * 0.17; g.save(); g.translate(W - m * 1.9 - s / 2, H - m * 1.9 - s / 2); g.rotate(-0.06); g.fillStyle = '#b7372a'; g.fillRect(-s / 2, -s / 2, s, s);
+    g.strokeStyle = '#f6ead0'; g.lineWidth = Math.max(1.5, s * 0.04); g.strokeRect(-s * 0.4, -s * 0.4, s * 0.8, s * 0.8); g.fillStyle = '#f6ead0'; g.font = `400 ${s * 0.4}px ${SIGN_WEI}`; g.fillText('台', 0, -s * 0.19); g.fillText('北', 0, s * 0.22); g.restore(); }
+}
 function create(opts) {
 opts = opts || {};
 const T = THREE, QS = new URLSearchParams(location.search);
@@ -307,13 +398,17 @@ function points(n, init, size, colour, opacity) {
 
 // ── text boards, placing models, the far city, banyans ───────────────────────────────────────
 // a text board made on a canvas: lines = [[text, px, y 0..1, weight], ...]
-  const board = (lines, w, h, bg, fg, glow = 0.25, cw = 1024) => {
-    const cv = document.createElement('canvas'); cv.width = cw; cv.height = Math.round(1024 * h / w); const g = cv.getContext('2d');
-    g.fillStyle = bg; g.fillRect(0, 0, cv.width, cv.height); g.strokeStyle = fg; g.lineWidth = 8; g.strokeRect(14, 14, cv.width - 28, cv.height - 28); g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
-    lines.forEach(([txt, size, y, font]) => { g.font = `${font || 700} ${size}px "PingFang TC","Heiti TC","Noto Sans TC",system-ui,sans-serif`; g.fillText(txt, cv.width / 2, cv.height * y); });
+  const board = (lines, w, h, bg, fg, glow = 0.25, cw = 1024, so) => {          // so: { kind } names the sign type (see SIGN_KINDS); left out, it is read from the wording
+    const cv = document.createElement('canvas'); cv.width = cw; cv.height = Math.round(1024 * h / w) * cw / 1024; const g = cv.getContext('2d');
+    paintSign(g, cv.width, cv.height, lines, bg, fg, so);
     const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    const repaint = () => { paintSign(g, cv.width, cv.height, lines, bg, fg, so); t.needsUpdate = true; };          // again once the brush fonts are ready
+    if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('40px "Weibei TC"'), document.fonts.load('40px "Kaiti TC"')]).then(repaint, () => {});
     const m = new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow }), e = new T.MeshStandardMaterial({ color: 0x2a2420, roughness: 0.6 });
-    const mesh = new T.Mesh(new T.BoxGeometry(w, h, 0.12), [e, e, e, e, m, m]); mesh.castShadow = true; return mesh;
+    const mesh = new T.Mesh(new T.BoxGeometry(w, h, 0.12), [e, e, e, e, m, m]); mesh.castShadow = true;
+    const rail = new T.MeshStandardMaterial({ color: 0x3a2416, roughness: 0.55 }), r = Math.min(0.12, Math.max(0.035, h * 0.045));              // a raised wooden frame round the face
+    [[0, h / 2, w + r * 2, r], [0, -h / 2, w + r * 2, r], [-w / 2, 0, r, h], [w / 2, 0, r, h]].forEach(([x, y, bw, bh]) => { const b = new T.Mesh(new T.BoxGeometry(bw, bh, 0.2), rail); b.position.set(x, y, 0); b.castShadow = true; mesh.add(b); });
+    return mesh;
   };
   const get = (root, name) => root.children.find(c => c.name === name);
   const place = (root, name, x, z, ry, s = 1) => { const o = dress(get(root, name).clone()); o.position.set(x, 0, z); o.rotation.y = ry; o.scale.setScalar(s); scene.add(o); return o; };
@@ -510,5 +605,5 @@ Object.defineProperty(window.__remake, 'hero', { get() { return hero; } });
 window.ENGINE.current = E;
 return E;
 }
-window.ENGINE = { create, current: null };
+window.ENGINE = { create, current: null, paintSign, signTrim, signKind, SIGN_KINDS };
 })();

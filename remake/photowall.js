@@ -671,10 +671,13 @@
   // a title or text plate: lines = [[text, size as a share of the plate's height, y 0..1, weight]], each shrunk to fit the width
   function plate(T, lines, w, h, bg, fg, glow) {
     const cv = document.createElement('canvas'); cv.width = 1024; cv.height = Math.max(64, Math.round(1024 * h / w)); const g = cv.getContext('2d'), W = cv.width, H = cv.height;
-    g.fillStyle = bg; g.fillRect(0, 0, W, H); g.strokeStyle = fg; g.lineWidth = 6; g.strokeRect(10, 10, W - 20, H - 20); g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
-    lines.forEach(([txt, size, y, weight]) => { if (!txt) return; let px = Math.round(H * size); g.font = `${weight || 700} ${px}px ${FONT}`; const mw = g.measureText(txt).width, max = W - 70;
-      if (mw > max) { px = Math.floor(px * max / mw); g.font = `${weight || 700} ${px}px ${FONT}`; } g.fillText(txt, W / 2, H * y); });
+    const old = () => { g.fillStyle = bg; g.fillRect(0, 0, W, H); g.strokeStyle = fg; g.lineWidth = 6; g.strokeRect(10, 10, W - 20, H - 20); g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+      lines.forEach(([txt, size, y, weight]) => { if (!txt) return; let px = Math.round(H * size); g.font = `${weight || 700} ${px}px ${FONT}`; const mw = g.measureText(txt).width, max = W - 70;
+        if (mw > max) { px = Math.floor(px * max / mw); g.font = `${weight || 700} ${px}px ${FONT}`; } g.fillText(txt, W / 2, H * y); }); };
     const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    // the engine's brush-lettered, framed sign when it is there (CJ, 2026-11-21: 「這些招牌也都太單調了」); the plain plate otherwise
+    const paint = () => { if (window.ENGINE && ENGINE.paintSign) ENGINE.paintSign(g, W, H, lines.map(([txt, size, y, weight]) => [txt, H * size, y, weight]), bg, fg, { seal: false }); else old(); t.needsUpdate = true; };
+    paint(); if (window.ENGINE && ENGINE.paintSign && document.fonts && document.fonts.load) Promise.all([document.fonts.load('40px "Weibei TC"'), document.fonts.load('40px "Kaiti TC"')]).then(paint, () => {});
     return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshStandardMaterial({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow == null ? 0.5 : glow }));
   }
   // each kind builds its body with box() and returns where the title, the photo frames and the "see all" plate go
