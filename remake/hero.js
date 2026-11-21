@@ -4,9 +4,15 @@
 // walk and run are driven by the distance she covers, so her feet keep pace with the ground.
 (function () {
   'use strict';
-  const WALK = 0.95, RUN = 2.6;                 // metres per second
+  const WALK = 0.8, RUN = 2.1;                  // metres per second
   const WALK_CYCLE = 0.56, RUN_CYCLE = 1.15;    // metres covered by one full cycle (two steps) of each loop
+  // A model can say how far one play of its walk and run clips carries it (the Tripo-rigged girl does,
+  // in her armature's extras). Her legs are short, so true pace would be very slow; SLIDE lets the ground
+  // pass a little faster than her feet, which reads better than tiny frantic steps.
+  const SLIDE = 1.9;
   function rigged(T, gltf) {
+    let walkClip = WALK_CYCLE, runClip = RUN_CYCLE;
+    gltf.scene.traverse(o => { const u = o.userData || {}; if (u.walkCycle) { walkClip = u.walkCycle * (u.walkCycles || 1) * SLIDE; runClip = u.runCycle * (u.runCycles || 1) * SLIDE; } });
   const group = gltf.scene, mixer = new T.AnimationMixer(group), act = {}; let eyes = null;
   group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; if (o.morphTargetDictionary && 'blink' in o.morphTargetDictionary) eyes = o; } });
   gltf.animations.forEach(c => { act[c.name] = mixer.clipAction(c); act[c.name].play(); act[c.name].setEffectiveWeight(c.name === 'Idle' ? 1 : 0); });
@@ -27,7 +33,7 @@
       group.rotation.z = SP.lean; group.rotation.x = SP.pitch;
     }
     S.move += (sm(0.05, 0.6, speed) - S.move) * Math.min(1, dt * 8); S.run += (sm(WALK * 1.25, RUN * 0.9, speed) - S.run) * Math.min(1, dt * 6);
-    S.phase = (S.phase + speed * dt / (WALK_CYCLE + (RUN_CYCLE - WALK_CYCLE) * S.run)) % 1; S.idleT += dt;
+    S.phase = (S.phase + speed * dt / (walkClip + (runClip - walkClip) * S.run)) % 1; S.idleT += dt;
     if (S.wave >= 0) { S.wave += dt; if (S.wave > act.Wave.getClip().duration || S.move > 0.3) S.wave = -1; }
     const wv = S.wave >= 0 ? Math.min(1, S.wave * 5) * Math.min(1, (act.Wave.getClip().duration - S.wave) * 5) : 0, idle = (1 - S.move) * (1 - wv);
     act.Idle.time = S.idleT % act.Idle.getClip().duration; act.Idle.setEffectiveWeight(idle);
