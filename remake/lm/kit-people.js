@@ -71,6 +71,8 @@ function crowd(E, opt) {
     // huddle(x, z, n): a small group facing each other
     huddle(x, z, n, o) { for (let k = 0; k < n; k++) { const a = k / n * 6.283 + rr(-0.3, 0.3), px = x + Math.cos(a) * 0.62, pz = z + Math.sin(a) * 0.62; C.drop(px, pz, Math.atan2(x - px, z - pz), Object.assign({ pose: pick(['talk', 'stand', 'drink', 'phone', 'wave', 'stand']) }, o || {}), 0.5); } return C; },
     build() {
+      // nobody stands in a camera: clear 4 m round each street-level viewpoint (keys 1 to 6), so no head fills a fixed shot
+      { const cams = (E.VIEWS || []).filter(v => v[1] < 4); for (let i = list.length - 1; i >= 0; i--) if (cams.some(v => Math.hypot(v[0] - list[i].x, v[2] - list[i].z) < 4)) list.splice(i, 1); }
       const G = geos(), bins = {}, e = new T.Euler(), q = new T.Quaternion(), p = new T.Vector3(), sc = new T.Vector3(), one = new T.Vector3(1, 1, 1);
       Object.keys(G).forEach(k => bins[k] = []);
       const frame = (par, x, y, z, rx, ry, rz) => { const m = new T.Matrix4().compose(p.set(x, y, z), q.setFromEuler(e.set(rx || 0, ry || 0, rz || 0)), one); return par ? m.premultiply(par) : m; };
