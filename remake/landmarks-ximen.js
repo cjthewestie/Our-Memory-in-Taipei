@@ -192,6 +192,7 @@ function facade(K, o) {
 // a standing or sitting figure, plain blocks, no likeness. o: shirt, pants, bowl, sit, apron
 function person(K, x, z, ry, o = {}) {
   K.at(x, 0, z, ry); const sh = o.shirt || pick(SHIRT), pa = o.pants || pick(PANTS), d = o.sit ? -0.38 : 0, s = o.h || rr(0.94, 1.06);
+  if (window.PEOPLE) { (window.__lmPeople = window.__lmPeople || []).push({ g: K.g, x, y: o.y || 0, z, ry, o }); K.at(); return K; }   // the people kit (lm/kit-people.js) draws this figure instead: lm/ximen-people.js reads the list
   if (o.sit) { K.bx(-0.16, -0.03, 0.42, 0.56, 0, 0.42, pa); K.bx(0.03, 0.16, 0.42, 0.56, 0, 0.42, pa); K.bx(-0.16, -0.03, 0, 0.45, 0.32, 0.44, pa); K.bx(0.03, 0.16, 0, 0.45, 0.32, 0.44, pa);
     K.cyl(0.17, 0.15, 0.42, M.wood, 0, 0.21, 0, 8); }
   else { K.bx(-0.16, -0.03, 0, 0.82 * s, -0.08, 0.08, pa); K.bx(0.03, 0.16, 0, 0.82 * s, -0.08, 0.08, pa); K.bx(-0.17, -0.02, 0, 0.07, -0.08, 0.16, M.black); K.bx(0.02, 0.17, 0, 0.07, -0.08, 0.16, M.black); }
@@ -511,7 +512,7 @@ function lailai() {
   // street level: display windows with mannequins, glass doors under a canopy
   K.bx(x0, x1, 0, G, -D, -2.6, M.dark); [x0, -2.2, 1.7, x1 - 0.5].forEach(x => K.bx(x, x + 0.5, 0, G, -2.6, 0, M.white)); K.bx(x0, x1, G - 0.6, G, -2.6, 0, M.white); K.bx(-2.6, 2.6, 3.5, 3.8, 0, 1.9, M.blue);
   K.bx(-1.7, 1.7, 0, 3.4, -0.5, -0.45, M.glassBlue); [-1.7, -0.85, 0, 0.85, 1.67].forEach(x => K.bx(x - 0.03, x + 0.03, 0, 3.4, -0.45, -0.4, M.steel)); K.bx(-1.6, 1.6, 0.1, 3.3, -2.58, -2.54, M.shopLit);
-  [[-6.0, -2.2], [2.2, 6.0]].forEach(([a, b]) => { K.bx(a, b, 0.5, 3.6, -0.45, -0.4, M.pane); K.bx(a, b, 0, 0.5, -0.6, -0.1, M.concLt); K.bx(a, b, 0.5, 3.6, -2.2, -2.16, M.shopLit); for (let k = 0; k < 4; k++) { K.at(0, 0.5, 0, 0); person(K, a + 0.5 + k * (b - a - 1) / 3, -1.2, rr(-0.4, 0.4), { shirt: pick(CLOTH), pants: pick(CLOTH) }); } K.at(); });
+  [[-6.0, -2.2], [2.2, 6.0]].forEach(([a, b]) => { K.bx(a, b, 0.5, 3.6, -0.45, -0.4, M.pane); K.bx(a, b, 0, 0.5, -0.6, -0.1, M.concLt); K.bx(a, b, 0.5, 3.6, -2.2, -2.16, M.shopLit); for (let k = 0; k < 4; k++) { K.at(0, 0.5, 0, 0); person(K, a + 0.5 + k * (b - a - 1) / 3, -1.2, rr(-0.4, 0.4), { shirt: pick(CLOTH), pants: pick(CLOTH), y: 0.5, mannequin: true }); } K.at(); });
   K.mesh(sign('OPEN', 3.2, 0.5, { bg: '#2a2622', fg: '#f3ecd9', font: 'Georgia, "Times New Roman", serif', weight: 700, spread: true, border: false, glow: 0.8, oneSide: true }), 0, 3.65, 1.92);
   return K.done();
 }
