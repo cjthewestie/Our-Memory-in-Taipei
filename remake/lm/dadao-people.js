@@ -12,13 +12,13 @@
   [[-2.9, 21, -1], [2.8, 14.5, 1], [-3.0, 3.5, -1], [-2.7, -8, -1], [2.9, -19, 1], [-3.1, -27, -1], [2.6, 30.5, 1], [-2.8, 33.5, -1]].forEach(([x, z, side], i) => C.drop(x, z, side * Math.PI / 2 + rr(-0.3, 0.3), { pose: i % 2 ? 'photo' : pick(['stand', 'phone', 'carry']), pack: i % 3 === 0 }));
   C.huddle(-2.3, 9.5, 3); C.huddle(2.2, -24.5, 2); C.huddle(-2.4, -34, 3); C.huddle(2.4, 24, 2);
   // 霞海城隍廟's forecourt: worshippers facing the hall (+x), a few waiting behind
-  [[7.6, 0.2], [8.3, 1.3], [7.9, -1.2], [6.6, 2.2]].forEach(([x, z]) => C.drop(x, z, Math.PI / 2 + rr(-0.15, 0.15), { pose: 'pray' }, 0.6));
-  C.drop(5.4, -3.6, Math.PI / 2 + 0.4, { pose: 'photo' }); C.drop(5.2, 4.6, 0.9, { pose: 'phone' }); C.drop(6.0, 5.4, -2.2, { pose: 'talk' });
+  [[7.6, -19.0], [8.3, -17.9], [7.9, -20.4], [6.6, -17.0]].forEach(([x, z]) => C.drop(x, z, Math.PI / 2 + rr(-0.15, 0.15), { pose: 'pray' }, 0.6));
+  C.drop(5.4, -22.8, Math.PI / 2 + 0.4, { pose: 'photo' }); C.drop(5.2, -14.6, 0.9, { pose: 'phone' }); C.drop(6.0, -13.8, -2.2, { pose: 'talk' });
   // 永樂市場's front: shoppers with bags
-  C.stroll(7, [[4.6, 9.0, -28.5, -13.6, 'z']], { each: { bag: true }, pairs: 0.3 });
+  C.stroll(7, [[4.6, 9.0, -9.3, 5.6, 'z']], { each: { bag: true }, pairs: 0.3 });
   // 慈聖宮's yard: eating on stools at the food stalls
   [[5.2, -33.2, 0.6], [6.4, -34.6, -0.8], [7.3, -32.6, 2.4], [5.6, -36.6, 1.9], [7.2, -37.4, -2.2]].forEach(([x, z, ry]) => C.drop(x, z, ry, { pose: 'sitEat' }, 0.7));
   // the lane to the water gate
-  C.stroll(6, [[-26, -5, -14.9, -12.3, 'x']], { pairs: 0.3 });
+  C.stroll(6, [[-26, -5, -29.3, -26.7, 'x']], { pairs: 0.3 });
   const g = C.build(); window.__lmPeopleCount = g.userData.count;
 };
