@@ -52,6 +52,7 @@ function Kit(name) {
   const K = { g,
     push(x, y, z, ry = 0, sc = 1) { stack.push(cur.clone()); cur = cur.clone().multiply(new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(UP, ry), new T.Vector3(sc, sc, sc))); return K; },
     pop() { cur = stack.pop(); return K; },
+    cur() { return cur.clone(); },
     box(mat, w, h, dd, x, y, z, ry = 0, rx = 0, rz = 0) { put(UNIT, mat, x, y, z, [rx, ry, rz], w, h, dd); return K; },
     bx(mat, x0, x1, y0, y1, z0, z1) { put(UNIT, mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, null, Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0)); return K; },
     cyl(mat, rTop, rBot, h, x, y, z, seg = 10, rot = null) { const r = Math.max(rTop, rBot, 1e-4); put(cylG(rTop / r, rBot / r, seg), mat, x, y, z, rot, r, h, r); return K; },
@@ -156,6 +157,7 @@ const tint = (g, W, H, c) => { g.fillStyle = c; g.fillRect(0, 0, W, H); };
 // ── small things used more than once ─────────────────────────────────────────────────────────
 // a plain standing or seated figure, about 1.62 m: no face, no likeness. o: { sit, shirt, pants, mat (one material: a bronze), vest, arms: 'down' | 'fwd' | 'up', s }
 function person(K, x, z, ry, o = {}) {
+  if (window.PEOPLE && !o.mat) { K.push(x, o.y || 0, z, ry, o.s || 1); (window.__lmPeople = window.__lmPeople || []).push({ g: K.g, m: K.cur(), o }); K.pop(); if (!o.shirt) pick(SHIRT); if (!o.pants) pick(PANTS); return; }   // the people kit (lm/kit-people.js) draws this figure instead (a one-material statue figure stays here): lm/square-people.js reads the list
   const sh = o.mat || o.shirt || pick(SHIRT), pa = o.mat || o.pants || pick(PANTS), sk = o.mat || M.skin, ha = o.mat || M.hair, ty = o.sit ? 0.5 : 0.78, arms = o.arms || 'down';
   K.push(x, o.y || 0, z, ry, o.s || 1);
   if (o.sit) { [-1, 1].forEach(k => { K.box(pa, 0.13, 0.13, 0.44, k * 0.09, 0.5, 0.2); K.box(pa, 0.12, 0.46, 0.13, k * 0.09, 0.23, 0.38); K.box(M.black, 0.11, 0.06, 0.22, k * 0.09, 0.03, 0.44); }); }
