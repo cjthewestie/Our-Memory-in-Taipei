@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · The memory notice board</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script src="photo-topics.js"></script>
+<script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="places.js"></script>
+<script src="noticeboard.js"></script>
+<script>
+// Test page for noticeboard.js: the board alone in an empty lit scene. ?place=notice-board opens its panel.
+ENGINE.create({
+  title: '回憶公佈欄 · Notice board test', subtitle: 'Click the board, or walk up and press E.',
+  shadowCenter: [0, 0, 0], start: { x: 0, z: 5, heading: Math.PI },
+  bounds: { minX: -8, maxX: 8, minZ: -3, maxZ: 9 },
+  views: [[0, 1.9, 4.2, 0, 1.7, -2], [2.6, 1.6, 2.2, 0, 1.7, -2], [-2.6, 1.6, 2.2, 0, 1.7, -2], [0, 1.75, 0.2, -0.3, 1.62, -2], [0, 5, 8, 0, 1.5, -2], [3, 2, -4.5, 0, 1.6, -2]],
+  ground: { strips: [{ w: 2.8, len: 18 }], puddles: 2, puddle: (rr) => [rr(-5, 5), rr(0, 6), rr(0, 3)] },
+  dust: { x: [-8, 8], y: [0.3, 6], z: [-5, 9] },
+  models: [],
+  clamp(p) { if (window.PHOTOWALL && PHOTOWALL.keepOut) PHOTOWALL.keepOut(p); },
+  build(E) {
+    NOTICEBOARD.add(E, { position: [0, -2], rotation: 0, district: new URLSearchParams(location.search).get('d') || 'ximen' });
+    PLACES.mount(E, { district: 'ximen' });
+  },
+});
+</script>
+</body>
+</html>

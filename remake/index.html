@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · 西門紅樓 plaza, golden hour</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script src="photo-topics.js"></script>
+<script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="design-kit.js"></script>
+<script src="places.js"></script>
+<script src="lm/loader.js" data-district="ximen" data-shared="kit-people" data-modules="exit6 people lions redhouse tattoo-lane america-lane chunghwa"></script>
+<script src="landmarks-ximen.js"></script>
+<script>
+// The 西門紅樓 front plaza (CJ, 2026-11-21: 「我要整個場景的重制達成風格的轉換 先做完整的一個小區塊讓我看看」).
+// Only this block's layout lives here. The light, sky, ground, builders, finishing chain, camera and
+// controls are in engine.js, shared with every other block page.
+ENGINE.create({
+  title: '西門紅樓 · golden hour', subtitle: '西門町: click a building or a marker, or walk up and press E',
+  shadowCenter: [0, 0, 22], start: { x: 0, z: 43, heading: Math.PI }, clamp(p) { const lane = (window.LM_AREAS || []).some(r => p.x >= r.x0 && p.x <= r.x1 && p.z >= r.z0 && p.z <= r.z1); if (!lane) { p.x = Math.max(-21, Math.min(21, p.x)); p.z = Math.max(11, Math.min(60, p.z)); } PHOTOWALL.keepOut(p); },   // window.LM_AREAS: extra walkable rectangles {x0,x1,z0,z1} a module in lm/ opens (a lane off the plaza); its own walls go in with PHOTOWALL.block   // the plaza's edge, and round the topic showcases
+  views: [[0, 1.6, 47, 0, 7.5, 0], [-6, 2.2, 31, 23, 7, 37], [6, 2.4, 34, -23, 4.2, 27], [3.5, 11.5, 20, 0.5, 8, 62], [9, 1.7, 14.5, 24, 3.6, 14], [9.5, 2.4, 55.5, 24, 8, 48.5]],   // 1 the Red House · 2 萬年 and the west row · 3 中華商場 · 4 the whole plaza toward 獅子林 and 來來 · 5 天后宮, 楊桃冰, 蜂大 · 6 電影街 and 阿宗
+  ground: { strips: [{ w: 3.2, len: 60, x: 0, z: 34 }],                                   // the terrazzo path to the door
+    puddle: (rr) => { let x = rr(-19, 19); if (Math.abs(x) < 2.4) x += 5; const rot = rr(0, 3); return [x, rr(13, 56), rot]; } },
+  dust: { x: [-24, 24], y: [0.3, 11], z: [4, 56] },
+  onFrame: (E) => { if (E.heroPos.z > 59.5) E.leave('square.html'); },                    // out of the south end, back to the square
+  models: ['bundle-core', 'bundle-square'],
+  build(E, [core, sq]) {
+  const { T, scene, rr, TEX, MATS, triMat, dress, get, place, board, sign, canopy, banyans, lanternString, stall, city, uTime } = E;
+  // the Red House, front door facing the plaza (+z)
+  const redHouse = dress(get(core, 'red-house').clone()); scene.add(redHouse);
+  // what stands round the plaza is built in landmarks-ximen.js from the research (docs/places/ximen.json): 中華商場 on the 中華路 side,
+  // 天后宮 to 阿宗麵線 on the other, 獅子林 and 來來百貨 at the far end. Only the old cinema stays as a distant model.
+  place(core, 'lux', 60, -22, -0.5);
+  city(95, 210);                                                                          // a hazy city behind everything
+  banyans(get(sq, 'sq-banyan'), [[-13.5, 21, 'banyanL', 1.0], [14.5, 25, 'banyanM', 1.05], [-16, 41, 'banyanM', 1.15], [16.5, 43, 'banyanL', 1.0]]);
+  // street furniture
+  const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter'), lampPost = get(core, 'lamp'), props = get(core, 'props');
+  for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 9; i++) {
+    if ((i + (side > 0 ? 1 : 0)) % 3 === 2) continue;
+    const z = 9 + i * 4.6; if (side > 0 && (z < 14 || (z > 24 && z < 28) || (z > 30 && z < 36))) continue;                 // not across the temple gate, the alley mouth or the 萬年 doors
+    const s = dress(scooters.children[i % 3].clone()); s.position.set(side * (22.3 + rr(-0.2, 0.2)), 0, z + rr(-0.6, 0.6)); s.rotation.y = side * (Math.PI / 2 + rr(-0.35, 0.35)); scene.add(s);
+  }
+  [[-21, 12], [21, 16], [-21, 30], [21, 34], [-21, 48], [21, 50], [-7, 12], [7, 12]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
+  [[-19, 18, 1], [19, 20, -1], [-19, 36, 1], [19, 38, -1]].forEach(([x, z, f]) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.rotation.y = f * Math.PI / 2; scene.add(l); });
+  props.children.forEach((p, i) => { for (let k = 0; k < 2; k++) { const o = dress(p.clone()); o.position.set((k ? 1 : -1) * rr(20.5, 22), 0, 8 + (i * 2 + k) * 3.4 + rr(-1, 1)); o.rotation.y = rr(0, 6.28); scene.add(o); } });
+  // lantern strings: from the gable out over the plaza, and across between the arcades
+  for (let i = 0; i < 7; i++) { const t = i / 6; lanternString(new T.Vector3(-9 + t * 18, 13.2, 8.6), new T.Vector3(-23.5 + t * 47, 6.4, 30 + Math.sin(t * Math.PI) * 14), 1.6); }
+  [18, 27, 36, 45].forEach((z, i) => lanternString(new T.Vector3(-23.5, 6.2 + (i % 2) * 0.5, z), new T.Vector3(23.5, 6.2 + ((i + 1) % 2) * 0.5, z + 3), 1.9));
+  E.buildLanterns();
+  // one showcase per topic of this scene (the list is PHOTO_TOPICS, in photo-topics.js): topic key -> [x, z, facing, kind, options]. A click opens the topic's gallery.
+  PHOTOWALL.showcases(E, { section: 'red', topics: PHOTO_TOPICS.red, spots: {
+    chunghwa: [-17.2, 30.5, Math.PI / 2, 'shop'],                // a shop front on the west edge, the side its old block stands on
+    cinema: [18.2, 41.2, -Math.PI / 2, 'poster'],                // a tall billboard beside the cinema front of 電影街
+    walk: [-10.5, 38.5, 0.45, 'wall'],                           // out in the open plaza, left of the path
+    redhouse: [7.6, 15.5, -0.25, 'wall', { body: 'brick' }] } });   // a brick wall beside the path, right of the door
+  // stalls and signs
+  stall(8.5, 30, -0.5, 8); stall(-9, 35, 0.6, 205); stall(11, 37.5, -1.0, 135); stall(-8.5, 44.5, 1.1, 28);
+  // the researched places and events: buildings you can click, and a marker for every event (landmarks-ximen.js)
+  LANDMARKS_XIMEN(E, { redHouse });
+  PLACES.mount(E, { district: 'ximen' });
+  if (window.LM_RUN) LM_RUN(E, 'ximen');   // the landmark modules in lm/, one file per builder
+  // the poncho bear (CJ, 2026-11-21: "Yes, add it", then "Yes, rig it"): a Tripo model from his Midjourney views, retopologized, rigged and
+  // finished by tools/character/finish_tripo_girl.py (asset/models/bear-poncho.glb). Open the page with ?hero=bear-poncho to play as the bear;
+  // otherwise it stands beside the path.
+  if (E.heroName !== 'bear-poncho') E.loadGLB('bear-poncho').then(bear => { bear.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; } }); bear.position.set(2.6, 0, 39.5); bear.rotation.y = -0.35; scene.add(bear); window.__bear = bear; });
+  },
+});
+</script>
+</body>
+</html>

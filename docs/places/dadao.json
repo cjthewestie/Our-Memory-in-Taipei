@@ -1,0 +1,1688 @@
+{
+  "district": "dadao",
+  "district_zh": "大稻埕 / 迪化街",
+  "researched": "2026-11-21",
+  "label_key": {
+    "measured": "Read on the cited page itself (via: page) or in a search-result summary of the cited page (via: search-snippet; weaker, re-open the page before publishing).",
+    "inferred": "Reasoned from measured facts or from general knowledge of the area; NOT read on a cited page. Check against the reference photos before modelling or publishing.",
+    "unknown": "Written as (unknown — needs CJ). Not confirmed by any page read."
+  },
+  "photo_note": "Reference photo URLs are Wikimedia Commons file pages built from file names listed on the cited Wikipedia articles (inferred URLs, not each opened). Licence was not read on any file page; Commons files are normally CC BY-SA or similar, but check each file page before reuse.",
+  "street_orientation_note": "inferred: Dihua Street Section 1 runs roughly south (Nanjing W. Rd) to north. Odd numbers (21 Yongle Market, 61 City God Temple) are on the east side, even numbers (34 Watsons, 154-158 Lin house) on the west side. Yanping N. Rd runs parallel one block east; Xining N. Rd one block west; the Tamsui River flood wall and wharf are further west. Minsheng W. Rd crosses east-west and ends at the wharf.",
+  "places": [
+    {
+      "id": "xiahai-city-god-temple",
+      "zh": "台北霞海城隍廟",
+      "en": "Taipei Xia-Hai City God Temple",
+      "kind": "place",
+      "years": "founded 1856, completed 1859; rebuilt 1994-1998; still open",
+      "history_en": "Residents of the new market street raised money for this temple in 1856 and finished it in 1859. It is small, about 46 ping (roughly 152 square metres), and has stayed on the same spot on Dihua Street ever since. The main god is the Xia-Hai City God. A City God's Wife was added in 1893, and a statue of the Old Man under the Moon, the matchmaker god, arrived in 1971 and is now the most visited. The temple became a city monument on 19 August 1985. A 1994-1998 restoration was dedicated on 16 May 1998.",
+      "history_zh": "咸豐六年（1856）集資興建，1859年落成，廟地僅約46坪。主祀霞海城隍，1893年增祀城隍夫人，1971年供奉月下老人，求姻緣者眾。1985年8月19日指定為市定古蹟，1998年整修完成。",
+      "facts": [
+        {
+          "fact": "Funded 1856, completed 1859 on 南街",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "fact": "Address 迪化街一段61號; site about 46 ping",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "fact": "City monument since 19 Aug 1985; 1994-1998 rebuild dedicated 16 May 1998; earlier repairs 1934 and 1971",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "fact": "City God's Wife added 1893; Old Man under the Moon statue dates from 1971",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Very small single-storey temple, one main hall plus one side hall, set in line with the shophouse row rather than behind a big courtyard",
+          "label": "measured (hall count, size) + inferred (in line with row)"
+        },
+        {
+          "detail": "1998 restoration replaced wall tiles with white stone and added lattice windows to the shrine niches",
+          "label": "measured"
+        },
+        {
+          "detail": "Traditional southern-Fujian temple roof with upturned swallowtail ridge and orange-red tiles; red doors with painted door gods",
+          "label": "inferred (general knowledge, check photo)"
+        },
+        {
+          "detail": "Large incense burner and offering tables in the narrow forecourt facing the street; red lanterns hung in rows overhead",
+          "label": "inferred (general knowledge, check photo)"
+        },
+        {
+          "detail": "Name board text 霞海城隍廟 over the door; colours (unknown — needs CJ, read from photo)",
+          "label": "inferred"
+        }
+      ],
+      "location": "East side of Dihua Street Section 1 at No. 61, north of Yongle Market (No. 21) and south of Minsheng W. Rd. Faces west onto the street. (address measured; side and order inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:大稻埕霞海城隍廟正面照.jpg",
+          "note": "front view; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/Category:Taipei_Xia-Hai_City_God_Temple",
+          "note": "Commons category (URL measured on the article); licence per file"
+        }
+      ]
+    },
+    {
+      "id": "yongle-market",
+      "zh": "永樂市場（永樂布業商場）",
+      "en": "Yongle Market (Yongle Fabric Market)",
+      "kind": "place",
+      "years": "market founded 1908; current building reopened 1985 (one source); still open",
+      "history_en": "The market began in 1908 under Japanese rule as a public food market for the Yongle-cho district. Japanese traders brought printed cloth in through Dadaocheng, and the market slowly turned into the main fabric wholesale centre of Taiwan. One source says the old market was torn down in 1982 and reopened on the same site in 1985 as a multi-storey building. Fresh food is on the ground floor, fabric stalls on the floors above, and since 2010 the Dadaocheng Theatre has used the 8th and 9th floors.",
+      "history_zh": "前身為1908年設立的公設永樂町食料品小賣市場，後因日商輸入印花布而成為全台布料批發重鎮。據載1982年拆除改建、1985年原地重新開業，一樓生鮮、樓上布市，八、九樓為大稻埕戲苑。",
+      "facts": [
+        {
+          "fact": "Founded 1908 as 公設永樂町食料品小賣市場",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://travel.yam.com/article/139306"
+        },
+        {
+          "fact": "Old market demolished 民國71 (1982), reopened on site 民國74 (1985); 1F fresh food, 2-3F fabric, 4F food court. A travel site instead mentions a large 1933 rebuild; the two are not reconciled",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://blog.udn.com/yumei0750/4201685"
+        },
+        {
+          "fact": "Address 迪化街一段21號; Dadaocheng Theatre on 8F and 9F",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕戲苑"
+        },
+        {
+          "fact": "Exterior described as retro red-brick wall with an octagonal tower feature (八角塔)",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://travel.yam.com/article/139306"
+        },
+        {
+          "fact": "Total number of storeys",
+          "label": "unknown",
+          "value": "(unknown — needs CJ); at least 9 because the theatre is on 9F (inferred)"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Large modern block, at least 9 storeys, far taller and wider than the 2-3 storey shophouses around it",
+          "label": "inferred from theatre floor numbers"
+        },
+        {
+          "detail": "Street face treated in red brick to match the old street, with an octagonal tower element",
+          "label": "measured (search-snippet)"
+        },
+        {
+          "detail": "Ground floor open market hall with fresh food stalls and cooked-food stalls at the corners; signage 永樂市場",
+          "label": "measured (use) + inferred (signage)"
+        },
+        {
+          "detail": "Second floor: dense grid of small fabric stalls with bolts of cloth stacked floor to ceiling",
+          "label": "inferred (general knowledge, check photo)"
+        },
+        {
+          "detail": "A small plaza in front (Yongle Plaza) between the market and the City God Temple, used for events",
+          "label": "inferred (general knowledge)"
+        }
+      ],
+      "location": "East side of Dihua Street Section 1 at No. 21, between Dihua Street and Yanping N. Rd Section 2, near Nanjing W. Rd at the south end of the street. (measured: address, between the two roads)",
+      "sources": [
+        "https://travel.yam.com/article/139306",
+        "https://blog.udn.com/yumei0750/4201685",
+        "https://zh.wikipedia.org/zh-tw/大稻埕戲苑"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:TAPO_Dadaocheng_Theater_at_Yongle_Building_20171014.jpg",
+          "note": "Yongle building exterior; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "dadaocheng-theatre",
+      "zh": "大稻埕戲苑",
+      "en": "Dadaocheng Theatre",
+      "kind": "place",
+      "years": "renamed 31 Oct 2009; trial opening 6 Mar 2010; still open",
+      "history_en": "The top floors of the Yongle Market building were a district activity centre from February 1987. The space was rebuilt from March 2009 as part of a city plan to revive old Dadaocheng, renamed Dadaocheng Theatre on 31 October 2009, and began trial operation on 6 March 2010. The 9th floor holds a 506-seat theatre for Taiwanese opera, Peking opera, Nanguan, Beiguan and Hakka opera. The 8th floor has a small hall of about 100 seats for glove puppetry and storytelling, plus a corridor exhibition on three puppet traditions. It is run by the Taipei Arts Promotion Office.",
+      "history_zh": "位於永樂市場大樓八、九樓，前身為1987年啟用的延平活動中心。2009年改建並更名，2010年3月6日試營運。九樓劇場506席，演出歌仔戲、京劇、南北管；八樓設曲藝場與偶戲展示。",
+      "facts": [
+        {
+          "fact": "8F and 9F of 永樂市場大樓, 迪化街一段21號",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕戲苑"
+        },
+        {
+          "fact": "延平活動中心 from Feb 1987; rebuilt Mar 2009; renamed 31 Oct 2009; trial operation 6 Mar 2010",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕戲苑"
+        },
+        {
+          "fact": "9F theatre 506 seats; 8F 曲藝場 about 100 seats; operator 臺北市藝文推廣處",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕戲苑"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "No street-level building of its own: model as a sign and lift lobby entrance on the Yongle Market building, with the theatre implied on the top two floors",
+          "label": "inferred"
+        },
+        {
+          "detail": "8th-floor corridor exhibition with puppet displays, including Four Heavenly Kings figures (a Commons photo is titled that way)",
+          "label": "measured (file name) + inferred"
+        },
+        {
+          "detail": "Entrance sign text 大稻埕戲苑; colours (unknown — needs CJ, read from photo)",
+          "label": "inferred"
+        }
+      ],
+      "location": "Inside the Yongle Market building, east side of Dihua Street Section 1, No. 21, floors 8-9. (measured)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/大稻埕戲苑"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:TAPO_Dadaocheng_Theater_entrance_20171014b.jpg",
+          "note": "8F entrance; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Four_Heavenly_Kings_at_TAPO_Dadaocheng_Theater_20171014.jpg",
+          "note": "corridor exhibition; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "dihua-shophouse-rows",
+      "zh": "迪化街街屋立面",
+      "en": "Dihua Street shophouse rows",
+      "kind": "place",
+      "years": "street formed 1850s; named Dihua Street 1947; 77 historic buildings kept under the 1995 plan",
+      "history_en": "Dihua Street took shape in the 1850s and by the late 1800s was Taipei's main street for dried goods, tea, Chinese medicine and cloth. In the Qing era it was several short streets, such as South Street, Middle Street and Middle-North Street. Under Japan it was Yongle-cho; in 1947 it was renamed after Dihua, today's Urumqi. Four facade types stand side by side: low Minnan houses, two-storey Western-style houses, Baroque-style fronts with raised sculpted gables, and plain Modernist fronts, the most common type. A 1995 plan kept the street at its old width and preserved 77 historic buildings.",
+      "history_zh": "迪化街成形於咸豐年間，清末為南北貨、茶葉、中藥與布匹集散地，1947年定名。街屋立面可分閩南式、洋樓式、仿巴洛克式與現代主義式四類。1995年確定維持原路寬，保存77棟歷史性建築。",
+      "facts": [
+        {
+          "fact": "Built in the Xianfeng era (1850s); Qing street names 中街, 中北街, 南街; Japanese-era 永樂町通; renamed 1947 after 迪化 (Urumqi)",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "閩南式: mostly single-storey, tiled sloping roof, wooden doors and windows, oldest type, concentrated on 中北街",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "洋樓式: usually two storeys, parapets, arched windows, vase-shaped balusters",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "仿巴洛克式: raised sculpted facade (gable) with floral ornament",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "現代主義式: clean lines, balanced proportions, most common type on the street",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "1995 plan kept original width and preserved 77 historic buildings; original width about 7.8 m per the Dihua Street article (the Dadaocheng article says 5 m)",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Narrow street about 7.8 m wide with continuous covered arcades (亭仔腳) at ground level on both sides",
+          "label": "measured (width) + inferred (arcade)"
+        },
+        {
+          "detail": "Minnan type: one storey, red clay roof tiles, timber shopfront boards, low eaves",
+          "label": "measured"
+        },
+        {
+          "detail": "Western type: two storeys, red brick, arched windows, parapet with green-glazed vase balusters",
+          "label": "measured (form) + inferred (red brick, green glaze)"
+        },
+        {
+          "detail": "Baroque type: three bays, tall pediment gable with plaster flowers, fruit and the shop name in relief; washed-stone or painted plaster in grey and cream",
+          "label": "measured (gable, floral) + inferred (materials, colours)"
+        },
+        {
+          "detail": "Modernist type: flat front, horizontal bands, simple geometric parapet, washed-stone grey",
+          "label": "measured (form) + inferred (material)"
+        },
+        {
+          "detail": "Shop goods spill onto the arcade: sacks and baskets of dried mushrooms, shrimp, nuts, herbs; hanging red banners at New Year",
+          "label": "inferred (general knowledge, check photos)"
+        }
+      ],
+      "location": "Section 1 runs from Nanjing W. Rd north toward Yanping N. Rd Section 4 and the Daqiaotou area. South Street lies between Yongchang St and Minsheng W. Rd; Middle Street between Minsheng W. Rd and Guisui St. (measured)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/迪化街",
+        "https://zh.wikipedia.org/zh-tw/大稻埕"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Buildings_along_Dihua_Street_07.23_(10).jpg",
+          "note": "street facades; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Aerial_photographs_of_Dihua_Street.jpg",
+          "note": "aerial view for roof layout; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Main_street_in_Dadaocheng.jpg",
+          "note": "street view; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "watsons-pharmacy-artyard",
+      "zh": "屈臣氏大藥房（小藝埕）",
+      "en": "A.S. Watson & Co. pharmacy building (ArtYard)",
+      "kind": "shop",
+      "years": "Watsons trading here from 1917 (another source says about 1928); listed 2005; ArtYard from 2011",
+      "history_en": "This corner building carried the Watsons name as a wholesaler of imported Western medicine on Dihua Street from 1917, though one account puts the opening at about 1928. A travel article calls it the first Western pharmacy in Taiwan and, in its day, the tallest and grandest building nearby. The old shop was listed as a Taipei city monument in 2005. In 2011 part of it became ArtYard, a shared house of small culture businesses, with a bookshop about the 1920s on the ground floor, a cafe, and a small theatre on the third floor.",
+      "history_zh": "屈臣氏大藥房自1917年起在迪化街批發進口西藥（另說約1928年）。三層樓洗石子立面坐落街角，2005年列為市定古蹟。2011年部分空間成為小藝埕，設有1920s書店、咖啡館與三樓思劇場。",
+      "facts": [
+        {
+          "fact": "Watsons operating on Dihua Street from 1917, wholesaling imported Western medicine; listed 市定古蹟 in 2005",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/屈臣氏大藥房"
+        },
+        {
+          "fact": "Alternative opening date about 1928",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "Three-storey washed-stone (洗石子) flat-beam building on a street corner; 2011 the right wing inner building became 小藝埕",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://travel.yam.com/article/128430"
+        },
+        {
+          "fact": "Address 迪化街一段34號; ArtYard entrance 迪化街一段32巷1號; 1F 1920s書店; 3F 思劇場; cement-sculpted shop name and trademark still visible on the facade",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.tatlerasia.com/lifestyle/travel/da-dao-cheng-taipei-zh-hant"
+        },
+        {
+          "fact": "Builder 李俊啟; the fire (brief says 1998) and the restoration years",
+          "label": "unknown",
+          "value": "(unknown — needs CJ). No page read confirmed the builder, the fire date or the restoration dates. One article only calls it a rebuilt Li family house."
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Three storeys on a street corner, grey washed-stone finish, flat lintels rather than arches",
+          "label": "measured (search-snippet)"
+        },
+        {
+          "detail": "Cement relief lettering 屈臣氏大藥房 and a trademark emblem on the upper facade",
+          "label": "measured (search-snippet) for existence; exact wording and emblem design inferred, read from photo"
+        },
+        {
+          "detail": "Emblem believed to be the Watsons dragon-and-pagoda mark in a roundel on the pediment",
+          "label": "inferred (general knowledge, check photo)"
+        },
+        {
+          "detail": "Ground-floor arcade with bookshop window; small ArtYard sign at the side lane entrance",
+          "label": "inferred"
+        }
+      ],
+      "location": "West side of Dihua Street Section 1, No. 34, at the corner of Lane 32; diagonally across from Yongle Market and the City God Temple. (address measured via snippet; side inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/屈臣氏大藥房",
+        "https://travel.yam.com/article/128430",
+        "https://www.tatlerasia.com/lifestyle/travel/da-dao-cheng-taipei-zh-hant"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Watson's_Pharmacy,_Dihua_Street_20160604.jpg",
+          "note": "facade 2016; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:屈臣氏大藥房.jpg",
+          "note": "facade; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "dadaocheng-wharf",
+      "zh": "大稻埕碼頭",
+      "en": "Dadaocheng Wharf",
+      "kind": "place",
+      "years": "trade port from the 1860s; revived as a leisure wharf 2005; still open",
+      "history_en": "After Tamsui opened as a treaty port in 1860, Dadaocheng passed Monga as the trading centre of northern Taiwan, and foreign firms shipped tea, sugar and camphor from this riverbank. The wharf faded as river trade declined. In 2005 the Taipei City Government revived it as a place for tourism, cycling and boat trips on the Tamsui River. Boats leave for Tamsui, and a container market with food, coffee and craft beer stands outside Flood Gate No. 5. The riverside park beside it hosts the summer fireworks.",
+      "history_zh": "1860年淡水開港後，大稻埕成為北台灣茶、糖、樟腦的出口商埠。河運沒落後沉寂，2005年市府重新打造為觀光、自行車與藍色水路的起點。五號水門外設有貨櫃市集，夏季煙火在此施放。",
+      "facts": [
+        {
+          "fact": "Tamsui opened 1860; Dadaocheng overtook Monga; tea, sugar, camphor trade",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕"
+        },
+        {
+          "fact": "Revived by the city in 2005 for tourism, cycling and boat tours; near No. 5 Water Gate; boats to Tamsui",
+          "label": "measured",
+          "via": "page",
+          "source": "https://en.wikipedia.org/wiki/Dadaocheng_Wharf"
+        },
+        {
+          "fact": "Container market outside 五號水門 with foreign food, coffee, craft beer; boats pass under Zhongxiao, Taipei and Chongyang bridges",
+          "label": "measured",
+          "via": "page",
+          "source": "https://udn.com/news/story/6961/9644197"
+        },
+        {
+          "fact": "Year the container market opened; whether a replica sailing junk stands on the plaza",
+          "label": "unknown",
+          "value": "(unknown — needs CJ)"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Tall concrete flood wall with a heavy steel flood gate (No. 5) that you walk through to reach the river",
+          "label": "measured (gate) + inferred (materials)"
+        },
+        {
+          "detail": "Flat riverside plaza and bike path, pontoon pier with tour boats, wide view of the Tamsui River and sunset to the west",
+          "label": "measured (bike path, boats) + inferred"
+        },
+        {
+          "detail": "Cluster of painted shipping containers stacked two high as food stalls with rooftop seating",
+          "label": "measured (container market) + inferred (stacking, seating)"
+        },
+        {
+          "detail": "Wooden replica of a Chinese sailing junk on the plaza",
+          "label": "inferred (general knowledge, unconfirmed)"
+        }
+      ],
+      "location": "On the Tamsui River bank at the west end of Minsheng W. Rd, outside Flood Gate No. 5, about two blocks west of Dihua Street. Coordinates 25°3′23.4″N 121°30′26.9″E. (gate and coordinates measured; road relation inferred)",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Dadaocheng_Wharf",
+        "https://udn.com/news/story/6961/9644197",
+        "https://zh.wikipedia.org/zh-tw/大稻埕"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Taipei_Taiwan_Flood-Gate-01.jpg",
+          "note": "flood gate; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Panoramic_Views_of_Taiper_Riverside_from_Dadaocheng_Wharf_07.23.jpg",
+          "note": "riverside panorama July 2023; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "sin-hong-choon-tea",
+      "zh": "新芳春茶行",
+      "en": "Sin Hong Choon Tea House",
+      "kind": "shop",
+      "years": "built 1934; tea trade wound down after the 1960s; restored 2015; open to the public 20 Sep 2016",
+      "history_en": "Tea merchant Wang Fang-qun came from Anxi in Fujian, and his son Wang Lian-he built this tea house in 1934. The ground floor was shop and workshop, the second floor offices and a reception room, and the third floor a shrine hall and family rooms. Business faded after the 1960s. The building was registered as a historic building on 8 March 2005 and approved as a city monument in 2009. A four-year restoration ended with a ceremony on 18 December 2015, the TV drama Purple Dadaocheng filmed here, and it opened to the public on 20 September 2016.",
+      "history_zh": "安溪茶商王芳群之子王連河於1934年興建，一樓店面與製茶工場、二樓辦公、三樓祀堂與住家。1960年代後茶業式微。2009年指定為市定古蹟，2015年底修復完成，曾借予《紫色大稻埕》拍攝，2016年9月20日開放。",
+      "facts": [
+        {
+          "fact": "Built 1934 by 王連河 at 民生西路303-309號; founder 王芳群 from Anxi",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/新芳春茶行"
+        },
+        {
+          "fact": "Three levels of use; three-bay (三崁) row house; TR bricks; facade clay sculpture attributed to 郭三川; weight-sash windows; gate couplets 芳尋顧渚 / 春採蒙山",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/新芳春茶行"
+        },
+        {
+          "fact": "Historic building 8 Mar 2005; monument approved Sep 2009; restoration ceremony 18 Dec 2015; opened 20 Sep 2016; reopened as 茶葉故事館 31 May 2019",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/新芳春茶行"
+        },
+        {
+          "fact": "Lent to the crew of 紫色大稻埕 after restoration",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/新芳春茶行"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Three storeys, three bays wide, long and deep plan with inner courtyards",
+          "label": "measured (levels, bays) + inferred (courtyards)"
+        },
+        {
+          "detail": "Brown-red TR brick walls with moulded clay ornament on the front, sash windows with counterweights",
+          "label": "measured (materials) + inferred (colour)"
+        },
+        {
+          "detail": "Couplets either side of the door: 芳尋顧渚 and 春採蒙山",
+          "label": "measured"
+        },
+        {
+          "detail": "Inside: hexagonal tortoise-shell floor tiles, cypress stair rail pierced with tea-leaf shapes, charcoal roasting room with round pits, a wooden winnowing machine",
+          "label": "measured"
+        }
+      ],
+      "location": "No. 309 Minsheng W. Rd, on the odd-numbered side, east of Dihua Street and almost opposite Bolero restaurant (Nos. 308 and 314). (address measured; relation inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/新芳春茶行"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:新芳春茶行正面照.jpg",
+          "note": "front; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:新芳春茶行入口.jpg",
+          "note": "entrance with couplets; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:新芳春茶行內焙籠間.jpg",
+          "note": "roasting room; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "bolero-restaurant",
+      "zh": "波麗路西餐廳",
+      "en": "Bolero Restaurant",
+      "kind": "shop",
+      "years": "opened 1934; second shop 1976; still open",
+      "history_en": "Liao Shui-lai, who had trained at a Japanese-run Western restaurant, opened Bolero in 1934 and named it after Ravel's music. It had some of the best sound equipment in Taiwan and played imported classical records, so young writers and artists met here to listen and talk. Painter Yan Yun-lian redesigned the interior in 1947. The house dishes are country-style curry rice and French duck rice, served on steel plates made for the shop. In 1976 the second generation split the business, and a second Bolero opened a few doors away at No. 308.",
+      "history_zh": "廖水來於1934年創立，店名取自拉威爾《波麗路》。以頂級音響播放古典音樂，是文人與藝術家聚會之地。1947年由畫家顏雲連設計裝修。1976年第二代分家，於民生西路308號另開新店。",
+      "facts": [
+        {
+          "fact": "Founded 1934 by 廖水來; name from Ravel's Boléro; top audio equipment; gathering place of young writers and artists",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/波麗路西餐廳"
+        },
+        {
+          "fact": "Main shop 民生西路314號; new shop No. 308 opened 1976 after the brothers split",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/波麗路西餐廳"
+        },
+        {
+          "fact": "1947 renovation by painter 顏雲連; dishes 鄉村咖哩飯 and 法國鴨子飯; custom stainless steel cutlery and plates",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/波麗路西餐廳"
+        },
+        {
+          "fact": "Taipei historic building; text gives 2006, infobox gives 6 Sep 2018",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/波麗路西餐廳"
+        },
+        {
+          "fact": "Reputation as a matchmaking (相親) restaurant",
+          "label": "unknown",
+          "value": "(unknown — needs CJ); widely said but not on the page read"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Two separate shopfronts on the same side of the road, Nos. 314 and 308, each with its own BOLERO / 波麗路 sign",
+          "label": "measured (two shops) + inferred (sign wording)"
+        },
+        {
+          "detail": "Mid-century modern interior: booths, abstract wall reliefs and coloured panels from the 1947 design",
+          "label": "measured (1947 redesign) + inferred (details, check photo)"
+        },
+        {
+          "detail": "Stainless steel oval steak plates and cutlery on the tables; a record player and speakers as a prop",
+          "label": "measured"
+        },
+        {
+          "detail": "Facade colours and sign colours: (unknown — needs CJ, read from the 2013 photos)",
+          "label": "inferred"
+        }
+      ],
+      "location": "Nos. 314 (main) and 308 (new) Minsheng W. Rd, even-numbered side, east of Dihua Street near Yanping N. Rd; Sin Hong Choon (No. 309) is across the road. (addresses measured; relation inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/波麗路西餐廳"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Bolero_Restaurant_314_20131216.JPG",
+          "note": "main shop 2013; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Bolero_Restaurant_308_and_Mitsubishi_Freeca_20131216.jpg",
+          "note": "new shop 2013; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "lin-wuhu-house",
+      "zh": "林五湖本館（林家古厝）",
+      "en": "Lin Wu-hu Hall (Lin family old house)",
+      "kind": "shop",
+      "years": "built 1851; still standing, run as a fortune-telling hall",
+      "history_en": "In 1851 the merchant Lin Lan-tian moved from Keelung to Dadaocheng to get away from pirates and built three shophouses here. They are counted among the oldest buildings on Dihua Street and are called its first Minnan-style shophouse. The plan is three halls with two courtyards between them. The front hall on the street was for trade, the middle hall with its open well was for family life and guests, and the back hall was a warehouse that once opened toward the Tamsui River. The family repairs it about every ten years. Today it houses the Lin Wu-hu fortune-telling hall.",
+      "history_zh": "咸豐元年（1851）商人林藍田自基隆遷來所建，為迪化街最古老的閩南式街屋之一。三進兩院：前進營商、中進設樓井為起居空間、後進為倉庫，昔日可通淡水河。現為林五湖命相館。",
+      "facts": [
+        {
+          "fact": "迪化街一段154、156、158號; built 1851 by 林藍田; three shophouses; first Minnan-style shophouse on the street",
+          "label": "measured",
+          "via": "page",
+          "source": "https://newtalk.tw/news/view/2021-08-02/614098"
+        },
+        {
+          "fact": "Three halls, two courtyards; middle hall has a 樓井 (open well); rear hall was a warehouse reaching toward the river; major repair about every ten years",
+          "label": "measured",
+          "via": "page",
+          "source": "https://newtalk.tw/news/view/2021-08-02/614098"
+        },
+        {
+          "fact": "Lin Lan-tian's first shop was named 林益順 (1851), the first store in Dadaocheng; site on 中街 between Minsheng W. Rd and Guisui St",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Low Minnan shophouse, red clay tile pitched roof, timber plank shopfront, much lower than the 2-3 storey neighbours",
+          "label": "inferred from the Minnan type description, check photo"
+        },
+        {
+          "detail": "Deep narrow plan: three halls in a line with two small open courtyards",
+          "label": "measured"
+        },
+        {
+          "detail": "Sign text 林五湖 with fortune-telling (命相) wording; colours (unknown — needs CJ, read from photo)",
+          "label": "inferred"
+        },
+        {
+          "detail": "Number of storeys at the street front",
+          "label": "unknown: (unknown — needs CJ); source does not say"
+        }
+      ],
+      "location": "West side of Dihua Street Section 1, Nos. 154-158, north of Minsheng W. Rd in the old Middle Street stretch toward Guisui St. (address measured; side inferred)",
+      "sources": [
+        "https://newtalk.tw/news/view/2021-08-02/614098",
+        "https://zh.wikipedia.org/zh-tw/大稻埕"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Lin_Wuhu_Numerology_Hall_20150419.jpg",
+          "note": "front 2015; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "cisheng-temple",
+      "zh": "大稻埕慈聖宮",
+      "en": "Dadaocheng Cisheng Temple (Mazu temple and food court)",
+      "kind": "place",
+      "years": "first built 1864; moved 1866 and 1910; current temple completed 1914; still open",
+      "history_en": "This Mazu temple was first built in 1864 and moved in 1866 to a site facing the Dadaocheng wharf. Japanese-era street planning forced another move in 1910, and the temple was rebuilt on its present site by 1914 using the old materials. Its stone dragon columns, tablets and carved beams were shipped from Xiamen and cut by craftsmen from Tong'an. The forecourt is lined with old food stalls selling pork rib soup, fried rice with whitebait, smoked shark, Shantou buns and four-herb soup. It was made a city monument on 22 December 2020.",
+      "history_zh": "主祀媽祖，同治三年（1864）創建，1866年遷至面向碼頭處，1910年因市區改正再遷，1914年於現址重建完成，石柱雕樑沿用舊材。廟埕小吃攤林立，有排骨湯、魩仔魚炒飯、鯊魚煙等。2020年指定為市定古蹟。",
+      "facts": [
+        {
+          "fact": "Built 1864; moved 1866 to Minle St / Minsheng W. Rd facing the wharf; moved 1910; rebuilt at present site 1914",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕慈聖宮"
+        },
+        {
+          "fact": "Address 保安街49巷17號; stone dragon columns and carved beams from Xiamen by Tong'an craftsmen; front hall renovated 1994",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕慈聖宮"
+        },
+        {
+          "fact": "Stalls: 魩仔魚炒飯, 原汁排骨湯, 鯊魚煙, 毛蟹, 汕頭包子, 四神湯",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕慈聖宮"
+        },
+        {
+          "fact": "City monument 22 Dec 2020",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕慈聖宮"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Traditional temple front with carved stone dragon columns and stone tablets; a Tongzhi 6 (1867) stone pillar survives",
+          "label": "measured"
+        },
+        {
+          "detail": "Long forecourt lane with a row of small numbered food stalls down one side",
+          "label": "measured (stalls) + inferred (layout)"
+        },
+        {
+          "detail": "Old banyan trees shading metal folding tables and plastic stools in front of the temple",
+          "label": "inferred (general knowledge; the page read does not mention trees or tables)"
+        },
+        {
+          "detail": "Roof and door colours: (unknown — needs CJ, read from photo)",
+          "label": "inferred"
+        }
+      ],
+      "location": "No. 17, Lane 49, Bao'an St, east of Dihua Street near Yanping N. Rd, north of Minsheng W. Rd. (address measured; relation inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/大稻埕慈聖宮"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:大稻埕慈聖宮正面照.jpg",
+          "note": "front; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:大稻埕慈聖宮同治六年石柱.jpg",
+          "note": "1867 stone pillar; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "li-linqiu-house",
+      "zh": "李臨秋故居",
+      "en": "Li Lin-qiu's Former Residence",
+      "kind": "place",
+      "years": "house rebuilt about 1932; Li died here 13 Feb 1979; opened to the public 26 Jul 2024",
+      "history_en": "Li Lin-qiu was a lyricist, linked above all with the song Bang Chhun Hong (望春風). He lived and wrote in this house from middle age until he died here on 13 February 1979. The plot was first built on about 1887, and around 1932 it was rebuilt as a two-storey brick shophouse. The front is only about 5.4 metres wide, with four columns making three bays. The city listed it as a monument (the page gives both 27 December 2021 and 21 February 2022), and after restoration it opened as an arts space on 26 July 2024.",
+      "history_zh": "〈望春風〉作詞人李臨秋中年後在此生活創作，1979年2月13日於此辭世。屋舍約1932年改建為二層磚造街屋，面寬約5.4公尺、四柱三開間。指定為市定古蹟後修復，2024年7月26日對外開放。",
+      "facts": [
+        {
+          "fact": "Lyricist linked with 望春風; lived here from middle age; died here 13 Feb 1979",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/李臨秋故居"
+        },
+        {
+          "fact": "西寧北路86巷4號; lot developed about 1887; rebuilt about 1932 as two-storey brick shophouse; brick and timber, red-brick floor, plaster walls, fir partitions; facade about 5.4 m, four columns, three bays",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/李臨秋故居"
+        },
+        {
+          "fact": "Monument designation 27 Dec 2021 (text) or 21 Feb 2022 (infobox); opened 26 Jul 2024",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/李臨秋故居"
+        },
+        {
+          "fact": "A Li Lin-qiu statue in Dadaocheng Park",
+          "label": "unknown",
+          "value": "(unknown — needs CJ); not on the page read"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Two-storey brick-and-timber house in a narrow lane, about 5.4 m wide, four columns and three bays",
+          "label": "measured"
+        },
+        {
+          "detail": "Red-brick floors, white plaster walls, fir-plank partitions inside; a street-facing window (a Commons photo shows it)",
+          "label": "measured"
+        },
+        {
+          "detail": "Prop idea: a writing desk with lyric sheets for 望春風 by the window",
+          "label": "inferred (suggestion)"
+        }
+      ],
+      "location": "No. 4, Lane 86, Xining N. Rd, one block west of Dihua Street toward the river. Coordinates 25°03′18″N 121°30′31″E. (address and coordinates measured; relation inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/李臨秋故居"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:李臨秋故居一景.jpg",
+          "note": "exterior; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:李臨秋故居街窗.jpg",
+          "note": "street window; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "puppet-theatre-museum",
+      "zh": "林柳新紀念偶戲博物館（台原亞洲偶戲博物館）",
+      "en": "Lin Liu-hsin Puppet Theatre Museum (Taiyuan Asian Puppet Theatre Museum)",
+      "kind": "place",
+      "years": "opened 2000; renamed Nov 2005; closed 1 Jul 2019",
+      "history_en": "The museum opened in 2000 as the TTT Puppet Centre. In November 2005 it was renamed the Lin Liu-hsin Puppet Theatre Museum, and later the Taiyuan Asian Puppet Theatre Museum. Its founder, Dr Lin Jing-fu, began collecting after seeing a fine traditional puppet on a trip to Japan in the 1990s. The collection grew to more than 10,000 pieces from around the world: glove puppets, shadow puppets, string puppets and water puppets. It also ran workshops and shows. The museum closed on 1 July 2019, so it fits the 2000-2019 scene almost exactly.",
+      "history_zh": "2000年以大稻埕偶戲館之名成立，2005年11月更名為林柳新紀念偶戲博物館，後改稱台原亞洲偶戲博物館。館藏逾萬件布袋戲偶、皮影、懸絲偶與水傀儡。2019年7月1日閉館。",
+      "facts": [
+        {
+          "fact": "2000 TTT Puppet Centre; Nov 2005 renamed Lin Liu-hsin Puppet Theatre Museum; later Taiyuan Asian Puppet Theatre Museum; closed 1 Jul 2019; over 10,000 items",
+          "label": "measured",
+          "via": "page",
+          "source": "https://en.wikipedia.org/wiki/Taiyuan_Asian_Puppet_Theatre_Museum"
+        },
+        {
+          "fact": "Founder Dr 林經甫 began collecting after a 1990s trip to Japan",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.moc.gov.tw/en/information_251_77412.html"
+        },
+        {
+          "fact": "Address 西寧北路79號 (one listing says 79-1)",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://en.wikipedia.org/wiki/Taiyuan_Asian_Puppet_Theatre_Museum"
+        },
+        {
+          "fact": "Chinese name of the 2000 centre (大稻埕偶戲館) and the building's storeys, age and facade",
+          "label": "unknown",
+          "value": "(unknown — needs CJ); no page read describes the building"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Old shophouse on Xining N. Rd; storeys and facade: (unknown — needs CJ, read from the 2008 photo)",
+          "label": "unknown"
+        },
+        {
+          "detail": "Window or doorway display of glove puppets in embroidered costumes on a carved wooden puppet stage",
+          "label": "inferred (suggestion based on the collection)"
+        },
+        {
+          "detail": "Sign text 林柳新紀念偶戲博物館 for the 2005-era look",
+          "label": "inferred from the name; check photo"
+        }
+      ],
+      "location": "No. 79 Xining N. Rd, one block west of Dihua Street, close to Li Lin-qiu's house (Lane 86). (address via snippet; relation inferred)",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Taiyuan_Asian_Puppet_Theatre_Museum",
+        "https://www.moc.gov.tw/en/information_251_77412.html"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Lin_Liu-Hsin_Puppet_Theatre_Museum_20080524.jpg",
+          "note": "exterior 2008; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "tianma-tea-house",
+      "zh": "天馬茶房",
+      "en": "Tianma Tea House (site)",
+      "kind": "shop",
+      "years": "opened 1941; original building demolished late 2005; tea house reopened on the 3rd floor of the new building 2011",
+      "history_en": "Zhan Tian-ma, a well-known silent-film narrator, opened this tea house in 1941 in the Taihei-cho part of Dadaocheng. On 27 February 1947 Monopoly Bureau inspectors seized the cigarettes of a widow selling in front of it, and the shooting that followed set off the 228 Incident. The old building was pulled down at the end of 2005 and a taller block replaced it. Local elders and culture workers reopened a tea house on the third floor of the new building in 2011. A plaque in Chinese and English marks the flash point a little to the east.",
+      "history_zh": "知名辯士詹天馬於1941年在太平町開設。1947年2月27日專賣局查緝員在店前取締私菸，引爆二二八事件。原建築2005年底拆除改建大樓，2011年文史工作者於新樓三樓重開茶房，附近立有事件引爆地碑。",
+      "facts": [
+        {
+          "fact": "Founded 1941 by 詹天馬 (benshi); former address 太平町三丁目; now 南京西路189號, opposite 法主公廟",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/天馬茶房"
+        },
+        {
+          "fact": "Original building torn down end of 2005 and replaced by a high-rise",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/天馬茶房"
+        },
+        {
+          "fact": "Reopened on the 3rd floor of the new structure in 2011 with a tea-house sign; bilingual plaque marking the 228 flash point slightly to the east",
+          "label": "measured",
+          "via": "page",
+          "source": "https://www.taipeitimes.com/News/feat/archives/2021/03/03/2003753137"
+        },
+        {
+          "fact": "Appearance of the original 1941 building; year the plaque was installed",
+          "label": "unknown",
+          "value": "(unknown — needs CJ)"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "For the 2000-2005 scene: the old low building still standing. Its look is (unknown — needs CJ); no page read describes it",
+          "label": "unknown"
+        },
+        {
+          "detail": "After 2005: an ordinary modern apartment block with a 天馬茶房 sign on the third floor",
+          "label": "measured"
+        },
+        {
+          "detail": "Stone or metal plaque on the pavement edge east of the door, text in Chinese and English, wording 二二八事件引爆地",
+          "label": "measured (plaque, bilingual, name) + inferred (material, position on pavement)"
+        }
+      ],
+      "location": "No. 189 Nanjing W. Rd, opposite Fazhugong Temple, just west of the Yanping N. Rd junction and a short walk east of the south end of Dihua Street. (address and temple measured; rest inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/天馬茶房",
+        "https://www.taipeitimes.com/News/feat/archives/2021/03/03/2003753137"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:台灣228事件發生的地點.jpg",
+          "note": "current site; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Tianma_Tea_House_former_site_20060101.jpg",
+          "note": "cleared lot Jan 2006 with banner; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "lin-he-fa-oil-rice",
+      "zh": "林合發油飯店",
+      "en": "Lin He Fa Oil Rice",
+      "kind": "shop",
+      "years": "founded 1894 (per a travel write-up); still open in 2026 write-ups",
+      "history_en": "Lin He Fa is a stall on the ground floor of Yongle Market, on a corner by the entrance. A travel write-up says it was founded in 1894 and is now run by the fourth generation, and that the family first sold red turtle cakes, herb cakes and other pastries before oil rice became the main item. Oil rice is sticky rice fried with mushrooms and pork, often bought in boxes to mark a new baby. The stall opens in the morning and the last pot comes out at noon; it is closed on Mondays.",
+      "history_zh": "位於永樂市場一樓轉角的油飯攤，據旅遊報導創立於1894年，現由第四代經營，早年以紅龜粿、草仔粿與糕餅起家。每日上午營業，中午十二點出最後一鍋，週一公休。",
+      "facts": [
+        {
+          "fact": "Founded 1894; fourth generation; began with 紅龜粿, 草仔粿 and pastries; corner stall",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.trvlogue.com/zh-Hant/taipei-dihua-youfan-linhefa"
+        },
+        {
+          "fact": "迪化街一段21號 永樂市場 stall 1430; open Tue-Sun 7:30 to noon, closed Monday",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.trvlogue.com/zh-Hant/taipei-dihua-youfan-linhefa"
+        },
+        {
+          "fact": "Still trading and listed among the market's known foods in a 22 May 2022 TV report",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://news.tvbs.com.tw/life/1799251"
+        },
+        {
+          "fact": "The 1894 date rests on a travel blog only",
+          "label": "inferred",
+          "value": "treat as the shop's own claim until a stronger source is found"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Open-fronted market stall on a ground-floor corner of Yongle Market, counter facing the walkway",
+          "label": "measured (search-snippet)"
+        },
+        {
+          "detail": "Large round steamer tubs of brown oil rice on the counter, stacks of paper lunch boxes, a scale",
+          "label": "inferred (general knowledge, check photo)"
+        },
+        {
+          "detail": "Sign text 林合發油飯店; sign colours (unknown — needs CJ)",
+          "label": "inferred"
+        },
+        {
+          "detail": "A queue of people along the market wall in the morning",
+          "label": "inferred"
+        }
+      ],
+      "location": "Ground floor of Yongle Market, Dihua Street Section 1 No. 21, at a corner entrance. Which corner: (unknown — needs CJ). (address via snippet)",
+      "sources": [
+        "https://www.trvlogue.com/zh-Hant/taipei-dihua-youfan-linhefa",
+        "https://news.tvbs.com.tw/life/1799251"
+      ],
+      "photos": [
+        {
+          "url": "https://www.trvlogue.com/zh-Hant/taipei-dihua-youfan-linhefa",
+          "note": "travel article with stall photos; copyright of the site, reference only, do not reuse"
+        }
+      ]
+    },
+    {
+      "id": "qianyuan-herb-shop",
+      "zh": "乾元參藥行",
+      "en": "Qian Yuan Ginseng and Herb Shop",
+      "kind": "shop",
+      "years": "(unknown — needs CJ)",
+      "history_en": "Qian Yuan is one of the Chinese medicine houses that give Dihua Street its smell of herbs. It stands at No. 71 in a Modernist-style building, and the gable is decorated with ginseng roots, so the front itself tells you what is sold inside. A photo caption from after the war also lists the shop at No. 42. It sits beside the Dihua Street post office and another herb shop in the old South Street stretch. Founding year and family history were not found in the pages read. (unknown — needs CJ)",
+      "history_zh": "迪化街著名參藥行，位於一段71號，現代主義式立面，山牆上以人蔘圖樣裝飾，一望即知所售何物。鄰近迪化街郵局與慶源藥行。創立年代（unknown — needs CJ）。",
+      "facts": [
+        {
+          "fact": "No. 71, Modernist building with ginseng decorations on the gable; a post-war caption also lists No. 42",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕"
+        },
+        {
+          "fact": "Stands near 臺北迪化街郵局 and 慶源藥行 (one Commons photo shows the three together)",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕"
+        },
+        {
+          "fact": "Founding year, founder, 六安堂 details",
+          "label": "unknown",
+          "value": "(unknown — needs CJ)"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Modernist front with plain horizontal lines; gable relief of ginseng roots",
+          "label": "measured"
+        },
+        {
+          "detail": "Inside: wall of small dark wooden herb drawers, glass jars of ginseng, brass scales on the counter",
+          "label": "inferred (general knowledge)"
+        },
+        {
+          "detail": "Sign text 乾元參藥行; storeys and colours (unknown — needs CJ, read from photo)",
+          "label": "inferred"
+        }
+      ],
+      "location": "East side of Dihua Street Section 1, No. 71, a few doors north of the City God Temple (No. 61), south of Minsheng W. Rd. (number measured; side and order inferred)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/大稻埕"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:乾元參藥行.jpg",
+          "note": "facade; licence not checked"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:臺北迪化街郵局、慶源藥行與乾元參藥行.jpg",
+          "note": "row view; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "i-mei-original-shop",
+      "zh": "義美（延平門市，創始地）",
+      "en": "I-Mei Foods original shop",
+      "kind": "shop",
+      "years": "founded 30 Mar 1934; still trading",
+      "history_en": "I-Mei, now one of Taiwan's best-known food companies, began as a small pastry shop opened on 30 March 1934 by Kao Fan-wang and his wife Kao Chen Hsiu-ying. They reused the name of the family's earlier cloth-dyeing business. One account says the shop opened on the site of Da-an Hospital, the clinic run by the doctor and activist Chiang Wei-shui; another says it opened in Taihei-cho 3-chome. The Dadaocheng article notes that the I-Mei Yanping store now stands where the 1921 Da-an Hospital was. The exact street number was not confirmed. (unknown — needs CJ)",
+      "history_zh": "1934年3月30日，高番王與妻子高陳秀英創立義美餅店，沿用家族早年染布行之名。店址據載位於蔣渭水大安醫院原址，即今義美延平門市。確切門牌（unknown — needs CJ）。",
+      "facts": [
+        {
+          "fact": "義美餅店 founded 30 Mar 1934 by 高番王 and 高陳秀英; name from the family's dye shop",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.foodnext.net/column/columnist/paper/5470114782"
+        },
+        {
+          "fact": "Opened on the former site of 蔣渭水's 大安醫院 (one source) / in 太平町三丁目 (another)",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.thenewslens.com/article/206534"
+        },
+        {
+          "fact": "The 1921 大安醫院 stood where the 義美 Yanping store is now",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕"
+        },
+        {
+          "fact": "Street number, building appearance, and which of the two snippet sources carries which wording",
+          "label": "unknown",
+          "value": "(unknown — needs CJ)"
+        }
+      ],
+      "visual_details": [
+        {
+          "detail": "Modern retail shopfront on Yanping N. Rd with the red I-Mei logo; exact look (unknown — needs CJ)",
+          "label": "inferred (general knowledge)"
+        },
+        {
+          "detail": "Glass counters of pastries, egg rolls and gift boxes",
+          "label": "inferred"
+        },
+        {
+          "detail": "A marker for Chiang Wei-shui's Da-an Hospital belongs at the same door",
+          "label": "measured (same site) + inferred (marker suggestion)"
+        }
+      ],
+      "location": "Yanping N. Rd Section 2, one block east of Dihua Street; number (unknown — needs CJ). (road inferred from the store name)",
+      "sources": [
+        "https://www.foodnext.net/column/columnist/paper/5470114782",
+        "https://www.thenewslens.com/article/206534",
+        "https://zh.wikipedia.org/zh-tw/大稻埕"
+      ],
+      "photos": [
+        {
+          "url": "(unknown — needs CJ)",
+          "note": "no reference photo found in the pages read"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "new-year-goods-street",
+      "zh": "迪化街年貨大街",
+      "en": "Dihua Street Lunar New Year Market",
+      "kind": "event",
+      "years": "first held 1996; yearly before Lunar New Year; 2026 edition 31 Jan to 15 Feb",
+      "history_en": "For about two weeks before Lunar New Year, Dihua Street turns into Taipei's best-known holiday market. It began in 1996 and was the first of its kind in Taiwan. Shops push stalls into the arcades, hand out samples and shout prices over the crowd, and more than a million people come. The 2026 edition ran from 31 January to 15 February, noon to midnight, with photo spots built around popular cartoon characters. Young people come for the snacks, the samples and the photos.",
+      "history_zh": "1996年起於春節前舉辦，為全台首創年貨大街，估計逾百萬人次。2026年於1月31日至2月15日登場，每日中午至午夜，設有人氣IP打卡點。",
+      "facts": [
+        {
+          "text": "1996: the city government and the partly restored Dihua Street held the first 年貨大街 in Taiwan, half a month before Lunar New Year",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "text": "Estimated at over one million visitors a year and about US$90 million in sales; 歸綏街 is the secondary street, mainly night-market snacks",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "text": "2026 edition: 31 Jan (Sat) to 15 Feb (Sun), daily 12:00 to 24:00, New Year's Eve closing 22:30; theme 「台灣年味在台北」; popular-IP check-in spots (IP not named on the page)",
+          "label": "measured",
+          "source": "https://www.gvm.com.tw/article/127283"
+        },
+        {
+          "text": "2026 area: Dihua Street Section 1 between 南京西路 and 歸綏街; Year of the Horse installations and a 發財金 lucky-money event",
+          "label": "measured",
+          "source": "https://news.tvbs.com.tw/life/3112101"
+        },
+        {
+          "text": "The 2026 IP partner was 白爛貓",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.marieclaire.com.tw/lifestyle/news/91453"
+        },
+        {
+          "text": "Young people come mainly for samples, snacks and photos",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        }
+      ],
+      "marker": {
+        "type": "立牌",
+        "depicts": "A red New Year arch board with lanterns, a stall heaped with sweets and dried mushrooms, and a seller holding out a sample tray, headed 1996."
+      },
+      "visual_details": [
+        "Dense crowd filling the street at dusk under red lanterns and shop signs (measured: 2018 Commons photo caption 迪化街湧入年貨採買人潮)",
+        "Stall tables under the arcades with open sacks and sample trays (inferred)",
+        "2026 horse-year installations and cartoon IP photo spots; exact look (unknown — needs CJ)"
+      ],
+      "location": "Dihua Street Section 1 from Nanjing W. Rd north to Guisui St (measured); place the marker near Yongle Plaza (suggestion).",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/迪化街",
+        "https://www.gvm.com.tw/article/127283",
+        "https://news.tvbs.com.tw/life/3112101"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:2018-02-13_Taipei_Lunar_New_Year_Festival.jpg",
+          "licence": "CC BY-SA 2.0, author daisuke1230 (measured on the file page)",
+          "shows": "Dihua Street packed with New Year shoppers, 13 Feb 2018"
+        },
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:2007-02-13_vendor_at_the_Chinese_New_Year_Fair_of_Dihua_Street.jpg",
+          "licence": "(unknown — needs CJ) (file page not opened)",
+          "shows": "A vendor at the 2007 New Year market"
+        }
+      ]
+    },
+    {
+      "id": "city-god-procession",
+      "zh": "霞海城隍聖誕遶境（五月十三迎城隍）",
+      "en": "Xia-Hai City God birthday procession",
+      "kind": "event",
+      "years": "13th day of the 5th lunar month, yearly; earliest record 1879; resumed 1898",
+      "history_en": "Every year on the 13th day of the fifth lunar month, the City God leaves his small temple on Dihua Street and is carried around Dadaocheng with a parade of temple troupes. The earliest record is from 1879; it was banned early in Japanese rule and came back in 1898 after an epidemic. The crowd is so thick that the saying goes: on the thirteenth, people come to watch people. Young visitors join for the street spectacle and the photos.",
+      "history_zh": "每年農曆五月十三日霞海城隍聖誕遶境，最早文獻記載為1879年，日治初期一度禁止，1898年因瘟疫解禁，留下「五月十三人看人」俗諺。",
+      "facts": [
+        {
+          "text": "Earliest written record of the lunar 5/13 procession is 光緒五年 (1879)",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "text": "Banned early in Japanese rule; allowed again in 1898 after a plague",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "text": "Saying: 「五月十三人看人，迎神賽會甲天下」",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "text": "Since 2006 the temple runs it as a culture festival (台北霞海城隍文化節), with markets and concerts; the 2026 誕隍祭 ran in June to July, sources disagree on exact dates",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.setn.com/klist/558216"
+        },
+        {
+          "text": "2026 procession date, route and troupe list: (unknown — needs CJ)",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        }
+      ],
+      "marker": {
+        "type": "statue",
+        "depicts": "Tall and short parade generals (七爺八爺) walking ahead of a small sedan chair, with 五月十三人看人 on the base."
+      },
+      "visual_details": [
+        "Tall and short general puppets, sedan chair, drum and gong troupes, firecracker smoke (inferred, not on a page read)",
+        "Route through the streets: (unknown — needs CJ)"
+      ],
+      "location": "Starts and ends at the City God Temple, Dihua Street Section 1 No. 61 (address from search snippet); place the statue in the temple forecourt (suggestion).",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+      ],
+      "photos": []
+    },
+    {
+      "id": "dadaocheng-fireworks",
+      "zh": "大稻埕情人節煙火（大稻埕夏日節）",
+      "en": "Dadaocheng Valentine's fireworks (Dadaocheng Summer Festival)",
+      "kind": "event",
+      "years": "first year (unknown — needs CJ); running by 2006; yearly around Qixi; 2026 edition 25 Jul to 15 Aug",
+      "history_en": "Each summer near Qixi, the Chinese Valentine's Day, fireworks go up over the Tamsui River beside Dadaocheng Wharf. The show was already running in 2006, with about 7,000 shells. Today it is the Dadaocheng Summer Festival. The 2026 edition opened on 25 July with its first drone light show, a Spider-Man theme and a nine-metre Spider-Man at the wharf, plus live sets by acts such as Bennu, and ran until 15 August. It is the classic Taipei summer date night.",
+      "history_zh": "每年七夕前後於大稻埕碼頭、延平河濱公園施放煙火，2006年已施放約七千發。2026年7月25日開幕，首次加入無人機燈光秀與蜘蛛人主題，至8月15日。",
+      "facts": [
+        {
+          "text": "26 Aug 2006: 台北大稻埕煙火音樂節 at 延平河濱公園 between water gates 3 and 5; about 7,000 shells from 8:30 pm in six themed parts; several times more shells than the year before",
+          "label": "measured",
+          "source": "https://www.epochtimes.com/b5/6/8/26/n1435221.htm"
+        },
+        {
+          "text": "2026 大稻埕夏日節 opened 25 Jul 2026 and ran to 15 Aug; themed fireworks on 5 Aug and 15 Aug; first-ever drone light show on opening night",
+          "label": "measured",
+          "source": "https://udn.com/news/story/7323/9650967"
+        },
+        {
+          "text": "2026 tie-in with Spider-Man: a 9-metre Spider-Man at Dadaocheng Wharf and Spider-Man crossing signals nearby; opening-night music 「埕光晚夜」 with Bennu, JOYCE 就以斯 and 溫蒂 (as printed)",
+          "label": "measured",
+          "source": "https://udn.com/news/story/7323/9650967"
+        },
+        {
+          "text": "The event existed by 2005, from the 2006 report comparing with last year",
+          "label": "inferred",
+          "source": "https://www.epochtimes.com/b5/6/8/26/n1435221.htm"
+        },
+        {
+          "text": "Opening night 2026 drew close to 120,000 people; later acts included 甜約翰 Sweet John and 163braces",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.cw.com.tw/article/5142137"
+        },
+        {
+          "text": "Renamed 大稻埕夏日節 from 2023",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.cna.com.tw/news/aloc/202508060058.aspx"
+        }
+      ],
+      "marker": {
+        "type": "stand",
+        "depicts": "A pier-railing viewing stand with a couple's silhouette looking up at a night-sky panel of fireworks and drone lights over the Tamsui River."
+      },
+      "visual_details": [
+        "Fireworks over the river, crowd between flood gates 3 and 5, Sanchong bank opposite (measured)",
+        "2026: drone formations of Taipei landmarks and Spider-Man, a 9-metre Spider-Man figure at the wharf (measured)",
+        "Picnic mats and reflections on the water (inferred)"
+      ],
+      "location": "Dadaocheng Wharf and Yanping Riverside Park, between flood gates 3 and 5, west of Dihua Street outside the flood wall (measured).",
+      "sources": [
+        "https://www.epochtimes.com/b5/6/8/26/n1435221.htm",
+        "https://udn.com/news/story/7323/9650967"
+      ],
+      "photos": []
+    },
+    {
+      "id": "tttifa-arts-festival",
+      "zh": "大稻埕國際藝術節（1920變裝遊行）",
+      "en": "Tua-Tiu-Tiann International Festival of Arts and 1920s costume parade",
+      "kind": "event",
+      "years": "first held 2015 (inferred); yearly in October; 2025 parade on 12 October",
+      "history_en": "Every October the Tua-Tiu-Tiann International Festival of Arts fills Dadaocheng with plays, music and dance for about a month. Its highlight is the 1920s costume parade. In 2025, on 12 October, people dressed as 1920s gentry, ladies and street vendors set off on five routes and met at the Yongle Plaza main stage, where the day ended with a starlit ball. Young people come to dress up, take photos and dance in the street.",
+      "history_zh": "每年十月舉行，為期約一個月，重頭戲為「1920變裝遊行」。2025年10月12日分五條路線出發，匯聚永樂廣場主舞台，並有星光舞會。",
+      "facts": [
+        {
+          "text": "12 Oct 2025: the costume parade set off on 5 routes and converged at 永樂廣場, whose main stage had music, drama, dance, circus and a starlit ball",
+          "label": "measured",
+          "source": "https://www.cna.com.tw/news/acul/202510120144.aspx"
+        },
+        {
+          "text": "The 2025 festival ran about one month and the 1920 變裝 was a headline event; organiser 周奕成 appeared as 蔣渭水; the 1920s theme points to the Taiwan Cultural Association founded in Dadaocheng in 1921",
+          "label": "measured",
+          "source": "https://www.cna.com.tw/news/acul/202510120144.aspx"
+        },
+        {
+          "text": "In 2016 the festival ran 4 to 25 October and held an 「藝術家狂騷派對」 every Tuesday at 8 pm",
+          "label": "measured",
+          "source": "https://www.accupass.com/event/1607201412491932333344"
+        },
+        {
+          "text": "Started in 2015 as an independent citizen-run festival",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.cna.com.tw/news/acul/202510120144.aspx"
+        },
+        {
+          "text": "2026 parade date and head count: (unknown — needs CJ)",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        }
+      ],
+      "marker": {
+        "type": "立牌",
+        "depicts": "Life-size cut-out figures in 1920s dress, a man in a three-piece suit and a woman with a parasol, with a face-hole photo board."
+      },
+      "visual_details": [
+        "Paraders dressed as 1920s gentry, ladies and street vendors (measured)",
+        "Main stage at Yongle Plaza with an evening ball (measured)",
+        "Exact costume colours and poster style: (unknown — needs CJ)"
+      ],
+      "location": "Parade ends at Yongle Plaza in front of Yongle Market on Dihua Street Section 1 (measured); place the board at the plaza edge (suggestion).",
+      "sources": [
+        "https://www.cna.com.tw/news/acul/202510120144.aspx",
+        "https://www.accupass.com/event/1607201412491932333344"
+      ],
+      "photos": []
+    },
+    {
+      "id": "film-twa-tiu-tiann-2014",
+      "zh": "電影《大稻埕》",
+      "en": "The film Twa-Tiu-Tiann (2014)",
+      "kind": "event",
+      "years": "released 30 January 2014",
+      "history_en": "Twa-Tiu-Tiann is a Taiwanese Lunar New Year film released on 30 January 2014 and named after the district. It was directed by Yeh Tien-lun (葉天倫) and stars Chu Ke-liang (豬哥亮), 宥勝, 簡嫚書 and Sonia Sui (隋棠). It earned NT$220 million across Taiwan. One filming site was the century-old house now known as ArtYard (民藝埕), just north of the City God Temple. For many young viewers it was their first look at old Dadaocheng.",
+      "history_zh": "2014年1月30日上映的台灣電影，葉天倫導演，豬哥亮、宥勝、簡嫚書、隋棠主演，全台票房2.2億元，曾於霞海城隍廟北側的民藝埕古厝取景。",
+      "facts": [
+        {
+          "text": "Released 30 Jan 2014; directed by 葉天倫; leads 豬哥亮、宥勝、簡嫚書、隋棠",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕_(電影)"
+        },
+        {
+          "text": "Final box office across Taiwan NT$220 million (新台幣2.2億元)",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕_(電影)"
+        },
+        {
+          "text": "Filming sites include 「大稻埕百年古厝」 (民藝埕, north side of 霞海城隍廟)",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕_(電影)"
+        },
+        {
+          "text": "It was many young viewers' first look at old Dadaocheng",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        },
+        {
+          "text": "English names Yeh Tien-lun, Chu Ke-liang and Sonia Sui are common romanisations, not from the page read",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        }
+      ],
+      "marker": {
+        "type": "small wall",
+        "depicts": "A low wall styled as a film poster board with a clapperboard reading 大稻埕 2014 and four cast silhouettes in 1920s dress."
+      },
+      "visual_details": [
+        "Old shophouse front of 民藝埕 as the backdrop (measured as a filming site)",
+        "Poster design and costume details: (unknown — needs CJ)"
+      ],
+      "location": "Outside ArtYard (民藝埕), the old house on the north side of Xia-Hai City God Temple, Dihua Street Section 1 (measured; house number (unknown — needs CJ)).",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/大稻埕_(電影)"
+      ],
+      "photos": []
+    },
+    {
+      "id": "solitary-gourmet-yongle",
+      "zh": "《孤獨的美食家》五郎在永樂市場",
+      "en": "Solitary Gourmet: Goro eats at Yongle Market",
+      "kind": "event",
+      "years": "Season 5, episodes 4 and 5; broadcast year 2015 (inferred)",
+      "history_en": "In season 5 of the Japanese drama Solitary Gourmet (孤獨的美食家), episodes 4 and 5 sent the hero Goro to Taiwan, the show's first trip abroad. Goro, played by Yutaka Matsushige (松重豐), ate at Yongle Danzai Noodles beside Yongle Market. The shop still sells a Goro set, a chicken rice box with side dishes. Fans from Japan and Taiwan come to eat exactly what he ate, and Matsushige has come back to Taiwan to film again since.",
+      "history_zh": "日劇《孤獨的美食家》第五季第4、5話首度海外出差來台，五郎（松重豐飾）曾到永樂市場旁的永樂担仔麵，店內至今有「五郎套餐」雞肉飯便當。",
+      "facts": [
+        {
+          "text": "Season 5 episodes 4 and 5 are a two-part Taiwan story, the series' first overseas trip; 趙文瑄 appears in them",
+          "label": "measured",
+          "source": "https://ja.wikipedia.org/wiki/孤独のグルメ_(テレビドラマ)"
+        },
+        {
+          "text": "Goro ate 永樂市場擔仔麵 and 滷肉飯 around Dadaocheng and Dihua Street years ago; 永樂担仔麵 is at 南京西路233巷20號 and sells a 「五郎套餐」, a chicken rice box listed at NT$100",
+          "label": "measured",
+          "source": "https://supertaste.tvbs.com.tw/pack/347055"
+        },
+        {
+          "text": "松重豐 has filmed in Taiwan several times, including the 2024 New Year special and the film version",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/孤獨的美食家_(電視劇)"
+        },
+        {
+          "text": "The Taiwan episodes were shot and aired in 2015",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.taiwannews.com.tw/zh/news/5053788"
+        },
+        {
+          "text": "Fans from Japan and Taiwan visit to order the same dishes; the shop menu has Japanese text",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://supertaste.tvbs.com.tw/infocard/20850"
+        }
+      ],
+      "marker": {
+        "type": "stand",
+        "depicts": "A small noodle-stall stand with a tray holding a chicken rice box and a bowl of danzai noodles, and a lone salaryman silhouette seen from behind."
+      },
+      "visual_details": [
+        "Chicken rice with a plate of side dishes, the Goro set (measured)",
+        "Danzai noodles and braised pork rice (measured)",
+        "Shop front look and signage: (unknown — needs CJ)"
+      ],
+      "location": "永樂担仔麵, 南京西路233巷20號, on the lane beside Yongle Market just off Dihua Street (address measured).",
+      "sources": [
+        "https://ja.wikipedia.org/wiki/孤独のグルメ_(テレビドラマ)",
+        "https://supertaste.tvbs.com.tw/pack/347055",
+        "https://zh.wikipedia.org/zh-tw/孤獨的美食家_(電視劇)"
+      ],
+      "photos": []
+    },
+    {
+      "id": "pier5-container-market",
+      "zh": "PIER5 大稻埕碼頭貨櫃市集",
+      "en": "PIER5 container market at Dadaocheng Wharf",
+      "kind": "event",
+      "years": "opened 1 April 2018; later re-let as 大稻埕貨櫃市集 (inferred); status in 2026 (unknown — needs CJ)",
+      "history_en": "PIER5 opened on 1 April 2018 inside flood gate 5 at Dadaocheng Wharf, at the river end of Minsheng West Road. White shipping containers were turned into small food and drink bars beside the Tamsui River, and the place quickly became a photo spot that drew big crowds. The organiser planned themed markets on two weekends a month and regular sets by singer-songwriters and bands. Young people come in the evening for a drink, the river breeze and live music.",
+      "history_zh": "2018年4月1日於大稻埕碼頭五號水門內開幕，白色貨櫃改裝成河岸餐飲吧，迅速成為拍照熱點，每月兩個週末辦主題市集，並有創作歌手與樂團演出。",
+      "facts": [
+        {
+          "text": "PIER5 opened on 1 April 2018 at 大稻埕碼頭 inside 五號水門, at the end of 民生西路",
+          "label": "measured",
+          "source": "https://supertaste.tvbs.com.tw/travel/309332"
+        },
+        {
+          "text": "White modern container building became a new photo spot and drew large crowds; themed markets two weekends a month; regular singer-songwriter and band sets; opening hours then ran to 22:00 or 23:00",
+          "label": "measured",
+          "source": "https://supertaste.tvbs.com.tw/travel/309332"
+        },
+        {
+          "text": "The first contract ended in December 2020 and the site reopened as 大稻埕貨櫃市集 with about 15 to 19 food stalls",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://www.beauty321.com/post/15765"
+        },
+        {
+          "text": "Sunset is the peak time for young visitors",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        },
+        {
+          "text": "Whether it is still operating in 2026 and under which name: (unknown — needs CJ)",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        }
+      ],
+      "marker": {
+        "type": "small wall",
+        "depicts": "A low wall of stacked white shipping containers with a string of bulbs, a bar counter window and a small stage with a guitar."
+      },
+      "visual_details": [
+        "White container units (measured)",
+        "River, wharf and live-music stage (measured)",
+        "Sunset sky and string lights (inferred)"
+      ],
+      "location": "Inside flood gate 5 at Dadaocheng Wharf, river end of Minsheng W. Rd, west of Dihua Street (measured).",
+      "sources": [
+        "https://supertaste.tvbs.com.tw/travel/309332"
+      ],
+      "photos": []
+    },
+    {
+      "id": "yuelao-matchmaker-crowds",
+      "zh": "霞海城隍廟月老人潮",
+      "en": "Matchmaker-god crowds at Xia-Hai City God Temple",
+      "kind": "event",
+      "years": "Yue Lao worshipped here since 1971; viral Japanese school-trip video October 2025",
+      "history_en": "The Old Man under the Moon, the matchmaker god, has been worshipped at Xia-Hai City God Temple since 1971 and is now the temple's most popular god. Single people come to ask him for a partner. In October 2025 a Threads video of Japanese high-school girls in uniform crowding the temple and its arcade went viral. People joked that the temple had become a stop on Japanese school trips and that the matchmaker now has overseas business.",
+      "history_zh": "霞海城隍廟自1971年起供奉月下老人，今為廟中最具人氣的神明。2025年10月，日本女高中生穿制服擠滿廟前騎樓拜月老的影片在Threads爆紅。",
+      "facts": [
+        {
+          "text": "月下老人 has been worshipped at the temple since 1971 and is now its most popular deity",
+          "label": "measured",
+          "source": "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟"
+        },
+        {
+          "text": "28 Oct 2025 report: a Threads video showed large numbers of uniformed Japanese high-school girls outside the temple, thought to have put 「拜月老」 on their school-trip plan; headline quotes the joke 「月老也有海外業務」",
+          "label": "measured",
+          "source": "https://udn.com/news/story/120912/9101135"
+        },
+        {
+          "text": "Temple staff speak Japanese and post worship steps in several languages",
+          "label": "inferred",
+          "source": "search snippet only, page not opened: https://city.gvm.com.tw/article/127369"
+        },
+        {
+          "text": "A named international celebrity or idol visit to the temple: (unknown — needs CJ), none found in the searches run",
+          "label": "inferred",
+          "source": "(unknown — needs CJ)"
+        }
+      ],
+      "marker": {
+        "type": "statue",
+        "depicts": "A small seated Old Man under the Moon with a white beard holding a red thread that runs out to a row of schoolgirl and couple silhouettes."
+      },
+      "visual_details": [
+        "The temple's Yue Lao statue (measured: Commons photo)",
+        "Uniformed students filling the arcade in front of the temple (measured, 2025 report)",
+        "Red thread and offerings: (inferred)"
+      ],
+      "location": "Xia-Hai City God Temple, Dihua Street Section 1 No. 61 (address from search snippet); place the statue beside the temple door (suggestion).",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/臺北霞海城隍廟",
+        "https://udn.com/news/story/120912/9101135"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Taipei_Ha-hai_Sing-hong_Temple's_guat-noo.jpg",
+          "licence": "CC BY-SA 4.0, author Oliver515 (measured on the file page)",
+          "shows": "The Yue Lao statue inside the temple, 8 June 2023"
+        }
+      ]
+    }
+  ],
+  "events_old_history": [
+    {
+      "id": "i-love-dihua-street-1988",
+      "zh": "我愛迪化街保存運動",
+      "en": "I Love Dihua Street preservation movement",
+      "kind": "event",
+      "years": "widening planned 1973, approved Oct 1977; campaign July 1988; preservation plan 1995",
+      "history_en": "In the 1970s the city planned to widen Dihua Street from under 8 metres to 20 metres, which would have cut the fronts off its old shophouses. The plan was approved in October 1977. When land was about to be taken in 1988, the Leshan Cultural Foundation started the I Love Dihua Street campaign in July with residents, citizens and scholars, and collected signatures. The widening was paused and universities were asked to study how to save the street. In 1995 a plan fixed the street at its old width and protected 77 historic buildings. Everything a visitor sees today exists because of this fight.",
+      "history_zh": "1977年10月市府核定將迪化街拓寬為20公尺，老街屋面臨拆除。1988年7月樂山文教基金會與居民、學者發起「我愛迪化街」連署，拓寬暫緩。1995年確定維持原路寬，保存77棟歷史建築。",
+      "facts": [
+        {
+          "fact": "1973 plan to widen from about 7.8 m to 20 m; approved October 1977",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "July 1988 樂山文教基金會 launched 我愛迪化街 with residents, citizens and scholars",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        },
+        {
+          "fact": "Signature drive led to a temporary halt; university researchers commissioned",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/大稻埕"
+        },
+        {
+          "fact": "1995 plan kept original width and 77 buildings; full-building preservation completed by 2004",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/迪化街"
+        }
+      ],
+      "marker": {
+        "type": "small wall",
+        "depicts": "A short brick wall section painted with the slogan 我愛迪化街, a row of signatures, and a white line on the ground showing where the 20-metre road would have cut through the houses."
+      },
+      "visual_details": [
+        {
+          "detail": "Ground line showing the planned 20 m width against the real 7.8 m street is the clearest way to show what was at stake",
+          "label": "inferred (design suggestion from measured widths)"
+        },
+        {
+          "detail": "What the 1988 banners and posters looked like: (unknown — needs CJ)",
+          "label": "unknown"
+        }
+      ],
+      "location": "Anywhere on Dihua Street Section 1; suggest the south entrance near Nanjing W. Rd so visitors meet it first. (suggestion)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/迪化街",
+        "https://zh.wikipedia.org/zh-tw/大稻埕"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Buildings_along_Dihua_Street_07.23.jpg",
+          "note": "the preserved facades today; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "228-flash-point-1947",
+      "zh": "二二八事件引爆點（天馬茶房前緝菸事件）",
+      "en": "Flash point of the 228 Incident at Tianma Tea House",
+      "kind": "event",
+      "years": "27 February 1947 (evening); marches on 28 February 1947",
+      "history_en": "On 27 February 1947 six inspectors from the Taipei branch of the Monopoly Bureau caught Lin Jiang-mai, a 40-year-old widow, selling cigarettes in front of Tianma Tea House. They took her goods and money and struck her on the head with a gun butt. As the crowd grew angry, shots were fired; one bystander was killed and another hurt. The next morning people marched south down Dihua Street, east along Nanjing West Road and on to the Monopoly Bureau. The protests spread across Taiwan and were put down by force. This is remembered as the start of the 228 Incident.",
+      "history_zh": "1947年2月27日，專賣局臺北分局六名查緝員在天馬茶房前取締寡婦林江邁販菸，以槍托擊傷其頭部，並開槍造成民眾一死一傷。翌日群眾沿迪化街、南京西路遊行抗議，成為二二八事件導火線。",
+      "facts": [
+        {
+          "fact": "27 Feb 1947; six Monopoly Bureau inspectors; 林江邁, 40-year-old widow; struck on the head with a rifle butt; shots killed one and wounded one",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/天馬茶房"
+        },
+        {
+          "fact": "28 Feb march went south on Dihua Street, east on Nanjing W. Rd, south on Yanping N. Rd, and on to the Monopoly Bureau's Taipei branch",
+          "label": "measured",
+          "via": "page",
+          "source": "https://www.taipeitimes.com/News/feat/archives/2021/03/03/2003753137"
+        },
+        {
+          "fact": "Bilingual plaque marking the flash point stands slightly east of No. 189; marches lay flowers at the 事件引爆地紀念碑",
+          "label": "measured",
+          "via": "page",
+          "source": "https://www.taipeitimes.com/News/feat/archives/2021/03/03/2003753137"
+        },
+        {
+          "fact": "Name of the bystander killed and the plaque's installation year",
+          "label": "unknown",
+          "value": "(unknown — needs CJ); not on the pages read"
+        }
+      ],
+      "marker": {
+        "type": "statue (low memorial stone)",
+        "depicts": "A plain dark stone marker with the words 二二八事件引爆地 and the date 1947.2.27, with a few scattered cigarette packs cast in bronze on the ground and white lilies. Keep it quiet and respectful, no figures of violence."
+      },
+      "visual_details": [
+        {
+          "detail": "Real plaque is bilingual Chinese and English and stands a little east of the tea house door",
+          "label": "measured"
+        },
+        {
+          "detail": "White lily is the common 228 remembrance flower",
+          "label": "inferred (general knowledge)"
+        }
+      ],
+      "location": "In front of No. 189 Nanjing W. Rd, opposite Fazhugong Temple, near the Yanping N. Rd junction; east of the south end of Dihua Street. (measured: address, temple)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/天馬茶房",
+        "https://www.taipeitimes.com/News/feat/archives/2021/03/03/2003753137"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:台灣228事件發生的地點.jpg",
+          "note": "site photo; licence not checked"
+        }
+      ]
+    },
+    {
+      "id": "watsons-fire-and-restoration",
+      "zh": "屈臣氏大藥房火災與修復",
+      "en": "Watsons pharmacy fire and restoration",
+      "kind": "event",
+      "years": "fire date (unknown — needs CJ; the brief says 1998); listed as a city monument 2005; ArtYard opened 2011",
+      "history_en": "The brief for this research names a 1998 fire at the Watsons pharmacy building and its later restoration. None of the pages read confirmed the fire, its date, the damage or the restoration years, so those stay open. What was confirmed: Watsons traded on Dihua Street from 1917, a magazine piece calls the present building a rebuilt Li family house, the old shop was listed as a city monument in 2005, and in 2011 part of it became ArtYard. Do not publish the fire story until a heritage record is read. (unknown — needs CJ)",
+      "history_zh": "屈臣氏大藥房曾遭祝融後重建之說，本次查閱的頁面均未能證實火災日期與修復年份（unknown — needs CJ）。已確認：1917年起營業、2005年列市定古蹟、2011年部分空間成為小藝埕。",
+      "facts": [
+        {
+          "fact": "Watsons on Dihua Street from 1917; listed 市定古蹟 2005",
+          "label": "measured",
+          "via": "page",
+          "source": "https://zh.wikipedia.org/zh-tw/屈臣氏大藥房"
+        },
+        {
+          "fact": "Described as a 百年重建的李氏家屋 (rebuilt Li family house) run by 世代群",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://www.businessweekly.com.tw/style/blog/7430"
+        },
+        {
+          "fact": "2011 right wing became 小藝埕",
+          "label": "measured",
+          "via": "search-snippet",
+          "source": "https://travel.yam.com/article/128430"
+        },
+        {
+          "fact": "Fire year, cause, damage, restoration years, builder 李俊啟",
+          "label": "unknown",
+          "value": "(unknown — needs CJ). From memory the fire may have been in the late 1990s and only the facade survived, but that is a guess and must not be published."
+        }
+      ],
+      "marker": {
+        "type": "立牌 (standing sign board)",
+        "depicts": "A before-and-after board beside the building: burnt shell on the left, restored facade on the right, with the dates left blank until confirmed."
+      },
+      "visual_details": [
+        {
+          "detail": "Use the present restored facade; do not model fire damage until a source photo is found",
+          "label": "inferred (caution)"
+        }
+      ],
+      "location": "Beside the Watsons / ArtYard building, Dihua Street Section 1 No. 34, west side at Lane 32. (address via snippet)",
+      "sources": [
+        "https://zh.wikipedia.org/zh-tw/屈臣氏大藥房",
+        "https://www.businessweekly.com.tw/style/blog/7430",
+        "https://travel.yam.com/article/128430"
+      ],
+      "photos": [
+        {
+          "url": "https://commons.wikimedia.org/wiki/File:Watson's_Pharmacy,_Dihua_Street_20160604.jpg",
+          "note": "restored facade 2016; licence not checked"
+        }
+      ]
+    }
+  ],
+  "events_note": "CJ, 2026-11-21: 「我說的重要事件其實是指辦的大活動啊或有什麼名人來 年輕人比較關心的活動不是古早的大事」. `events` holds held activities and celebrity visits; the earlier civic-history events are kept in `events_old_history`, which build_data.py does not read."
+}

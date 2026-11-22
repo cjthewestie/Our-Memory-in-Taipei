@@ -1,0 +1,52 @@
+// hero.js — the player character's runtime, shared by every scene page in this folder.
+// The model comes from Blender (tools/character/build_girl.py → asset/models/girl-rigged.glb) with
+// Idle, Walk, Run and Wave. The three loops play together and are mixed by how fast she is moving;
+// walk and run are driven by the distance she covers, so her feet keep pace with the ground.
+(function () {
+  'use strict';
+  const WALK = 1.4, RUN = 3.0;                  // metres per second (CJ, 2026-11-22: 「人物走路太慢」; was 0.8 and 2.1)
+  const WALK_CYCLE = 0.56, RUN_CYCLE = 1.15;    // metres covered by one full cycle (two steps) of each loop
+  // A model can say how far one play of its walk and run clips carries it (the Tripo-rigged girl does,
+  // in her armature's extras). Her legs are short, so true pace would be very slow; SLIDE lets the ground
+  // pass a little faster than her feet, which reads better than tiny frantic steps.
+  const SLIDE = 2.3;                           // raised with the speed, so her legs speed up by about a third rather than doubling
+  function rigged(T, gltf) {
+    let walkClip = WALK_CYCLE, runClip = RUN_CYCLE;
+    gltf.scene.traverse(o => { const u = o.userData || {}; if (u.walkCycle) { walkClip = u.walkCycle * (u.walkCycles || 1) * SLIDE; runClip = u.runCycle * (u.runCycles || 1) * SLIDE; } });
+  const group = gltf.scene, mixer = new T.AnimationMixer(group), act = {}; let eyes = null;
+  group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; if (o.morphTargetDictionary && 'blink' in o.morphTargetDictionary) eyes = o; } });
+  gltf.animations.forEach(c => { act[c.name] = mixer.clipAction(c); act[c.name].play(); act[c.name].setEffectiveWeight(c.name === 'Idle' ? 1 : 0); });
+  if (act.Wave) { act.Wave.setLoop(T.LoopOnce, 1); act.Wave.clampWhenFinished = false; }
+  const S = { move: 0, run: 0, phase: 0, idleT: 0, wave: -1, blink: 2, blinkT: 0 };
+  const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  // Loose things lag behind the body: when she speeds up, stops or turns, the braids and the satchel
+  // swing on a spring, on top of the swing that is baked into each loop. She also leans into turns.
+  const loose = []; group.traverse(o => { if (o.isBone && /^(hair|braid|bag)/.test(o.name)) loose.push({ b: o, k: /2$/.test(o.name) ? 1.6 : /^bag/.test(o.name) ? 0.6 : 1 }); });
+  const SP = { fx: 0, fv: 0, sx: 0, sv: 0, last: 0, lean: 0, pitch: 0 }; group.rotation.order = 'YXZ';
+  function update(dt, speed, turn) {
+    turn = turn || 0;
+    if (dt > 0) {
+      const acc = Math.max(-12, Math.min(12, (speed - SP.last) / dt)); SP.last = speed;
+      SP.fv += ((-acc * 0.035 - SP.fx) * 70 - SP.fv * 6.5) * dt; SP.fx += SP.fv * dt;
+      SP.sv += ((turn * 0.05 * Math.min(1, speed) - SP.sx) * 70 - SP.sv * 6.5) * dt; SP.sx += SP.sv * dt;
+      SP.lean += (-turn * 0.035 * Math.min(1.5, speed) - SP.lean) * Math.min(1, dt * 6); SP.pitch += (acc * 0.012 - SP.pitch) * Math.min(1, dt * 5);
+      group.rotation.z = SP.lean; group.rotation.x = SP.pitch;
+    }
+    S.move += (sm(0.05, 0.6, speed) - S.move) * Math.min(1, dt * 8); S.run += (sm(WALK * 1.25, RUN * 0.9, speed) - S.run) * Math.min(1, dt * 6);
+    S.phase = (S.phase + speed * dt / (walkClip + (runClip - walkClip) * S.run)) % 1; S.idleT += dt;
+    if (S.wave >= 0) { S.wave += dt; if (S.wave > act.Wave.getClip().duration || S.move > 0.3) S.wave = -1; }
+    const wv = S.wave >= 0 ? Math.min(1, S.wave * 5) * Math.min(1, (act.Wave.getClip().duration - S.wave) * 5) : 0, idle = (1 - S.move) * (1 - wv);
+    act.Idle.time = S.idleT % act.Idle.getClip().duration; act.Idle.setEffectiveWeight(idle);
+    act.Walk.time = S.phase * act.Walk.getClip().duration; act.Walk.setEffectiveWeight(S.move * (1 - S.run));
+    act.Run.time = S.phase * act.Run.getClip().duration; act.Run.setEffectiveWeight(S.move * S.run);
+    if (act.Wave) { act.Wave.time = Math.max(0, S.wave); act.Wave.setEffectiveWeight(wv); }
+    mixer.update(0);
+    loose.forEach(({ b, k }) => { b.rotateX(-SP.fx * k); b.rotateZ(SP.sx * k); });
+    S.blink -= dt; if (S.blink < 0) { S.blinkT = 0.14; S.blink = 2.2 + Math.random() * 3.5; }
+    S.blinkT = Math.max(0, S.blinkT - dt); if (eyes) eyes.morphTargetInfluences[eyes.morphTargetDictionary.blink] = S.blinkT > 0 ? 1 - Math.abs(S.blinkT / 0.14 * 2 - 1) : 0;
+  }
+  update(0, 0);
+  return { group, update, state: S, wave() { if (act.Wave) S.wave = 0; }, actions: Object.keys(act) };
+}
+  window.HERO = { rigged, WALK, RUN };
+})();

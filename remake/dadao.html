@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake · 大稻埕 迪化街 年貨大街, golden hour</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script src="photo-topics.js"></script>
+<script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="design-kit.js"></script>
+<script src="places.js"></script>
+<script src="lm/loader.js" data-district="dadao" data-shared="kit-people" data-modules="yongle goods arcade people"></script>
+<script src="landmarks-dadao.js"></script>
+<script>
+// 大稻埕: 迪化街 at Lunar New Year (年貨大街), 2000s–2010s. A STREET, not a plaza: 9 m between the arcades,
+// about 70 m long, running north (−z) from the archway. Halfway down, 霞海城隍廟's forecourt opens on the east
+// side; further on, 永樂市場 stands back behind its stalls, and a lane on the west drops to the Tamsui wharf.
+// Only this block's layout lives here; light, sky, ground, builders, finishing chain and controls are in engine.js.
+const ZC = i => 29.6 - i * 4.8, FX = 5.3;                        // shophouse slot centres along the street; origins sit FX out, so fronts stand 9 m apart
+// 'L': a landmark built in landmarks-dadao.js stands in that slot (新芳春 2–3, 乾元 6, 屈臣氏 7–8, 波麗路 10 and its second shop 12, 偶戲館 11, 李臨秋 13 on the west; 義美 0, 天馬 3 on the east)
+const WEST = ['yang2', 'min1', 'L', 'L', 'yang2', 'min1', 'L', 'L', 'L', null, 'L', 'L', 'L', 'L', 'bar3', 'min1', 'yang2', 'min3'];   // null: the lane to the river
+const EAST = ['L', 'bar2', 'yang3', 'L', 'bar2', null, null, null, 'yang2', null, null, null, null, null, null, 'min3', 'bar2', 'yang3'];             // gaps: temple forecourt, market front, 慈聖宮's yard
+const AREAS = [[-4.0, 4.0, -39.4, 38.5], [4.0, 10.6, -5.4, 7.0], [4.0, 9.6, -29.4, -12.9], [-27.5, -4.0, -15.3, -11.9], [4.0, 8.2, -39.2, -31.4]];   // street, forecourt, market front, lane, 慈聖宮's yard: [minX, maxX, minZ, maxZ]
+const BLOCKS = [];                                                 // things she walks round: [x, z, radius]
+// ── the lettering of this street's own boards, drawn on top of a DESIGN material (signTexture repaints when the painting lands) ──
+const DADAO_BOARDS = (() => {
+  const KAI = '"Weibei TC","Kaiti TC","BiauKai","PingFang TC",serif', SONG = '"Songti TC","LiSong Pro","PMingLiU",serif', LAT = 'Futura,"Avenir Next","Helvetica Neue",sans-serif';
+  const txt = (g, t, x, y, px, face, wt, fill, maxW, align) => { g.font = `${wt} ${px}px ${face}`; const w = g.measureText(t).width; if (maxW && w > maxW) g.font = `${wt} ${px * maxW / w}px ${face}`; g.textAlign = align || 'center'; g.textBaseline = 'middle'; g.fillStyle = fill; g.fillText(t, x, y); };
+  const tracked = (g, t, x, y, px, face, fill, sp) => { g.font = `600 ${px}px ${face}`; const ch = [...t], ws = ch.map(c => g.measureText(c).width), tot = ws.reduce((a, b) => a + b, 0) + sp * (ch.length - 1); let cx = x - tot / 2; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillStyle = fill; ch.forEach((c, i) => { g.fillText(c, cx, y); cx += ws[i] + sp; }); };
+  const cover = (g, im, x, y, w, h, fy) => { const k = Math.max(w / im.width, h / im.height), cw = w / k, ch = h / k; g.drawImage(im, (im.width - cw) / 2, Math.max(0, Math.min(im.height - ch, im.height * (fy || 0.5) - ch / 2)), cw, ch, x, y, w, h); };
+  const seal = (g, t, x, y, r, fill, ink) => { g.save(); g.fillStyle = fill; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.strokeStyle = ink; g.lineWidth = r * 0.1; g.beginPath(); g.arc(x, y, r * 0.82, 0, 7); g.stroke(); txt(g, t, x, y + r * 0.04, r * (t.length > 1 ? 0.62 : 1.0), KAI, 900, ink, r * 1.5); g.restore(); };
+  const lanternRow = (g, x0, x1, y, r, n) => { for (let i = 0; i < n; i++) { const x = x0 + (i + 0.5) * (x1 - x0) / n, yy = y + Math.sin(i * 1.7) * r * 0.3, gr = g.createRadialGradient(x, yy, 1, x, yy, r * 1.8);
+    gr.addColorStop(0, 'rgba(255,190,90,.55)'); gr.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = gr; g.beginPath(); g.arc(x, yy, r * 1.8, 0, 7); g.fill(); g.fillStyle = '#e8402a'; g.beginPath(); g.ellipse(x, yy, r, r * 0.85, 0, 0, 7); g.fill(); g.fillStyle = '#f2c14e'; g.fillRect(x - r * 0.45, yy - r * 0.95, r * 0.9, r * 0.2); g.fillRect(x - r * 0.45, yy + r * 0.75, r * 0.9, r * 0.2); } };
+  return {
+    // 年貨大街 archway: side panels with couplet words, the gate painting in the middle, the name in carved gold over it
+    gate(g, W, H) {
+      const im = window.DESIGN && DESIGN.art('posters/gates/dadao.jpg'), px = W * 0.15, b = H * 0.07;
+      g.save(); g.beginPath(); g.rect(px, b, W - 2 * px, H - 2 * b); g.clip();
+      if (im) { cover(g, im, px, b, W - 2 * px, H - 2 * b, 0.45); g.globalCompositeOperation = 'multiply'; g.fillStyle = 'rgba(190,40,30,.35)'; g.fillRect(px, b, W - 2 * px, H - 2 * b); g.globalCompositeOperation = 'source-over'; }
+      else { const sky = g.createLinearGradient(0, b, 0, H - b); sky.addColorStop(0, '#2a0f2a'); sky.addColorStop(0.6, '#8a1f1c'); sky.addColorStop(1, '#e0733a'); g.fillStyle = sky; g.fillRect(px, b, W - 2 * px, H - 2 * b);
+        g.fillStyle = 'rgba(30,8,8,.75)'; for (let x = px; x < W - px; x += 46) { const h = H * (0.28 + ((x * 7) % 5) * 0.03); g.fillRect(x, H - b - h, 42, h); g.beginPath(); g.moveTo(x - 3, H - b - h); g.quadraticCurveTo(x + 21, H - b - h - 18, x + 45, H - b - h); g.fill(); }
+        lanternRow(g, px, W - px, H * 0.24, H * 0.06, 14); lanternRow(g, px + 20, W - px, H * 0.42, H * 0.045, 11); }
+      const vg = g.createLinearGradient(0, b, 0, H - b); vg.addColorStop(0, 'rgba(0,0,0,.35)'); vg.addColorStop(0.5, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)'); g.fillStyle = vg; g.fillRect(px, b, W - 2 * px, H - 2 * b); g.restore();
+      // the side panels: couplet words in a frame
+      [[px * 0.5, '恭賀新禧'], [W - px * 0.5, '大吉大利']].forEach(([x, t]) => { g.strokeStyle = '#e9c46a'; g.lineWidth = 3; g.strokeRect(x - px * 0.36, b + 6, px * 0.72, H - 2 * b - 12);
+        [...t].forEach((c, k) => txt(g, c, x, b + 26 + k * (H - 2 * b - 52) / 3, H * 0.15, KAI, 900, '#f3d27a')); });
+      // the title: tracked Latin over it, the name in gold with a carved shadow, the year ribbon under it
+      tracked(g, 'DIHUA STREET  ·  LUNAR NEW YEAR MARKET', W / 2, H * 0.17, H * 0.055, LAT, '#ffe9b0', 5);
+      g.save(); g.shadowColor = 'rgba(40,0,0,.85)'; g.shadowOffsetX = 4; g.shadowOffsetY = 5; g.shadowBlur = 4; const gold = g.createLinearGradient(0, H * 0.3, 0, H * 0.72); gold.addColorStop(0, '#fff1b8'); gold.addColorStop(0.5, '#e9b440'); gold.addColorStop(1, '#a8701a');
+      g.font = `900 ${H * 0.46}px ${KAI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 7; g.strokeStyle = '#4a0c08'; g.strokeText('年貨大街', W / 2, H * 0.5); g.fillStyle = gold; g.fillText('年貨大街', W / 2, H * 0.5); g.restore();
+      g.fillStyle = '#f3d27a'; g.beginPath(); g.moveTo(W * 0.33, H * 0.76); g.lineTo(W * 0.67, H * 0.76); g.lineTo(W * 0.65, H * 0.82); g.lineTo(W * 0.67, H * 0.88); g.lineTo(W * 0.33, H * 0.88); g.lineTo(W * 0.35, H * 0.82); g.closePath(); g.fill();
+      txt(g, '大稻埕 · 一九九六起 · 春節前十五天', W / 2, H * 0.82, H * 0.07, KAI, 800, '#7a1410', W * 0.3);
+      seal(g, '迪化', W * 0.24, H * 0.5, H * 0.13, '#c4201a', '#ffe9b0'); seal(g, '春', W * 0.76, H * 0.5, H * 0.13, '#f3d27a', '#7a1410');
+      g.strokeStyle = '#e9c46a'; g.lineWidth = 6; g.strokeRect(5, 5, W - 10, H - 10); g.lineWidth = 2; g.strokeRect(b * 0.6, b * 0.6, W - b * 1.2, H - b * 1.2);
+      [[b * 0.6, b * 0.6], [W - b * 0.6, b * 0.6], [b * 0.6, H - b * 0.6], [W - b * 0.6, H - b * 0.6]].forEach(([x, y]) => { g.fillStyle = '#e9c46a'; g.beginPath(); g.arc(x, y, b * 0.55, 0, 7); g.fill(); g.fillStyle = '#7a1410'; g.beginPath(); g.arc(x, y, b * 0.25, 0, 7); g.fill(); });
+    },
+    // 永樂市場: the market's own enamel plate (kind A), white letters, the trade under it
+    market(g, W, H) {
+      g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 5; g.strokeRect(14, 14, W - 28, H - 28); g.save(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowOffsetY = 4; g.shadowBlur = 3;
+      txt(g, '永樂市場', W / 2, H * 0.42, H * 0.5, SONG, 900, '#f4f0e4', W * 0.86); g.restore();
+      tracked(g, 'YONGLE MARKET', W / 2, H * 0.78, H * 0.1, LAT, '#f4f0e4', 14); txt(g, '布業商場 · 1908', W * 0.88, H * 0.78, H * 0.06, SONG, 700, 'rgba(244,240,228,.75)', W * 0.2);
+    },
+    // 大稻埕碼頭 on the quay (kind B): the river at sunset, the tea junks that sailed from here, the name set big
+    quay(g, W, H) {
+      const im = window.DESIGN && DESIGN.art('posters/topics/wharf.jpg'), sx = W * 0.42;
+      const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#3a1f4a'); sky.addColorStop(0.55, '#e86a3a'); sky.addColorStop(1, '#f3c14b'); g.fillStyle = sky; g.fillRect(sx, 0, W - sx, H);
+      if (im) { cover(g, im, sx, 0, W - sx, H, 0.5); g.globalCompositeOperation = 'soft-light'; g.fillStyle = 'rgba(255,140,60,.5)'; g.fillRect(sx, 0, W - sx, H); g.globalCompositeOperation = 'source-over'; }
+      else { g.fillStyle = '#ffe3a0'; g.beginPath(); g.arc(W * 0.8, H * 0.52, H * 0.18, 0, 7); g.fill(); g.fillStyle = 'rgba(40,20,40,.8)'; for (let x = sx; x < W; x += 24) { const h = H * (0.08 + ((x * 13) % 7) * 0.02); g.fillRect(x, H * 0.62 - h, 20, h); }
+        ['#1d4e6e', '#2f7f9a', '#0d2a44'].forEach((c, k) => { g.fillStyle = c; g.beginPath(); g.moveTo(sx, H); for (let x = sx; x <= W; x += 10) g.lineTo(x, H * (0.62 + k * 0.12) + Math.sin(x / 30 + k) * 3); g.lineTo(W, H); g.fill(); });
+        g.fillStyle = '#1a1018'; g.beginPath(); g.moveTo(W * 0.55, H * 0.7); g.lineTo(W * 0.66, H * 0.7); g.lineTo(W * 0.64, H * 0.76); g.lineTo(W * 0.57, H * 0.76); g.fill(); g.beginPath(); g.moveTo(W * 0.6, H * 0.68); g.lineTo(W * 0.6, H * 0.3); g.quadraticCurveTo(W * 0.65, H * 0.45, W * 0.66, H * 0.66); g.fill(); }
+      g.fillStyle = '#efe6d0'; g.fillRect(0, 0, sx, H); g.fillStyle = '#0d2a44'; g.fillRect(0, H * 0.86, sx, H * 0.14); g.fillStyle = '#c4201a'; g.fillRect(sx - 10, 0, 10, H);
+      g.fillStyle = '#c4201a'; g.fillRect(W * 0.02, H * 0.1, H * 0.2, H * 0.66); [...'淡水河'].forEach((c, k) => txt(g, c, W * 0.02 + H * 0.1, H * 0.22 + k * H * 0.21, H * 0.16, KAI, 900, '#fff1d0'));
+      const mx = W * 0.04 + H * 0.24 + (sx - W * 0.04 - H * 0.24) / 2;
+      txt(g, '大稻埕碼頭', mx, H * 0.42, H * 0.4, KAI, 900, '#0d2a44', sx - W * 0.06 - H * 0.24); tracked(g, 'DADAOCHENG WHARF', mx, H * 0.7, H * 0.08, LAT, '#0d2a44', 6);
+      txt(g, '1860s 茶葉出港  ─  2005 親水碼頭  ─  五號水門', sx / 2, H * 0.93, H * 0.075, '"PingFang TC",sans-serif', 700, '#efe6d0', sx * 0.92);
+      g.strokeStyle = '#0d2a44'; g.lineWidth = 4; g.strokeRect(3, 3, W - 6, H - 6);
+    },
+  };
+})();
+const camQ = new URLSearchParams(location.search).get('cam');      // ?view=1&cam=px,py,pz,tx,ty,tz : a free camera for checking
+ENGINE.create({
+  title: '大稻埕 · 迪化街年貨大街', subtitle: 'Dihua Street at Lunar New Year, 2000–2019', loading: 'Hanging the lanterns…',
+  sunDir: [-24, 30, -46], shadowCenter: [0, 0, -2], start: { x: 0.4, z: 29.5, heading: Math.PI },
+  views: [camQ ? camQ.split(',').map(Number) : [0.9, 1.6, 48, -0.2, 5.6, 10], [1.8, 2.0, 25.6, -7, 5.0, 16.5], [0.4, 1.7, 11.2, 10.5, 4.4, -1.4], [3.7, 2.2, 3.8, -6, 5.2, -5], [-3.0, 2.2, -23.5, 9, 5.5, -33], [1.6, 1.6, -13.3, -30, 2.6, -13.8]],   // archway · 新芳春茶行 · 霞海城隍廟 · 乾元 and 屈臣氏 · 戲苑 tower and 慈聖宮 · the lane to the water gate
+  ground: { puddles: 14, puddle: (rr) => [rr(-3.6, 3.6), rr(-33, 33), rr(0, 3)] },   // wet brick from wall to wall
+  dust: { x: [-6, 12], y: [0.3, 8], z: [-36, 36] },
+  clamp(p) {
+    for (let pass = 0; pass < 2; pass++) {
+      let best = null, bd = 1e9;
+      for (const [x0, x1, z0, z1] of AREAS) { const cx = Math.max(x0, Math.min(x1, p.x)), cz = Math.max(z0, Math.min(z1, p.z)), d = Math.hypot(cx - p.x, cz - p.z); if (d < bd) { bd = d; best = [cx, cz]; } }
+      p.x = best[0]; p.z = best[1];
+      if (pass === 0) PHOTOWALL.keepOut(p);                         // round the topic showcases
+      if (pass === 0) for (const [bx, bz, br] of BLOCKS) { const d = Math.hypot(p.x - bx, p.z - bz); if (d < br) { const k = br / Math.max(d, 1e-3); p.x = bx + (p.x - bx) * k; p.z = bz + (p.z - bz) * k; } }
+    }
+  },
+  onFrame: (E) => { if (E.heroPos.z > 38) E.leave('square.html?from=dadao', '廣場 · The Square', 500);    // out under the archway, back to the square
+    if (E.QS.get('debug') === '1' && E.state.ready) document.getElementById('load').style.display = 'none'; },   // checking shots: drop the loading cover at once, no fade
+  models: ['bundle-dadao', 'bundle-core', 'bundle-square'],
+  build(E, [dadao, core, sq]) {
+  const { T, scene, rr, TEX, MATS, GLOW, triMat, dress, get, place, board, sign, canopy, banyans, lanternString, stall, steamSrc, canvasTex, speckle } = E;
+  const add = (geo, mat, x, y, z, cast = true) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = cast; m.receiveShadow = true; scene.add(m); return m; };
+
+  // ── the two rows of shophouses: 閩南 brick, 洋樓 and Baroque crests, two and three storeys ──
+  const zone2 = get(dadao, 'dihua-zone2'), kit = (...parts) => { const g = new T.Group(); parts.forEach(n => g.add(get(zone2, n).clone())); return g; };
+  const KIND = { min3: () => get(dadao, 'dihua-min').clone(), yang3: () => get(dadao, 'dihua-yang').clone(), bar3: () => get(dadao, 'dihua-baroque').clone(),
+    min1: () => kit('arcade', 'min'), yang2: () => kit('arcade', 'yang', 'yang_crest'), bar2: () => kit('arcade', 'baroque', 'baroque_crest') };
+  const HOUSES = {};                                               // 'side:slot' -> the house there, so a landmark can make it clickable
+  const plasters = ['#d8c8ac', '#cdb694', '#c2b3a4', '#b4bba6', '#d0aa86', '#bdb4a4', '#d9c39c'], bricks = ['#ffffff', '#e9d2c4', '#f3e2cf', '#dcc0b0'];
+  const house = (kind, side, i) => {
+    if (!KIND[kind]) return; const h = KIND[kind](); HOUSES[side + ':' + i] = h; h.position.set(side * FX, 0, ZC(i)); h.rotation.y = -side * Math.PI / 2;
+    dress(h, { swap: { bone: triMat({ color: plasters[(i * 3 + (side > 0 ? 2 : 0)) % plasters.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }), brick: triMat({ color: bricks[(i + (side > 0 ? 1 : 0)) % bricks.length], tex: TEX.brick, scale: 1.0, rough: 0.9 }) } });
+    scene.add(h);
+  };
+  WEST.forEach((k, i) => k && house(k, -1, i)); EAST.forEach((k, i) => k && house(k, 1, i));
+
+  // ── the 年貨大街 archway at the street's mouth; she arrives just inside it ──
+  const arch = dress(get(get(dadao, 'dadao-entrance'), 'portal').clone()); arch.position.set(0, 0, 34.4); scene.add(arch);
+
+  // ── 霞海城隍廟 and its forecourt, opening off the east side halfway down ──
+  const templeM = place(dadao, 'temple', 14.0, 0.8, -Math.PI / 2);
+  const paving = triMat({ color: '#a79c8c', tex: TEX.concrete, scale: 0.6, rough: 0.5 });
+  add(new T.BoxGeometry(7.2, 0.03, 14.4), paving, 8.1, 0.012, 0.8, false);
+  { const bronze = triMat({ color: '#6b5a3c', tex: TEX.metal, scale: 2, rough: 0.35, metal: 0.8 }), bx = 7.3, bz = 0.8;      // the incense burner, smoking
+    add(new T.CylinderGeometry(0.62, 0.42, 0.62, 20), bronze, bx, 1.0, bz); add(new T.CylinderGeometry(0.7, 0.66, 0.1, 20), bronze, bx, 1.34, bz);
+    [0, 2.1, 4.2].forEach(a => add(new T.CylinderGeometry(0.07, 0.05, 0.72, 8), bronze, bx + Math.cos(a) * 0.4, 0.36, bz + Math.sin(a) * 0.4));
+    add(new T.CylinderGeometry(0.56, 0.56, 0.03, 20), GLOW(2.6, 0.9, 0.25), bx, 1.385, bz, false);
+    for (let i = 0; i < 3; i++) steamSrc.push(new T.Vector3(bx + rr(-0.2, 0.2), 1.45, bz + rr(-0.2, 0.2))); BLOCKS.push([bx, bz, 1.1]); }
+
+  // ── 永樂市場, standing back behind its own stalls ──
+  const yongleM = place(dadao, 'yongle', 10.9, -20.8, -Math.PI / 2, 0.85);
+  add(new T.BoxGeometry(6.2, 0.03, 19.2), paving, 7.6, 0.012, -20.8, false);
+
+  // ── lanterns close overhead: a string across the street every two metres, zig-zagging ──
+  const kindAt = (row, z) => row[Math.max(0, Math.min(17, Math.round((29.6 - z) / 4.8)))];
+  const anchor = (side, z, k) => {                                // where a string can be tied on that side of the street at z
+    const kind = kindAt(side < 0 ? WEST : EAST, z);
+    if (kind) return new T.Vector3(side * 4.45, kind === 'min1' ? 4.35 : 5.7 + (k % 3) * 0.45, z);
+    if (side > 0 && z < -30.4) return new T.Vector3(9.3, 6.0 + (k % 2) * 0.3, z);   // 慈聖宮's roof
+    if (side < 0) return null;                                    // the lane mouth: nothing to tie to
+    return z > -8 ? new T.Vector3(11.2, 6.3, z) : new T.Vector3(10.4, 7.0 + (k % 2) * 0.5, z);   // the temple's eave, or the market's front
+  };
+  let k = 0; for (let z = 31; z > -51; z -= 1.9, k++) { const a = anchor(-1, z, k), b = anchor(1, z + (k % 2 ? 1.2 : -1.2), k + 1); if (a && b) lanternString(a, b, b.x > 5 ? 1.5 : 0.8); }
+  E.buildLanterns();
+
+  // ── red New Year banners on wires across the street ──
+  const cloth = (text, w, h, wide) => { const cv = document.createElement('canvas'); cv.width = wide ? 1024 : 128; cv.height = wide ? Math.round(1024 * h / w) : Math.round(128 * h / w); const g = cv.getContext('2d');
+    if (!(window.DESIGN && DESIGN.drawMaterial(g, cv.width, cv.height, 'cloth', () => 0.5))) { g.fillStyle = '#b3241a'; g.fillRect(0, 0, cv.width, cv.height); } g.strokeStyle = '#e9c46a'; g.lineWidth = wide ? 10 : 5; g.strokeRect(7, 7, cv.width - 14, cv.height - 14);
+    g.fillStyle = '#f3d27a'; g.textAlign = 'center'; g.textBaseline = 'middle'; const n = [...text].length;
+    if (wide) { g.font = `700 ${Math.round(cv.height * 0.62)}px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif`; g.fillText(text, cv.width / 2, cv.height * 0.53); }
+    else { const step = (cv.height - 30) / n; g.font = `700 ${Math.round(Math.min(92, step * 0.82))}px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif`; [...text].forEach((ch, i) => g.fillText(ch, 64, 15 + step * (i + 0.5))); }
+    const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    const f = new T.MeshStandardMaterial({ map: t, roughness: 0.85, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.2 }), e = new T.MeshStandardMaterial({ color: 0x7a1c14 });
+    const m = new T.Mesh(new T.BoxGeometry(w, h, 0.016), [e, e, e, e, f, f]); m.castShadow = true; return m; };   // a thin box, so the words read the right way round from both sides
+  const wishes = ['恭賀新禧', '年貨大街', '大吉大利', '招財進寶', '新春特賣', '萬事如意', '迪化街', '年年有餘', '南北貨', '歲歲平安'];
+  [27.2, 17.6, -8.8, -32.8, -42.4].forEach((z, j) => {
+    add(new T.CylinderGeometry(0.012, 0.012, 8.9, 4), MATS.ink, 0, 7.55, z, false).rotation.z = Math.PI / 2;
+    [-2.6, 0, 2.6].forEach((x, i) => { const b = cloth(wishes[(j * 3 + i) % wishes.length], 0.78, 2.5); b.position.set(x + rr(-0.3, 0.3), 6.28, z); b.rotation.y = rr(-0.12, 0.12); scene.add(b); });
+  });
+
+  [[7.0, 7.9, '國泰民安'], [9.4, 7.9, '風調雨順'], [7.0, -6.3, '合境平安'], [9.4, -6.3, '神恩廣被']].forEach(([x, z, t]) => { const b = cloth(t, 1.0, 3.5); b.position.set(x, 5.5, z); scene.add(b); });   // on the forecourt's side walls
+
+  // ── dried-goods stalls spilling into the road, with baskets of goods and price cards; three cooked-food stalls that steam ──
+  const stallM = get(dadao, 'stall'), wicker = triMat({ color: '#dcb986', tex: TEX.plaster, scale: 3, rough: 0.9 }), plank = triMat({ color: '#a67c52', tex: TEX.bark, scale: 2, rough: 0.85 });
+  const GOODS = ['#7a1f1a', '#d9852b', '#5a4030', '#c9a56a', '#d43a5a', '#7d8f3a', '#e9e2d0', '#a8501f'], goodsMat = GOODS.map(c => new T.MeshStandardMaterial({ color: E.col(c), roughness: 0.75 }));
+  const baskets = (x, z, alongZ, n, seed) => { for (let i = 0; i < n; i++) { const o = (i - (n - 1) / 2) * 0.66, bx = alongZ ? x : x + o, bz = alongZ ? z + o : z;
+    add(new T.CylinderGeometry(0.31, 0.25, 0.42, 14), wicker, bx, 0.56, bz); const g = add(new T.SphereGeometry(0.29, 14, 8), goodsMat[(seed + i * 3) % GOODS.length], bx, 0.76, bz); g.scale.y = 0.5; }
+    add(new T.BoxGeometry(alongZ ? 0.8 : n * 0.66 + 0.2, 0.35, alongZ ? n * 0.66 + 0.2 : 0.8), plank, x, 0.175, z); };
+  const card = (a, b, x, z, ry) => { const cv = document.createElement('canvas'); cv.width = 256; cv.height = 176; const g = cv.getContext('2d'); g.fillStyle = '#f7ecd0'; g.fillRect(0, 0, 256, 176); g.strokeStyle = '#b3241a'; g.lineWidth = 8; g.strokeRect(6, 6, 244, 164);
+    g.fillStyle = '#b3241a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '700 70px "PingFang TC","Heiti TC",sans-serif'; g.fillText(a, 128, 58); g.fillStyle = '#2a2420'; g.font = '700 50px system-ui,sans-serif'; g.fillText(b, 128, 128);
+    const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+    const m = add(new T.BoxGeometry(0.62, 0.43, 0.02), new T.MeshStandardMaterial({ map: t, roughness: 0.7, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: 0.25 }), x, 1.32, z); m.rotation.y = ry;
+    add(new T.CylinderGeometry(0.012, 0.012, 1.1, 5), MATS.ink, x, 0.6, z); };
+  const PRICES = [['烏魚子', '一兩 $380'], ['香菇', '一斤 $450'], ['干貝', '一兩 $260'], ['瓜子', '一斤 $120'], ['紅棗', '一斤 $180'], ['開心果', '一斤 $320'], ['糖果', '一斤 $150'], ['魷魚絲', '一包 $100'], ['枸杞', '一斤 $240'], ['腰果', '一斤 $300'], ['蜜餞', '一盒 $200'], ['臘腸', '一斤 $280']];
+  let pc = 0;
+  const goods = (x, z, side) => {                                 // one dried-goods stall on that side, facing the middle of the road
+    const s = dress(stallM.clone()); s.position.set(x, 0, z); s.rotation.y = -side * Math.PI / 2; scene.add(s);
+    BLOCKS.push([x, z - 0.95, 1.3], [x, z + 0.95, 1.3]);
+    const e = rr(0, 1) < 0.5 ? 1 : -1; baskets(x - side * 0.1, z + e * 2.75, true, 3, pc); BLOCKS.push([x, z + e * 2.75, 1.05]);
+    card(...PRICES[pc % PRICES.length], x - side * 0.62, z + e * 2.4, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
+    card(...PRICES[pc % PRICES.length], x - side * 0.6, z + e * 3.3, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
+  };
+  [[-3.05, 27.4], [-3.05, -28.2]].forEach(([x, z]) => goods(x, z, -1));          // fewer than before: the landmark fronts keep their own goods under the arcade
+  [[3.05, -9.6]].forEach(([x, z]) => goods(x, z, 1));
+  [[8.3, -17.6], [8.3, -23.6]].forEach(([x, z]) => goods(x, z, 1));                 // the market's own row
+  [[-3.0, 9.8, Math.PI / 2, 8], [3.0, 25.0, -Math.PI / 2, 205], [-3.0, -38.5, Math.PI / 2, 135], [6.9, -32.0, Math.PI, 28]].forEach(([x, z, r, h]) => { stall(x, z, r, h); BLOCKS.push([x, z - 0.8, 1.35], [x, z + 0.8, 1.35], [x + Math.sign(-x) * 1.3, z, 0.8]); });
+  // sacks, crates and boxes where the goods were unloaded; scooters and a bicycle against the piers
+  const props = get(core, 'props'), pr = n => get(props, n), scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
+  [[-3.75, 12.2, 'crate'], [3.6, 10.4, 'crate'], [3.7, 9.7, 'boxes'], [3.6, 22.6, 'sack'], [3.5, -5.2, 'sack'], [-3.7, -9.4, 'crate'], [-3.4, -26.2, 'sack'], [3.7, -28.9, 'boxes'], [5.4, -29.6, 'crate']]
+    .forEach(([x, z, n]) => { for (let j = 0; j < 2; j++) { const o = dress(pr(n).clone()); o.position.set(x + rr(-0.25, 0.25), 0, z + j * 0.55); o.rotation.y = rr(0, 6.28); o.scale.setScalar(rr(1.0, 1.35)); scene.add(o); } });
+  [[-3.8, 29.9, 1.2], [3.85, 22.0, -1.9], [-3.85, -27.0, 1.5], [3.85, -36.8, -1.4], [-3.8, -34.6, 1.8], [-1.7, 37.3, 0.3], [-2.4, 37.5, 0.1], [-3.2, 37.4, -0.2]].forEach(([x, z, ry], i) => { const sc = dress(scooters.children[i % 3].clone()); sc.position.set(x, 0, z); sc.rotation.y = ry; scene.add(sc); });
+  { const b = dress(pr('bicycle').clone()); b.position.set(-3.9, 0, 23.4); b.rotation.y = 0.15; scene.add(b); }
+  [[4.9, 7.4, 1], [4.9, -5.8, 1], [10.6, 6.9, 1], [10.6, -5.2, 1], [5.0, -11.7, 0], [5.0, -30.0, 0], [-4.9, -11.6, 1], [-4.9, -15.6, 1]].forEach(([x, z, kind]) => { const p = dress(planter.children[kind].clone()); p.position.set(x, 0, z); p.rotation.y = kind ? 0 : Math.PI / 2; scene.add(p); });
+
+  // ── shop signs on the fronts: dried goods, herbs, cloth, tea ──
+  const words = ['南北貨', '中藥行', '布莊', '茶行', '蔘藥行', '乾貨', '烏魚子', '燕窩', '糖果', '臘味', '金紙店', '竹器', '米行', '干貝', '紅棗', '蜜餞', '香菇', '魚翅', '漢方', '布行', '茶葉', '雜糧', '餅舖', '香舖'];
+  let wi = 0; [[WEST, -1], [EAST, 1]].forEach(([row, side]) => row.forEach((kind, i) => { if (!kind || kind === 'L' || kind === 'min1' || i > 15) return; const w = words[wi % words.length];
+    sign(w, side * 4.16, 5.3 + (wi % 3) * 0.35, ZC(i) + (wi % 2 ? 1.75 : -1.75), 0, [4, 38, 210, 150, 350, 28][wi % 6], wi % 3 === 0); wi++; }));
+  const nameBoard = (lines, w, h, x, y, z, ry, bg, fg) => { const b = board(lines, w, h, bg, fg, 0.45); b.position.set(x, y, z); b.rotation.y = ry; scene.add(b); return b; };
+  // the archway's board is the site's own gate (kind B), never a plate: the painted gate art (asset/textures/posters/gates/dadao.jpg,
+  // a code-drawn street of lanterns until it lands) under designed lettering. CJ, 2026-11-22: 「招牌可以用midjourney生成紋理 或海報更換所有的招牌或有字的牌子直到他們有質感跟好看」
+  const twoSided = (tex, w, h, x, y, z, ry, glow) => { const f = new T.MeshStandardMaterial({ map: tex, roughness: 0.45, emissiveMap: tex, emissive: new T.Color(1, 1, 1), emissiveIntensity: glow }), e = new T.MeshStandardMaterial({ color: E.col('#3a120e'), roughness: 0.6 });
+    const m = new T.Mesh(new T.BoxGeometry(w, h, 0.09), [e, e, e, e, f, f]); m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; scene.add(m); return m; };
+  if (window.DESIGN) {
+    twoSided(DESIGN.signTexture(E, 'redlacquer', 1024, 246, (g, W, H) => DADAO_BOARDS.gate(g, W, H), 'dadao-gate'), 5.2, 1.25, 0, 7.35, 35.16, 0, 0.42);
+    twoSided(DESIGN.signTexture(E, 'enamel', 1024, 284, (g, W, H) => DADAO_BOARDS.market(g, W, H), 'dadao-yongle'), 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, 0.35);
+  } else { nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a'); nameBoard([['永樂市場', 170, 0.42], ['YONGLE MARKET', 60, 0.8, 600]], 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, '#1f2a44', '#f1e7d2'); }
+
+  // ── one showcase per topic of this scene (the list is PHOTO_TOPICS, in photo-topics.js): topic key -> [x, z, facing, kind]. A click opens the topic's gallery ──
+  PHOTOWALL.showcases(E, { section: 'dadao', topics: PHOTO_TOPICS.dadao, spots: {
+    newyear: [5.9, 36.2, -Math.PI / 2 + 0.4, 'stand'],            // a market stand just outside the archway, on the east side, facing the way in
+    temple: [7.2, -4.6, 0, 'shrine'],                             // a small shrine wall with lanterns on the forecourt's south side, facing whoever walks up the street
+    fabric: [4.9, -17.7, -Math.PI / 2, 'shop'],                   // a shop front at the kerb of the market's own front
+    wharf: [-23, -10.5, Math.PI - 0.5, 'wall', { accent: '#1f2a44' }] } });   // a wall on the quay where the lane opens out, turned toward whoever comes down the lane
+
+  // ── the researched places and events: landmark buildings, their signs, and a clickable marker for every event ──
+  LANDMARKS_DADAO(E, { FX, sq, temple: templeM, yongle: yongleM, houses: HOUSES, BLOCKS, AREAS });
+  PLACES.mount(E, { district: 'dadao' });
+  if (window.LM_RUN) LM_RUN(E, 'dadao');   // the landmark modules in lm/, one file per builder
+
+  // ── trees: banyans outside the archway, in the forecourt's corner and at the end of the lane ──
+  banyans(get(sq, 'sq-banyan'), [[-10.5, 36.2, 'banyanM', 0.95], [10.8, 36.6, 'banyanM', 0.9], [-22.5, -6.8, 'banyanM', 0.85]]);
+
+  // ── the lane to the river: a quay, a rail, a moored boat, and the Tamsui wide and bright beyond ──
+  { const water = new T.Mesh(new T.PlaneGeometry(180, 320), new T.MeshStandardMaterial({ color: E.col('#4a6f7c'), roughness: 0.1, metalness: 0.35, emissive: E.col('#b8743e'), emissiveIntensity: 0.22 }));
+    water.rotation.x = -Math.PI / 2; water.position.set(-121, 0.02, 0); water.receiveShadow = true; scene.add(water);
+    const stone = triMat({ color: '#9a9288', tex: TEX.concrete, scale: 0.8, rough: 0.7 });
+    add(new T.BoxGeometry(1.0, 0.5, 320), stone, -30.6, 0.25, 0);
+    add(new T.BoxGeometry(0.07, 0.07, 110), MATS.ink, -29.6, 1.05, -10); add(new T.BoxGeometry(0.05, 0.05, 110), MATS.ink, -29.6, 0.6, -10);
+    for (let z = -64; z <= 44; z += 2.4) add(new T.BoxGeometry(0.09, 1.1, 0.09), MATS.ink, -29.6, 0.55, z);
+    [[-28.4, -9.5], [-28.4, -18.5], [-28.4, 8], [-28.4, -36]].forEach(([x, z]) => { const l = dress(get(core, 'lamp').clone()); l.position.set(x, 0, z); l.rotation.y = Math.PI / 2; scene.add(l); });
+    [[-26.6, -15.9], [-26.6, -11.4]].forEach(([x, z]) => { const b = dress(get(core, 'bollard').clone()); b.position.set(x, 0, z); scene.add(b); });
+    if (window.DESIGN) twoSided(DESIGN.signTexture(E, 'paper', 1024, 241, (g, W, H) => DADAO_BOARDS.quay(g, W, H), 'dadao-quay'), 3.4, 0.8, -27.6, 3.9, -13.6, Math.PI / 2, 0.4);   // the quay's own board (kind B): a river-sunset print
+    else nameBoard([['大稻埕碼頭', 150, 0.5]], 3.4, 0.8, -27.6, 3.9, -13.6, Math.PI / 2, '#1f2a44', '#f1e7d2');
+    [-15.1, -12.1].forEach(z => add(new T.CylinderGeometry(0.05, 0.05, 3.6, 8), MATS.ink, -27.6, 1.8, z));
+    const hull = triMat({ color: '#3d5c6e', tex: TEX.bark, scale: 2, rough: 0.7 }), deck = triMat({ color: '#e6dcc6', tex: TEX.plaster, scale: 1, rough: 0.8 });   // a ferry at the wharf
+    const boat = new T.Group(); boat.position.set(-35.4, 0, -14.6); boat.rotation.y = 0.06;
+    [[new T.BoxGeometry(3.4, 1.0, 11), hull, 0, 0.45, 0], [new T.BoxGeometry(2.7, 1.5, 6.2), deck, 0, 1.7, -0.6], [new T.BoxGeometry(3.0, 0.12, 6.8), hull, 0, 2.5, -0.6], [new T.BoxGeometry(0.5, 0.9, 0.5), MATS.verm, 0, 3.0, -2.4], [new T.CylinderGeometry(0.04, 0.05, 3.4, 6), MATS.ink, 0, 4.2, 1.6]]
+      .forEach(([g, m, x, y, z]) => { const o = new T.Mesh(g, m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; boat.add(o); });
+    for (let i = 0; i < 5; i++) { const w = new T.Mesh(new T.BoxGeometry(0.04, 0.6, 0.8), GLOW(2.4, 1.6, 0.8)); w.position.set(1.36, 1.8, -2.9 + i * 1.15); boat.add(w); }
+    scene.add(boat);
+    [[-23.5, 12], [-24, 24], [-23, -28], [-24, -42]].forEach(([x, z], i) => { const t = dress(get(core, 'tree').clone()); t.position.set(x, 0, z); t.rotation.y = i * 1.3; t.scale.setScalar(1 + (i % 2) * 0.15); scene.add(t); }); }
+
+  // ── the hazy city all round, kept clear of the river and of the street's two ends ──
+  { const n = 190, im = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), triMat({ color: '#6d6762', tex: TEX.concrete, scale: 0.15, rough: 0.9 }), n), d = new T.Object3D();
+    for (let i = 0; i < n;) { const a = rr(0, 6.283), r = rr(44, 215), x = Math.cos(a) * r, z = Math.sin(a) * r; if ((x < -26 && x > -150) || Math.abs(x) < 15) continue;
+      const h = Math.min(rr(8, 30), 8 + (r - 44) * 0.5); d.position.set(x, h / 2, z); d.scale.set(rr(8, 18), h, rr(8, 18)); d.rotation.y = rr(0, 1.5); d.updateMatrix(); im.setMatrixAt(i++, d.matrix); }
+    im.castShadow = im.receiveShadow = true; scene.add(im); }
+  },
+});
+</script>
+</body>
+</html>

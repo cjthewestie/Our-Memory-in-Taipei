@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · Place and event markers</title>
+</head>
+<body>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="../memories-config.js"></script>
+<script src="hero.js"></script>
+<script src="engine.js"></script>
+<script src="photo-topics.js"></script>
+<script src="photowall.js"></script>
+<script src="place-data.js"></script>
+<script src="design-kit.js"></script>
+<script src="places.js"></script>
+<script>
+// A test page for places.js: one marker of each type, every statue shape, and one "existing building" target,
+// all with real items from PLACE_DATA. Nothing here is a block of the site.
+//   ?place=<key>          opens that item's panel on load
+//   ?pltest=add:<key>     adds one drawn picture to that item's photos, then opens its panel and prints PLTEST lines
+//   ?pltest=near:<key>    stands her beside that marker (the E prompt), then prints PLTEST lines
+//   ?pltest=e:<key>       the same, then presses E      ·  ?pltest=click:<key>  clicks the marker on the canvas
+//   ?pltest=esc:<key>     opens the panel, presses W (she must not move), then Esc
+const QS = new URLSearchParams(location.search);
+if (QS.get('debug') === '1') { const st = document.createElement('style'); st.textContent = '#load { transition: none !important; }'; document.head.appendChild(st); }   // headless shots: no half-faded loading cover
+const E0 = ENGINE.create({
+  title: '地點與事件 · Place markers test', subtitle: 'Click a marker, or walk up to one and press E.',
+  sunDir: [-26, 30, 34], shadowCenter: [0, 0, 0], start: { x: 0, z: 7, heading: Math.PI },   // the sun stands behind the camera here, so the fronts of the markers are lit
+  clamp(p) { p.x = Math.max(-40, Math.min(40, p.x)); p.z = Math.max(-50, Math.min(12, p.z)); PHOTOWALL.keepOut(p); },
+  views: [[0, 3.2, 12, 0, 1.6, 0], [0, 3.2, 2, 0, 1.4, -10], [0, 3.6, -9, 0, 1.8, -20], [0, 3.6, -21, 0, 1.6, -32], [0, 3.0, -35, 0, 1.4, -44], [0, 3.2, -1.5, 0, 1.6, -8]],
+  ground: { strips: [{ w: 3, len: 90, turn: true, z: 3.4 }], puddles: 3, puddle: (rr) => [rr(-8, 8), rr(4, 9), rr(0, 3)] },
+  dust: { x: [-30, 30], y: [0.3, 6], z: [-46, 10] },
+  models: [],
+  build(E) {
+    const { T, scene, TEX, triMat, MATS, board } = E;
+    const X = k => PLACES.item('xinyi', k), M = k => PLACES.item('ximen', k), D = k => PLACES.item('dadao', k), Q = k => PLACES.item('square', k);
+    // CJ, 2026-11-22: 「這種無聊的招牌絕對不能出現」. One of each designed form from design-kit.js, on real items. ?cam=... frames a row.
+    const row = (z, list, gap) => list.forEach(([it, design], i) => PLACES.add(E, it, { position: [(i - (list.length - 1) / 2) * gap, z], rotation: 0, design }));
+    // row A, z = 0: the six poster mounts (each item's own curated design)
+    row(0, [[D('tttifa-arts-festival')], [Q('golden-melody-arena-2006')], [Q('jay-chou-taipei-dome-2024')], [Q('universiade-2017')], [M('mayday-5th-anniv-2004')], [D('film-twa-tiu-tiann-2014')]], 7);
+    // row B, z = -10: statues on block, drum and podium plinths
+    row(-10, [[X('taipei-101-opening-2004')], [X('alex-honnold-free-solo-2026')], [M('drag-festival-2025')], [D('yuelao-matchmaker-crowds')], [X('taipei-101-run-up-2005')], [Q('nba-taipei-game-2013')], [Q('yuanzai-first-day-2014')], [D('city-god-procession')], [Q('golden-melody-arena-2006'), { form: 'statue', motif: 'record', plinth: 'drum' }], [Q('universiade-2017'), { form: 'statue', motif: 'rings', plinth: 'podium' }], [M('play-now-concert-2021'), { form: 'statue', motif: 'mic', plinth: 'block' }]], 4.2);
+    // row C, z = -20: installations
+    row(-20, [[X('nuit-blanche-xinyi-2023')], [M('rainbow-crossing-2019')], [M('lantern-festival-2017')], [X('first-nye-fireworks-2005')], [X('taiwan-pride-city-hall-2024')], [Q('lantern-fest-shilin-2022')], [Q('flora-expo-2010')], [Q('pokemon-go-beitou-2016')], [X('eslite-xinyi-last-night-2023')], [M('golden-horse-outdoor-2018')], [D('dadaocheng-fireworks')]], 7);
+    // row D, z = -32: booths
+    row(-32, [[M('jay-chou-signing-2004')], [M('play-now-concert-2021')], [M('orange-carnival-2024')], [M('gatao-fanmeet-2025')], [X('deadpool-reynolds-2016')], [D('new-year-goods-street')], [D('solitary-gourmet-yongle')], [D('pier5-container-market')], [X('simple-life-urban-2019')], [Q('msi-2019-heping')], [Q('fancy-frontier-ff')]], 5);
+    // row E, z = -44: every poster layout once, each in a lit case
+    const L = DESIGN.LAYOUTS, src = [Q('golden-melody-arena-2006'), Q('flora-expo-2010'), Q('universiade-2017'), Q('msi-2019-heping'), Q('jay-chou-taipei-dome-2024'), Q('nuit-blanche-gongguan-2017'), M('lantern-festival-2017'), Q('fancy-frontier-ff'), X('weekend-in-taipei-2024'), D('film-twa-tiu-tiann-2014'), M('backstreet-fest-2020'), X('taipei-nye-party-2020'), X('alain-robert-climb-2004'), D('tttifa-arts-festival'), D('new-year-goods-street'), M('lai-lai-closes-2003') || X('eslite-xinyi')];
+    row(-44, L.map((lay, i) => [src[i % src.length], { form: 'poster', mount: 'case', layout: lay, palette: lay }]), 2.3);
+    // left of row A, x = -24 ... -32: the three district gate posters (posters/gates/<district>.jpg once the painting lands, code-drawn until then),
+    // and behind them the real-sign material boards (signs/<material>.jpg) with lettering set in code
+    [['ximen', '西門町', '西門', 'XIMENDING', 'anime'], ['dadao', '大稻埕', '大稻埕', 'DADAOCHENG', 'painted'], ['xinyi', '信義區', '信義', 'XINYI', 'award']].forEach(([d, head, big, en, layout], i) => {
+      const g = DESIGN.build(E, null, { form: 'poster', mount: 'case', layout, palette: layout, head, big, en, art: 'posters/gates/' + d + '.jpg', kicker: 'GATEWAY · 入口' }); g.position.set(-24 - i * 4, 0, 0); scene.add(g); });
+    DESIGN.MATERIALS.forEach((m, i) => { const t = DESIGN.signTexture(E, m, 512, 160, (g, W, H) => { g.fillStyle = /lightbox|paper|brass/.test(m) ? '#1a1410' : '#f4e8c8'; g.font = `900 ${H * 0.5}px "Kaiti TC",serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(m, W / 2, H / 2); }, 'test');
+      const s = new T.Mesh(new T.PlaneGeometry(2.4, 0.75), new T.MeshStandardMaterial({ map: t, roughness: 0.6 })); s.position.set(-22 - (i % 6) * 2.6, 1.0 + ((i / 6) | 0) * 0.9, -4); scene.add(s); });
+    // an existing building registered as a target, with a plaque on its wall
+    const shop = new T.Group(); shop.position.set(30, 0, 3); shop.rotation.y = -Math.PI / 2;
+    const body = new T.Mesh(new T.BoxGeometry(4.2, 3.4, 2.6), MATS.brick); body.position.y = 1.7; body.castShadow = body.receiveShadow = true; shop.add(body);
+    const sg = board([['蜂大咖啡', 150, 0.5]], 3.2, 0.7, '#1f2a44', '#f1e7d2', 0.5); sg.position.set(0, 2.9, 1.37); shop.add(sg); scene.add(shop);
+    PLACES.add(E, M('fong-da'), { target: shop, plaque: { position: [28.64, 1.5, 4.6], rotation: -Math.PI / 2 } });
+    PHOTOWALL.block({ x: 30, z: 3, facing: -Math.PI / 2, hw: 2.1, hd: 1.3 });
+    window.PL = PLACES.mount(E, { district: 'xinyi' });
+  },
+});
+
+// ── self-test, only with ?pltest= ──
+(async () => {
+  const q = QS.get('pltest'); if (!q) return; const [mode, key] = q.split(':');
+  let FRAME = 0; (function count() { FRAME++; requestAnimationFrame(count); })();   // headless virtual time runs timers ahead of drawing, so the tests wait for drawn frames
+  const wait = ms => new Promise(r => setTimeout(r, ms)), frames = async n => { const f0 = FRAME; for (let i = 0; i < 300 && FRAME - f0 < n; i++) await wait(30); }, done = () => { window.__pltestDone = true; }, say = (tag, o) => console.log('PLTEST ' + tag + ' ' + JSON.stringify(o));
+  while (!(window.__remake && window.__remake.ready && window.__places)) await wait(100);
+  const e = __places.entries.find(x => x.key === key), panel = () => ({ open: __places.isOpen(), current: __places.current(), title: (document.querySelector('.pl-card h2') || {}).textContent,
+    badge: !document.querySelector('.pl-badge').hidden, zh: document.querySelector('.pl-zh').textContent.length, en: document.querySelector('.pl-his').textContent.length,
+    sources: [...document.querySelectorAll('.pl-links a')].map(a => a.target + '|' + a.rel).filter((x, i, l) => l.indexOf(x) === i), nSources: document.querySelectorAll('.pl-links a').length,
+    tiles: document.querySelectorAll('.pl-tile').length, addButton: !document.querySelector('.pl-add').hidden, param: new URLSearchParams(location.search).get('place') });
+  say('list', __places.list().map(x => x.key + ':' + x.type));
+  if (mode === 'add') {
+    __places.open(key); await e.shelf.ready; say('before', panel());
+    const cv = document.createElement('canvas'); cv.width = 1200; cv.height = 900; const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 900);
+    gr.addColorStop(0, '#f7b267'); gr.addColorStop(1, '#3d2c4a'); g.fillStyle = gr; g.fillRect(0, 0, 1200, 900); g.fillStyle = '#fff3d6'; g.font = '700 110px sans-serif'; g.textAlign = 'center'; g.fillText('TEST ' + key.slice(0, 14), 600, 470);
+    const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+    say('added', await e.shelf.add({ file: new File([blob], 't.png', { type: 'image/png' }), body: '測試照片 · a test photo', year: 2004, name: 'pltest' }));
+    await frames(12); say('after', panel());
+    say('records', (await __photowall.records()).map(r => ({ key: r.key, section: r.section, topic: r.topic, body: r.body, blobBytes: r.blob && r.blob.size })));
+    return done();
+  }
+  const P = e.pos, th = e.group ? e.group.rotation.y : 0; E0.heroPos.set(P.x + Math.sin(th) * 2.1, 0, P.z + Math.cos(th) * 2.1); E0.cam(th + 0.5, 0.2, 4.2);
+  await frames(20); say('near', { near: __places.near(), prompt: !document.querySelector('.pl-go').hidden, text: document.querySelector('.pl-go').textContent });
+  if (mode === 'e') { document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true })); await frames(10); say('afterE', panel()); }
+  if (mode === 'click') { const v = new THREE.Vector3(P.x, 1.2, P.z).project(E0.camera), r = E0.canvas.getBoundingClientRect(), x = r.left + (v.x * 0.5 + 0.5) * r.width, y = r.top + (-v.y * 0.5 + 0.5) * r.height;
+    ['pointerdown', 'pointerup'].forEach(t => E0.canvas.dispatchEvent(new PointerEvent(t, { clientX: x, clientY: y, pointerId: 7, pointerType: 'mouse', bubbles: true }))); await frames(10); say('afterClick', panel()); }
+  if (mode === 'esc') { __places.open(key); await frames(10); const a = E0.heroPos.clone();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', bubbles: true })); await frames(45);
+    say('walkWhileOpen', { open: __places.isOpen(), moved: +E0.heroPos.distanceTo(a).toFixed(3), keyW: !!E0.keys.w, focusInPanel: document.querySelector('.pl-card').contains(document.activeElement) });
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await frames(10); say('afterEsc', panel());
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', bubbles: true })); await frames(45); say('walkAfterClose', { moved: +E0.heroPos.distanceTo(a).toFixed(3) }); }
+  done();
+})();
+</script>
+</body>
+</html>

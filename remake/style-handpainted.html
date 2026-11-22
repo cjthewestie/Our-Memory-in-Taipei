@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · 西門紅樓 plaza, Hand-painted</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #2a211c; overflow: hidden; font: 500 13px/1.4 system-ui, sans-serif; color: #fff4e0; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 18px; top: 16px; text-shadow: 0 1px 8px rgba(40,20,10,.7); pointer-events: none; }
+  #hud b { display: block; font: 700 20px/1.1 system-ui, sans-serif; letter-spacing: .02em; }
+  #hud span { opacity: .9; }
+  #keys { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: rgba(40,28,22,.62); padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(6px); white-space: nowrap; }
+  #load { position: fixed; inset: 0; display: grid; place-items: center; background: #2a211c; transition: opacity .25s; }
+  #load.gone { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><b>西門紅樓 · Hand-painted</b><span>Remake test: the whole block built again by hand and painted</span></div>
+<div id="keys">W A S D walk · Shift run · H wave · drag to look · scroll to zoom · 1–6 viewpoints · 0 follow</div>
+<div id="load">Painting the plaza…</div>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="hero.js"></script>
+<script>
+// Hand-painted remake (CJ, 2026-11-21: 「這些場景都沒有重做只有套色而已啊」「再給我一個 hand painting 版本」).
+// Nothing in this scene comes from the project's building models. The Red House, both shophouse
+// rows, the trees, lanterns, stalls, props, ground, sky and far city are all built in this file from
+// simple shapes that are bent and leaned on purpose, and every surface is painted on a canvas with
+// overlapping brush strokes. Light and shadow are mostly painted in (baked into vertex colours and
+// the textures); one soft sun only adds cast shadows. Only the player character is a loaded model.
+(() => {
+'use strict';
+const T = THREE, QS = new URLSearchParams(location.search);
+const canvas = document.getElementById('c');
+const renderer = new T.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+const PR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+renderer.debug.checkShaderErrors = QS.get('debug') === '1';
+const scene = new T.Scene();
+const camera = new T.PerspectiveCamera(52, 1, 0.1, 600);
+const col = (hex) => new T.Color(hex).convertSRGBToLinear();
+const hslc = (h, s, l) => new T.Color().setHSL((((h % 360) + 360) % 360) / 360, Math.min(1, Math.max(0, s / 100)), Math.min(1, Math.max(0, l / 100))).convertSRGBToLinear();
+const R = (() => { let s = 20261121; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; })();
+const rr = (a, b) => a + (b - a) * R(), pick = (a) => a[Math.floor(R() * a.length)];
+const lerp = (a, b, t) => a + (b - a) * t, clamp = (x, a, b) => Math.min(b, Math.max(a, x)), sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const h3 = (x, y, z) => { const s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return s - Math.floor(s); };
+function vn(x, y, z) {                                                     // smooth 3D noise, 0..1
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z); let fx = x - xi, fy = y - yi, fz = z - zi;
+  fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy); fz = fz * fz * (3 - 2 * fz);
+  return lerp(lerp(lerp(h3(xi, yi, zi), h3(xi + 1, yi, zi), fx), lerp(h3(xi, yi + 1, zi), h3(xi + 1, yi + 1, zi), fx), fy),
+    lerp(lerp(h3(xi, yi, zi + 1), h3(xi + 1, yi, zi + 1), fx), lerp(h3(xi, yi + 1, zi + 1), h3(xi + 1, yi + 1, zi + 1), fx), fy), fz);
+}
+
+// ── light: gentle. A violet ambient makes the shadows cool, one soft sun makes the light side warm ──
+const SUN = new T.Vector3(-0.5, 0.78, 0.52).normalize();
+const sun = new T.DirectionalLight(new T.Color(1.0, 0.80, 0.52), 0.72);
+sun.position.copy(SUN).multiplyScalar(130).add(new T.Vector3(0, 0, 26)); sun.target.position.set(0, 0, 26);
+sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.06; sun.shadow.radius = 3;
+Object.assign(sun.shadow.camera, { left: -62, right: 62, top: 62, bottom: -62, near: 10, far: 260 }); sun.shadow.camera.updateProjectionMatrix();
+scene.add(sun, sun.target, new T.AmbientLight(new T.Color(0.74, 0.69, 0.82), 1.0));
+const FOG = col('#ecd9c2'); scene.fog = new T.Fog(FOG, 55, 250);
+
+// ── the brush: every texture below is made of these strokes ─────────────────────────────────────
+const hsl = (h, s, l, a = 1) => `hsla(${(((h % 360) + 360) % 360).toFixed(1)},${clamp(s, 0, 100).toFixed(1)}%,${clamp(l, 0, 100).toFixed(1)}%,${a.toFixed(3)})`;
+function brush(g, x, y, len, wid, ang, style, bend = 0) {
+  const dx = Math.cos(ang) * len / 2, dy = Math.sin(ang) * len / 2;
+  g.strokeStyle = style; g.lineWidth = wid; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - dx, y - dy); g.quadraticCurveTo(x - dy * bend, y + dx * bend, x + dx, y + dy); g.stroke();
+}
+function daub(g, w, h, n, o) {                                             // n loose strokes around one colour
+  for (let i = 0; i < n; i++) {
+    const x = rr(o.x0 ?? 0, o.x1 ?? w), y = rr(o.y0 ?? 0, o.y1 ?? h), len = o.len * rr(0.5, 1.4), wid = o.wid * rr(0.6, 1.3), ang = (o.ang || 0) + rr(-1, 1) * (o.av ?? 0.5), bend = rr(-0.5, 0.5);
+    const st = hsl(o.h + rr(-1, 1) * (o.dh || 0), o.s + rr(-1, 1) * (o.ds || 0), o.l + rr(-1, 1) * (o.dl || 0), o.a * rr(0.6, 1));
+    if (o.wrap) { for (let ox = -w; ox <= w; ox += w) for (let oy = -h; oy <= h; oy += h) { const m = len + wid; if (x + ox > -m && x + ox < w + m && y + oy > -m && y + oy < h + m) brush(g, x + ox, y + oy, len, wid, ang, st, bend); } }
+    else brush(g, x, y, len, wid, ang, st, bend);
+  }
+}
+function mkTex(w, h, draw, o = {}) {
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h);
+  const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8; if (o.repeat !== false) t.wrapS = t.wrapT = T.RepeatWrapping; return t;
+}
+const PM = (map, o = {}) => new T.MeshLambertMaterial(Object.assign({ map, vertexColors: true }, o));
+const FONT = '700 84px "Kaiti TC","STKaiti","BiauKai","PingFang TC","Heiti TC",sans-serif';
+
+// One wall, painted like a background artist would: loose underpainting, a few bricks picked out,
+// grime climbing from the base, shade under the eave, a light edge and a dark edge.
+function paintWall(g, w, h, o) {
+  const hue = o.hue, sat = o.sat, lit = o.lit, grime = o.grime ?? 1;
+  g.fillStyle = hsl(hue, sat, lit); g.fillRect(0, 0, w, h);
+  daub(g, w, h, 240, { h: hue, dh: 9, s: sat, ds: 10, l: lit, dl: 8, len: w * 0.22, wid: w * 0.075, ang: -0.35, av: 0.6, a: 0.4 });
+  daub(g, w, h, 280, { h: hue + 6, dh: 13, s: sat, ds: 12, l: lit + 2, dl: 10, len: w * 0.12, wid: w * 0.03, ang: -0.2, av: 0.8, a: 0.3 });
+  const cluster = (bw, bh, bh0, bs, bl, n) => { const c0 = Math.floor(rr(0, w / bw)), r0 = Math.floor(rr(0, h / bh));
+    for (let k = 0; k < n; k++) { const r = r0 + Math.floor(rr(0, 4)), c = c0 + Math.floor(rr(0, 3)); brush(g, (c + (r % 2) * 0.5 + 0.5) * bw, (r + 0.5) * bh, bw * 0.68, bh * 0.62, rr(-0.05, 0.05), hsl(bh0 + rr(-8, 14), bs + rr(-10, 10), bl + rr(-12, 16), 0.8)); } };
+  if (o.kind === 'brick') {
+    const bw = w / 7, bh = bw * 0.42;
+    for (let r = 0; r * bh < h; r++) brush(g, w / 2, r * bh + rr(-2, 2), w * 1.1, 1.8, rr(-0.012, 0.012), hsl(hue + 16, sat * 0.5, lit + 22, 0.16), rr(-0.02, 0.02));
+    for (let c = 0; c < 22; c++) cluster(bw, bh, hue, sat, lit, 2 + Math.floor(rr(0, 7)));
+  } else if (o.kind === 'plaster') {
+    for (let c = 0; c < 2; c++) { const px = rr(w * 0.1, w * 0.9), py = rr(h * 0.15, h * 0.85); daub(g, w, h, 14, { x0: px - 46, x1: px + 46, y0: py - 30, y1: py + 30, h: 30, s: 25, l: lit - 20, dl: 5, len: 40, wid: 26, a: 0.5, av: 2 });
+      for (let k = 0; k < 9; k++) brush(g, px + rr(-40, 40), py + Math.round(rr(-2, 2)) * 15, 30, 10, rr(-0.06, 0.06), hsl(12 + rr(-6, 10), 55, 44 + rr(-8, 10), 0.85)); }
+    for (let c = 0; c < 3; c++) { let x = rr(0, w), y = rr(0, h * 0.5); g.strokeStyle = hsl(hue - 10, sat, lit - 26, 0.5); g.lineWidth = 1.6; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 7; k++) { x += rr(-16, 16); y += rr(8, 26); g.lineTo(x, y); } g.stroke(); }
+    daub(g, w, h, 14, { y0: 0, y1: h * 0.5, h: hue - 20, s: sat * 0.6, l: lit - 20, dl: 4, len: h * 0.3, wid: w * 0.012, ang: 1.57, av: 0.05, a: 0.16 });   // rain drips
+  } else {                                                                 // small wall tiles
+    const tw = w / 14; for (let i = 1; i < 14; i++) { brush(g, i * tw + rr(-2, 2), h / 2, h * 1.1, 1.4, 1.5708 + rr(-0.01, 0.01), hsl(hue, sat * 0.5, lit - 16, 0.2)); brush(g, w / 2, i * tw + rr(-2, 2), w * 1.1, 1.4, rr(-0.01, 0.01), hsl(hue, sat * 0.5, lit - 16, 0.2)); }
+    for (let k = 0; k < 46; k++) { const c = Math.floor(rr(0, 14)), r = Math.floor(rr(0, 14)); brush(g, (c + 0.5) * tw, (r + 0.5) * tw, tw * 0.3, tw * 0.62, rr(-0.1, 0.1), hsl(hue + rr(-14, 14), sat + rr(-8, 14), lit + rr(-12, 14), 0.7)); }
+  }
+  daub(g, w, h, 40, { y0: h * 0.1, y1: h * 0.6, h: 45, s: 75, l: 88, dl: 5, len: w * 0.25, wid: w * 0.06, ang: -0.4, av: 0.4, a: 0.1 });       // sun scumble
+  const gr = g.createLinearGradient(0, h, 0, h * 0.72); gr.addColorStop(0, `rgba(48,34,62,${0.62 * grime})`); gr.addColorStop(1, 'rgba(48,34,62,0)'); g.fillStyle = gr; g.fillRect(0, h * 0.72, w, h * 0.28);
+  daub(g, w, h, 70 * grime, { y0: h * 0.86, y1: h, h: 265, s: 22, l: 22, dl: 6, len: h * 0.1, wid: w * 0.03, ang: 1.57, av: 0.25, a: 0.24 });
+  daub(g, w, h, 18 * grime, { y0: h * 0.94, y1: h, h: 95, s: 38, l: 36, dl: 6, len: w * 0.05, wid: w * 0.02, ang: 0, av: 1, a: 0.4 });           // moss
+  const g2 = g.createLinearGradient(0, 0, 0, h * 0.1); g2.addColorStop(0, 'rgba(44,38,86,.42)'); g2.addColorStop(1, 'rgba(44,38,86,0)'); g.fillStyle = g2; g.fillRect(0, 0, w, h * 0.1);
+  daub(g, w, h, 26, { x0: 0, x1: w * 0.025, h: 45, s: 60, l: 92, len: h * 0.12, wid: w * 0.014, ang: 1.57, av: 0.08, a: 0.45 });
+  daub(g, w, h, 26, { x0: w * 0.975, x1: w, h: 262, s: 25, l: 22, len: h * 0.12, wid: w * 0.014, ang: 1.57, av: 0.08, a: 0.32 });
+}
+
+// ── the shared painted surfaces (these tile; colour comes from the brush and from each object's own tint) ──
+const TEX = {
+  paint: mkTex(512, 512, (g, w, h) => { g.fillStyle = hsl(40, 12, 86); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 420, { h: 40, dh: 40, s: 12, ds: 8, l: 86, dl: 8, len: 120, wid: 42, ang: -0.5, av: 0.6, a: 0.38, wrap: true });
+    daub(g, w, h, 480, { h: 30, dh: 60, s: 12, ds: 8, l: 84, dl: 11, len: 64, wid: 15, ang: -0.3, av: 0.9, a: 0.28, wrap: true });
+    daub(g, w, h, 200, { h: 50, s: 30, l: 97, len: 80, wid: 3, ang: -0.5, av: 0.5, a: 0.3, wrap: true }); }),
+  brick: mkTex(512, 512, (g, w, h) => { g.fillStyle = hsl(11, 58, 40); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 300, { h: 11, dh: 8, s: 58, ds: 10, l: 40, dl: 7, len: 110, wid: 40, ang: -0.3, av: 0.6, a: 0.4, wrap: true });
+    const bw = w / 6, bh = h / 16; for (let r = 0; r < 16; r++) for (let c = -1; c < 7; c++) if (R() < 0.42) brush(g, (c + (r % 2) * 0.5 + 0.5) * bw + rr(-3, 3), (r + 0.5) * bh + rr(-1.5, 1.5), bw * 0.68, bh * 0.62, rr(-0.05, 0.05), hsl(8 + rr(-6, 16), 58 + rr(-12, 10), 42 + rr(-12, 17), 0.75));
+    daub(g, w, h, 120, { h: 30, s: 60, l: 78, len: 50, wid: 3, ang: 0, av: 0.2, a: 0.22, wrap: true }); }),
+  quoin: mkTex(256, 256, (g, w, h) => { for (let b = 0; b < 4; b++) { const red = b % 2 === 0; g.fillStyle = red ? hsl(10, 58, 42) : hsl(42, 45, 86); g.fillRect(0, b * 64, w, 64);
+      daub(g, w, h, 60, { y0: b * 64 + 8, y1: b * 64 + 56, h: red ? 10 : 42, dh: 8, s: red ? 58 : 40, ds: 10, l: red ? 42 : 86, dl: 8, len: 70, wid: 18, ang: 0, av: 0.15, a: 0.45, wrap: true });
+      brush(g, w / 2, b * 64 + 2, w * 1.2, 4, 0, hsl(270, 25, 28, 0.4)); brush(g, w / 2, b * 64 + 8, w * 1.2, 2.5, 0, hsl(48, 80, 94, 0.45)); } }),
+  roof: mkTex(256, 256, (g, w, h) => { g.fillStyle = hsl(188, 24, 30); g.fillRect(0, 0, w, h); const cw = w / 8, rh = h / 8;
+    for (let r = 0; r < 8; r++) { for (let c = -1; c < 9; c++) { const x = (c + (r % 2) * 0.5 + 0.5) * cw, y = (r + 0.5) * rh; brush(g, x, y, rh * 0.62, cw * 0.74, 1.5708 + rr(-0.08, 0.08), hsl(182 + rr(-12, 22), 26 + rr(-8, 10), 36 + rr(-9, 12), 0.92)); brush(g, x - cw * 0.16, y - rh * 0.2, rh * 0.3, 3, 1.5708, hsl(170, 40, 70, 0.4)); }
+      brush(g, w / 2, (r + 1) * rh - 1, w * 1.2, 4, 0, hsl(215, 35, 15, 0.6)); } }),
+  paving: mkTex(1024, 1024, (g, w, h) => { g.fillStyle = hsl(18, 24, 32); g.fillRect(0, 0, w, h); const rh = h / 8;
+    for (let r = 0; r < 8; r++) { let x = -rr(0, 150); const x0 = x; while (x < w + 160) { const bw = rr(70, 210), hue = 24 + rr(-14, 14), sa = 24 + rr(-10, 14), li = 61 + rr(-10, 9), y = r * rh;
+        for (let ox = 0; ox >= -w; ox -= w) { const xx = x + ox - x0 * 0 ; g.fillStyle = hsl(hue, sa, li); g.beginPath(); g.moveTo(xx + 5 + rr(-2, 2), y + 5 + rr(-2, 2)); g.lineTo(xx + bw - 5 + rr(-2, 2), y + 5 + rr(-2, 2)); g.lineTo(xx + bw - 5 + rr(-2, 2), y + rh - 5 + rr(-2, 2)); g.lineTo(xx + 5 + rr(-2, 2), y + rh - 5 + rr(-2, 2)); g.closePath(); g.fill();
+          for (let k = 0; k < 4; k++) brush(g, xx + bw * rr(0.25, 0.75), y + rh * rr(0.25, 0.75), bw * 0.5, rh * 0.26, rr(-0.3, 0.3), hsl(hue + rr(-8, 8), sa, li + rr(-7, 8), 0.4));
+          brush(g, xx + bw / 2, y + 9, bw * 0.8, 3, 0, hsl(45, 60, 90, 0.35)); }
+        x += bw; if (x > w && x - bw < w) break; } }
+    daub(g, w, h, 260, { h: 20, dh: 30, s: 25, l: 50, dl: 14, len: 220, wid: 60, ang: 0.3, av: 1, a: 0.07, wrap: true });
+    daub(g, w, h, 300, { h: 270, s: 20, l: 28, len: 14, wid: 6, av: 3, a: 0.16, wrap: true }); }),
+  path: mkTex(512, 512, (g, w, h) => { g.fillStyle = hsl(30, 26, 44); g.fillRect(0, 0, w, h); const rh = h / 4;
+    for (let r = 0; r < 4; r++) { const n = 2 + (r % 2), bw = w / n, off = r % 2 ? bw * 0.4 : 0; for (let c = -1; c <= n; c++) { const x = c * bw + off, y = r * rh, hue = 38 + rr(-10, 8), li = 80 + rr(-6, 6);
+        g.fillStyle = hsl(hue, 34, li); g.beginPath(); g.moveTo(x + 6, y + 6 + rr(-2, 2)); g.lineTo(x + bw - 6, y + 6 + rr(-2, 2)); g.lineTo(x + bw - 6 + rr(-2, 2), y + rh - 6); g.lineTo(x + 6 + rr(-2, 2), y + rh - 6); g.closePath(); g.fill();
+        for (let k = 0; k < 7; k++) brush(g, x + bw * rr(0.2, 0.8), y + rh * rr(0.2, 0.8), bw * 0.4, rh * 0.22, rr(-0.4, 0.4), hsl(hue + rr(-10, 10), 34, li + rr(-7, 7), 0.4)); } }
+    daub(g, w, h, 60, { h: 280, s: 20, l: 40, len: 20, wid: 5, av: 3, a: 0.14, wrap: true }); }),
+  leaf: mkTex(512, 512, (g, w, h) => { g.fillStyle = hsl(95, 30, 70); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 1000, { h: 95, dh: 28, s: 38, ds: 15, l: 72, dl: 20, len: 30, wid: 16, av: 3.2, a: 0.62, wrap: true });
+    daub(g, w, h, 320, { h: 70, dh: 15, s: 60, l: 94, dl: 4, len: 22, wid: 10, av: 3.2, a: 0.55, wrap: true });
+    daub(g, w, h, 240, { h: 160, dh: 20, s: 40, l: 40, dl: 6, len: 22, wid: 10, av: 3.2, a: 0.42, wrap: true }); }),
+  bark: mkTex(256, 256, (g, w, h) => { g.fillStyle = hsl(26, 26, 62); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 260, { h: 26, dh: 14, s: 26, ds: 10, l: 62, dl: 18, len: 110, wid: 13, ang: 1.5708, av: 0.16, a: 0.5, wrap: true });
+    daub(g, w, h, 60, { h: 45, s: 50, l: 92, len: 70, wid: 4, ang: 1.5708, av: 0.12, a: 0.4, wrap: true }); daub(g, w, h, 60, { h: 280, s: 25, l: 24, len: 80, wid: 4, ang: 1.5708, av: 0.12, a: 0.4, wrap: true }); }),
+  wood: mkTex(256, 256, (g, w, h) => { g.fillStyle = hsl(32, 40, 72); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 200, { h: 32, dh: 10, s: 40, ds: 10, l: 72, dl: 12, len: 120, wid: 14, ang: 0, av: 0.06, a: 0.5, wrap: true });
+    for (let i = 0; i < 4; i++) { brush(g, w / 2, i * 64 + 3, w * 1.2, 4, 0, hsl(15, 40, 22, 0.7)); brush(g, w / 2, i * 64 + 9, w * 1.2, 2.5, 0, hsl(45, 70, 94, 0.5)); } }),
+  farwall: mkTex(256, 256, (g, w, h) => { g.fillStyle = hsl(30, 14, 84); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 160, { h: 30, dh: 40, s: 14, l: 84, dl: 7, len: 100, wid: 34, ang: -0.4, av: 0.6, a: 0.4, wrap: true });
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (R() < 0.8) brush(g, (c + 0.5) * 64 + rr(-3, 3), (r + 0.5) * 64 + rr(-3, 3), 26, 20, 1.5708, hsl(225 + rr(-15, 15), 26, 50 + rr(-8, 14), 0.6)); }),
+  lantern: mkTex(256, 256, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#c9b8a4'); gr.addColorStop(0.42, '#fffbea'); gr.addColorStop(0.62, '#fff3d2'); gr.addColorStop(1, '#a8948a'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    daub(g, w, h, 120, { h: 40, s: 30, l: 88, dl: 8, len: 60, wid: 16, ang: 1.5708, av: 0.2, a: 0.3, wrap: true });
+    for (let i = 0; i < 16; i++) brush(g, i * 16 + 8, h / 2, h * 1.1, 2.2, 1.5708, hsl(15, 40, 35, 0.4));
+    brush(g, w / 2, 24, w * 1.2, 12, 0, hsl(44, 80, 62, 0.9)); brush(g, w / 2, h - 24, w * 1.2, 12, 0, hsl(44, 80, 55, 0.9)); }),
+};
+const stripes = (hue) => mkTex(256, 256, (g, w, h) => { for (let i = 0; i < 6; i++) { const c = i % 2; g.fillStyle = c ? hsl(44, 60, 90) : hsl(hue, 66, 50); g.fillRect(i * w / 6, 0, w / 6 + 1, h);
+    daub(g, w, h, 24, { x0: i * w / 6 + 8, x1: (i + 1) * w / 6 - 8, h: c ? 44 : hue, dh: 6, s: c ? 55 : 66, l: c ? 90 : 50, dl: 8, len: 90, wid: 13, ang: 1.5708, av: 0.06, a: 0.5 }); }
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(60,40,90,.4)'); gr.addColorStop(0.5, 'rgba(60,40,90,0)'); gr.addColorStop(1, 'rgba(255,240,200,.25)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+const glassTex = (i) => mkTex(128, 192, (g, w, h) => {
+  const base = [[196, 38, 24], [40, 72, 62], [216, 26, 38]][i]; g.fillStyle = hsl(...base); g.fillRect(0, 0, w, h);
+  daub(g, w, h, 60, { h: base[0], dh: 14, s: base[1], l: base[2], dl: 8, len: 50, wid: 16, ang: 0.9, av: 0.4, a: 0.5 });
+  if (i === 1) daub(g, w, h, 12, { y0: h * 0.4, y1: h, h: 20, s: 60, l: 42, len: 50, wid: 10, ang: 1.57, av: 0.2, a: 0.5 });
+  if (i === 2) { g.fillStyle = hsl(40, 45, 84, 0.85); g.fillRect(0, 0, w * 0.46, h); daub(g, w, h, 16, { x0: 0, x1: w * 0.42, h: 35, s: 40, l: 76, len: 120, wid: 5, ang: 1.57, av: 0.05, a: 0.5 }); }
+  for (let k = 0; k < 3; k++) brush(g, rr(20, w - 20), rr(30, h - 30), 90, rr(5, 14), -1.0, hsl(190, 60, 86, 0.16));
+  const gr = g.createLinearGradient(0, 0, 0, h * 0.35); gr.addColorStop(0, 'rgba(20,16,50,.6)'); gr.addColorStop(1, 'rgba(20,16,50,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h * 0.35);
+  brush(g, w / 2 + rr(-2, 2), h / 2, h, 9, 1.5708 + rr(-0.02, 0.02), hsl(42, 45, 88)); brush(g, w / 2, h * 0.38, w, 8, rr(-0.03, 0.03), hsl(42, 45, 86));
+}, { repeat: false });
+const shopTex = (i) => mkTex(256, 256, (g, w, h) => {
+  g.fillStyle = hsl(22, 36, 15); g.fillRect(0, 0, w, h); daub(g, w, h, 110, { h: 22, dh: 18, s: 36, l: 17, dl: 6, len: 70, wid: 24, av: 1, a: 0.5 });
+  const gl = g.createRadialGradient(w / 2, h * 0.3, 4, w / 2, h * 0.3, w * 0.55); gl.addColorStop(0, 'rgba(255,196,96,.75)'); gl.addColorStop(1, 'rgba(255,170,80,0)'); g.fillStyle = gl; g.fillRect(0, 0, w, h);
+  if (i === 3) { g.fillStyle = hsl(200, 14, 48); g.fillRect(16, 26, w - 32, h - 26); for (let y = 34; y < h; y += 13) { brush(g, w / 2, y, w - 44, 5, rr(-0.01, 0.01), hsl(200, 16, 62, 0.8)); brush(g, w / 2, y + 5, w - 44, 3, 0, hsl(230, 25, 26, 0.6)); } }
+  else { for (let s = 0; s < 3; s++) { const y = h * (0.3 + 0.16 * s); brush(g, w / 2, y, w * 0.86, 6, rr(-0.015, 0.015), hsl(28, 45, 34)); for (let k = 0; k < 15; k++) brush(g, rr(22, w - 22), y - 13, 14, rr(7, 12), 1.5708 + rr(-0.2, 0.2), hsl(pick([4, 30, 48, 140, 190, 330]) + rr(-8, 8), 68, 56 + rr(-10, 12), 0.92)); }
+    const ch = [8, 190, 42][i % 3]; g.fillStyle = hsl(ch, 46, 36); g.fillRect(0, h * 0.74, w, h * 0.26); daub(g, w, h, 40, { y0: h * 0.77, y1: h, h: ch, dh: 8, s: 46, l: 36, dl: 8, len: 80, wid: 14, ang: 0, av: 0.1, a: 0.5 }); brush(g, w / 2, h * 0.745, w, 6, 0, hsl(44, 60, 82, 0.9)); }
+  brush(g, 7, h / 2, h, 14, 1.5708, hsl(24, 40, 26)); brush(g, w - 7, h / 2, h, 14, 1.5708, hsl(24, 40, 22)); brush(g, w / 2, 8, w, 18, 0, hsl(260, 30, 14, 0.8));
+  const gr = g.createLinearGradient(0, h, 0, h * 0.8); gr.addColorStop(0, 'rgba(30,20,50,.6)'); gr.addColorStop(1, 'rgba(30,20,50,0)'); g.fillStyle = gr; g.fillRect(0, h * 0.8, w, h * 0.2);
+}, { repeat: false });
+function signTex(text, hue, vert, dark) {
+  const chars = [...text], n = chars.length, cw = 112, W = vert ? 140 : cw * n + 34, H = vert ? cw * n + 34 : 140;
+  return mkTex(W, H, (g, w, h) => {
+    const bl = dark ? 30 : 87; g.fillStyle = hsl(hue, dark ? 62 : 50, bl); g.fillRect(0, 0, w, h);
+    daub(g, w, h, 50 + n * 30, { h: hue, dh: 10, s: dark ? 62 : 50, ds: 10, l: bl, dl: 7, len: 70, wid: 22, ang: vert ? 1.57 : 0, av: 0.3, a: 0.4 });
+    g.strokeStyle = hsl(hue + (dark ? 32 : 0), 72, dark ? 76 : 30, 0.92); g.lineWidth = 8; g.lineJoin = 'round'; g.beginPath(); g.moveTo(10 + rr(-2, 2), 10 + rr(-2, 2)); g.lineTo(w - 10 + rr(-2, 2), 10 + rr(-2, 2)); g.lineTo(w - 10 + rr(-2, 2), h - 10 + rr(-2, 2)); g.lineTo(10 + rr(-2, 2), h - 10 + rr(-2, 2)); g.closePath(); g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = FONT;
+    chars.forEach((ch, i) => { const x = vert ? w / 2 : 17 + cw * (i + 0.5), y = vert ? 17 + cw * (i + 0.5) : h / 2; g.save(); g.translate(x + rr(-3, 3), y + rr(-3, 3)); g.rotate(rr(-0.08, 0.08)); g.fillStyle = 'rgba(20,10,30,.35)'; g.fillText(ch, 3, 4); g.fillStyle = dark ? hsl(46, 92, 88) : hsl(hue, 78, 24); g.fillText(ch, 0, 0); g.restore(); });
+    daub(g, w, h, 16, { y0: h * 0.88, y1: h, h: 270, s: 20, l: 20, dl: 5, len: 40, wid: 12, a: 0.2, av: 0.4 });
+  }, { repeat: false });
+}
+const MAT = {
+  paint: PM(TEX.paint), brick: PM(TEX.brick), quoin: PM(TEX.quoin), roof: PM(TEX.roof), ground: PM(TEX.paving), path: PM(TEX.path), leaf: PM(TEX.leaf), bark: PM(TEX.bark), wood: PM(TEX.wood), farwall: PM(TEX.farwall),
+  lantern: new T.MeshBasicMaterial({ map: TEX.lantern, vertexColors: true }),
+  awn: [6, 186, 40, 150].map(h => PM(stripes(h), { side: T.DoubleSide })), glass: [0, 1, 2].map(i => PM(glassTex(i))), shop: [0, 1, 2, 3].map(i => PM(shopTex(i))),
+  blob: new T.MeshBasicMaterial({ transparent: true, depthWrite: false, fog: false, map: mkTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(64, 64, 4, 64, 64, 64); gr.addColorStop(0, 'rgba(52,36,84,.55)'); gr.addColorStop(0.6, 'rgba(52,36,84,.3)'); gr.addColorStop(1, 'rgba(52,36,84,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, { repeat: false }) }),
+};
+const uTime = { value: 0 };
+MAT.leaf.onBeforeCompile = (sh) => { sh.uniforms.uTime = uTime; sh.vertexShader = 'uniform float uTime;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n transformed.x += sin(uTime * 1.3 + position.y * 1.7 + position.z * 0.6) * 0.05; transformed.z += cos(uTime * 1.1 + position.x * 1.3) * 0.04;'); };
+
+// ── building by hand: every shape goes through add(), which bends it, lays its UVs, paints its shading and batches it ──
+const BATCH = new Map();
+function MX(x = 0, y = 0, z = 0, ry = 0, rx = 0, rz = 0, sx = 1, sy = 1, sz = 1) { return new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromEuler(new T.Euler(rx, ry, rz, 'YXZ')), new T.Vector3(sx, sy, sz)); }
+function wonk(g, amt, f, seed) {                                           // push every point a little off true, so nothing is straight
+  const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i) * f + seed, y = p.getY(i) * f + seed * 0.7, z = p.getZ(i) * f - seed;
+    p.setXYZ(i, p.getX(i) + (vn(x, y, z) - 0.5) * 2 * amt, p.getY(i) + (vn(x + 31, y + 17, z + 5) - 0.5) * 2 * amt, p.getZ(i) + (vn(x - 13, y + 47, z + 23) - 0.5) * 2 * amt); }
+}
+function projUV(g, s, ox, oy) {                                            // UVs in metres, picked per triangle by which way it faces
+  const p = g.attributes.position, n = g.attributes.normal, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i += 3) { const ax = Math.abs(n.getX(i) + n.getX(i + 1) + n.getX(i + 2)), ay = Math.abs(n.getY(i) + n.getY(i + 1) + n.getY(i + 2)), az = Math.abs(n.getZ(i) + n.getZ(i + 1) + n.getZ(i + 2));
+    for (let k = i; k < i + 3; k++) { let u, v; if (ay >= ax && ay >= az) { u = p.getX(k); v = p.getZ(k); } else if (ax >= az) { u = p.getZ(k); v = p.getY(k); } else { u = p.getX(k); v = p.getY(k); } uv[k * 2] = u * s + ox; uv[k * 2 + 1] = v * s + oy; } }
+  g.setAttribute('uv', new T.BufferAttribute(uv, 2));
+}
+const WHITE = new T.Color(1, 1, 1);
+function bake(g, o) {                                                      // painted-in shading: warm toward the sun, cool away, dark and bluish near the ground
+  const p = g.attributes.position, n = g.attributes.normal, c = new Float32Array(p.count * 3), t = o.tint ? (o.tint.isColor ? o.tint : col(o.tint)) : WHITE, va = o.var ?? 0.08;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), nx = n.getX(i), ny = n.getY(i), nz = n.getZ(i);
+    if (o.fn) { const q = o.fn(x, y, z, nx, ny, nz); c[i * 3] = q[0]; c[i * 3 + 1] = q[1]; c[i * 3 + 2] = q[2]; continue; }
+    const k = sstep(-0.25, 0.7, nx * SUN.x + ny * SUN.y + nz * SUN.z); let r = lerp(0.80, 1.05, k), gg = lerp(0.81, 1.0, k), b = lerp(0.99, 0.92, k);
+    if (ny < 0) { const u = 1 + ny * 0.32; r *= u; gg *= u; b *= u; }
+    const m = 1 + (vn(x * 0.45, y * 0.45, z * 0.45) - 0.5) * 2 * va, w = (vn(x * 0.2 + 40, y * 0.2, z * 0.2 + 9) - 0.5) * 0.1; r *= m * (1 + w); gg *= m; b *= m * (1 - w);
+    if (o.gh) { const u = sstep(0, 1, (y - (o.gy || 0)) / o.gh); r *= lerp(0.56, 1, u); gg *= lerp(0.55, 1, u); b *= lerp(0.72, 1, u); }
+    c[i * 3] = t.r * r; c[i * 3 + 1] = t.g * gg; c[i * 3 + 2] = t.b * b;
+  }
+  g.setAttribute('color', new T.BufferAttribute(c, 3));
+}
+function add(geo, mat, M, o = {}) {
+  const g = geo.index ? geo.toNonIndexed() : geo;
+  if (o.wonk) wonk(g, o.wonk, o.wf || 0.5, R() * 50);
+  if (o.proj) projUV(g, o.proj, R(), R());
+  if (o.uvs) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * o.uvs[0], uv.getY(i) * o.uvs[1]); }
+  if (M) g.applyMatrix4(M);
+  bake(g, o);
+  const key = mat.uuid + (o.nocast ? 'n' : ''); let b = BATCH.get(key); if (!b) BATCH.set(key, b = { mat, cast: !o.nocast, list: [] }); b.list.push(g);
+}
+function flush() {
+  BATCH.forEach(({ mat, cast, list }) => {
+    let n = 0; list.forEach(g => { n += g.attributes.position.count; });
+    const P = new Float32Array(n * 3), N = new Float32Array(n * 3), C = new Float32Array(n * 3), U = new Float32Array(n * 2); let k = 0;
+    list.forEach(g => { const a = g.attributes; P.set(a.position.array, k * 3); N.set(a.normal.array, k * 3); C.set(a.color.array, k * 3); if (a.uv) U.set(a.uv.array, k * 2); k += a.position.count; });
+    const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(P, 3)); geo.setAttribute('normal', new T.BufferAttribute(N, 3)); geo.setAttribute('color', new T.BufferAttribute(C, 3)); geo.setAttribute('uv', new T.BufferAttribute(U, 2));
+    const m = new T.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; m.frustumCulled = false; if (mat.transparent) m.renderOrder = 2; scene.add(m);
+  });
+  BATCH.clear();
+}
+function quadGrid(fn, nu, nv, su = 1, sv = 1) {                            // a sheet from a function; the front faces du × dv
+  const P = []; for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) P.push(fn(i / nu, j / nv));
+  const at = (i, j) => P[clamp(j, 0, nv) * (nu + 1) + clamp(i, 0, nu)], Nn = [], a = new T.Vector3(), b = new T.Vector3();
+  for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { a.subVectors(at(i + 1, j), at(i - 1, j)); b.subVectors(at(i, j + 1), at(i, j - 1)); Nn.push(new T.Vector3().crossVectors(a, b).normalize()); }
+  const pos = [], nor = [], uv = [], put = (i, j) => { const q = j * (nu + 1) + i; pos.push(P[q].x, P[q].y, P[q].z); nor.push(Nn[q].x, Nn[q].y, Nn[q].z); uv.push(i / nu * su, j / nv * sv); };
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { put(i, j); put(i + 1, j); put(i + 1, j + 1); put(i, j); put(i + 1, j + 1); put(i, j + 1); }
+  const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new T.Float32BufferAttribute(nor, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); return g;
+}
+function lathe(pts, su, sv, seg = 8, a0 = Math.PI / 8) {                    // pts: [radius, height] going up
+  return quadGrid((u, v) => { const f = v * (pts.length - 1), i = Math.min(pts.length - 2, Math.floor(f)), t = f - i, r = lerp(pts[i][0], pts[i + 1][0], t), y = lerp(pts[i][1], pts[i + 1][1], t), a = a0 + Math.round(u * seg) / seg * Math.PI * 2; return new T.Vector3(Math.sin(a) * r, y, Math.cos(a) * r); }, seg, pts.length - 1, su, sv);
+}
+function limb(pts, r0, r1, flare = 0, rs = 7) {                             // a curving, tapering tube: trunks, branches, ropes, posts
+  const curve = new T.CatmullRomCurve3(pts), ts = Math.max(4, pts.length * 5), g = new T.TubeGeometry(curve, ts, 1, rs, false), p = g.attributes.position, uv = g.attributes.uv, len = curve.getLength(), c = new T.Vector3();
+  for (let i = 0; i <= ts; i++) { const t = i / ts, r = r0 + (r1 - r0) * t + flare * Math.pow(1 - t, 7); curve.getPointAt(t, c);
+    for (let j = 0; j <= rs; j++) { const q = i * (rs + 1) + j; p.setXYZ(q, c.x + (p.getX(q) - c.x) * r, c.y + (p.getY(q) - c.y) * r, c.z + (p.getZ(q) - c.z) * r); uv.setXY(q, j / rs * 2, t * len * 0.35); } }
+  return g;
+}
+function rod(a, b, r, rs = 6) { const d = new T.Vector3().subVectors(b, a), g = new T.CylinderGeometry(r, r, d.length(), rs); g.applyMatrix4(new T.Matrix4().compose(new T.Vector3().addVectors(a, b).multiplyScalar(0.5), new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), d.clone().normalize()), new T.Vector3(1, 1, 1))); return g; }
+function archShape(w, h, pad = 0) { const s = new T.Shape(), r = w / 2 + pad, ys = h - w / 2; s.moveTo(-r, -pad); s.lineTo(r, -pad); s.lineTo(r, ys); s.absarc(0, ys, r, 0, Math.PI, false); s.lineTo(-r, -pad); return s; }
+function rectShape(w, h, pad = 0) { const s = new T.Shape(), r = w / 2 + pad; s.moveTo(-r, -pad); s.lineTo(r, -pad); s.lineTo(r, h + pad); s.lineTo(-r, h + pad); s.lineTo(-r, -pad); return s; }
+function fitUV(g, w, h) { const p = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / w + 0.5, p.getY(i) / h); return g; }
+function signBox(w, h, d, faces) { const g = new T.BoxGeometry(w, h, d), uv = g.attributes.uv; for (let f = 0; f < 6; f++) if (!faces.includes(f)) for (let i = 0; i < 4; i++) uv.setXY(f * 4 + i, 0.03 + 0.02 * (i % 2), 0.03 + 0.02 * (i >> 1)); return g; }
+const box = (w, h, d, a = 1, b = 1, c = 1) => new T.BoxGeometry(w, h, d, a, b, c);
+const CREAM = col('#f6e6c2'), STONE = col('#d8c6a2'), DARK = col('#3a2c3a'), GOLD = col('#e2a93a');
+
+// a window with a fat frame, a sill and painted glass
+function win(M, w, h, kind, frameC, o = {}) {
+  const t = o.t || 0.2, mk = kind === 'arch' ? archShape : rectShape, sh = mk(w, h, t); sh.holes.push(mk(w, h, 0));
+  add(new T.ExtrudeGeometry(sh, { depth: 0.36, bevelEnabled: false, curveSegments: 7 }), MAT.paint, M.clone().multiply(MX(0, 0, -0.1)), { proj: 0.6, wonk: 0.035, wf: 1.2, tint: frameC });
+  add(fitUV(new T.ShapeGeometry(mk(w, h, 0), 7), w, h), o.glass || pick(MAT.glass), M.clone().multiply(MX(0, 0, 0.05)), { var: 0.03 });
+  add(box(w + 2 * t + 0.34, 0.22, 0.6), MAT.paint, M.clone().multiply(MX(0, -t - 0.1, 0.14, 0, 0, rr(-0.02, 0.02))), { proj: 0.6, wonk: 0.03, tint: frameC });
+  if (kind === 'arch' && !o.noKey) add(box(w * 0.26, 0.5, 0.5), MAT.paint, M.clone().multiply(MX(0, h + t * 0.5, 0.1)), { proj: 0.6, wonk: 0.03, tint: frameC });
+}
+function sign(M, text, hue, vert, dark, scale = 1) {
+  const n = [...text].length, mat = PM(signTex(text, hue, vert, dark));
+  if (vert) { add(signBox(0.16, 0.6 * n * scale + 0.2, 0.76 * scale, [0, 1]), mat, M, { var: 0.03 }); }
+  else add(signBox(0.58 * n * scale + 0.2, 0.74 * scale, 0.16, [4, 5]), mat, M, { var: 0.03 });
+}
+function shadowBlob(x, z, r) { const g = new T.CircleGeometry(r, 20); g.rotateX(-Math.PI / 2); add(g, MAT.blob, MX(x, 0.06 + R() * 0.01, z), { nocast: true }); }
+const lanternTints = [[1.0, 0.24, 0.15], [1.0, 0.24, 0.15], [1.0, 0.3, 0.14], [1.0, 0.7, 0.26], [1.0, 0.45, 0.5]];
+function lantern(p, r, tint) {                                              // a big round paper lantern hanging from p
+  tint = tint || pick(lanternTints); const M = MX(p.x, p.y - r * 0.9 - 0.14, p.z, rr(0, 6), 0, rr(-0.08, 0.08));
+  add(new T.SphereGeometry(r, 14, 10), MAT.lantern, M.clone().multiply(MX(0, 0, 0, 0, 0, 0, 1, 0.86, 1)), { fn: (x, y, z, nx, ny) => { const k = 1.22 - 0.42 * Math.abs(ny) + (ny < 0 ? ny * 0.2 : 0); return [tint[0] * k, tint[1] * k * (1 + (1 - Math.abs(ny)) * 0.5), tint[2] * k]; } });
+  add(new T.CylinderGeometry(r * 0.4, r * 0.44, r * 0.2, 8), MAT.paint, M.clone().multiply(MX(0, r * 0.82, 0)), { tint: GOLD, proj: 1 });
+  add(new T.CylinderGeometry(r * 0.44, r * 0.36, r * 0.2, 8), MAT.paint, M.clone().multiply(MX(0, -r * 0.82, 0)), { tint: GOLD, proj: 1 });
+  add(new T.CylinderGeometry(r * 0.05, r * 0.16, r * 0.9, 5), MAT.paint, M.clone().multiply(MX(0, -r * 1.35, 0)), { tint: col('#d8402a'), proj: 1, nocast: true });
+}
+function lanternString(a, b, sag, r = 0.46) {
+  const pts = [], n = Math.max(6, Math.round(a.distanceTo(b) / 0.6)); for (let i = 0; i <= n; i++) { const t = i / n, p = a.clone().lerp(b, t); p.y -= Math.sin(Math.PI * t) * sag; pts.push(p); }
+  add(limb(pts, 0.03, 0.03, 0, 4), MAT.paint, null, { tint: DARK, nocast: true });
+  const every = Math.max(2, Math.round(3.0 / (a.distanceTo(b) / n))); for (let i = every; i < n - 1; i += every) lantern(pts[i], r * rr(0.85, 1.2));
+}
+
+// ── 1. the Red House: a squat eight-sided brick tower, cream bands, arched windows, a low roof with a lantern, a cross-shaped hall behind ──
+function redHouse() {
+  const CZ = 2.5, RB = 8.3, RT = 7.8, H = 9.4, D8 = Math.PI / 8, base = MX(0, 0, CZ), rad = (y) => RB + (RT - RB) * (y / H), apo = (y) => rad(y) * Math.cos(D8);
+  const wallM = [0, 1, 2].map(i => PM(mkTex(512, 768, (g, w, h) => paintWall(g, w, h, { hue: 9 + i * 3, sat: 62, lit: 43 + i, kind: 'brick' }), { repeat: false })));
+  const ring = (r, y, h, tint, o = {}) => add(new T.CylinderGeometry(r, r + (o.flare || 0), h, 8, 1), MAT.paint, base.clone().multiply(MX(0, y, 0, D8)), Object.assign({ proj: 0.4, wonk: 0.05, tint }, o));
+  for (let k = 0; k < 8; k++) {
+    const th = k * Math.PI / 4, A = (y) => new T.Vector3(Math.sin(th - D8) * rad(y), y, Math.cos(th - D8) * rad(y)), B = (y) => new T.Vector3(Math.sin(th + D8) * rad(y), y, Math.cos(th + D8) * rad(y));
+    add(quadGrid((u, v) => A(v * H).lerp(B(v * H), u), 3, 8), wallM[k % 3], base, { var: 0.06 });
+    const ca = th + D8; add(box(1.2, H + 0.3, 1.2, 1, 6, 1), MAT.quoin, base.clone().multiply(MX(Math.sin(ca) * (RB - 0.42), (H + 0.3) / 2, Math.cos(ca) * (RB - 0.42), ca, 0, 0, 1, 1, 1)), { proj: 0.5, wonk: 0.06, gy: 0, gh: 1.6 });
+    const F = (y, out = 0) => base.clone().multiply(MX(Math.sin(th) * (apo(y) + out), y, Math.cos(th) * (apo(y) + out), th));
+    if (k === 0) {                                                         // the front door, with steps and two oversized lanterns
+      const door = PM(mkTex(256, 384, (g, w, h) => { g.fillStyle = hsl(18, 50, 20); g.fillRect(0, 0, w, h); daub(g, w, h, 120, { h: 20, dh: 8, s: 52, l: 27, dl: 7, len: 110, wid: 15, ang: 1.5708, av: 0.06, a: 0.55 });
+        for (let s = 0; s < 2; s++) for (let r = 0; r < 3; r++) { const x = 20 + s * 122, y = 120 + r * 88; g.strokeStyle = hsl(14, 50, 13, 0.85); g.lineWidth = 5; g.strokeRect(x + rr(-2, 2), y, 94, 70); brush(g, x + 47, y + 6, 80, 3, 0, hsl(40, 70, 62, 0.5)); }
+        brush(g, w / 2, h / 2, h, 6, 1.5708, hsl(270, 30, 8)); brush(g, w / 2 - 14, h * 0.62, 6, 12, 0, hsl(44, 85, 60)); brush(g, w / 2 + 14, h * 0.62, 6, 12, 0, hsl(44, 85, 60));
+        const gl = g.createRadialGradient(w / 2, 50, 4, w / 2, 50, 110); gl.addColorStop(0, 'rgba(255,205,110,.95)'); gl.addColorStop(1, 'rgba(255,180,90,0)'); g.fillStyle = gl; g.fillRect(0, 0, w, 150);
+        const gr = g.createLinearGradient(0, h, 0, h * 0.8); gr.addColorStop(0, 'rgba(26,16,46,.7)'); gr.addColorStop(1, 'rgba(26,16,46,0)'); g.fillStyle = gr; g.fillRect(0, h * 0.8, w, h * 0.2); }, { repeat: false }));
+      win(F(0.9, 0.05), 3.0, 4.4, 'arch', CREAM, { t: 0.42, glass: door });
+      add(box(5.6, 0.32, 2.4), MAT.paint, F(0.16, 1.0), { proj: 0.4, wonk: 0.06, tint: STONE, gh: 0.4 }); add(box(4.6, 0.32, 1.5), MAT.paint, F(0.48, 0.6), { proj: 0.4, wonk: 0.06, tint: STONE }); add(box(3.9, 0.3, 0.8), MAT.paint, F(0.78, 0.3), { proj: 0.4, wonk: 0.05, tint: CREAM });
+      [-1, 1].forEach(s => { const p = new T.Vector3(s * 2.75, 4.6, CZ + apo(4.6) + 0.75); add(rod(new T.Vector3(p.x, p.y, p.z - 0.9), p, 0.06), MAT.paint, null, { tint: DARK }); lantern(p, 0.62, lanternTints[0]); });
+      sign(F(5.55, 0.42), '西門紅樓', 4, false, true, 1.25);
+    } else win(F(1.3, 0.05), 1.9, 2.9, 'arch', CREAM, { t: 0.3 });
+    if (k !== 0) win(F(5.5, 0.05), 1.7, 2.5, 'arch', CREAM, { t: 0.28 });
+    else [-1.75, 1.75].forEach(x => win(F(6.55, 0.05).multiply(MX(x, 0, 0)), 1.05, 1.9, 'arch', CREAM, { t: 0.22 }));
+  }
+  ring(RB + 0.5, 0.45, 0.9, STONE, { gy: 0, gh: 0.8, flare: 0.15 }); ring(rad(4.75) + 0.34, 4.75, 0.5, CREAM); ring(rad(4.3) + 0.2, 4.4, 0.2, CREAM);
+  [2.7, 7.0, 8.0].forEach(y => ring(rad(y) + 0.13, y, 0.24, CREAM));
+  ring(RT + 0.55, H - 0.05, 0.6, CREAM); ring(RT + 0.95, H + 0.38, 0.34, CREAM);
+  // the roof: low, dome-like, thick at the edge, with fat ribs and a little lantern on top
+  const prof = [[9.25, 9.75], [8.7, 10.3], [7.5, 11.25], [5.7, 12.2], [3.7, 12.9], [2.2, 13.25]];
+  add(new T.CylinderGeometry(9.3, 9.35, 0.42, 8, 1), MAT.roof, base.clone().multiply(MX(0, 9.72, 0, D8)), { proj: 0.5, wonk: 0.06, tint: col('#8fb0a8') });
+  add(lathe(prof, 18, 4), MAT.roof, base, { wonk: 0.07, tint: col('#e9f2e2'), var: 0.12 });
+  for (let k = 0; k < 8; k++) { const a = D8 + k * Math.PI / 4; add(limb(prof.map(([r, y]) => new T.Vector3(Math.sin(a) * (r + 0.05), y + 0.1, Math.cos(a) * (r + 0.05))), 0.3, 0.2, 0, 6), MAT.paint, base, { tint: CREAM }); }
+  add(new T.CylinderGeometry(2.0, 2.25, 2.0, 8, 1), MAT.paint, base.clone().multiply(MX(0, 14.2, 0, D8)), { proj: 0.5, wonk: 0.05, tint: CREAM });
+  for (let k = 0; k < 8; k++) { const th = k * Math.PI / 4; add(new T.ShapeGeometry(archShape(0.74, 1.3), 6), MAT.paint, base.clone().multiply(MX(Math.sin(th) * 2.0, 13.55, Math.cos(th) * 2.0, th)), { proj: 0.5, tint: col('#2e2a44') }); }
+  add(new T.CylinderGeometry(2.85, 2.9, 0.3, 8, 1), MAT.paint, base.clone().multiply(MX(0, 15.3, 0, D8)), { proj: 0.5, wonk: 0.04, tint: CREAM });
+  add(lathe([[2.8, 15.4], [2.4, 15.95], [1.5, 16.75], [0.5, 17.35], [0.2, 17.5]], 8, 2), MAT.roof, base, { wonk: 0.05, tint: col('#e9f2e2') });
+  add(new T.SphereGeometry(0.42, 10, 8), MAT.paint, base.clone().multiply(MX(0, 17.75, 0)), { proj: 1, tint: GOLD }); add(new T.ConeGeometry(0.14, 1.1, 6), MAT.paint, base.clone().multiply(MX(0, 18.6, 0)), { proj: 1, tint: GOLD });
+  // the gable over the door
+  { const s = new T.Shape(); s.moveTo(-3.7, 0); s.lineTo(3.7, 0); s.lineTo(3.7, 0.9); s.quadraticCurveTo(3.5, 2.0, 1.9, 2.25); s.quadraticCurveTo(1.25, 3.7, 0, 3.95); s.quadraticCurveTo(-1.25, 3.7, -1.9, 2.25); s.quadraticCurveTo(-3.5, 2.0, -3.7, 0.9); s.lineTo(-3.7, 0);
+    const z0 = CZ + apo(H) - 0.15, eg = () => new T.ExtrudeGeometry(s, { depth: 0.7, bevelEnabled: false, curveSegments: 8 });
+    add(eg(), MAT.brick, MX(0, 9.55, z0), { proj: 0.33, wonk: 0.04 }); add(eg(), MAT.paint, MX(0, 9.55, z0 - 0.1, 0, 0, 0, 1.09, 1.09, 0.8), { proj: 0.5, wonk: 0.04, tint: CREAM });
+    add(new T.TorusGeometry(0.78, 0.2, 8, 20), MAT.paint, MX(0, 11.25, z0 + 0.72), { proj: 0.8, tint: CREAM }); add(new T.CircleGeometry(0.78, 20), MAT.paint, MX(0, 11.25, z0 + 0.73), { proj: 0.5, tint: col('#2f3a52') });
+    add(new T.SphereGeometry(0.34, 8, 6), MAT.paint, MX(0, 13.75, z0 + 0.35), { proj: 1, tint: CREAM }); }
+  // the cross-shaped hall behind: a long nave and a transept, lower than the tower
+  const hall = (M, len, w, wh, rh) => {
+    const s = new T.Shape(); s.moveTo(-w / 2, 0); s.lineTo(w / 2, 0); s.lineTo(w / 2, wh); s.lineTo(0, rh); s.lineTo(-w / 2, wh); s.lineTo(-w / 2, 0);
+    add(new T.ExtrudeGeometry(s, { depth: len, bevelEnabled: false }), MAT.brick, M, { proj: 0.33, wonk: 0.1, wf: 0.2, gy: 0, gh: 1.8 });
+    const a = Math.atan2(rh - wh, w / 2), L = Math.hypot(w / 2, rh - wh) + 1.1;
+    [-1, 1].forEach(sd => { add(box(L, 0.42, len + 1.5, 4, 1, 6), MAT.roof, M.clone().multiply(MX(sd * Math.cos(a) * (L / 2 - 0.1), rh - Math.sin(a) * (L / 2 - 0.1) + 0.22, len / 2, 0, 0, -sd * a)), { proj: 0.5, wonk: 0.08, tint: col('#e9f2e2'), var: 0.12 });
+      add(box(0.36, 0.5, len + 0.2), MAT.paint, M.clone().multiply(MX(sd * (w / 2 + 0.06), wh - 0.35, len / 2)), { proj: 0.4, wonk: 0.04, tint: CREAM }); add(box(0.4, 0.8, len + 0.2), MAT.paint, M.clone().multiply(MX(sd * (w / 2 + 0.08), 0.4, len / 2)), { proj: 0.4, wonk: 0.04, tint: STONE, gh: 0.7 });
+      for (let z = 3.5; z < len - 2; z += 5.6) win(M.clone().multiply(MX(sd * (w / 2 + 0.03), 1.5, z, sd * Math.PI / 2)), 1.45, 2.8, 'arch', CREAM, { t: 0.26 }); });
+    add(limb([new T.Vector3(0, rh + 0.35, -0.6), new T.Vector3(0, rh + 0.42, len / 2), new T.Vector3(0, rh + 0.35, len + 0.6)], 0.26, 0.26, 0, 6), MAT.paint, M, { tint: CREAM });
+  };
+  hall(MX(0, 0, -38), 34, 11.5, 6.0, 9.6); hall(MX(-18, 0, -20, Math.PI / 2), 36, 10.5, 5.6, 9.0);
+}
+
+// ── 2. shophouses: each one its own width, height, colour, windows, roof and signs, and none of them standing straight ──
+const SHOPNAMES = ['阿美牛肉麵', '永和豆漿', '紅樓茶莊', '大方冰果室', '寶島鐘錶', '美華理髮廳', '萬年唱片行', '西門照相館', '老王皮鞋', '金泰布莊', '阿婆豆花', '成都楊桃冰', '天天雜貨', '福星藥房', '小上海湯包', '新光戲院', '長安當鋪', '好味滷肉飯', '春水堂', '南美咖啡', '大同電器', '美觀園'];
+const VSIGNS = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊', '旅社', '當鋪', '滷肉飯', '咖啡', '電器行', '眼鏡', '銀樓', '中藥'];
+const PALETTE = [[42, 55, 78], [8, 58, 46], [186, 30, 62], [26, 62, 66], [345, 40, 70], [150, 24, 62], [48, 70, 72], [205, 34, 66], [16, 55, 58], [70, 30, 70], [280, 18, 68], [32, 40, 84]];
+let shopN = 0; const ROWX = 20.6;
+function shophouse(side, zc, W) {
+  const idx = shopN++, [hue, sat, lit] = PALETTE[(idx * 5 + (side > 0 ? 3 : 0)) % PALETTE.length], kind = hue < 20 && lit < 60 ? 'brick' : pick(['plaster', 'plaster', 'tile']);
+  const lean = new T.Matrix4().set(1, rr(-0.035, 0.035), 0, 0, 0, 1, 0, 0, 0, rr(-0.012, 0.03), 1, 0, 0, 0, 0, 1);
+  const B = MX(side * ROWX, 0, zc, side < 0 ? Math.PI / 2 : -Math.PI / 2).multiply(lean), at = (x, y, z, ry = 0, rx = 0, rz = 0) => B.clone().multiply(MX(x, y, z, ry, rx, rz));
+  const AH = 3.5 + rr(-0.2, 0.3), nF = 1 + Math.floor(rr(0, 2.6)), fh = rr(2.8, 3.3), H = AH + 1.5 + nF * fh, D = 8;
+  const wallC = hslc(hue, sat, lit), trimC = hslc(hue + 18, sat * 0.45, Math.min(93, lit + 22)), darkC = hslc(hue - 8, sat, lit - 20), accent = hslc(pick([186, 150, 8, 210, 36]), 45, 42);
+  // arcade: fat columns, a deep shaded walkway, a painted shopfront at the back
+  const xs = W > 5.3 ? [-W / 2 + 0.42, 0, W / 2 - 0.42] : [-W / 2 + 0.42, W / 2 - 0.42], round = R() < 0.3;
+  xs.forEach(x => { add(round ? new T.CylinderGeometry(0.36, 0.44, AH, 9, 3) : box(0.78, AH, 0.78, 1, 3, 1), kind === 'brick' ? MAT.brick : MAT.paint, at(x, AH / 2, -0.42), { proj: kind === 'brick' ? 0.33 : 0.5, wonk: 0.07, tint: kind === 'brick' ? null : wallC, gy: 0, gh: 1.5 });
+    add(box(1.0, 0.36, 1.0), MAT.paint, at(x, 0.18, -0.42), { proj: 0.5, wonk: 0.05, tint: STONE, gy: 0, gh: 0.5 }); add(box(1.0, 0.26, 1.0), MAT.paint, at(x, AH - 0.3, -0.42), { proj: 0.5, wonk: 0.05, tint: trimC }); });
+  add(quadGrid((u, v) => new T.Vector3((u - 0.5) * W, v * AH, -3.1), 1, 1), MAT.shop[(idx + (side > 0 ? 1 : 0)) % 4], B, { var: 0.03, tint: col('#e8dcd0') });
+  add(box(W, 0.16, 3.4), MAT.paint, at(0, 0.08, -1.5), { proj: 0.4, tint: hslc(30 + rr(-10, 10), 22, 70) });
+  add(box(0.2, AH, 2.7), MAT.paint, at(-W / 2 + 0.1, AH / 2, -1.75), { proj: 0.4, tint: darkC, gh: 1.5 });
+  // upper floors
+  add(box(W + 0.08, H - AH, D), MAT.paint, at(0, (H + AH) / 2, -D / 2), { proj: 0.35, tint: hslc(hue, sat * 0.9, lit - 6) });
+  const face = PM(mkTex(512, 512, (g, w, h) => paintWall(g, w, h, { hue, sat, lit, kind, grime: 0.55 }), { repeat: false }));
+  add(quadGrid((u, v) => new T.Vector3((u - 0.5) * (W + 0.08), AH + v * (H - AH), 0.03), 2, 4), face, B, { var: 0.05 });
+  add(box(W + 0.34, 0.4, 0.5), MAT.paint, at(0, AH + 0.05, 0.16), { proj: 0.5, wonk: 0.05, tint: trimC });
+  const wk = pick(['arch', 'rect', 'rect']), nW = W > 5.2 ? 3 : 2, ww = Math.min(1.3, W / nW - 0.95), frameC = R() < 0.6 ? trimC : accent, shut = R() < 0.4;
+  for (let f = 0; f < nF; f++) { const y0 = AH + 1.75 + f * fh, wh = fh * 0.56;
+    if (f > 0) add(box(W + 0.26, 0.24, 0.32), MAT.paint, at(0, y0 - 0.55, 0.12), { proj: 0.5, wonk: 0.04, tint: trimC });
+    for (let i = 0; i < nW; i++) { const x = (i - (nW - 1) / 2) * (W / nW) + rr(-0.06, 0.06), y = y0 + rr(-0.06, 0.06); win(at(x, y, 0.03, 0, 0, rr(-0.025, 0.025)), ww, wh, wk, frameC);
+      if (shut) [-1, 1].forEach(s => add(box(ww * 0.46, wh + 0.1, 0.08), MAT.wood, at(x + s * (ww * 0.73 + 0.2), y + wh / 2, 0.12, s * rr(0.1, 0.5)), { proj: 1.2, wonk: 0.02, tint: accent }));
+      else if (R() < 0.3) { add(box(ww + 0.4, 0.28, 0.4), MAT.paint, at(x, y - 0.42, 0.42), { proj: 0.6, wonk: 0.03, tint: col('#b9583a') }); add(new T.IcosahedronGeometry(0.36, 1), MAT.leaf, at(x, y - 0.12, 0.42).multiply(MX(0, 0, 0, 0, 0, 0, 1.7, 0.75, 0.8)), { proj: 0.6, wonk: 0.08, wf: 2, fn: leafCol(1.05, 0.06) }); }
+      else if (R() < 0.3) add(box(ww + 0.7, 0.07, 0.8, 3, 1, 1), pick(MAT.awn), at(x, y + wh + 0.2, 0.42, 0, 0.5), { wonk: 0.03 });
+      else if (R() < 0.25) add(box(0.85, 0.55, 0.5), MAT.paint, at(x, y - 0.5, 0.3), { proj: 0.8, wonk: 0.03, tint: col('#b9c0c4') }); } }
+  // the top: every house ends differently, all with thick edges
+  const top = idx % 4;
+  if (top === 0) { add(box(W + 0.4, 0.5, 0.8), MAT.paint, at(0, H + 0.15, -0.28), { proj: 0.5, wonk: 0.06, tint: trimC });
+    const s = new T.Shape(), pw = W * 0.34; s.moveTo(-pw, 0); s.lineTo(pw, 0); s.lineTo(pw, 0.5); s.quadraticCurveTo(pw * 0.7, 1.5, 0, 1.75); s.quadraticCurveTo(-pw * 0.7, 1.5, -pw, 0.5); s.lineTo(-pw, 0);
+    add(new T.ExtrudeGeometry(s, { depth: 0.5, bevelEnabled: false, curveSegments: 6 }), MAT.paint, at(0, H + 0.38, -0.5), { proj: 0.5, wonk: 0.04, tint: wallC }); add(new T.ExtrudeGeometry(s, { depth: 0.3, bevelEnabled: false, curveSegments: 6 }), MAT.paint, at(0, H + 0.38, -0.56).multiply(MX(0, 0, 0, 0, 0, 0, 1.12, 1.12, 1)), { proj: 0.5, wonk: 0.04, tint: trimC });
+    add(new T.CircleGeometry(0.42, 14), MAT.paint, at(0, H + 1.15, 0.02), { proj: 0.6, tint: accent }); }
+  else if (top === 1) { add(box(W + 0.6, 0.4, 4.4, 4, 1, 3), MAT.roof, at(0, H + 1.08, -1.5, 0, 0.48), { proj: 0.6, wonk: 0.08, tint: hslc(pick([12, 186, 24]), 34, 74), var: 0.12 }); add(box(W + 0.62, 0.34, 0.3), MAT.paint, at(0, H + 0.02, 0.5), { proj: 0.5, wonk: 0.05, tint: darkC }); add(box(W, 1.6, D - 3.4), MAT.paint, at(0, H + 0.8, -3.4 - (D - 3.4) / 2), { proj: 0.35, tint: darkC }); }
+  else if (top === 2) { [[W + 0.3, 0.6, 0.3], [W * 0.62, 0.75, 0.95], [W * 0.3, 0.6, 1.6]].forEach(([w, h, y]) => { add(box(w, h, 0.6), kind === 'brick' ? MAT.brick : MAT.paint, at(0, H + y, -0.25), { proj: kind === 'brick' ? 0.33 : 0.5, wonk: 0.05, tint: kind === 'brick' ? null : wallC }); add(box(w + 0.22, 0.16, 0.76), MAT.paint, at(0, H + y + h / 2 + 0.06, -0.25), { proj: 0.5, wonk: 0.04, tint: trimC }); }); }
+  else { add(box(W + 0.36, 0.34, 0.6), MAT.paint, at(0, H + 0.62, -0.25), { proj: 0.5, wonk: 0.05, tint: trimC }); for (let x = -W / 2 + 0.3; x <= W / 2 - 0.2; x += 0.62) add(box(0.2, 0.5, 0.26), MAT.paint, at(x, H + 0.25, -0.25), { proj: 0.6, wonk: 0.03, tint: trimC });
+    const tx = rr(-W / 4, W / 4); add(new T.CylinderGeometry(0.8, 0.86, 1.5, 12), MAT.paint, at(tx, H + 1.5, -3.2), { proj: 0.5, wonk: 0.06, tint: col('#8fb4c4') }); add(new T.ConeGeometry(0.95, 0.4, 12), MAT.paint, at(tx, H + 2.44, -3.2), { proj: 0.5, tint: col('#6f93a4') }); [-0.5, 0.5].forEach(o2 => add(box(0.14, 0.8, 0.14), MAT.paint, at(tx + o2, H + 0.4, -3.2), { proj: 1, tint: DARK })); }
+  // awning, signboard, vertical sign, pipe, lantern
+  if (R() < 0.6) { const am = pick(MAT.awn), rx = rr(0.36, 0.5); add(box(W - 0.3, 0.1, 2.0, 5, 1, 2), am, at(0, AH - 0.3, 0.98, 0, rx), { wonk: 0.07 }); add(box(W - 0.3, 0.34, 0.07, 5, 1, 1), am, at(0, AH - 0.3 - Math.sin(rx) * 1.0 - 0.14, 0.98 + Math.cos(rx) * 1.0), { wonk: 0.04 }); }
+  const nm = SHOPNAMES[idx % SHOPNAMES.length]; sign(at(rr(-0.2, 0.2), AH + 0.8, 0.34, 0, -0.06, rr(-0.03, 0.03)), nm, pick([4, 210, 38, 150, 350, 28]), false, R() < 0.5, Math.min(1.1, (W - 0.8) / (0.58 * [...nm].length + 0.2)));
+  if (nF > 1 || R() < 0.5) { const t = VSIGNS[(idx * 3 + 1) % VSIGNS.length], n = [...t].length, sx = R() < 0.5 ? -1 : 1, y = Math.min(H - 0.3 - n * 0.3, AH + 1.7 + n * 0.3 + rr(0, 0.8));
+    sign(at(sx * (W / 2 - 0.2), y, 0.72, 0, 0, rr(-0.03, 0.03)), t, pick([4, 210, 38, 150, 350, 28]), true, R() < 0.55); [-1, 1].forEach(s => add(box(0.08, 0.08, 0.6), MAT.paint, at(sx * (W / 2 - 0.2), y + s * n * 0.22, 0.3), { proj: 1, tint: DARK })); }
+  if (R() < 0.55) add(limb([new T.Vector3(W / 2 - 0.14, AH + 0.2, 0.14), new T.Vector3(W / 2 - 0.1 + rr(-0.05, 0.05), (H + AH) / 2, 0.16), new T.Vector3(W / 2 - 0.14, H, 0.14)], 0.07, 0.07, 0, 5), MAT.paint, B, { tint: darkC });
+  if (R() < 0.6) { const p = new T.Vector3(rr(-W / 4, W / 4), AH - 0.25, 0.1).applyMatrix4(B); lantern(p, 0.34); }
+  return H;
+}
+
+// ── 3. trees: thick bent trunks, fat branches, leaves as big painted clumps ──
+const LEAF_D = col('#1f4f4a'), LEAF_M = col('#4f9440'), LEAF_L = col('#c9d95c');
+function leafCol(gain = 1, warm = 0) {
+  return (x, y, z, nx, ny, nz) => { const k = clamp(0.5 + ny * 0.42 + (nx * SUN.x + nz * SUN.z) * 0.3 + (vn(x * 0.8, y * 0.8, z * 0.8) - 0.5) * 0.5, 0, 1), a = k < 0.5 ? LEAF_D : LEAF_M, b = k < 0.5 ? LEAF_M : LEAF_L, t = k < 0.5 ? k * 2 : k * 2 - 2 + 1 - 0;
+    const tt = k < 0.5 ? k * 2 : (k - 0.5) * 2; return [lerp(a.r, b.r, tt) * gain * (1.5 + warm), lerp(a.g, b.g, tt) * gain * 1.5, lerp(a.b, b.b, tt) * gain * (1.5 - warm)]; };
+}
+function tree(x, z, s) {
+  const M = MX(x, 0, z, rr(0, 6.28), 0, 0, s, s, s), barkC = hslc(24 + rr(-6, 6), 30, 46), gain = rr(0.9, 1.1), warm = rr(-0.08, 0.12);
+  const top = new T.Vector3(rr(-0.9, 0.9), 4.5, rr(-0.9, 0.9));
+  add(limb([new T.Vector3(0, -0.2, 0), new T.Vector3(rr(-0.5, 0.5), 1.3, rr(-0.5, 0.5)), new T.Vector3(rr(-0.8, 0.8), 2.9, rr(-0.8, 0.8)), top], 0.66, 0.4, 0.75, 9), MAT.bark, M, { tint: barkC, gy: 0, gh: 1.3 * s, var: 0.14 });
+  const clumps = [[top.x, 6.5, top.z, 3.3]], nb = 5;
+  for (let i = 0; i < nb; i++) { const a = i / nb * 6.283 + rr(-0.4, 0.4), d = rr(2.7, 3.9), c = new T.Vector3(top.x + Math.cos(a) * d, rr(4.5, 5.9), top.z + Math.sin(a) * d);
+    add(limb([top.clone().add(new T.Vector3(0, -1.0, 0)), top.clone().lerp(c, 0.5).add(new T.Vector3(0, rr(0.1, 0.7), 0)), c], 0.32, 0.13, 0, 6), MAT.bark, M, { tint: barkC, var: 0.14 });
+    clumps.push([c.x, c.y + 0.6, c.z, rr(1.9, 2.6)]);
+    if (i % 2 === 0) add(limb([c.clone().add(new T.Vector3(rr(-0.5, 0.5), -0.6, rr(-0.5, 0.5))), c.clone().add(new T.Vector3(rr(-0.2, 0.2), -1.4, rr(-0.2, 0.2))), c.clone().add(new T.Vector3(rr(-0.25, 0.25), -2.1, rr(-0.25, 0.25)))], 0.04, 0.02, 0, 4), MAT.bark, M, { tint: barkC, nocast: true }); }
+  for (let i = 0; i < 4; i++) clumps.push([top.x + rr(-2.4, 2.4), rr(7.4, 8.6), top.z + rr(-2.4, 2.4), rr(1.2, 1.7)]);
+  clumps.forEach(([cx, cy, cz, r]) => add(new T.IcosahedronGeometry(r, 3), MAT.leaf, M.clone().multiply(MX(cx, cy, cz, rr(0, 6), 0, 0, 1, rr(0.64, 0.8), 1)), { wonk: r * 0.2, wf: 1.25 / r, proj: 0.3, fn: leafCol(gain, warm) }));
+  shadowBlob(x, z, 1.9 * s);
+  // a low brick ring to sit on
+  add(new T.CylinderGeometry(1.75 * s, 1.85 * s, 0.5, 12, 1), MAT.brick, MX(x, 0.25, z), { proj: 0.33, wonk: 0.06, gy: 0, gh: 0.45 }); add(new T.CylinderGeometry(1.85 * s, 1.85 * s, 0.14, 12, 1), MAT.paint, MX(x, 0.55, z), { proj: 0.5, wonk: 0.05, tint: STONE });
+}
+
+// ── 5. stalls and props ──
+function stool(x, z, tint) { const M = MX(x, 0, z, rr(0, 3)); add(new T.CylinderGeometry(0.2, 0.18, 0.07, 10), MAT.paint, M.clone().multiply(MX(0, 0.47, 0)), { proj: 1, wonk: 0.015, tint }); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => add(rod(new T.Vector3(a * 0.11, 0.45, b * 0.11), new T.Vector3(a * 0.17, 0, b * 0.17), 0.022, 5), MAT.paint, M, { tint: col('#c9ccd0') })); }
+function crate(x, y, z, ry, tint) { add(box(0.62, 0.44, 0.46), MAT.wood, MX(x, y + 0.22, z, ry), { proj: 1.6, wonk: 0.03, tint, gy: y, gh: y ? 0 : 0.3 }); }
+function stall(x, z, ry, k, word) {
+  const M = MX(x, 0, z, ry), at = (px, py, pz, a = 0, b = 0, c = 0) => M.clone().multiply(MX(px, py, pz, a, b, c)), hue = [8, 186, 40][k % 3], bodyC = hslc(hue, 50, 52), steel = col('#c2c8cc');
+  add(box(2.4, 0.95, 1.15, 2, 2, 1), MAT.wood, at(0, 0.78, 0), { proj: 1.0, wonk: 0.06, tint: bodyC, gy: 0.25, gh: 0.5 }); add(box(2.65, 0.12, 1.36), MAT.wood, at(0, 1.31, 0), { proj: 1.0, wonk: 0.04, tint: col('#f0d9a8') });
+  [-0.85, 0.85].forEach(px => { const g = new T.CylinderGeometry(0.4, 0.4, 0.13, 14); g.rotateX(Math.PI / 2); add(g, MAT.paint, at(px, 0.4, 0.62), { proj: 1, wonk: 0.02, tint: DARK }); const hgeo = new T.CylinderGeometry(0.14, 0.14, 0.16, 8); hgeo.rotateX(Math.PI / 2); add(hgeo, MAT.paint, at(px, 0.4, 0.64), { proj: 1, tint: GOLD }); });
+  [[-1.2, -0.58], [1.2, -0.58], [-1.2, 0.58], [1.2, 0.58]].forEach(([px, pz]) => add(limb([new T.Vector3(px, 0.3, pz), new T.Vector3(px + rr(-0.05, 0.05), 1.6, pz), new T.Vector3(px * 1.04, 2.9, pz * 1.1)], 0.055, 0.045, 0, 5), MAT.wood, M, { tint: col('#8a5a3a') }));
+  const am = MAT.awn[k % MAT.awn.length]; add(box(3.2, 0.11, 2.3, 6, 1, 2), am, at(0, 2.98, 0.2, 0, 0.2), { wonk: 0.08 }); add(box(3.2, 0.34, 0.07, 6, 1, 1), am, at(0, 2.62, 1.34), { wonk: 0.04 });
+  for (let i = 0; i < 3; i++) add(new T.CylinderGeometry(0.34, 0.34, 0.17, 12), MAT.wood, at(-0.7, 1.46 + i * 0.17, 0.05, i), { proj: 1.5, wonk: 0.015, tint: col('#e2bd7a') });
+  add(new T.SphereGeometry(0.33, 10, 6, 0, 6.283, 0, 1.4), MAT.wood, at(-0.7, 1.88, 0.05), { proj: 1.5, tint: col('#e9c98a') });
+  add(new T.CylinderGeometry(0.3, 0.26, 0.4, 12), MAT.paint, at(0.2, 1.57, 0), { proj: 1, wonk: 0.02, tint: steel }); add(new T.CylinderGeometry(0.26, 0.22, 0.3, 12), MAT.paint, at(0.85, 1.52, 0.1), { proj: 1, wonk: 0.02, tint: col('#5a5560') });
+  for (let i = 0; i < 4; i++) add(new T.CylinderGeometry(0.13, 0.09, 0.07, 8), MAT.paint, at(0.3 + (i % 2) * 0.3, 1.41 + Math.floor(i / 2) * 0.07, 0.48), { proj: 1, tint: col('#f4efe6') });
+  sign(at(0, 2.45, 1.38, 0, 0, rr(-0.04, 0.04)), word, hue, false, true, 0.72);
+  lantern(new T.Vector3(-1.45, 2.75, 1.25).applyMatrix4(M), 0.27); lantern(new T.Vector3(1.45, 2.75, 1.25).applyMatrix4(M), 0.27, lanternTints[3]);
+  const p1 = new T.Vector3(-1.1, 0, 1.9).applyMatrix4(M), p2 = new T.Vector3(0.1, 0, 2.2).applyMatrix4(M), p3 = new T.Vector3(1.2, 0, 1.8).applyMatrix4(M);
+  stool(p1.x, p1.z, col('#d84a34')); stool(p2.x, p2.z, col('#3aa0a0')); stool(p3.x, p3.z, col('#e9b23a')); shadowBlob(x, z, 2.2);
+}
+function bicycle(x, z, ry, tint) {
+  const M = MX(x, 0, z, ry, 0, 0.13), V = (a, b, c = 0) => new T.Vector3(a, b, c), fr = { tint, proj: 1 };
+  [-0.54, 0.54].forEach(px => { add(new T.TorusGeometry(0.35, 0.04, 6, 18), MAT.paint, M.clone().multiply(MX(px, 0.39, 0)), { tint: DARK, proj: 1 }); add(new T.CylinderGeometry(0.05, 0.05, 0.1, 6).rotateX(Math.PI / 2), MAT.paint, M.clone().multiply(MX(px, 0.39, 0)), { tint: col('#c9ccd0'), proj: 1 }); });
+  [[V(-0.54, 0.39), V(-0.06, 0.37)], [V(-0.06, 0.37), V(-0.22, 0.9)], [V(-0.2, 0.84), V(0.38, 0.88)], [V(-0.06, 0.37), V(0.38, 0.84)], [V(-0.54, 0.39), V(-0.2, 0.84)], [V(0.36, 1.02), V(0.54, 0.39)], [V(0.36, 1.0, -0.26), V(0.36, 1.0, 0.26)]].forEach(([a, b]) => add(rod(a, b, 0.03), MAT.paint, M, fr));
+  add(box(0.3, 0.08, 0.16), MAT.paint, M.clone().multiply(MX(-0.24, 0.94, 0)), { tint: DARK, proj: 1, wonk: 0.01 }); add(box(0.32, 0.24, 0.36), MAT.wood, M.clone().multiply(MX(0.64, 0.86, 0)), { tint: col('#e2bd7a'), proj: 2, wonk: 0.02 });
+}
+function scooter(x, z, ry, tint) {
+  const M = MX(x, 0, z, ry, 0, rr(0.04, 0.1)), at = (a, b, c, d = 0, e = 0, f = 0) => M.clone().multiply(MX(a, b, c, d, e, f)), o = { tint, proj: 1, wonk: 0.03, wf: 2 };
+  [-0.62, 0.62].forEach(px => add(new T.CylinderGeometry(0.25, 0.25, 0.14, 12).rotateX(Math.PI / 2), MAT.paint, at(px, 0.25, 0), { tint: DARK, proj: 1 }));
+  add(box(0.95, 0.16, 0.34), MAT.paint, at(0, 0.32, 0), o); add(box(0.74, 0.46, 0.4, 2, 2, 1), MAT.paint, at(-0.4, 0.6, 0), o); add(box(0.72, 0.13, 0.36), MAT.paint, at(-0.38, 0.9, 0), { tint: DARK, proj: 1, wonk: 0.02 });
+  add(box(0.14, 0.82, 0.4, 1, 2, 1), MAT.paint, at(0.48, 0.66, 0, 0, 0, 0.28), o); add(box(0.3, 0.12, 0.3), MAT.paint, at(0.62, 0.42, 0), o);
+  add(rod(new T.Vector3(0.36, 1.08, -0.3), new T.Vector3(0.36, 1.08, 0.3), 0.03), MAT.paint, M, { tint: DARK }); add(new T.SphereGeometry(0.11, 8, 6), MAT.lantern, at(0.47, 0.98, 0), { fn: () => [1.3, 1.2, 0.8] });
+}
+function planter(x, z) { add(new T.CylinderGeometry(0.52, 0.38, 0.62, 10, 1), MAT.paint, MX(x, 0.31, z), { proj: 0.8, wonk: 0.05, tint: col('#c9623e'), gy: 0, gh: 0.4 }); add(new T.CylinderGeometry(0.58, 0.56, 0.12, 10), MAT.paint, MX(x, 0.64, z), { proj: 0.8, wonk: 0.03, tint: col('#d97a4e') });
+  add(new T.IcosahedronGeometry(0.62, 2), MAT.leaf, MX(x, 1.1, z, rr(0, 6), 0, 0, 1, 0.85, 1), { wonk: 0.14, wf: 2, proj: 0.5, fn: leafCol(1.05, 0.05) }); if (R() < 0.6) for (let i = 0; i < 5; i++) add(new T.SphereGeometry(0.09, 6, 5), MAT.lantern, MX(x + rr(-0.45, 0.45), 1.1 + rr(0, 0.45), z + rr(-0.45, 0.45)), { fn: () => [1.2, 0.5, 0.55], nocast: true }); }
+function lampPost(x, z, f) { add(limb([new T.Vector3(x, 0, z), new T.Vector3(x + f * 0.08, 2.4, z), new T.Vector3(x - f * 0.05, 4.3, z), new T.Vector3(x + f * 0.7, 4.95, z), new T.Vector3(x + f * 1.15, 4.7, z)], 0.14, 0.07, 0.16, 7), MAT.paint, null, { tint: col('#2f5a50'), gh: 1 });
+  add(new T.SphereGeometry(0.34, 12, 9), MAT.lantern, MX(x + f * 1.15, 4.36, z), { fn: (a, b, c, nx, ny) => { const k = 1.25 - 0.3 * Math.abs(ny); return [1.3 * k, 1.12 * k, 0.72 * k]; } }); add(new T.ConeGeometry(0.4, 0.26, 10), MAT.paint, MX(x + f * 1.15, 4.74, z), { proj: 1, tint: col('#2f5a50') }); }
+
+// ── 6. the ground ──
+function ground() {
+  const g = new T.PlaneGeometry(440, 440, 146, 146); g.rotateX(-Math.PI / 2);
+  add(g, MAT.ground, null, { uvs: [74, 74], nocast: true, fn: (x, y, z) => { const m = 0.84 + 0.3 * vn(x * 0.07 + 5, 0, z * 0.07), w = (vn(x * 0.03, 3, z * 0.03 + 8) - 0.5) * 0.22, e = 1 - 0.2 * sstep(14, 20, Math.abs(x)) * (z > 0 && z < 66 ? 1 : 0), n = 1 - 0.18 * sstep(16, 10, z) * sstep(14, 8, Math.abs(x)); return [m * (1.04 + w) * e * n, m * e * n, m * (0.98 - w) * e * n]; } });
+  const pathAt = (z) => [0.55 * Math.sin(z * 0.13), 2.2 + 0.32 * Math.sin(z * 0.41) + 0.2 * Math.sin(z * 1.07 + 1)];
+  add(quadGrid((u, v) => { const z = 10.6 + v * 55, [cx, hw] = pathAt(z); return new T.Vector3(cx - (u - 0.5) * 2 * hw, 0.03, z); }, 4, 44, 1, 13), MAT.path, null, { nocast: true, var: 0.1 });
+  [-1, 1].forEach(s => add(quadGrid((u, v) => { const z = 10.6 + v * 55, [cx, hw] = pathAt(z); return new T.Vector3(cx + s * (hw + 0.2) - (u - 0.5) * 0.46, 0.036, z); }, 1, 44, 0.16, 20), MAT.brick, null, { nocast: true }));
+  const medal = PM(mkTex(512, 512, (g2, w, h) => { g2.fillStyle = hsl(36, 34, 78); g2.fillRect(0, 0, w, h); daub(g2, w, h, 200, { h: 36, dh: 10, s: 34, l: 78, dl: 7, len: 80, wid: 24, av: 3, a: 0.4 });
+    const ringD = (rad, n, len, wid, hue, sa, li) => { for (let i = 0; i < n; i++) { const a = i / n * 6.283; brush(g2, 256 + Math.cos(a) * rad, 256 + Math.sin(a) * rad, len, wid, a + 1.5708 + rr(-0.06, 0.06), hsl(hue + rr(-6, 8), sa, li + rr(-8, 8), 0.92)); } };
+    ringD(236, 44, 30, 20, 10, 58, 42); ringD(208, 60, 20, 8, 40, 40, 90); ringD(150, 30, 28, 18, 188, 28, 46);
+    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + 0.39; brush(g2, 256 + Math.cos(a) * 82, 256 + Math.sin(a) * 82, 120, 30, a, hsl(i % 2 ? 10 : 44, 60, i % 2 ? 44 : 60, 0.9)); brush(g2, 256 + Math.cos(a) * 90, 256 + Math.sin(a) * 90 - 5, 90, 5, a, hsl(46, 80, 92, 0.5)); }
+    ringD(34, 14, 18, 22, 10, 60, 40); ringD(10, 6, 8, 14, 44, 70, 78); daub(g2, w, h, 80, { h: 275, s: 20, l: 30, len: 18, wid: 6, av: 3, a: 0.14 }); }, { repeat: false }));
+  const c = new T.CircleGeometry(5.2, 40); c.rotateX(-Math.PI / 2); add(c, medal, MX(0, 0.045, 19), { nocast: true, var: 0.05 });
+}
+
+// ── 7. the sky and the far city: both painted flat, then hung around the scene ──
+function skyAndCity() {
+  const skyT = mkTex(2048, 1024, (g, w, h) => {
+    const hz = h * 0.5, gr = g.createLinearGradient(0, 0, 0, hz); gr.addColorStop(0, '#3f78c2'); gr.addColorStop(0.5, '#6fb4dc'); gr.addColorStop(0.8, '#b4d9ea'); gr.addColorStop(0.93, '#f3e6cf'); gr.addColorStop(1, '#f8d6a6'); g.fillStyle = gr; g.fillRect(0, 0, w, hz); g.fillStyle = '#ecd9c2'; g.fillRect(0, hz, w, h - hz);
+    for (let i = 0; i < 1500; i++) { const y = rr(0, hz * 1.02), t = y / hz, hue = t < 0.82 ? lerp(216, 198, t / 0.82) : 36, sa = t < 0.82 ? lerp(56, 46, t / 0.82) : 62, li = t < 0.82 ? lerp(50, 80, t / 0.82) : 88, x = rr(0, w), len = rr(90, 260), wid = rr(14, 40), st = hsl(hue + rr(-8, 8), sa + rr(-8, 8), li + rr(-5, 5), 0.3), an = rr(-0.18, 0.18), bd = rr(-0.3, 0.3);
+      for (let ox = -w; ox <= w; ox += w) brush(g, x + ox, y, len, wid, an, st, bd); }
+    const sx = 0.133 * w, sy = 239, sg = g.createRadialGradient(sx, sy, 6, sx, sy, 210); sg.addColorStop(0, 'rgba(255,250,224,1)'); sg.addColorStop(0.16, 'rgba(255,240,190,.8)'); sg.addColorStop(1, 'rgba(255,230,170,0)'); g.fillStyle = sg; g.fillRect(sx - 220, sy - 220, 440, 440);
+    for (let c = 0; c < 22; c++) {                                         // clouds: a violet underside, a warm body, a cream top, all in strokes
+      const cx = rr(0, w), el = rr(0.08, 0.72), cy = hz * (1 - el), sc = lerp(0.5, 1.25, el), cw = rr(120, 260) * sc, chh = cw * rr(0.2, 0.32);
+      const layer = (n, dy, hue, sa, li, a, k) => { for (let i = 0; i < n; i++) { const u = rr(-1, 1) * rr(0.2, 1), v = rr(-1, 1) * (1 - u * u) * 0.9, x = cx + u * cw, y = Math.min(cy + chh * 0.55, cy + v * chh * k + dy * chh), len = cw * rr(0.2, 0.42), wid = chh * rr(0.3, 0.6), st = hsl(hue + rr(-6, 6), sa, li + rr(-3, 3), a), an = rr(-0.3, 0.3), bd = rr(-0.5, 0.5); for (let ox = -w; ox <= w; ox += w) brush(g, x + ox, y, len, wid, an, st, bd); } };
+      layer(46, 0.34, 262, 34, 74, 0.42, 1); layer(70, 0, 34, 70, 93, 0.5, 1); layer(36, -0.36, 50, 100, 98, 0.6, 0.6); }
+    daub(g, w, h, 120, { y0: hz * 0.9, y1: hz * 1.05, h: 32, s: 60, l: 88, dl: 4, len: 240, wid: 22, ang: 0, av: 0.05, a: 0.25 });
+  }, { repeat: false });
+  const sky = new T.Mesh(new T.SphereGeometry(480, 48, 24), new T.MeshBasicMaterial({ map: skyT, side: T.BackSide, depthWrite: false, fog: false })); sky.frustumCulled = false; sky.renderOrder = -2; scene.add(sky);
+  const cityT = mkTex(4096, 512, (g, w, h) => {
+    const hill = (y0, amp, hue, sa, li) => { g.fillStyle = hsl(hue, sa, li); g.beginPath(); g.moveTo(0, h); const ph = rr(0, 6); for (let x = 0; x <= w; x += 16) { const t = x / w * 6.283; g.lineTo(x, y0 - amp * (0.5 + 0.5 * Math.sin(t * 3 + ph)) - amp * 0.4 * Math.sin(t * 7 + ph * 2) - amp * 0.2 * Math.sin(t * 16 + ph)); } g.lineTo(w, h); g.closePath(); g.fill(); };
+    hill(250, 90, 205, 30, 78); daub(g, w, h, 500, { y0: 180, y1: 300, h: 200, dh: 15, s: 30, l: 76, dl: 5, len: 120, wid: 22, ang: -0.2, av: 0.4, a: 0.18, wrap: true });
+    hill(300, 46, 170, 28, 70); daub(g, w, h, 500, { y0: 262, y1: 340, h: 150, dh: 20, s: 30, l: 68, dl: 6, len: 60, wid: 20, av: 1, a: 0.2, wrap: true });
+    const row = (n, yb, hmin, hmax, hueA, li, a) => { for (let i = 0; i < n; i++) { const bw = rr(26, 70), bh = rr(hmin, hmax) * (R() < 0.08 ? 1.7 : 1), x = rr(0, w), hue = pick(hueA) + rr(-10, 10), l2 = li + rr(-5, 5);
+      for (let ox = -w; ox <= w; ox += w) { const xx = x + ox; if (xx < -80 || xx > w + 80) continue; g.fillStyle = hsl(hue, 24, l2, a); g.beginPath(); g.moveTo(xx + rr(-2, 2), yb); g.lineTo(xx + rr(-3, 3), yb - bh); g.lineTo(xx + bw + rr(-3, 3), yb - bh + rr(-4, 4)); g.lineTo(xx + bw + rr(-2, 2), yb); g.closePath(); g.fill();
+        for (let k = 0; k < 4; k++) brush(g, xx + bw * rr(0.2, 0.8), yb - bh * rr(0.1, 0.9), bh * 0.5, bw * 0.3, 1.5708, hsl(hue + rr(-8, 8), 24, l2 + rr(-5, 6), 0.35));
+        brush(g, xx + 3, yb - bh / 2, bh * 0.9, 3, 1.5708, hsl(45, 70, 94, 0.45)); brush(g, xx + bw / 2, yb - bh + 2, bw, 4, 0, hsl(30, 60, 92, 0.5));
+        for (let r = 0; r < bh / 14 - 1; r++) for (let c2 = 0; c2 < bw / 12 - 1; c2++) if (R() < 0.6) brush(g, xx + 8 + c2 * 12, yb - bh + 12 + r * 14, 5, 5, 1.5708, hsl(225, 30, l2 - 18, 0.45)); } } };
+    row(150, 372, 40, 120, [220, 250, 200, 280], 78, 0.95); row(170, 400, 30, 90, [20, 40, 345, 200, 30], 74, 0.97);
+    daub(g, w, h, 240, { y0: 372, y1: 404, h: 130, dh: 30, s: 32, l: 60, dl: 8, len: 34, wid: 22, av: 2, a: 0.6, wrap: true });
+    const gr = g.createLinearGradient(0, 330, 0, 420); gr.addColorStop(0, 'rgba(236,217,194,0)'); gr.addColorStop(1, 'rgba(236,217,194,1)'); g.fillStyle = gr; g.fillRect(0, 330, w, h - 330);
+  }, { repeat: false }); cityT.wrapS = T.RepeatWrapping;
+  const ringG = new T.CylinderGeometry(205, 205, 86, 64, 1, true), ring = new T.Mesh(ringG, new T.MeshBasicMaterial({ map: cityT, side: T.BackSide, transparent: true, depthWrite: false, fog: false })); ring.position.y = 86 / 2 - 86 * (512 - 404) / 512 - 0.5; ring.renderOrder = -1; ring.frustumCulled = false; scene.add(ring);
+  // a ring of soft painted blocks between the plaza and the horizon
+  for (let i = 0; i < 70; i++) { const a = rr(0, 6.283), r = rr(52, 135), x = Math.cos(a) * r, z = 26 + Math.sin(a) * r; if (Math.abs(x) < 41 && z > -52 && z < 90) continue;
+    const w = rr(9, 20), h = rr(9, 30) * (R() < 0.12 ? 1.6 : 1), d = rr(9, 18), ry = rr(-0.3, 0.3), tint = hslc(pick([220, 250, 28, 345, 200, 40]) + rr(-10, 10), 22, rr(70, 82));
+    add(box(w, h, d, 2, 3, 2), MAT.farwall, MX(x, h / 2, z, ry), { proj: 0.11, wonk: 0.5, wf: 0.1, tint, gy: 0, gh: 5, nocast: true }); add(box(w + 0.8, 0.7, d + 0.8), MAT.paint, MX(x, h + 0.2, z, ry), { proj: 0.2, wonk: 0.3, wf: 0.1, tint: tint.clone().multiplyScalar(0.8), nocast: true }); }
+  return sky;
+}
+
+// ── build everything ─────────────────────────────────────────────────────────────────────────────
+const state = { ready: false, error: null, fps: 0 }; let sky = null, hero = null;
+function build() {
+  ground(); sky = skyAndCity(); redHouse();
+  for (const side of [-1, 1]) { let z = 4.5 + (side > 0 ? 0.8 : 0), i = 0; const tops = [];
+    while (z < 64) { const W = rr(4.0, 6.6); tops.push([z + W / 2, shophouse(side, z + W / 2, W)]); z += W - 0.04; i++; }
+    add(box(1, 7.5, 62), MAT.paint, MX(side * (ROWX + 4.9), 3.75, 34), { proj: 0.3, tint: col('#4a3a48') });                 // a dark back wall, so gaps between leaning houses read as alleys
+    tops.forEach(([zc, H], k) => { if (k % 3 === 1) { add(box(1.6, 1.1, 1.2), MAT.paint, MX(side * (ROWX + 3.9), H + 0.55, zc, rr(0, 1)), { proj: 0.6, wonk: 0.06, tint: col('#b9a48c') }); } }); }
+  [[-12.5, 22, 1.0], [13, 26, 1.08], [-13.5, 41.5, 1.15], [14, 44, 1.0], [-30, -6, 1.3], [31, -10, 1.25]].forEach(([x, z, s]) => tree(x, z, s));
+  // 4. lantern strings: from the tower's cornice out over the plaza, and across between the rows
+  for (let i = 0; i < 5; i++) { const t = i / 4; lanternString(new T.Vector3(-7.5 + t * 15, 9.6, 10.3 - Math.abs(t - 0.5) * 3.2), new T.Vector3(-19.4 + t * 38.8, 6.6 + (i % 2) * 0.5, 26 + Math.sin(t * Math.PI) * 15), 1.7); }
+  [19, 30, 40, 51].forEach((z, i) => lanternString(new T.Vector3(-20.2, 6.5 + (i % 2) * 0.6, z), new T.Vector3(20.2, 6.6 + ((i + 1) % 2) * 0.5, z + 2.5), 2.0));
+  stall(8.6, 31, -0.5, 0, '牛肉麵'); stall(-9.2, 35.5, 0.6, 1, '豆花'); stall(11.5, 50, -1.0, 2, '滷味');
+  [[-6.2, 30.5, 0.4], [-5.5, 31.4, 1.2], [5, 37, 0.2], [13.6, 33.2, 0.9]].forEach(([x, z, r], i) => { crate(x, 0, z, r, hslc(30 + i * 8, 40, 66)); if (i < 2) crate(x + 0.05, 0.44, z + 0.04, r + 0.3, hslc(24, 44, 60)); });
+  for (let i = 0; i < 7; i++) add(new T.SphereGeometry(0.1, 7, 5), MAT.lantern, MX(5 + rr(-0.22, 0.22), 0.5, 37 + rr(-0.15, 0.15)), { fn: () => i % 2 ? [1.1, 0.5, 0.12] : [0.6, 0.9, 0.2], nocast: true });
+  bicycle(-17.0, 27.5, 1.2, col('#2f9a94')); bicycle(16.8, 39, -1.9, col('#d8483a')); bicycle(-11.6, 23.6, 0.4, col('#e9b23a'));
+  [[-18.3, 14, 1], [-18.4, 33, 1], [-18.2, 46.5, 1], [18.3, 18.5, -1], [18.4, 29, -1], [18.3, 53, -1], [-18.3, 56, 1]].forEach(([x, z, s], i) => scooter(x, z + rr(-0.4, 0.4), s * (Math.PI / 2) + rr(-0.4, 0.4), [col('#8fd0c0'), col('#e2543c'), col('#f2e2b8'), col('#5a86c8')][i % 4]));
+  [[-18.2, 20], [18.2, 23.5], [-18.2, 38], [18.2, 34.5], [18.2, 41], [-6, 12.6], [6, 12.6], [-18.2, 51]].forEach(([x, z]) => planter(x, z));
+  [[-16.8, 17, 1], [16.8, 21, -1], [-16.8, 44, 1], [16.8, 48, -1]].forEach(([x, z, f]) => lampPost(x, z, f));
+  flush();
+}
+try { build(); document.getElementById('load').classList.add('gone'); } catch (e) { state.error = String(e && e.stack || e); console.error('build failed: ' + state.error); document.getElementById('load').textContent = 'Could not build the scene: ' + e; }
+
+// the player character (the only loaded model)
+const loader = new T.GLTFLoader(); if (window.MeshoptDecoder) loader.setMeshoptDecoder(window.MeshoptDecoder);
+const loadGLTF = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', res, undefined, rej));
+const rigged = (gltf) => HERO.rigged(T, gltf);
+fetch('../asset/models/').then(r => r.ok ? r.text() : '').catch(() => '').then(list => (list.includes('noodles-girl.glb') ? loadGLTF('noodles-girl').catch(() => loadGLTF('girl-rigged')) : loadGLTF('girl-rigged')))
+  .then(girl => { hero = rigged(girl); scene.add(hero.group); state.ready = !state.error; if (!state.error) document.getElementById('load').classList.add('gone'); })
+  .catch(e => { state.error = String(e); document.getElementById('load').textContent = 'Could not load the character: ' + e; });
+
+// ── the finishing chain: one pass that turns the frame into flat dabs of paint, then grades it ──
+const fsTri = new T.Mesh(new T.PlaneGeometry(2, 2)); const fsScene = new T.Scene(); fsScene.add(fsTri); const fsCam = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const finalMat = new T.ShaderMaterial({ depthTest: false, depthWrite: false, uniforms: { tScene: { value: null }, uRes: { value: new T.Vector2(1, 1) }, uK: { value: 1.2 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+  fragmentShader: `precision highp float; varying vec2 vUv; uniform sampler2D tScene; uniform vec2 uRes; uniform float uK;
+  float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h(i), h(i+vec2(1,0)), f.x), mix(h(i+vec2(0,1)), h(i+vec2(1,1)), f.x), f.y); }
+  void main(){
+    vec2 px = vUv * uRes, wob = (vec2(n(px / 70.0), n(px / 70.0 + 9.7)) - 0.5) * 3.0 * uK;     // edges wander a little, like a hand-held brush
+    vec3 best = vec3(0.0); float bv = 1e9;
+    for (int q = 0; q < 4; q++) {                                                              // keep the calmest of four neighbouring patches: flat dabs with crisp edges
+      vec2 dir = vec2(q < 2 ? 1.0 : -1.0, (q == 0 || q == 2) ? 1.0 : -1.0); vec3 m = vec3(0.0), s = vec3(0.0);
+      for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) { vec3 c = texture2D(tScene, (px + wob + dir * vec2(float(i), float(j)) * uK) / uRes).rgb; m += c; s += c * c; }
+      m /= 9.0; s = abs(s / 9.0 - m * m); float v = s.r + s.g + s.b; if (v < bv) { bv = v; best = m; }
+    }
+    vec3 c = best; vec3 hi = max(c - 0.82, 0.0); c = min(c, 0.82) + 0.18 * (1.0 - exp(-hi / 0.18));    // soft shoulder, colours stay as painted
+    c = pow(max(c, 0.0), vec3(1.0 / 2.2));
+    float l = dot(c, vec3(0.2126, 0.7152, 0.0722)); c = mix(vec3(l), c, 1.12);
+    c += vec3(0.02, 0.0, 0.035) * (1.0 - smoothstep(0.0, 0.45, l)) + vec3(0.02, 0.01, -0.01) * smoothstep(0.55, 1.0, l);
+    vec2 q2 = vUv - 0.5; c *= 1.0 - dot(q2, q2) * 0.32;
+    c *= 0.965 + 0.07 * n(px / 2.3) * n(px / 9.0 + 3.0);                                                  // canvas tooth
+    gl_FragColor = vec4(c, 1.0);
+  }` });
+const rtScene = new T.WebGLRenderTarget(4, 4, { type: T.HalfFloatType, depthBuffer: true, minFilter: T.LinearFilter, magFilter: T.LinearFilter, samples: 4 });
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight, W = Math.floor(w * PR), H = Math.floor(h * PR);
+  renderer.setPixelRatio(PR); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  rtScene.setSize(W, H); finalMat.uniforms.uRes.value.set(W, H); finalMat.uniforms.uK.value = (parseFloat(QS.get('k')) || 1.15) * PR * Math.max(1, H / 900);
+}
+window.addEventListener('resize', resize); resize();
+
+// ── camera: six viewpoints, drag to look, keys to walk ───────────────────────────────────────
+const VIEWS = [[0, 1.6, 47, 0, 7.5, 0], [-9, 1.5, 33, 7, 6, 4], [15, 1.3, 36, -8, 6.5, 6], [0, 10, 56, 0, 5, 6], [-11, 1.5, 30, -22, 12, -8], [17.4, 1.7, 51.5, -10, 5.2, 20]];
+let yaw = 0, pitch = 0; const pos = new T.Vector3(), keys = {};
+function setView(i) { const v = VIEWS[i]; pos.set(v[0], v[1], v[2]); const dx = v[3] - v[0], dy = v[4] - v[1], dz = v[5] - v[2]; yaw = Math.atan2(-dx, -dz); pitch = Math.atan2(dy, Math.hypot(dx, dz)); mode = 'fixed'; }
+// follow: the camera rides behind the character; fixed: it stands at a viewpoint and she still walks
+let mode = 'follow', camYaw = 0, camPitch = 0.13, camDist = 3.4;
+const heroPos = new T.Vector3(0, 0, 43), camTarget = new T.Vector3(0, 0.72, 43); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
+if (QS.get('cam')) { VIEWS.push(QS.get('cam').split(',').map(Number)); setView(VIEWS.length - 1); VIEWS.pop(); } else if (QS.get('view')) setView(Math.max(0, Math.min(5, (parseInt(QS.get('view'), 10) || 1) - 1)));
+if (QS.get('close')) { camDist = 1.9; camYaw = Math.PI - 0.5; camPitch = 0.06; }            // ?close=1 looks at her face
+let drag = null;
+canvas.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag[0], dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY];
+  if (mode === 'follow') { camYaw -= dx * 0.005; camPitch = Math.max(-0.12, Math.min(1.25, camPitch + dy * 0.004)); }
+  else { yaw -= dx * 0.0035; pitch = Math.max(-1.2, Math.min(1.35, pitch - dy * 0.0035)); } });
+canvas.addEventListener('pointerup', () => { drag = null; });
+canvas.addEventListener('wheel', e => { e.preventDefault(); camDist = Math.max(1.3, Math.min(11, camDist * (1 + Math.sign(e.deltaY) * 0.08))); }, { passive: false });
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key >= '1' && e.key <= '6') setView(+e.key - 1); if (e.key === '0' || e.key.toLowerCase() === 'f') mode = 'follow'; if (e.key.toLowerCase() === 'h' && hero && hero.wave) hero.wave(); });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// ── frame ────────────────────────────────────────────────────────────────────────────────────
+let last = performance.now(), fpsAcc = 0, fpsN = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000; uTime.value = t;
+  const f = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0), sd = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
+  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? (keys.shift ? HERO.RUN : HERO.WALK) : 0;
+  let turnRate = 0;
+  if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
+  heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);
+  heroPos.x = Math.max(-18.2, Math.min(18.2, heroPos.x + Math.sin(heroHead) * heroSpeed * dt)); heroPos.z = Math.max(12.2, Math.min(60, heroPos.z + Math.cos(heroHead) * heroSpeed * dt));
+  if (heroPos.z > 59.5 && !window.__leaving) { window.__leaving = true; location.href = 'square.html'; }                 // out of the south end, back to the square
+  if (hero) { hero.group.position.copy(heroPos); hero.group.rotation.y = heroHead; hero.update(dt, heroSpeed, heroTurn); }
+  if (mode === 'follow') {
+    camTarget.lerp(new T.Vector3(heroPos.x, 0.72, heroPos.z), Math.min(1, dt * 7));
+    const cp = Math.cos(camPitch); camera.position.set(camTarget.x + Math.sin(camYaw) * cp * camDist, Math.max(0.22, camTarget.y + Math.sin(camPitch) * camDist), camTarget.z + Math.cos(camYaw) * cp * camDist);
+    camera.lookAt(camTarget.x, camTarget.y + 0.12 + camDist * 0.08, camTarget.z);
+  } else { camera.position.copy(pos); camera.position.y += Math.sin(t * 0.6) * 0.015; camera.rotation.set(pitch, yaw, 0, 'YXZ'); }
+  camera.updateMatrixWorld();
+  if (sky) sky.position.copy(camera.position);
+  renderer.setRenderTarget(rtScene); renderer.render(scene, camera);
+  finalMat.uniforms.tScene.value = rtScene.texture; fsTri.material = finalMat; renderer.setRenderTarget(null); renderer.render(fsScene, fsCam);
+  fpsAcc += dt; fpsN++; if (fpsAcc > 1) { state.fps = Math.round(fpsN / fpsAcc); fpsAcc = 0; fpsN = 0; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__remake = Object.assign(state, { setView, VIEWS, renderer, scene, camera, sun, keys, cam(y, p, d) { mode = 'follow'; camYaw = y; camPitch = p; camDist = d; } });
+Object.defineProperty(window.__remake, 'hero', { get() { return hero; } });
+})();
+</script>
+</body>
+</html>

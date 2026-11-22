@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remake test · 西門紅樓 plaza, American comic</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1a1512; overflow: hidden; font: 500 13px/1.4 system-ui, sans-serif; color: #f6ead8; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  #hud { position: fixed; left: 26px; top: 24px; pointer-events: none; background: #ffe24a; color: #111; border: 3px solid #111; padding: 8px 14px 9px; box-shadow: 5px 5px 0 #111; transform: rotate(-1.2deg); }
+  #panel { position: fixed; inset: 9px; border: 4px solid #111; box-shadow: 0 0 0 9px #f4efe2; pointer-events: none; }
+  #hud b { display: block; font: 900 italic 21px/1.1 'Arial Black', 'Helvetica Neue', system-ui, sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+  #hud span { font-weight: 700; }
+  #keys { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: #fff; color: #111; font-weight: 700; border: 3px solid #111; padding: 7px 14px; border-radius: 999px; white-space: nowrap; }
+  #load { position: fixed; inset: 0; display: grid; place-items: center; background: #1a1512; transition: opacity .25s; }
+  #load.gone { opacity: 0; pointer-events: none; visibility: hidden; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><b>西門紅樓 · American comic</b><span>Remake test: one block rebuilt in ink, flat colour and dots</span></div>
+<div id="panel"></div>
+<div id="keys">W A S D walk · Shift run · H wave · drag to look · scroll to zoom · 1–6 viewpoints · 0 follow</div>
+<div id="load">Building the plaza…</div>
+<script src="../three.min.js"></script>
+<script src="../GLTFLoader.js"></script>
+<script src="../meshopt_decoder.js"></script>
+<script src="hero.js"></script>
+<script>
+// Remake test, American comic version (CJ, 2026-11-21: 「我要整個場景的重制達成風格的轉換」).
+// Same block as index.html, redrawn for print: one hard key light, three flat bands per surface,
+// spot colours with no texture, foliage as inked masses, a Ben-Day sky, steam as drawn puffs,
+// and a three-plate finish (colour out of register, halftone dots in shadow, black ink line).
+// The original notes follow.
+// Remake test (CJ, 2026-11-21: 「我要整個場景的重制達成風格的轉換 先做完整的一個小區塊讓我看看」).
+// One block, the 西門紅樓 front plaza, rebuilt for the "light and air" look: a low sun behind the
+// building, real light shafts (marched through the sun's shadow map), haze that shifts from warm
+// gold to teal with distance, glow, dust, wet paving. The building shapes come from the project's
+// photo-built models; every surface, the ground, the foliage, the lanterns, the stalls, the signs,
+// the sky and the whole lighting and finishing chain are new in this file.
+(() => {
+'use strict';
+const T = THREE, QS = new URLSearchParams(location.search);
+const canvas = document.getElementById('c');
+const renderer = new T.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+const PR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFShadowMap;
+renderer.debug.checkShaderErrors = QS.get('debug') === '1';
+const scene = new T.Scene();
+const camera = new T.PerspectiveCamera(52, 1, 0.1, 500);
+const col = (hex) => new T.Color(hex).convertSRGBToLinear();
+const R = (() => { let s = 20261121; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; })();
+const rr = (a, b) => a + (b - a) * R();
+
+// ── light ────────────────────────────────────────────────────────────────────────────────────
+// One hard key light, high and from the left, a little in front: the right-hand arcade stands in
+// flat light, the left-hand arcade falls into dotted shadow, and the Red House's eight sides step
+// through all three bands. A round form (her face, a lantern) is split light and dark. No fill light: the
+// shadow colour is chosen, not computed.
+const SUN_DIR = new T.Vector3(-0.62, 0.66, 0.27).normalize();           // from the ground toward the sun
+const sun = new T.DirectionalLight(0xffffff, 1);
+sun.position.copy(SUN_DIR).multiplyScalar(130).add(new T.Vector3(0, 0, 22)); sun.target.position.set(0, 0, 22);
+sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.06;
+Object.assign(sun.shadow.camera, { left: -62, right: 62, top: 62, bottom: -62, near: 10, far: 260 }); sun.shadow.camera.updateProjectionMatrix();
+scene.add(sun, sun.target);
+
+// ── flat ink-and-colour surfaces ─────────────────────────────────────────────────────────────
+function canvasTex(size, draw, repeat) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size; draw(cv.getContext('2d'), size);
+  const t = new T.CanvasTexture(cv); t.wrapS = t.wrapT = T.RepeatWrapping; t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+  if (repeat) t.repeat.set(repeat, repeat); return t;
+}
+const speckle = () => {};                                                // no grit on a printed page
+const TEX = {};
+
+// Every surface is lit the way a colourist fills a panel: three flat bands and nothing between.
+//   shadow : the base colour pushed toward violet (and marked in alpha so the dot plate finds it)
+//   flat   : the base colour
+//   light  : a warmer, brighter step where the surface faces the sun squarely
+// The band comes from the angle to the sun and the sun's shadow map, with hard thresholds.
+function comicPatch(sh) {
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <shadowmap_pars_fragment>', '#include <shadowmap_pars_fragment>\n#include <shadowmask_pars_fragment>\nfloat cmLit = 1.0;')
+    .replace('#include <aomap_fragment>', `
+      float cmN = dot(normal, directionalLights[0].direction);
+      float cmS = smoothstep(0.35, 0.65, getShadowMask());
+      #ifdef CM_WRAP
+        cmLit = smoothstep(-0.62, -0.56, cmN) * cmS;
+      #else
+        cmLit = smoothstep(0.04, 0.10, cmN) * cmS;
+      #endif
+      float cmHi = smoothstep(0.58, 0.62, cmN) * cmS;
+      vec3 cmBand = mix(vec3(0.36, 0.31, 0.60), mix(vec3(0.74, 0.72, 0.70), vec3(1.12, 1.06, 0.92), cmHi), cmLit);`)
+    .replace(/vec3 outgoingLight = [^;]+;/, 'vec3 outgoingLight = diffuseColor.rgb * cmBand + totalEmissiveRadiance;')
+    .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n gl_FragColor.a = max(cmLit, step(0.4, dot(totalEmissiveRadiance, vec3(1.0))));');
+}
+function inkMat(o = {}) {
+  const m = new T.MeshToonMaterial({ color: o.color === undefined || o.color === null ? 0xffffff : (o.color.isColor ? o.color.clone() : col(o.color)) });
+  if (o.map) m.map = o.map; if (o.side !== undefined) m.side = o.side;
+  if (o.emissive) { m.emissive = o.emissive.isColor ? o.emissive : col(o.emissive); m.emissiveIntensity = o.eI === undefined ? 1 : o.eI; }
+  if (o.emissiveMap) m.emissiveMap = o.emissiveMap;
+  m.onBeforeCompile = comicPatch; return m;
+}
+// the page's old "standard" materials, redirected: roughness and metalness mean nothing in print
+const inkStd = (p) => inkMat({ color: p.color === undefined ? undefined : new T.Color(p.color), map: p.map, side: p.side, emissive: p.emissive, emissiveMap: p.emissiveMap, eI: p.emissiveIntensity });
+const triMat = ({ color = '#ffffff', emissive = null, eI = 1 }) => inkMat({ color, emissive, eI });
+const GLOW = (r, g, b) => { const k = 1 / Math.max(r, g, b); return new T.MeshBasicMaterial({ color: new T.Color(Math.pow(r * k, 2.2), Math.pow(g * k, 2.2), Math.pow(b * k, 2.2)) }); };   // lamps are flat spot colour
+const MATS = {
+  brick: triMat({ color: '#de3b26' }),
+  bone: triMat({ color: '#fbe9b7' }),
+  ink: triMat({ color: '#2b2f4a' }),
+  walk: triMat({ color: '#f0d9a0' }),
+  haze: triMat({ color: '#5fa8d8' }),
+  verm: triMat({ color: '#f0452c' }),
+  lamp: GLOW(1.0, 0.86, 0.2),
+  leaf: triMat({ color: '#3fae49' }),
+  road: triMat({ color: '#6e5560' }),
+  glass: triMat({ color: '#3fd0e6' }),
+};
+function dress(node, opts = {}) {
+  node.traverse(o => {
+    if (!o.isMesh) return;
+    const name = o.material && o.material.name; o.material = (opts.swap && opts.swap[name]) || MATS[name] || MATS.walk;
+    o.castShadow = !(opts.noCast && opts.noCast.includes(name)); o.receiveShadow = true;
+  });
+  return node;
+}
+
+// ── sky: a printed panel sky ─────────────────────────────────────────────────────────────────
+// Yellow at the horizon, cyan above, and the blue is laid on as Ben-Day dots that swell with height
+// until they close up. Clouds are flat white shapes with one shadow tone and an ink edge; a sunburst
+// of pale wedges fans out behind the Red House.
+const sky = new T.Mesh(new T.SphereGeometry(400, 48, 24), new T.ShaderMaterial({
+  side: T.BackSide, depthWrite: false, uniforms: { uSun: { value: SUN_DIR }, uTime: { value: 0 }, uPxS: { value: 1 } },
+  vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform vec3 uSun; uniform float uTime, uPxS; varying vec3 vD;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h(i), h(i+vec2(1,0)), f.x), mix(h(i+vec2(0,1)), h(i+vec2(1,1)), f.x), f.y); }
+    float fbm(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * n(p); p = p * 2.03 + 11.0; a *= 0.5; } return s; }
+    vec3 S(float r, float g, float b){ return pow(vec3(r, g, b), vec3(2.2)); }
+    void main(){
+      vec3 d = normalize(vD); float up = clamp(d.y, 0.0, 1.0);
+      vec3 c = mix(S(1.0, 0.90, 0.42), S(0.42, 0.86, 0.96), smoothstep(0.0, 0.30, up));       // yellow horizon into cyan
+      // sunburst wedges fanning up from the horizon behind the building
+      float ang = atan(d.y + 0.03, d.x), wedge = step(0.5, fract(ang * 14.0 / 3.14159));
+      c = mix(c, S(1.0, 0.97, 0.72), wedge * (1.0 - smoothstep(0.05, 0.42, up)) * smoothstep(0.1, 0.5, -d.z) * 0.8);
+      // Ben-Day dots: one blue, the dot grows with height
+      vec2 g = mat2(0.7071, -0.7071, 0.7071, 0.7071) * gl_FragCoord.xy / (9.0 * uPxS);
+      float rad = 0.74 * smoothstep(0.05, 0.75, up), dotM = 1.0 - smoothstep(-0.04, 0.04, length(fract(g) - 0.5) - rad);
+      c = mix(c, S(0.10, 0.36, 0.86), dotM);
+      // clouds: flat shapes
+      vec2 q = d.xz / (d.y + 0.25) * 1.15 + vec2(uTime * 0.004, 0.0);
+      float f = fbm(q) * smoothstep(0.03, 0.2, d.y);
+      float body = step(0.585, f);
+      float edge = body > 0.5 ? 0.0 : 1.0 - smoothstep(1.6 * uPxS, 2.6 * uPxS, (0.585 - f) / max(length(vec2(dFdx(f), dFdy(f))), 1e-5));
+      c = mix(c, mix(S(0.80, 0.80, 0.97), S(1.0, 1.0, 1.0), step(0.62, fbm(q + vec2(0.05, -0.10)))), body);   // white with a lavender underside
+      c = mix(c, vec3(0.012, 0.010, 0.022), edge);                                   // inked edge
+      gl_FragColor = vec4(c, 1.0);
+    }` }));
+sky.frustumCulled = false; scene.add(sky);
+
+// ── ground: flat terracotta with drawn joints ────────────────────────────────────────────────
+{
+  // big pavers, three close flat tones, one ink joint line. No speckle, no bump: the page stays clean.
+  const pave = canvasTex(1024, (g, s) => {
+    const n = 8, w = s / n; g.fillStyle = '#e0825a'; g.fillRect(0, 0, s, s);
+    for (let r = 0; r < n; r++) for (let c = -1; c <= n; c++) { const v = Math.random(); if (v < 0.62) continue; g.fillStyle = v < 0.82 ? '#d67650' : '#e98f66'; g.fillRect(c * w + (r % 2) * w / 2, r * w, w, w); }
+    g.strokeStyle = '#7a2f1e'; g.lineWidth = 5;
+    for (let r = 0; r < n; r++) { g.beginPath(); g.moveTo(0, r * w); g.lineTo(s, r * w); g.stroke(); for (let c = -1; c <= n; c++) { const x = c * w + (r % 2) * w / 2; g.beginPath(); g.moveTo(x, r * w); g.lineTo(x, r * w + w); g.stroke(); } }
+  }, 40);
+  pave.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const ground = new T.Mesh(new T.PlaneGeometry(240, 240), inkMat({ map: pave }));
+  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+  const path = canvasTex(256, (g, s) => { g.fillStyle = '#f6e7b0'; g.fillRect(0, 0, s, s); g.fillStyle = '#7a2f1e'; g.fillRect(0, 0, 10, s); g.fillRect(s - 10, 0, 10, s); g.fillRect(0, 0, s, 5); }, 1);
+  const strip = new T.Mesh(new T.PlaneGeometry(3.2, 60), inkMat({ map: path }));
+  strip.material.map.repeat.set(1, 20); strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0.012, 34); strip.receiveShadow = true; scene.add(strip);   // the pale path to the door
+}
+
+// ── foliage: drawn as masses ─────────────────────────────────────────────────────────────────
+// A comic artist does not draw leaves, he draws the clump and inks its edge. Each canopy is a
+// cluster of overlapping balls in three flat greens; where two balls meet the surface turns
+// sharply, and the black plate draws the scalloped line between them.
+const uTime = { value: 0 };
+const BALL = new T.IcosahedronGeometry(1, 3);
+const GREENS = ['#2f9a3f', '#46b648', '#6fcf4a'];
+function canopy(cx, cz, cy, rx, ry) {
+  const mats = GREENS.map(c => inkMat({ color: c }));
+  for (let i = 0; i < 17; i++) {
+    const u = R() * 6.283, v = Math.acos(rr(-0.35, 1)), r = i < 3 ? 0.25 : Math.cbrt(rr(0.25, 1));
+    const m = new T.Mesh(BALL, mats[i % 3]), s = rr(0.30, 0.46) * rx * (i < 3 ? 1.25 : 1);
+    m.position.set(cx + Math.sin(v) * Math.cos(u) * rx * r * 0.78, cy + Math.cos(v) * ry * r * 0.8, cz + Math.sin(v) * Math.sin(u) * rx * r * 0.78);
+    m.scale.set(s, s * rr(0.62, 0.8), s); m.castShadow = m.receiveShadow = true; scene.add(m);
+  }
+}
+
+// ── lanterns on strings ──────────────────────────────────────────────────────────────────────
+const lanternPts = [];
+function lanternString(a, b, sag) {
+  const pts = []; const n = Math.max(6, Math.round(a.distanceTo(b) / 0.5));
+  for (let i = 0; i <= n; i++) { const t = i / n, p = a.clone().lerp(b, t); p.y -= Math.sin(Math.PI * t) * sag; pts.push(p); }
+  scene.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), n, 0.014, 4), inkStd({ color: 0x15120f, roughness: 0.8 })));
+  const every = Math.max(2, Math.round(1.7 / (a.distanceTo(b) / n)));
+  for (let i = every; i < n; i += every) lanternPts.push(pts[i]);
+}
+function buildLanterns() {
+  const body = new T.SphereGeometry(0.3, 14, 10); body.scale(1, 0.84, 1);
+  const im = new T.InstancedMesh(body, inkMat({}), lanternPts.length);
+  const cap = new T.InstancedMesh(new T.CylinderGeometry(0.11, 0.11, 0.6, 8), inkStd({ color: 0x2a1c12, roughness: 0.7 }), lanternPts.length);
+  const d = new T.Object3D(), c = new T.Color();
+  lanternPts.forEach((p, i) => {
+    d.position.set(p.x, p.y - 0.36, p.z); d.rotation.set(0, 0, 0); d.scale.setScalar(rr(0.88, 1.12)); d.updateMatrix(); im.setMatrixAt(i, d.matrix); cap.setMatrixAt(i, d.matrix);
+    if (R() < 0.72) c.set('#f02d1f'); else c.set('#ffd23a'); c.convertSRGBToLinear(); im.setColorAt(i, c);
+  });
+  im.castShadow = false; cap.castShadow = false;   /* lantern shadows would pepper the whole plaza with blots */ im.frustumCulled = cap.frustumCulled = false; scene.add(im, cap); return im;
+}
+
+// ── street stalls, with steam ────────────────────────────────────────────────────────────────
+const steamSrc = [];
+function stall(x, z, rot, hue) {
+  const g = new T.Group(); g.position.set(x, 0, z); g.rotation.y = rot;
+  const wood = triMat({ color: '#c98a4a' }), steel = triMat({ color: '#c9d6e6' });
+  const add = (geo, mat, px, py, pz) => { const m = new T.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+  add(new T.BoxGeometry(2.4, 0.9, 1.1), wood, 0, 0.55, 0); add(new T.BoxGeometry(2.5, 0.06, 1.2), steel, 0, 1.03, 0);
+  [[-1.15, -0.5], [1.15, -0.5], [-1.15, 0.5], [1.15, 0.5]].forEach(([px, pz]) => add(new T.CylinderGeometry(0.03, 0.03, 2.5, 6), steel, px, 1.25, pz));
+  [-0.9, 0.9].forEach(px => add(new T.CylinderGeometry(0.2, 0.2, 0.1, 14), inkStd({ color: 0x1b1b1b, roughness: 0.6 }), px, 0.2, 0).rotation.set(0, 0, Math.PI / 2));
+  const awn = canvasTex(256, (c, s) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#f1e6d0' : `hsl(${hue},85%,50%)`; c.fillRect(i * s / 8, 0, s / 8, s); } speckle(c, s, 2500, 0.1, true); });
+  const am = inkStd({ map: awn, roughness: 0.9, side: T.DoubleSide });
+
+  const a = add(new T.BoxGeometry(2.9, 0.04, 1.9), am, 0, 2.55, 0.15); a.rotation.x = 0.16;
+  [0.55, -0.1, -0.75].forEach((px, i) => { const pot = add(new T.CylinderGeometry(0.24, 0.2, 0.32, 16), steel, px, 1.22, 0.05); steamSrc.push(new T.Vector3(px, 1.45, 0.05).applyAxisAngle(new T.Vector3(0, 1, 0), rot).add(g.position)); });
+  [-0.9, 0, 0.9].forEach(px => add(new T.SphereGeometry(0.07, 8, 6), GLOW(4.5, 3.0, 1.3), px, 2.28, -0.55).castShadow = false);
+  [[-0.7, 1.3], [0.2, 1.4], [1.0, 1.25]].forEach(([px, pz]) => { add(new T.CylinderGeometry(0.17, 0.17, 0.04, 12), inkStd({ color: 0xb23a2a, roughness: 0.5 }), px, 0.46, pz); [[-.13, -.13], [.13, -.13], [-.13, .13], [.13, .13]].forEach(([lx, lz]) => add(new T.CylinderGeometry(0.012, 0.012, 0.45, 5), steel, px + lx, 0.22, pz + lz)); });
+  scene.add(g);
+}
+
+// ── shop signs ───────────────────────────────────────────────────────────────────────────────
+function sign(text, x, y, z, rotY, hue, lit) {
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128 * text.length; const g = cv.getContext('2d');
+  g.fillStyle = `hsl(${hue},55%,${lit ? 30 : 86}%)`; g.fillRect(0, 0, cv.width, cv.height); g.strokeStyle = lit ? '#f5e7c8' : `hsl(${hue},60%,30%)`; g.lineWidth = 6; g.strokeRect(6, 6, cv.width - 12, cv.height - 12);
+  g.fillStyle = lit ? '#fff3d6' : `hsl(${hue},65%,26%)`; g.font = '700 92px "PingFang TC","Heiti TC","Noto Sans TC",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  [...text].forEach((ch, i) => g.fillText(ch, 64, 64 + i * 128));
+  const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = 8;
+  const m = inkStd({ map: t, roughness: 0.6, emissiveMap: t, emissive: new T.Color(1, 1, 1), emissiveIntensity: lit ? 0.45 : 0 });
+  const h = 0.62 * text.length, mesh = new T.Mesh(new T.BoxGeometry(0.62, h, 0.1), [inkStd({ color: 0x222222 }), inkStd({ color: 0x222222 }), inkStd({ color: 0x222222 }), inkStd({ color: 0x222222 }), m, m]);
+  mesh.position.set(x, y, z); mesh.rotation.y = rotY; mesh.castShadow = true; scene.add(mesh);
+}
+
+// ── air: steam as drawn puffs ────────────────────────────────────────────────────────────────
+// Each puff is a solid white disc that writes depth, so the black plate rings it with an ink line.
+function points(n, init, size) {
+  const pos = new Float32Array(n * 3), seed = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const p = init(i); pos.set([p.x, p.y, p.z], i * 3); seed[i] = Math.random(); }
+  const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setAttribute('seed', new T.BufferAttribute(seed, 1));
+  const mat = new T.ShaderMaterial({ uniforms: { uTime, uSize: { value: size }, uPx: { value: 1 } },
+    vertexShader: `uniform float uTime, uSize, uPx; attribute float seed;
+      void main(){ vec3 p = position; float life = fract(uTime * (0.10 + seed * 0.08) + seed * 7.0);
+        p.y += life * 2.4; p.x += sin(life * 5.0 + seed * 20.0) * 0.25 * life + life * 0.45; p.z += cos(life * 4.0 + seed * 11.0) * 0.2 * life;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0); gl_Position = projectionMatrix * mv;
+        gl_PointSize = uSize * uPx * sin(life * 3.14159) * (0.45 + life * 0.8) / max(-mv.z, 0.5); }`,
+    fragmentShader: 'void main(){ if (length(gl_PointCoord - 0.5) > 0.5) discard; gl_FragColor = vec4(0.96, 0.97, 1.0, 1.0); }' });
+  const p = new T.Points(geo, mat); p.frustumCulled = false; scene.add(p); return p;
+}
+
+// ── build ────────────────────────────────────────────────────────────────────────────────────
+const loader = new T.GLTFLoader(); if (window.MeshoptDecoder) loader.setMeshoptDecoder(window.MeshoptDecoder);
+const loadGLB = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', g => res(g.scene), undefined, rej));
+const loadGLTF = (n) => new Promise((res, rej) => loader.load('../asset/models/' + n + '.glb', res, undefined, rej));
+const rigged = (gltf) => HERO.rigged(T, gltf);
+let walker = null, hero = null, lanterns = null, steam = null;
+const state = { ready: false, error: null, fps: 0 };
+Promise.all([loadGLB('bundle-core'), loadGLB('bundle-square'), loadGLTF('girl-rigged')]).then(([core, sq, girl]) => {
+  const get = (root, name) => root.children.find(c => c.name === name);
+  // the Red House, front door facing the plaza (+z)
+  scene.add(dress(get(core, 'red-house').clone()));
+  // 騎樓 shophouse rows, left and right
+  const arcade = get(sq, 'sq-arcade'), tints = ['#ffe08a', '#f7a35c', '#9fdcc8', '#f9b4a6', '#cfe07a', '#f2c6e0'];
+  for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 11; i++) {
+    const a = arcade.clone(); a.position.set(side * 26.5, 0, 6 + i * 4.5); a.rotation.y = -side * Math.PI / 2;
+    dress(a, { swap: { bone: triMat({ color: tints[(i * 5 + (side > 0 ? 2 : 0)) % tints.length], tex: TEX.plaster, scale: 0.4, rough: 0.85 }) } });
+    a.scale.y = 1 + ((i * 7 + side) % 3) * 0.14; scene.add(a);
+  }
+  // what stands behind and beside: the tall 萬年大樓, the old cinema, a 中華商場 block
+  const far = (name, x, z, ry, s = 1) => { const o = dress(get(core, name).clone()); o.position.set(x, 0, z); o.rotation.y = ry; o.scale.setScalar(s); scene.add(o); };
+  far('wannian', -44, -34, 0.4); far('lux', 46, -22, -0.5); far('chunghwa', -46, 22, Math.PI / 2, 1.2); far('chunghwa', 46, 34, -Math.PI / 2, 1.2);
+  // a hazy city behind everything
+  { const n = 150, im = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), triMat({ color: '#9aa8e0' }), n), d = new T.Object3D();
+    for (let i = 0; i < n; i++) { const a = rr(0, 6.283), r = rr(95, 210), h = rr(8, 30); d.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r); d.scale.set(rr(8, 18), h, rr(8, 18)); d.rotation.y = rr(0, 1.5); d.updateMatrix(); im.setMatrixAt(i, d.matrix); }
+    im.castShadow = true; im.receiveShadow = true; scene.add(im); }
+  // banyans: the models' trunks and branches, the leaves replaced one by one
+  const CANOPY = triMat({ color: '#213b1e' }); CANOPY.userData.canopy = true;
+  const banyan = get(sq, 'sq-banyan'), BARK = triMat({ color: '#a8683c' }), BARK2 = triMat({ color: '#6b3f2a' });
+  [[-13.5, 21, 'banyanL', 1.0], [14.5, 25, 'banyanM', 1.05], [-16, 41, 'banyanM', 1.15], [16.5, 43, 'banyanL', 1.0]].forEach(([x, z, kind, s], i) => {
+    const b = dress(get(banyan, kind).clone(), { noCast: ['leaf'], swap: { leaf: CANOPY, haze: BARK, ink: BARK2, road: BARK2 } });
+    b.traverse(o => { if (o.isMesh && o.material.userData.canopy) o.visible = false; });
+    b.position.set(x, 0, z); b.rotation.y = i * 1.7; b.scale.setScalar(s); scene.add(b);
+    canopy(x, z, 6.4 * s, 6.0 * s, 2.9 * s);
+  });
+  // street furniture
+  const scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter'), lampPost = get(core, 'lamp'), props = get(core, 'props');
+  for (let side = -1; side <= 1; side += 2) for (let i = 0; i < 9; i++) {
+    if ((i + (side > 0 ? 1 : 0)) % 3 === 2) continue;
+    const s = dress(scooters.children[i % 3].clone()); s.position.set(side * (22.6 + rr(-0.3, 0.3)), 0, 9 + i * 4.6 + rr(-0.6, 0.6)); s.rotation.y = side * (Math.PI / 2 + rr(-0.35, 0.35)); scene.add(s);
+  }
+  [[-21, 12], [21, 16], [-21, 30], [21, 34], [-21, 48], [21, 50], [-7, 12], [7, 12]].forEach(([x, z], i) => { const p = dress(planter.children[i % 2].clone()); p.position.set(x, 0, z); scene.add(p); });
+  [[-19, 18, 1], [19, 20, -1], [-19, 36, 1], [19, 38, -1]].forEach(([x, z, f]) => { const l = dress(lampPost.clone()); l.position.set(x, 0, z); l.rotation.y = f * Math.PI / 2; scene.add(l); });
+  props.children.forEach((p, i) => { for (let k = 0; k < 2; k++) { const o = dress(p.clone()); o.position.set((k ? 1 : -1) * rr(20.5, 22), 0, 8 + (i * 2 + k) * 3.4 + rr(-1, 1)); o.rotation.y = rr(0, 6.28); scene.add(o); } });
+  // lantern strings: from the gable out over the plaza, and across between the arcades
+  for (let i = 0; i < 7; i++) { const t = i / 6; lanternString(new T.Vector3(-9 + t * 18, 13.2, 8.6), new T.Vector3(-23.5 + t * 47, 6.4, 30 + Math.sin(t * Math.PI) * 14), 1.6); }
+  [18, 27, 36, 45].forEach((z, i) => lanternString(new T.Vector3(-23.5, 6.2 + (i % 2) * 0.5, z), new T.Vector3(23.5, 6.2 + ((i + 1) % 2) * 0.5, z + 3), 1.9));
+  lanterns = buildLanterns();
+  // stalls and signs
+  stall(8.5, 30, -0.5, 8); stall(-9, 35, 0.6, 205); stall(12, 43, -1.0, 135); stall(-13, 46.5, 1.1, 28);
+  const words = ['牛肉麵', '冰果室', '鐘錶行', '理髮廳', '西藥房', '唱片行', '照相館', '皮鞋', '布莊', '金紙店', '豆花', '機車行', '雜貨', '茶莊'];
+  words.forEach((w, i) => { const side = i % 2 ? 1 : -1; sign(w, side * 23.9, 3.6 + (i % 3) * 0.5, 8.5 + Math.floor(i / 2) * 6.3, side > 0 ? -Math.PI / 2 : Math.PI / 2, [4, 210, 38, 150, 350, 28][i % 6], i % 3 === 0); });
+  // someone walking the plaza
+  hero = rigged(girl); scene.add(hero.group);
+  hero.group.traverse(o => { if (!o.isMesh) return;                                           // she is inked and flat-coloured like everything else
+    const conv = (s) => { if (!s || s.transparent) return s; const m = inkMat({ color: s.color, map: s.map, side: s.side }); m.vertexColors = s.vertexColors; m.alphaTest = s.alphaTest; m.name = s.name; m.defines = Object.assign({}, m.defines, { CM_WRAP: 1 }); return m; };   // the light wraps further round her, as an artist would cheat it
+    o.receiveShadow = false;                                                                 // her light comes from the angle alone, so the hat never blots out her face
+    o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material); });
+  // steam: drawn puffs, not mist
+  steam = points(steamSrc.length * 7, (i) => steamSrc[i % steamSrc.length].clone().add(new T.Vector3(rr(-0.1, 0.1), 0, rr(-0.1, 0.1))), 260);
+  state.ready = true; document.getElementById('load').classList.add('gone');
+}).catch(e => { state.error = String(e); document.getElementById('load').textContent = 'Could not load the models: ' + e; });
+
+// ── the finishing chain ──────────────────────────────────────────────────────────────────────
+const fsTri = new T.Mesh(new T.PlaneGeometry(2, 2)); const fsScene = new T.Scene(); fsScene.add(fsTri); const fsCam = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+const COMMON = `precision highp float; varying vec2 vUv; uniform sampler2D tDepth; uniform mat4 uProjInv, uCamWorld; uniform vec3 uCamPos, uSunDir; uniform float uNear, uFar, uTime;
+  float viewZ(float d){ float z = d * 2.0 - 1.0; return 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear)); }
+  vec3 worldAt(vec2 uv, float d){ vec4 v = uProjInv * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); v /= v.w; return (uCamWorld * v).xyz; }
+  float ign(vec2 p){ return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }`;
+const shared = { tDepth: { value: null }, uProjInv: { value: new T.Matrix4() }, uCamWorld: { value: new T.Matrix4() }, uCamPos: { value: new T.Vector3() }, uSunDir: { value: SUN_DIR }, uNear: { value: 0.1 }, uFar: { value: 500 }, uTime };
+const pass = (frag, uniforms) => new T.ShaderMaterial({ vertexShader: VS, fragmentShader: frag, uniforms: Object.assign({}, shared, uniforms), depthTest: false, depthWrite: false });
+
+// The comic finish. Three plates, as on a press:
+//   1. the colour plate: the flat toon-lit scene, printed a hair out of register
+//   2. the dot plate: halftone dots wherever a surface is in shadow (the materials write "lit or not" into alpha)
+//   3. the black plate: ink lines where the depth breaks (silhouettes) and where the surface turns (creases)
+// The normals for the creases are rebuilt from the depth buffer, so texture can never make a line.
+const normMat = pass(COMMON + `uniform vec2 uRes;
+  vec3 P(vec2 uv){ return worldAt(uv, texture2D(tDepth, uv).x); }
+  void main(){
+    vec2 px = 1.0 / uRes; float d = texture2D(tDepth, vUv).x;
+    if (d >= 0.99999) { gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0 / uFar); return; }
+    vec3 c = P(vUv), l = P(vUv - vec2(px.x, 0.0)), r = P(vUv + vec2(px.x, 0.0)), u = P(vUv + vec2(0.0, px.y)), b = P(vUv - vec2(0.0, px.y));
+    vec3 dx = dot(c - l, c - l) < dot(r - c, r - c) ? c - l : r - c;      // take the neighbour on the same surface
+    vec3 dy = dot(c - b, c - b) < dot(u - c, u - c) ? c - b : u - c;
+    gl_FragColor = vec4(normalize(cross(dx, dy)), 1.0 / viewZ(d));
+  }`, { uRes: { value: new T.Vector2(1, 1) } });
+const finalMat = pass(COMMON + `uniform sampler2D tScene, tNorm; uniform vec2 uRes;
+  float hh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(hh(i), hh(i+vec2(1,0)), f.x), mix(hh(i+vec2(0,1)), hh(i+vec2(1,1)), f.x), f.y); }
+  void main(){
+    vec2 px = 1.0 / uRes; float th = uRes.y / 800.0;
+    // COLOUR PLATE, slightly out of register with the black
+    vec2 cu = vUv + px * th * vec2(1.7, -1.1);
+    float d = texture2D(tDepth, cu).x; bool isSky = d >= 0.99999; float dist = length(worldAt(cu, d) - uCamPos);
+    vec4 s = texture2D(tScene, cu); vec3 c = min(s.rgb, vec3(1.0)); float shade = isSky ? 0.0 : (1.0 - clamp(s.a, 0.0, 1.0)) * (1.0 - smoothstep(40.0, 90.0, dist));   // no dots on the far city: it is one flat tone
+    // DOT PLATE: 45 degree screen, dots swell with how deep the shadow is
+    vec2 g = mat2(0.7071, -0.7071, 0.7071, 0.7071) * gl_FragCoord.xy / (5.0 * th);
+    float r = length(fract(g) - 0.5), dotM = 1.0 - smoothstep(-0.05, 0.05, r - 0.31 * sqrt(shade));
+    c = mix(c, c * vec3(0.26, 0.20, 0.50), dotM * step(0.02, shade));
+    // far things flatten toward a flat blue, the way a colourist knocks back a background
+    float farK = isSky ? 0.0 : smoothstep(35.0, 125.0, dist);
+    c = mix(c, vec3(0.30, 0.50, 0.80), farK * 0.8);
+    // BLACK PLATE
+    vec2 o = px * th * 1.15; vec4 n0 = texture2D(tNorm, vUv);
+    vec4 a = texture2D(tNorm, vUv + o), b = texture2D(tNorm, vUv - o), e = texture2D(tNorm, vUv + vec2(o.x, -o.y)), f = texture2D(tNorm, vUv + vec2(-o.x, o.y));
+    float zc = 1.0 / n0.a;
+    float eD = (abs(a.a + b.a - 2.0 * n0.a) + abs(e.a + f.a - 2.0 * n0.a)) / n0.a;          // 1/z is straight across a flat face, so this is zero on any plane
+    float eN = 4.0 - dot(n0.xyz, a.xyz) - dot(n0.xyz, b.xyz) - dot(n0.xyz, e.xyz) - dot(n0.xyz, f.xyz);
+    float ink = max(smoothstep(0.035, 0.085, eD), smoothstep(0.5, 0.95, eN) * (1.0 - smoothstep(45.0, 110.0, zc)));
+    // heavier line close up: a second, wider ring for near silhouettes
+    vec2 o2 = o * 2.1; float eD2 = (abs(texture2D(tNorm, vUv + o2).a + texture2D(tNorm, vUv - o2).a - 2.0 * n0.a) + abs(texture2D(tNorm, vUv + vec2(o2.x, -o2.y)).a + texture2D(tNorm, vUv + vec2(-o2.x, o2.y)).a - 2.0 * n0.a)) / n0.a;
+    ink = max(ink, smoothstep(0.25, 0.5, eD2) * (1.0 - smoothstep(14.0, 40.0, zc)));
+    vec3 inkCol = mix(vec3(0.012, 0.010, 0.022), vec3(0.10, 0.17, 0.36), smoothstep(70.0, 260.0, zc));
+    c = mix(c, inkCol, ink);
+    // PAPER: cream stock with tooth, ink soaks in unevenly
+    c = pow(max(c, 0.0), vec3(1.0 / 2.2));
+    float tooth = vn(gl_FragCoord.xy / th * 0.9) * 0.6 + vn(gl_FragCoord.xy / th * 0.23) * 0.4;
+    c = c * vec3(0.985, 0.955, 0.895) * (0.93 + 0.09 * tooth) + vec3(0.035, 0.03, 0.02);
+    gl_FragColor = vec4(c, 1.0);
+  }`, { tScene: { value: null }, tNorm: { value: null }, uRes: { value: new T.Vector2(1, 1) } });
+
+const hdr = (w, h, depth) => { const rt = new T.WebGLRenderTarget(w, h, { type: T.HalfFloatType, depthBuffer: !!depth, minFilter: T.LinearFilter, magFilter: T.LinearFilter });
+  if (depth) { rt.depthTexture = new T.DepthTexture(w, h); rt.depthTexture.type = T.UnsignedIntType; } return rt; };
+const rtScene = hdr(4, 4, true), rtN = hdr(4, 4);
+rtN.texture.minFilter = rtN.texture.magFilter = T.NearestFilter;
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight, W = Math.floor(w * PR), H = Math.floor(h * PR);
+  renderer.setPixelRatio(PR); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  rtScene.setSize(W, H); rtN.setSize(W, H);
+  finalMat.uniforms.uRes.value.set(W, H); normMat.uniforms.uRes.value.set(W, H);
+}
+window.addEventListener('resize', resize); resize();
+const draw = (mat, target) => { fsTri.material = mat; renderer.setRenderTarget(target); renderer.render(fsScene, fsCam); };
+
+// ── camera: six viewpoints, drag to look, keys to walk ───────────────────────────────────────
+const VIEWS = [[0, 1.6, 47, 0, 7.5, 0], [-9, 1.5, 33, 7, 6, 4], [15, 1.3, 36, -8, 6.5, 6], [0, 10, 56, 0, 5, 6], [-11, 1.5, 30, -22, 12, -8], [21, 1.7, 44, -12, 4.5, 14]];
+let yaw = 0, pitch = 0; const pos = new T.Vector3(), keys = {};
+function setView(i) { const v = VIEWS[i]; pos.set(v[0], v[1], v[2]); const dx = v[3] - v[0], dy = v[4] - v[1], dz = v[5] - v[2]; yaw = Math.atan2(-dx, -dz); pitch = Math.atan2(dy, Math.hypot(dx, dz)); mode = 'fixed'; }
+// follow: the camera rides behind the character; fixed: it stands at a viewpoint and she still walks
+let mode = 'follow', camYaw = 0, camPitch = 0.13, camDist = 3.4;
+const heroPos = new T.Vector3(0, 0, 43), camTarget = new T.Vector3(0, 0.72, 43); let heroHead = Math.PI, heroSpeed = 0, heroTurn = 0;
+if (QS.get('view')) setView(Math.max(0, Math.min(5, (parseInt(QS.get('view'), 10) || 1) - 1)));
+if (QS.get('close')) { camDist = 1.9; camYaw = Math.PI - 0.5; camPitch = 0.06; }            // ?close=1 looks at her face
+let drag = null;
+canvas.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag[0], dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY];
+  if (mode === 'follow') { camYaw -= dx * 0.005; camPitch = Math.max(-0.12, Math.min(1.25, camPitch + dy * 0.004)); }
+  else { yaw -= dx * 0.0035; pitch = Math.max(-1.2, Math.min(1.35, pitch - dy * 0.0035)); } });
+canvas.addEventListener('pointerup', () => { drag = null; });
+canvas.addEventListener('wheel', e => { e.preventDefault(); camDist = Math.max(1.3, Math.min(11, camDist * (1 + Math.sign(e.deltaY) * 0.08))); }, { passive: false });
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key >= '1' && e.key <= '6') setView(+e.key - 1); if (e.key === '0' || e.key.toLowerCase() === 'f') mode = 'follow'; if (e.key.toLowerCase() === 'h' && hero && hero.wave) hero.wave(); });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// ── frame ────────────────────────────────────────────────────────────────────────────────────
+let last = performance.now(), fpsAcc = 0, fpsN = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000; uTime.value = t; sky.material.uniforms.uTime.value = t;
+  const f = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0), sd = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
+  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? (keys.shift ? HERO.RUN : HERO.WALK) : 0;
+  let turnRate = 0;
+  if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
+  heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);
+  heroPos.x = Math.max(-21, Math.min(21, heroPos.x + Math.sin(heroHead) * heroSpeed * dt)); heroPos.z = Math.max(11, Math.min(60, heroPos.z + Math.cos(heroHead) * heroSpeed * dt));
+  if (heroPos.z > 59.5 && !window.__leaving) { window.__leaving = true; location.href = 'square.html'; }                 // out of the south end, back to the square
+  if (hero) { hero.group.position.copy(heroPos); hero.group.rotation.y = heroHead; hero.update(dt, heroSpeed, heroTurn); }
+  if (mode === 'follow') {
+    camTarget.lerp(new T.Vector3(heroPos.x, 0.72, heroPos.z), Math.min(1, dt * 7));
+    const cp = Math.cos(camPitch); camera.position.set(camTarget.x + Math.sin(camYaw) * cp * camDist, Math.max(0.22, camTarget.y + Math.sin(camPitch) * camDist), camTarget.z + Math.cos(camYaw) * cp * camDist);
+    camera.lookAt(camTarget.x, camTarget.y + 0.12 + camDist * 0.08, camTarget.z);
+  } else { camera.position.copy(pos); camera.position.y += Math.sin(t * 0.6) * 0.015; camera.rotation.set(pitch, yaw, 0, 'YXZ'); }
+  camera.updateMatrixWorld();
+  sky.position.copy(camera.position);
+  if (false && walker) { const a = t * 0.11; walker.position.set(Math.sin(a) * 6.5, 0, 31 + Math.cos(a) * 9); walker.rotation.y = a + Math.PI / 2; const k = Math.floor(t * 3.4) % 2; walker.children[0].visible = !k; if (walker.children[1]) walker.children[1].visible = !!k; }
+  if (lanterns) lanterns.rotation.z = 0;                                                    // (strings are fixed; the leaves carry the wind)
+  if (steam) steam.material.uniforms.uPx.value = PR;
+  sky.material.uniforms.uPxS.value = rtScene.height / 800;
+
+  renderer.setRenderTarget(rtScene); renderer.render(scene, camera);
+  shared.tDepth.value = rtScene.depthTexture; shared.uProjInv.value.copy(camera.projectionMatrixInverse); shared.uCamWorld.value.copy(camera.matrixWorld); shared.uCamPos.value.copy(camera.position);
+  draw(normMat, rtN);
+  finalMat.uniforms.tScene.value = rtScene.texture; finalMat.uniforms.tNorm.value = rtN.texture;
+  draw(finalMat, null);
+  fpsAcc += dt; fpsN++; if (fpsAcc > 1) { state.fps = Math.round(fpsN / fpsAcc); fpsAcc = 0; fpsN = 0; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__remake = Object.assign(state, { setView, VIEWS, renderer, scene, camera, sun, keys, cam(y, p, d) { mode = 'follow'; camYaw = y; camPitch = p; camDist = d; } });
+Object.defineProperty(window.__remake, 'hero', { get() { return hero; } });
+})();
+</script>
+</body>
+</html>

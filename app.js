@@ -1691,7 +1691,8 @@
     renderer.setRenderTarget(rt);
     renderer.render(scene, camera);
     renderer.setRenderTarget(null);
-    renderer.render(postScene, postCam);
+    // style-lab.js (?style=…, a look test) draws the final pass in place of ours when a style is on
+    if (!(window.STYLE_LAB && window.STYLE_LAB.render(renderer, rt, camera, now / 1000))) renderer.render(postScene, postCam);
     if (booting) { booting = false; document.body.classList.remove('booting'); }   // the canvas has a frame: the boot screen can go
     frameMs += (performance.now() - rafNow - frameMs) * 0.05;       // the frame's own CPU time (update + draw submission), smoothed; a cost the display cap cannot hide (issue #19)
     requestAnimationFrame(frame);
