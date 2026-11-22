@@ -192,6 +192,7 @@ function facade(K, o) {
 // a standing or sitting figure, plain blocks, no likeness. o: shirt, pants, bowl, sit, apron
 function person(K, x, z, ry, o = {}) {
   K.at(x, 0, z, ry); const sh = o.shirt || pick(SHIRT), pa = o.pants || pick(PANTS), d = o.sit ? -0.38 : 0, s = o.h || rr(0.94, 1.06);
+  if (window.PEOPLE) { (window.__lmPeople = window.__lmPeople || []).push({ g: K.g, x, y: o.y || 0, z, ry, o }); K.at(); return K; }   // the people kit (lm/kit-people.js) draws this figure instead: lm/ximen-people.js reads the list
   if (o.sit) { K.bx(-0.16, -0.03, 0.42, 0.56, 0, 0.42, pa); K.bx(0.03, 0.16, 0.42, 0.56, 0, 0.42, pa); K.bx(-0.16, -0.03, 0, 0.45, 0.32, 0.44, pa); K.bx(0.03, 0.16, 0, 0.45, 0.32, 0.44, pa);
     K.cyl(0.17, 0.15, 0.42, M.wood, 0, 0.21, 0, 8); }
   else { K.bx(-0.16, -0.03, 0, 0.82 * s, -0.08, 0.08, pa); K.bx(0.03, 0.16, 0, 0.82 * s, -0.08, 0.08, pa); K.bx(-0.17, -0.02, 0, 0.07, -0.08, 0.16, M.black); K.bx(0.02, 0.17, 0, 0.07, -0.08, 0.16, M.black); }
@@ -391,7 +392,7 @@ function tianhou() {
     K.sph(0.17, M.gold, cx, yR + 0.42, zm); K.cyl(0.03, 0.09, 0.3, M.gold, cx, yR + 0.2, zm, 8); };
   roof(0, 5.6, 12.0, 0.95, 0.8); [-1.6, 1.6].forEach(x => { K.sph(0.22, M.tileGreen, x, 13.75, -0.1, 1.4); K.sph(0.12, M.gold, x * 1.15, 14.0, -0.1); });                                // the roof and its two dragons, as blocks
   [-2.0, -1.2, -0.4, 0.4, 1.2, 2.0].forEach(x => lantern(K, x, 3.35, 0.8));                                                                                              // six red lanterns in a row over the door
-  [-2.75, 2.75].forEach(x => { K.bx(x - 0.3, x + 0.3, 0, 0.55, 0.75, 1.35, M.stone); K.box(0.36, 0.5, 0.5, M.stone, x, 0.8, 1.05, 0, -0.25); K.sph(0.2, M.stone, x, 1.2, 1.2); K.sph(0.09, M.stone, x - 0.0, 1.05, 1.36); });     // the stone lions, as blocks
+  if (!(window.LMK && window.LM && window.LM['ximen-lions'])) [-2.75, 2.75].forEach(x => { K.bx(x - 0.3, x + 0.3, 0, 0.55, 0.75, 1.35, M.stone); K.box(0.36, 0.5, 0.5, M.stone, x, 0.8, 1.05, 0, -0.25); K.sph(0.2, M.stone, x, 1.2, 1.2); K.sph(0.09, M.stone, x - 0.0, 1.05, 1.36); });     // the stone lions, as blocks: only when lm/ximen-lions.js (the carved pair) is not loaded
   K.cyl(0.42, 0.3, 0.5, M.gold, 0, 0.95, -0.7, 12); K.cyl(0.46, 0.46, 0.06, M.gold, 0, 1.22, -0.7, 12); [0, 2.1, 4.2].forEach(a => K.cyl(0.05, 0.04, 0.7, M.gold, Math.sin(a) * 0.28, 0.35, -0.7 + Math.cos(a) * 0.28, 6));
   [-0.42, 0.42].forEach(x => K.cyl(0.035, 0.035, 0.4, M.gold, x, 1.3, -0.7, 6));
   return K.done();
@@ -511,7 +512,7 @@ function lailai() {
   // street level: display windows with mannequins, glass doors under a canopy
   K.bx(x0, x1, 0, G, -D, -2.6, M.dark); [x0, -2.2, 1.7, x1 - 0.5].forEach(x => K.bx(x, x + 0.5, 0, G, -2.6, 0, M.white)); K.bx(x0, x1, G - 0.6, G, -2.6, 0, M.white); K.bx(-2.6, 2.6, 3.5, 3.8, 0, 1.9, M.blue);
   K.bx(-1.7, 1.7, 0, 3.4, -0.5, -0.45, M.glassBlue); [-1.7, -0.85, 0, 0.85, 1.67].forEach(x => K.bx(x - 0.03, x + 0.03, 0, 3.4, -0.45, -0.4, M.steel)); K.bx(-1.6, 1.6, 0.1, 3.3, -2.58, -2.54, M.shopLit);
-  [[-6.0, -2.2], [2.2, 6.0]].forEach(([a, b]) => { K.bx(a, b, 0.5, 3.6, -0.45, -0.4, M.pane); K.bx(a, b, 0, 0.5, -0.6, -0.1, M.concLt); K.bx(a, b, 0.5, 3.6, -2.2, -2.16, M.shopLit); for (let k = 0; k < 4; k++) { K.at(0, 0.5, 0, 0); person(K, a + 0.5 + k * (b - a - 1) / 3, -1.2, rr(-0.4, 0.4), { shirt: pick(CLOTH), pants: pick(CLOTH) }); } K.at(); });
+  [[-6.0, -2.2], [2.2, 6.0]].forEach(([a, b]) => { K.bx(a, b, 0.5, 3.6, -0.45, -0.4, M.pane); K.bx(a, b, 0, 0.5, -0.6, -0.1, M.concLt); K.bx(a, b, 0.5, 3.6, -2.2, -2.16, M.shopLit); for (let k = 0; k < 4; k++) { K.at(0, 0.5, 0, 0); person(K, a + 0.5 + k * (b - a - 1) / 3, -1.2, rr(-0.4, 0.4), { shirt: pick(CLOTH), pants: pick(CLOTH), y: 0.5, mannequin: true }); } K.at(); });
   K.mesh(sign('OPEN', 3.2, 0.5, { bg: '#2a2622', fg: '#f3ecd9', font: 'Georgia, "Times New Roman", serif', weight: 700, spread: true, border: false, glow: 0.8, oneSide: true }), 0, 3.65, 1.92);
   return K.done();
 }
@@ -715,8 +716,8 @@ if (window.PLACES) {
     design: { form: 'installation', piece: 'arch', layout: 'street', palette: 'rainbow', motif: 'rainbow', head: '西門 彩虹地景', big: 'TAIPEI', kicker: 'EXIT 6 RAINBOW', kicker2: '六色 TAIPEI', en: 'Six colours and the word TAIPEI on the Exit 6 plaza', date: '2019.9.25', venue: '捷運西門站 6號出口' } });
   ev('mayday-5th-anniv-2004', { position: [4.6, 55.6], rotation: Math.PI - 0.15,              // at the mouth of the car-free streets
     design: { form: 'poster', mount: 'wall', layouts: ['concert', 'news', 'concert', 'street'], layout: 'concert', palette: 'concert', head: '五月天 成軍五週年', big: 'MAYDAY 5', kicker: 'LIVE · 5TH ANNIVERSARY', kicker2: '歌迷擠爆紅樓', en: 'Five years a band, one small show before the Asian tour', date: '2004.4', venue: '西門紅樓' } });
-  ev('gatao-fanmeet-2025', { position: [12.8, 56.4], rotation: Math.PI - 0.3,
-    design: { form: 'booth', booth: 'fanmeet', layout: 'premiere', palette: GANG, head: '《角頭－鬥陣欸》封街見面會', big: '鬥陣欸', kicker: 'FAN MEET', kicker2: '8.21 全台上映', en: 'The cast closes Movie Street two days before the release', date: '2025.8.19', venue: '西門町電影街', props: ['flashes', 'barrier'] } },
+  ev('gatao-fanmeet-2025', { position: [13.4, 56.3], rotation: -Math.PI / 2 - 0.12,   /* turned to face the plaza: its back wall filled the right of viewpoint 6 (checker 2026-11-22) */
+    design: { form: 'booth', booth: 'fanmeet', layout: 'premiere', palette: GANG, head: '《角頭－鬥陣欸》封街見面會', big: '鬥陣欸', kicker: 'FAN MEET', kicker2: '8.21 全台上映', en: 'The cast closes Movie Street two days before the release', date: '2025.8.19', venue: '西門町電影街', props: ['flashes'] } },
     [{ at: [-2.9, 0.7], turn: 0.3, design: { form: 'poster', mount: 'case', layout: 'premiere', palette: GANG, variant: 1, head: '角頭－鬥陣欸', big: '鬥陣', kicker: 'IN CINEMAS 8.21', kicker2: '台北見面會', date: '2025.8.19', venue: '西門町電影街', carpet: false } }]);
   ev('play-now-concert-2021', { position: [-17.6, 56.6], rotation: Math.PI - 0.35,
     design: { form: 'booth', booth: 'stage', layout: 'concert', palette: NEON, head: 'PLAY NOW EP2 嘻嘻哈哈', big: '嘻嘻哈哈', kicker: 'FREE HIP-HOP SHOW', kicker2: '西門PLAY樂購町', en: 'OSN, 婁峻碩, 陳零九, 呂士軒, 王豔薇, 陳忻玥 · over ten thousand visits', date: '2021.2.28', venue: '捷運西門站 6號出口廣場', props: ['barrier', 'flashes'] } },

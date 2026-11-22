@@ -68,3 +68,20 @@ python3 -m http.server 8821 --bind 127.0.0.1 --directory ~/Documents/CJ-project-
 node tools/places/check.mjs "http://localhost:8821/remake/square.html?debug=1&view=1" /tmp/square.png --eval="JSON.stringify({e:__remake.error,n:__places.list().length,lm:window.__lm})"
 ```
 Expect `e` null and the counts in section 2. Then relaunch the wave (section 4, step 1).
+
+## 8. 2026-11-22, later: the single-builder pass
+
+CJ, 2026-11-22: "rebuild with one agent step by step in background" (this replaced the 48-agent wave). One builder worked down `docs/workflows/wave-2026-11-22.md` in order, one commit per piece, all local on `style-lab` (nothing pushed, merged or opened as a PR by this pass). Another session merged `origin/main` into `style-lab` during the run (the poncho bear as default lead, run by default); none of this pass's commits are on `main` (measured: `git merge-base --is-ancestor`).
+
+- Built (measured: each page loads with `__remake.error` null and the same place counts, square 24, 西門町 23, 大稻埕 23, 信義 25): the shared people kit and four people modules; `lm/kit-build.js` (the builders' toolbox: merge kit, materials, painted boards, ground holes, retargeting); 西門町 Exit 6, lions, Red House, 刺青街, 美國街, 中華商場 row, the fan-meet booth and viewpoint 6; 大稻埕 in its true street order, 永樂市場 front, arcade shops, arcades; 信義 doors, 新光三越 A9 A8 A4 with skywalks, the real City Hall, 四四南村 courtyard, Taipei 101 ornaments and podium; the square's bus-stop signs and direction board, street life; booth frames in the design kit.
+- What each piece rests on, with labels: `docs/places/fixes-2026-11-22.md`.
+- Left: the report-only rows of the wave (sign-face evidence, look/use/journey verification, proofreading, performance) were not run; "乾元 lantern", "wharf beam" and "unchecked signs" were not identified; frame rate is unverified; pushing and merging are CJ's call.
+
+Check any page (own port, never 8821 while CJ is viewing there):
+
+```bash
+python3 -m http.server 8841 --bind 127.0.0.1 --directory ~/Documents/CJ-project-vault/_worktrees/Our-Memory-in-Taipei/style-lab
+```
+```bash
+node tools/places/check.mjs "http://localhost:8841/remake/dadao.html?debug=1&view=1" /tmp/dadao.png --eval="JSON.stringify({e:__remake.error,n:__places.list().length,lm:window.__lm})"
+```

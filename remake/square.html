@@ -17,7 +17,7 @@
 <script src="place-data.js"></script>
 <script src="design-kit.js"></script>
 <script src="places.js"></script>
-<script src="lm/loader.js" data-district="square" data-shared="kit-people" data-modules="life people"></script>
+<script src="lm/loader.js" data-district="square" data-shared="kit-people kit-build" data-modules="life people"></script>
 <script src="noticeboard.js"></script>
 <script src="landmarks-square.js"></script>
 <script>
@@ -193,7 +193,7 @@ const inGate = (a, b) => Math.abs(b) < 3.4 && Math.abs(a) > 13;  // a gate's ope
 ENGINE.create({
   title: '廣場 · The Square', subtitle: 'Three gates, forty years. Walk through one.',
   shadowCenter: [0, 0, 0], start: { x: 0, z: 11.5, heading: Math.PI },
-  views: [[0, 1.5, 16.5, 0, 4.5, 0], [6.6, 1.4, 2.4, -17, 5, -1.5], [-3.4, 1.5, 0.6, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-10, 1.4, -9, -21, 10, -18], [-3, 1.5, 14.5, 9.5, 2.2, 9]],
+  views: [[0, 1.5, 16.5, 0, 4.5, 0], [6.6, 1.4, 2.4, -17, 5, -1.5], [-3.4, 1.5, 0.6, 3, 6, -18], [0, 12, 24, 0, 2.5, 0], [-2, 2.2, -6, -20, 5, -17], [-3, 1.5, 14.5, 9.5, 2.2, 9]],
   ground: { strips: [{ w: 2.8, len: 37 }, { w: 2.8, len: 37, turn: true }],               // a terrazzo cross, gate to gate
     puddle: (rr) => { let x = rr(-14, 14); if (Math.abs(x) < 2.4) x += 5; let z = rr(-14, 14); if (Math.abs(z) < 2.4) z += 5; return [x, z, rr(0, 3)]; } },
   dust: { x: [-18, 18], y: [0.3, 9], z: [-18, 18] },

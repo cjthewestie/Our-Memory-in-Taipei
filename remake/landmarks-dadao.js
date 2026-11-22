@@ -38,7 +38,7 @@
   };
 
   window.LANDMARKS_DADAO = function (E, ctx) {
-    const { T, scene, triMat, TEX, MATS, GLOW, col } = E, FX = ctx.FX, BLOCKS = ctx.BLOCKS;
+    const { T, scene, triMat, TEX, MATS, GLOW, col } = E, FX = ctx.FX, BLOCKS = ctx.BLOCKS, TZ = ctx.TZ || 0, MZ = ctx.MZ || 0, LZ = ctx.LZ || 0;   // TZ, MZ, LZ: how far the temple's, the market's and the lane's things moved when the street was put in its true order (dadao.html)
     const std = (c, rough = 0.7, metal = 0) => new T.MeshStandardMaterial({ color: col(c), roughness: rough, metalness: metal });
     const M = {
       brick: triMat({ color: '#f4ddd0', tex: TEX.brick, scale: 1, rough: 0.9 }), brickTR: triMat({ color: '#c79f88', tex: TEX.brick, scale: 1, rough: 0.9 }),
@@ -234,7 +234,7 @@
     const OUT = {};
 
     // ═════════ 1. 新芳春茶行: three storeys, three bays, brown-red TR brick, moulded ornament, couplets at the door ═════════
-    { const g = slot(-1, 17.6), B = Bag(), S = shell(B, { W: 9.4, bays: 3, storeys: 3, wall: M.brickTR, trim: M.stoneL, arcade: 'arch', win: 'flat', frame: M.frameW, ww: 1.5, wh: 1.85, seed: 1, roof: 'tile', skipWin: (f, i) => i === 1 });
+    { const g = slot(-1, -20.8), B = Bag(), S = shell(B, { W: 9.4, bays: 3, storeys: 3, wall: M.brickTR, trim: M.stoneL, arcade: 'arch', win: 'flat', frame: M.frameW, ww: 1.5, wh: 1.85, seed: 1, roof: 'tile', skipWin: (f, i) => i === 1 });
       // centre bay: a recessed loggia with a balcony on each upper floor
       for (let f = 1; f < 3; f++) { const y = S.gf + (f - 1) * S.fh, x0 = S.pierX[1] + 0.3, x1 = S.pierX[2] - 0.3; B.bx(M.dark, x0, x1, y + 0.3, y + 2.75, F - 0.14, F - 0.1); B.bx(f === 1 ? M.litSoft : M.glass, x0 + 0.5, x1 - 0.5, y + 0.3, y + 2.3, F - 0.12, F - 0.07);
         B.bx(M.stoneL, x0 - 0.1, x1 + 0.1, y + 2.75, y + 2.95, F - 0.2, F + 0.12); B.bx(M.frameW, (x0 + x1) / 2 - 0.03, (x0 + x1) / 2 + 0.03, y + 0.3, y + 2.3, F - 0.1, F - 0.04);
@@ -253,7 +253,7 @@
       B.build(g); OUT.tea = g; }
 
     // ═════════ 2. 乾元參藥行: a Modernist front, horizontal bands, a ginseng relief on the parapet ═════════
-    { const g = slot(-1, 0.8), B = Bag(), S = shell(B, { W: 4.6, bays: 1, storeys: 3, wall: M.stoneL, trim: M.stone, pier: M.stone, arcade: 'flat', win: 'flat', frame: M.frameD, ww: 3.0, wh: 1.5, bars: 4, seed: 0 });
+    { const g = slot(1, -28.0), B = Bag(), S = shell(B, { W: 4.6, bays: 1, storeys: 3, wall: M.stoneL, trim: M.stone, pier: M.stone, arcade: 'flat', win: 'flat', frame: M.frameD, ww: 3.0, wh: 1.5, bars: 4, seed: 0 });
       for (let f = 1; f < 3; f++) { const y = S.gf + (f - 1) * S.fh; [0.55, 2.95].forEach(dy => B.bx(M.stone, -S.hw + 0.3, S.hw - 0.3, y + dy, y + dy + 0.1, F - 0.12, F + 0.2)); }      // the long sun-shades
       B.bx(M.stoneL, -S.hw, S.hw, S.H + 0.22, S.H + 0.95, F - 0.4, F - 0.02); pediment(B, M.stoneL, 0, 3.4, S.H + 0.95, 1.5, 'step'); [-1.9, 1.9].forEach(x => B.bx(M.stone, x - 0.16, x + 0.16, S.H + 0.22, S.H + 1.5, F - 0.42, F + 0.04));
       for (let k = 0; k < 3; k++) B.bx(M.stone, -S.hw, S.hw, S.H + 0.36 + k * 0.2, S.H + 0.42 + k * 0.2, F - 0.1, F + 0.03);
@@ -273,7 +273,7 @@
       B.build(g); OUT.qianyuan = g; }
 
     // ═════════ 3. 屈臣氏大藥房 / 小藝埕: three storeys of grey washed stone on the corner of the lane, flat lintels ═════════
-    { const g = slot(-1, -6.4), B = Bag(), S = shell(B, { W: 9.4, bays: 3, storeys: 3, wall: M.stone, trim: M.stoneL, pier: M.stone, arcade: 'flat', win: 'flat', frame: M.frameW, ww: 1.7, wh: 1.9, seed: 2, roof: 'tile' });
+    { const g = slot(-1, 8.0), B = Bag(), S = shell(B, { W: 9.4, bays: 3, storeys: 3, wall: M.stone, trim: M.stoneL, pier: M.stone, arcade: 'flat', win: 'flat', frame: M.frameW, ww: 1.7, wh: 1.9, seed: 2, roof: 'tile' });
       B.bx(M.stone, -S.hw, S.hw, S.H + 0.22, S.H + 1.0, F - 0.4, F - 0.02); B.bx(M.stoneL, -S.hw, S.hw, S.H + 1.0, S.H + 1.14, F - 0.46, F + 0.08); S.pierX.forEach(x => { B.bx(M.stone, x - 0.24, x + 0.24, S.H + 0.22, S.H + 1.3, F - 0.44, F + 0.03); urn(B, M.stoneL, x, S.H + 1.3, F - 0.2); });
       pediment(B, M.stone, 0, 3.6, S.H + 1.14, 1.9, 'tri'); B.bx(M.stoneL, -1.9, 1.9, S.H + 1.14, S.H + 1.26, F - 0.34, F + 0.1);
       B.put(M.stoneL, new T.CylinderGeometry(0.52, 0.52, 0.06, 24), 0, S.H + 1.95, F + 0.03, 0, PI / 2); B.put(M.stone, new T.CylinderGeometry(0.42, 0.42, 0.08, 24), 0, S.H + 1.95, F + 0.04, 0, PI / 2);      // a plain roundel where the old trade mark sits (the mark itself is not copied)
@@ -330,10 +330,10 @@
         sideAt(label('BOLERO', 3.3, 0.62, { kind: 'stone', font: 'Didot,"Times New Roman",serif', bg: '#e3d4b3', fg: '#7a1c14', glow: 0.08, weight: 800 }), -2.9, 3.05); sideAt(label('波麗路西餐廳', 3.3, 0.24, { kind: 'stone', font: KAI, bg: '#e3d4b3', fg: '#3a2a20', glow: 0.06, spread: true }), -2.9, 2.62);
         sideAt(label('BOLERO', 0.9, 0.2, { kind: 'paint', mat: 'brass', font: 'Didot,"Times New Roman",serif', bg: '#7a5636', fg: '#2a1a10', weight: 800 }), 0.9, 2.62, 0.1); }
       B.build(g); return g; };
-    OUT.bolero = boleroShop(-18.4, 0); OUT.bolero2 = boleroShop(-28.0, 1);
+    OUT.bolero = boleroShop(-32.8, 0); OUT.bolero2 = boleroShop(-37.6, 1);
 
     // ═════════ 5. 林柳新紀念偶戲博物館: a red-brick 洋樓 with arched windows, a glove-puppet stage in the arcade ═════════
-    { const g = slot(-1, -23.2), B = Bag(), S = shell(B, { W: 4.6, bays: 2, storeys: 3, wall: M.brick, trim: M.stoneL, arcade: 'arch', win: 'arch', frame: M.teal, ww: 1.05, wh: 1.9, seed: 5, pw: 0.5, roof: 'tile' });
+    { const g = slot(-1, 0.8), B = Bag(), S = shell(B, { W: 4.6, bays: 2, storeys: 3, wall: M.brick, trim: M.stoneL, arcade: 'arch', win: 'arch', frame: M.teal, ww: 1.05, wh: 1.9, seed: 5, pw: 0.5, roof: 'tile' });
       balustrade(B, -S.hw, S.hw, S.H + 0.22, F - 0.1, 0.85, [...S.pierX], M.stoneL, M.green); pediment(B, M.brick, 0, 2.0, S.H + 0.22, 1.5, 'round'); urn(B, M.stoneL, 0, S.H + 1.7, F - 0.14);
       B.put(M.stoneL, new T.CylinderGeometry(0.3, 0.3, 0.06, 18), 0, S.H + 0.95, F + 0.03, 0, PI / 2);
       B.bx(M.brick, -S.hw + 0.3, S.hw - 0.3, 0.08, S.gf - 0.2, AB, AB + 0.05); B.bx(M.dark, 0.75, 1.8, 0.08, 2.5, AB + 0.02, AB + 0.08); B.bx(M.teal, 0.68, 0.75, 0.08, 2.55, AB + 0.02, AB + 0.12); B.bx(M.teal, 1.8, 1.87, 0.08, 2.55, AB + 0.02, AB + 0.12);
@@ -347,7 +347,7 @@
       B.build(g); OUT.puppet = g; }
 
     // ═════════ 6. 李臨秋故居: two storeys, brick below and white plaster above, four posts and three bays, a tiled eave ═════════
-    { const g = slot(-1, -32.8), B = Bag(), S = shell(B, { W: 4.6, bays: 3, storeys: 2, wall: M.white, trim: M.timber, pier: M.brick, arcade: 'flat', beam: M.timberD, win: 'flat', frame: M.teal, ww: 0.95, wh: 1.5, seed: 0, pw: 0.34, fh: 3.0, roof: 'none' });
+    { const g = slot(-1, -4.0), B = Bag(), S = shell(B, { W: 4.6, bays: 3, storeys: 2, wall: M.white, trim: M.timber, pier: M.brick, arcade: 'flat', beam: M.timberD, win: 'flat', frame: M.teal, ww: 0.95, wh: 1.5, seed: 0, pw: 0.34, fh: 3.0, roof: 'none' });
       for (let k = 0; k < 2; k++) B.put(M.tile, new T.BoxGeometry(S.W + 0.3, 0.1, 2.2), 0, S.H + 0.55 - k * 0.02, F - 0.75, 0, 0.42); for (let x = -S.hw; x <= S.hw + 0.01; x += 0.33) B.put(M.tile, new T.CylinderGeometry(0.06, 0.06, 2.2, 6), x, S.H + 0.62, F - 0.75, 0, PI / 2 + 0.42);
       B.bx(M.white, -S.hw, S.hw, S.H, S.H + 1.0, BACK, F - 1.4); B.bx(M.tile, -S.hw - 0.1, S.hw + 0.1, S.H + 0.98, S.H + 1.1, F - 1.9, F - 1.5);
       B.bx(M.brick, -S.hw + 0.2, S.hw - 0.2, 0.08, S.gf - 0.2, AB, AB + 0.05); B.bx(M.timberD, -0.5, 0.5, 0.08, 2.4, AB + 0.02, AB + 0.1); B.bx(M.teal, -0.02, 0.02, 0.08, 2.4, AB + 0.1, AB + 0.12);
@@ -422,7 +422,7 @@
     }
 
     // ═════════ 10. 林五湖本館: the 1851 Minnan house already in the row; its boards, lanterns and the fortune-teller's table ═════════
-    { const g = slot(-1, 5.6), B = Bag();
+    { const g = slot(-1, -42.4), B = Bag();
       at(g, hang('林五湖本館', 2.4, 0.5, { kind: 'plaque', rtl: true, bg: '#1c1712', fg: '#e9c46a' }), 0, 3.05, F + 0.1); at(g, hang('命相', 0.5, 0.95, { kind: 'cloth', font: WEI, vertical: true, bg: '#b3241a', fg: '#f3d27a' }), -1.95, 2.3, F + 0.4, PI / 2); at(g, hang('擇日 卜卦', 0.42, 1.3, { kind: 'paint', mat: 'paper', font: KAI, vertical: true, bg: '#f7ecd0', fg: '#2a2420' }), 1.95, 2.15, F + 0.4, PI / 2);
       redLantern(B, -1.2, 2.45, F + 0.25, 0.22); redLantern(B, 1.2, 2.45, F + 0.25, 0.22);
       B.bx(M.cloth, -0.6, 0.6, 0.02, 0.78, 0.0, 0.6); B.bx(M.gold, -0.62, 0.62, 0.78, 0.8, -0.02, 0.62); B.cyl(M.timber, 0.07, 0.07, 0.2, -0.35, 0.8, 0.3, 8); for (let i = 0; i < 7; i++) B.cyl(M.paper, 0.008, 0.008, 0.3, -0.35 + Math.cos(i) * 0.04, 0.85, 0.3 + Math.sin(i) * 0.04, 4);     // the 籤筒
@@ -431,17 +431,17 @@
       B.build(g); OUT.linwuhu = g; }
 
     // ═════════ 11. 霞海城隍廟: the temple model already stands on its forecourt; add the offering table, 月老's stand and a stele ═════════
-    { const g = free(0, 0), B = Bag();
+    { const g = free(0, TZ), B = Bag();
       B.bx(M.cloth, 9.0, 9.9, 0.03, 0.85, -0.6, 2.2); B.bx(M.gold, 8.98, 9.92, 0.85, 0.88, -0.62, 2.22); [[-0.2, 3], [0.5, 1], [1.2, 0], [1.8, 6]].forEach(([z, i]) => { B.cyl(M.paper, 0.2, 0.14, 0.05, 9.45, 0.88, z, 12); for (let k = 0; k < 4; k++) B.ball(GOODS[(i + k) % 2 ? 1 : 4], 0.075, 9.45 + Math.cos(k * 2.1) * 0.09, 0.98 + (k === 3 ? 0.1 : 0), z + Math.sin(k * 2.1) * 0.09); });
       B.cyl(M.red, 0.03, 0.03, 0.3, 9.2, 0.88, 0.8, 6); B.cyl(M.red, 0.03, 0.03, 0.3, 9.2, 0.88, 1.5, 6); B.ball(M.lit, 0.035, 9.2, 1.21, 0.8); B.ball(M.lit, 0.035, 9.2, 1.21, 1.5);
       B.bx(M.granite, 10.15, 10.4, 0, 2.25, 3.3, 4.2); B.bx(M.stone, 10.05, 10.5, 0, 0.2, 3.2, 4.3);
       B.build(g); at(g, label('霞海城隍廟', 0.6, 1.25, { kind: 'stone', font: WEI, vertical: true, bg: '#3a3a3e', fg: '#9a6a1c', glow: 0.2 }), 10.14, 1.0, 3.75, -PI / 2); at(g, label('1859', 0.6, 0.2, { bg: '#3a3a3e', fg: '#e9c46a', weight: 600 }), 10.14, 0.3, 3.75, -PI / 2);
       at(g, hang('月下老人', 0.36, 1.5, { kind: 'cloth', font: WEI, vertical: true, bg: '#b3241a', fg: '#f3d27a', glow: 0.4 }), 9.45, 1.9, -1.2, -PI / 2); at(g, new T.Mesh(new T.CylinderGeometry(0.025, 0.025, 2.7, 6), M.ink), 9.45, 1.35, -1.2);
-      BLOCKS.push([9.45, 0.3, 0.9], [9.45, 1.4, 0.9]); OUT.xiahaiExtras = g; }
+      BLOCKS.push([9.45, 0.3 + TZ, 0.9], [9.45, 1.4 + TZ, 0.9]); OUT.xiahaiExtras = g; }
 
     // ═════════ 12. 永樂市場 + 大稻埕戲苑 + 林合發油飯店 ═════════
     { // the brick octagonal tower at the market's north corner, the theatre's lift lobby at its foot
-      const g = free(10.9, -28.9), B = Bag(), r = 2.0, h = 15.5;
+      const g = free(10.9, -28.9 + MZ), B = Bag(), r = 2.0, h = 15.5;
       B.put(M.brick, new T.CylinderGeometry(r, r, h, 8), 0, h / 2, 0, PI / 8); [0.0, 4.2, 8.0, 11.8, 15.3].forEach(y => B.put(M.stoneL, new T.CylinderGeometry(r + 0.12, r + 0.12, 0.28, 8), 0, y + 0.14, 0, PI / 8));
       B.put(M.tile, new T.ConeGeometry(r + 0.35, 1.6, 8), 0, h + 0.8 + 0.28, 0, PI / 8); B.ball(M.gold, 0.16, 0, h + 1.95, 0);
       for (let k = 0; k < 8; k++) { const a = k * PI / 4, nx = Math.sin(a), nz = Math.cos(a), d = r * Math.cos(PI / 8) + 0.01; [5.2, 9.0, 12.8].forEach(y => { B.put(M.glass, new T.BoxGeometry(0.5, 1.9, 0.06), nx * d, y + 0.95, nz * d, a); B.put(M.stoneL, new T.BoxGeometry(0.7, 0.12, 0.12), nx * d, y - 0.06, nz * d, a); B.put(M.stoneL, new T.BoxGeometry(0.7, 0.12, 0.12), nx * d, y + 1.96, nz * d, a); }); }
@@ -451,9 +451,9 @@
       B.build(g); at(g, hang('大稻埕戲苑', 2.9, 0.6, { kind: 'box', font: KAI, bg: '#7a1c14', fg: '#f6e3a8', sub: 'Dadaocheng Theater 8F', subFont: FONT }), -3.95, 3.85, 0, -PI / 2);
       at(g, hang('大稻埕戲苑', 0.6, 4.2, { kind: 'box', font: KAI, vertical: true, bg: '#7a1c14', fg: '#f6e3a8' }), -2.25, 6.6, 0.9, -PI / 2); at(g, hang('永樂市場', 0.6, 3.2, { kind: 'box', font: KAI, vertical: true, bg: '#f3ecd9', fg: '#1f4f7a' }), -2.25, 6.1, -0.2, -PI / 2);
       at(g, label('今日演出 歌仔戲 · 布袋戲', 0.9, 1.3, { kind: 'paint', mat: 'paper', font: KAI, bg: '#f7ecd0', fg: '#7a1c14', border: '#7a1c14', glow: 0.3 }), -3.12, 1.6, 1.28, -PI / 2).scale.set(0.45, 0.9, 1);
-      BLOCKS.push([8.7, -28.4, 1.6], [8.7, -29.5, 1.6]); OUT.theatre = g; }
+      BLOCKS.push([8.7, -28.4 + MZ, 1.6], [8.7, -29.5 + MZ, 1.6]); OUT.theatre = g; }
     { // 林合發油飯店: the open stall on the market's ground-floor corner, steamer tubs of oil rice on the counter
-      const g = free(7.4, -11.75, PI), B = Bag(), wood = M.timber;
+      const g = free(7.4, -11.75 + MZ, PI), B = Bag(), wood = M.timber;
       B.bx(M.white, -1.5, 1.5, 0, 0.95, -0.1, 0.55); B.bx(M.steel, -1.55, 1.55, 0.95, 1.0, -0.15, 0.6); B.bx(M.red, -1.5, 1.5, 0.3, 0.75, 0.55, 0.56);
       [-0.85, 0.05].forEach((x, i) => { B.cyl(wood, 0.36, 0.33, 0.34, x, 1.0, 0.2, 16); B.cyl(M.steel, 0.375, 0.375, 0.04, x, 1.12, 0.2, 16); B.ball(M.rice, 0.33, x, 1.34, 0.2, 0.42); for (let k = 0; k < 5; k++) B.ball(k % 2 ? std('#3d2a1c') : std('#c9884a'), 0.04, x + Math.cos(k * 1.4) * 0.16, 1.47, 0.2 + Math.sin(k * 1.4) * 0.16); });
       for (let k = 0; k < 6; k++) B.bx(M.paper, 0.75, 1.05, 1.0 + k * 0.045, 1.04 + k * 0.045, 0.05, 0.35); for (let k = 0; k < 4; k++) B.bx(M.paper, 1.12, 1.42, 1.0 + k * 0.045, 1.04 + k * 0.045, 0.1, 0.4);
@@ -461,10 +461,10 @@
       [-1.5, 1.5].forEach(x => B.cyl(M.steel, 0.03, 0.03, 2.7, x, 0, 0.55, 6)); B.put(M.redD, new T.BoxGeometry(3.3, 0.05, 1.4), 0, 2.62, 0.75, 0, 0.25); B.bx(M.white, -1.6, 1.6, 0, 2.9, -0.5, -0.38);
       B.bx(M.lit, -1.2, 1.2, 2.3, 2.36, 0.3, 0.36);
       B.build(g); at(g, hang('林合發油飯店', 2.8, 0.52, { kind: 'paint', mat: 'tin', tint: 0.82, font: KAI, bg: '#b3241a', fg: '#fff3c4', glow: 0.4 }), 0, 2.2, 0.62); at(g, label('油飯 紅蛋 雞腿', 0.36, 1.15, { kind: 'paint', mat: 'paper', font: KAI, vertical: true, bg: '#f7ecd0', fg: '#b3241a', border: '#b3241a', glow: 0.3 }), -1.25, 1.7, -0.37);
-      E.steamSrc.push(new T.Vector3(7.4 + 0.85, 1.5, -11.95), new T.Vector3(7.4 - 0.05, 1.5, -11.95)); OUT.linhefa = g; }
+      E.steamSrc.push(new T.Vector3(7.4 + 0.85, 1.5, -11.95 + MZ), new T.Vector3(7.4 - 0.05, 1.5, -11.95 + MZ)); OUT.linhefa = g; }
 
     // ═════════ 13. 大稻埕碼頭: the flood wall, water gate No. 5 with its steel leaf run back, the container market on the quay ═════════
-    { const g = free(0, 0), B = Bag(), x0 = -19.6, x1 = -18.7, zA = -16.7, zB = -10.5, hgt = 6.2;
+    { const g = free(0, LZ), B = Bag(), x0 = -19.6, x1 = -18.7, zA = -16.7, zB = -10.5, hgt = 6.2;
       B.bx(M.concrete, x0, x1, 0, hgt, -46, zA); B.bx(M.concrete, x0, x1, 0, hgt, zB, 40); B.bx(M.concrete, x0 - 0.25, x1 + 0.25, 4.7, hgt + 0.5, zA - 0.9, zB + 0.9);
       [zA - 0.45, zB + 0.45].forEach(z => { B.bx(M.concrete, x0 - 0.3, x1 + 0.3, 0, 4.7, z - 0.45, z + 0.45); B.bx(M.yellow, x1 + 0.3, x1 + 0.32, 0, 1.2, z - 0.45, z + 0.45); for (let k = 0; k < 3; k++) B.bx(M.ink, x1 + 0.32, x1 + 0.33, 0.15 + k * 0.4, 0.33 + k * 0.4, z - 0.45, z + 0.45); });
       B.bx(M.concrete, x0 - 0.02, x1 + 0.02, hgt, hgt + 0.18, -46, 40); for (let z = -45; z < 40; z += 6) if (z < zA - 1 || z > zB + 1) B.bx(M.concrete, x0 - 0.12, x1 + 0.12, 0, hgt, z - 0.2, z + 0.2);
@@ -480,8 +480,10 @@
       [[-25.6, M.orange], [-22.6, M.white]].forEach(([x, m]) => { B.cyl(M.ink, 0.025, 0.025, 2.1, x, 5.12, -19.4, 6); B.put(m, new T.ConeGeometry(1.15, 0.45, 10), x, 7.3, -19.4); B.cyl(M.steel, 0.4, 0.4, 0.04, x + 0.2, 5.82, -19.1, 12); B.cyl(M.ink, 0.02, 0.02, 0.7, x + 0.2, 5.12, -19.1, 5); });
       B.build(g);
       at(g, hang('大稻埕碼頭', 4.4, 0.95, { kind: 'enamel', font: FONT, weight: 700, spread: true, bg: '#1f4f7a', fg: '#ffffff', sub: 'Dadaocheng Wharf', glow: 0.3 }), x1 + 0.27, 5.45, (zA + zB) / 2, PI / 2);
-      const gateNo = () => hang('5', 0.8, 0.9, { kind: 'paint', mat: 'stone', font: FONT, weight: 900, bg: '#b3aea2', fg: '#1f4f7a', thick: 0.012, glow: 0.08 });   // the gate's number, painted in heavy sans on the concrete pier (sources-dadao.md)
-      at(g, gateNo(), x1 + 0.32, 3.3, zB + 0.45, PI / 2); at(g, gateNo(), x1 + 0.32, 3.3, zA - 0.45, PI / 2);
+      const gateNo = () => pic(0.88, 1.12, (c, cw, ch) => { c.fillStyle = '#b4afa3'; c.fillRect(0, 0, cw, ch); for (let k = 0; k < 40; k++) { c.fillStyle = `rgba(60,55,45,${0.03 + (k * 37 % 10) * 0.006})`; c.fillRect((k * 53) % cw, 0, 2 + k % 5, ch); }
+        c.strokeStyle = '#1f4f7a'; c.lineWidth = cw * 0.045; c.beginPath(); c.arc(cw / 2, ch * 0.4, cw * 0.4, 0, 7); c.stroke(); c.fillStyle = '#1f4f7a'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `900 ${Math.round(cw * 0.62)}px "Helvetica Neue",Arial,sans-serif`; c.fillText('5', cw / 2, ch * 0.42);
+        c.font = `800 ${Math.round(cw * 0.15)}px ${FONT}`; c.fillText('五號水門', cw / 2, ch * 0.82); c.font = `700 ${Math.round(cw * 0.07)}px "Helvetica Neue",Arial,sans-serif`; c.fillText('FLOOD GATE No. 5 · 大稻埕', cw / 2, ch * 0.93); }, 0.1);   // the gate's number as flood gates carry it: a ringed numeral stencilled straight onto the pier, in the pier's own concrete colour, no plate (checker 2026-11-22: the pale square plate read as a name plate)
+      at(g, gateNo(), x1 + 0.315, 3.0, zB + 0.45, PI / 2); at(g, gateNo(), x1 + 0.315, 3.0, zA - 0.45, PI / 2);
       const wave = (z, w) => at(g, pic(w, 2.6, (c, cw, ch) => { c.fillStyle = '#b9b4a8'; c.fillRect(0, 0, cw, ch); ['#1f4f7a', '#2f7f9a', '#7fb7c4'].forEach((colr, k) => { c.fillStyle = colr; c.beginPath(); c.moveTo(0, ch); for (let x = 0; x <= cw; x += 8) c.lineTo(x, ch * (0.45 + k * 0.18) + Math.sin(x / cw * 22 + k * 1.7) * ch * 0.06); c.lineTo(cw, ch); c.fill(); });
         c.fillStyle = '#efe6d0'; [[0.2, 0.3], [0.62, 0.24]].forEach(([x, y]) => { c.beginPath(); c.moveTo(x * cw, y * ch + ch * 0.2); c.lineTo(x * cw + cw * 0.09, y * ch + ch * 0.2); c.lineTo(x * cw + cw * 0.06, y * ch + ch * 0.26); c.lineTo(x * cw + cw * 0.01, y * ch + ch * 0.26); c.fill(); c.fillStyle = '#b3241a'; c.beginPath(); c.moveTo(x * cw + cw * 0.04, y * ch + ch * 0.18); c.lineTo(x * cw + cw * 0.04, y * ch - ch * 0.02); c.lineTo(x * cw + cw * 0.085, y * ch + ch * 0.18); c.fill(); c.fillStyle = '#efe6d0'; }); }, 0.12, 100), x1 + 0.015, 1.5, z, PI / 2);
       wave(zB + 0.9 + 4.2, 8); wave(zA - 0.9 - 4.2, 8);
@@ -491,29 +493,29 @@
       OUT.wharf = g; }
 
     // the white line of the 20-metre road that was never cut: 10 m out from the street's middle, across the temple forecourt
-    { const g = free(0, 0), line = new T.Mesh(new T.PlaneGeometry(0.16, 12), new T.MeshBasicMaterial({ color: 0xf4f0e6 })); line.rotation.x = -PI / 2; line.position.set(10.0, 0.035, 0.8); g.add(line);
+    { const g = free(0, TZ), line = new T.Mesh(new T.PlaneGeometry(0.16, 12), new T.MeshBasicMaterial({ color: 0xf4f0e6 })); line.rotation.x = -PI / 2; line.position.set(10.0, 0.035, 0.8); g.add(line);
       const t = label('20 m 計畫道路線 · 1977', 3.4, 0.3, { bg: '#a79c8c', fg: '#ffffff', glow: 0.35, weight: 600 }); t.rotation.set(-PI / 2, 0, PI / 2); t.position.set(9.72, 0.036, 0.8); g.add(t); OUT.line = g; }
 
     // ═════════ register every place and every event ═════════
     const P = k => PLACES.item('dadao', k), H = ctx.houses, HP = PI / 2;
-    PLACES.add(E, P('xiahai-city-god-temple'), { target: [ctx.temple, OUT.xiahaiExtras], plaque: { position: [10.12, 1.95, 3.75], rotation: -HP }, near: [8.6, 1.5], radius: 3.6 });
-    PLACES.add(E, P('yongle-market'), { target: ctx.yongle, plaque: { position: [9.15, 1.5, -20.8], rotation: -HP, size: 0.24 }, near: [8.0, -20.8], radius: 3.2 });
-    PLACES.add(E, P('dadaocheng-theatre'), { target: OUT.theatre, plaque: { position: [7.72, 1.5, -30.2], rotation: -HP }, near: [7.2, -28.4], radius: 3 });
-    PLACES.add(E, P('lin-he-fa-oil-rice'), { target: OUT.linhefa, plaque: { position: [9.05, 1.5, -12.3], rotation: PI }, near: [7.4, -12.6], radius: 2.6 });
+    PLACES.add(E, P('xiahai-city-god-temple'), { target: [ctx.temple, OUT.xiahaiExtras], plaque: { position: [10.12, 1.95, 3.75 + TZ], rotation: -HP }, near: [8.6, 1.5 + TZ], radius: 3.6 });
+    PLACES.add(E, P('yongle-market'), { target: ctx.yongle, plaque: { position: [9.15, 1.5, -20.8 + MZ], rotation: -HP, size: 0.24 }, near: [8.0, -20.8 + MZ], radius: 3.2 });
+    PLACES.add(E, P('dadaocheng-theatre'), { target: OUT.theatre, plaque: { position: [7.72, 1.5, -30.2 + MZ], rotation: -HP }, near: [7.2, -28.4 + MZ], radius: 3 });
+    PLACES.add(E, P('lin-he-fa-oil-rice'), { target: OUT.linhefa, plaque: { position: [9.05, 1.5, -12.3 + MZ], rotation: PI }, near: [7.4, -12.6 + MZ], radius: 2.6 });
     PLACES.add(E, P('dihua-shophouse-rows'), { position: [3.45, 20.2], rotation: -HP, design: DADAO_DESIGNS['dihua-shophouse-rows'] });   // the street's own exhibit: the 1988 fight that saved it, as a front page
     PLACES.add(E, P('dihua-shophouse-rows'), { target: [H['1:1'], H['1:2'], H['1:4'], H['-1:0'], H['-1:4']].filter(Boolean) });
-    PLACES.add(E, P('watsons-pharmacy-artyard'), { target: OUT.watsons, plaque: { position: [-4.4, 1.5, -11.05], rotation: HP }, near: [-3.6, -6.4], radius: 4.2 });
-    PLACES.add(E, P('dadaocheng-wharf'), { target: OUT.wharf, plaque: { position: [-18.38, 1.5, -10.05], rotation: HP, size: 0.26 }, near: [-17.5, -13.6], radius: 5 });
-    PLACES.add(E, P('sin-hong-choon-tea'), { target: OUT.tea, plaque: { position: [-4.4, 1.5, 12.95], rotation: HP }, near: [-3.6, 17.6], radius: 4.2 });
-    PLACES.add(E, P('bolero-restaurant'), { target: [OUT.bolero, OUT.bolero2], plaque: { position: [-4.4, 1.5, -16.25], rotation: HP }, near: [-3.6, -18.4], radius: 2.8 });
-    PLACES.add(E, P('lin-wuhu-house'), { target: [H['-1:5'], OUT.linwuhu].filter(Boolean), plaque: { position: [-4.4, 1.5, 7.75], rotation: HP }, near: [-3.6, 5.6], radius: 2.8 });
+    PLACES.add(E, P('watsons-pharmacy-artyard'), { target: OUT.watsons, plaque: { position: [-4.4, 1.5, -11.05 + 14.4], rotation: HP }, near: [-3.6, -6.4 + 14.4], radius: 4.2 });
+    PLACES.add(E, P('dadaocheng-wharf'), { target: OUT.wharf, plaque: { position: [-18.38, 1.5, -10.05 + LZ], rotation: HP, size: 0.26 }, near: [-17.5, -13.6 + LZ], radius: 5 });
+    PLACES.add(E, P('sin-hong-choon-tea'), { target: OUT.tea, plaque: { position: [-4.4, 1.5, 12.95 - 38.4], rotation: HP }, near: [-3.6, 17.6 - 38.4], radius: 4.2 });
+    PLACES.add(E, P('bolero-restaurant'), { target: [OUT.bolero, OUT.bolero2], plaque: { position: [-4.4, 1.5, -16.25 - 14.4], rotation: HP }, near: [-3.6, -18.4 - 14.4], radius: 2.8 });
+    PLACES.add(E, P('lin-wuhu-house'), { target: [H['-1:15'], OUT.linwuhu].filter(Boolean), plaque: { position: [-4.4, 1.5, 7.75 - 48], rotation: HP }, near: [-3.4, -39.0], radius: 4.2 });   // the last house she can reach at the north end
     PLACES.add(E, P('cisheng-temple'), { target: OUT.cisheng, plaque: { position: [4.42, 1.5, -30.75], rotation: -HP }, near: [5.2, -35.2], radius: 4.6 });
-    PLACES.add(E, P('li-linqiu-house'), { target: OUT.li, plaque: { position: [-4.4, 1.5, -30.62], rotation: HP }, near: [-3.6, -32.8], radius: 2.8 });
-    PLACES.add(E, P('puppet-theatre-museum'), { target: OUT.puppet, plaque: { position: [-4.4, 1.5, -25.4], rotation: HP }, near: [-3.6, -23.2], radius: 2.8 });
+    PLACES.add(E, P('li-linqiu-house'), { target: OUT.li, plaque: { position: [-4.4, 1.5, -30.62 + 28.8], rotation: HP }, near: [-3.6, -32.8 + 28.8], radius: 2.8 });
+    PLACES.add(E, P('puppet-theatre-museum'), { target: OUT.puppet, plaque: { position: [-4.4, 1.5, -25.4 + 24], rotation: HP }, near: [-3.6, -23.2 + 24], radius: 2.8 });
     // HANDOFF.md: "二二八 (1947, 天馬茶房) deliberately left out of the story, per the original brief." The research covered it by
     // mistake; both items are held out of the public data (tools/places/build_data.py HELD) for good. CJ, 2026-11-21: "Keep them out". The shopfront stays as an unnamed tea house.
     if (P('tianma-tea-house')) PLACES.add(E, P('tianma-tea-house'), { target: OUT.tianma, plaque: { position: [4.4, 1.5, 17.38], rotation: -HP }, near: [3.6, 15.2], radius: 2.8 });
-    PLACES.add(E, P('qianyuan-herb-shop'), { target: OUT.qianyuan, plaque: { position: [-4.4, 1.5, 2.98], rotation: HP }, near: [-3.6, 0.8], radius: 2.8 });
+    PLACES.add(E, P('qianyuan-herb-shop'), { target: OUT.qianyuan, plaque: { position: [4.4, 1.5, -28.0 - 2.18], rotation: -HP }, near: [3.6, -28.0], radius: 2.8 });   // east side, a few doors north of the temple (No. 71)
     PLACES.add(E, P('i-mei-original-shop'), { target: OUT.imei, plaque: { position: [4.4, 1.5, 31.78], rotation: -HP }, near: [3.6, 29.6], radius: 2.8 });
     // events: each stands where it happened in this layout, each a designed piece (kind B), never a name plate.
     // CJ, 2026-11-22: 「反正這些招牌 字都是要設計過的可以是海報雕像或是裝置藝術攤位 ... 這種無聊的招牌絕對不能出現就對了」.
@@ -521,14 +523,14 @@
     // asset/textures/posters/events/<key>.jpg (DESIGN picks it up; the code-drawn poster shows until it lands).
     const D = DADAO_DESIGNS;
     PLACES.add(E, P('new-year-goods-street'), { position: [-3.45, 33.0], rotation: HP, design: D['new-year-goods-street'] });          // just inside the archway
-    PLACES.add(E, P('yuelao-matchmaker-crowds'), { position: [7.0, 6.35], rotation: PI, design: D['yuelao-matchmaker-crowds'] });     // in the temple forecourt, where the queue for 月老 forms
+    PLACES.add(E, P('yuelao-matchmaker-crowds'), { position: [7.0, 6.35 + TZ], rotation: PI, design: D['yuelao-matchmaker-crowds'] });     // in the temple forecourt, where the queue for 月老 forms
     if (P('228-flash-point-1947')) PLACES.add(E, P('228-flash-point-1947'), { position: [3.3, 12.2], rotation: -HP });                           // held out of the data for good (see above); never built
-    PLACES.add(E, P('city-god-procession'), { position: [5.3, 2.5], rotation: -HP, design: D['city-god-procession'] });               // setting out from the temple forecourt
-    PLACES.add(E, P('dadaocheng-fireworks'), { position: [-25.4, -13.6], rotation: HP, design: D['dadaocheng-fireworks'] });          // on the quay, the river behind it
-    PLACES.add(E, P('tttifa-arts-festival'), { position: [-3.45, -20.6], rotation: HP, design: D['tttifa-arts-festival'] });          // the costume parade's route, between the café and the puppet museum
-    PLACES.add(E, P('film-twa-tiu-tiann-2014'), { position: [-3.45, -1.75], rotation: HP, design: D['film-twa-tiu-tiann-2014'] });    // on the street the film was named for
-    PLACES.add(E, P('solitary-gourmet-yongle'), { position: [3.45, -17.2], rotation: -HP, design: D['solitary-gourmet-yongle'] });    // on the kerb by 永樂市場, where 五郎 ate
-    PLACES.add(E, P('pier5-container-market'), { position: [-25.4, -8.6], rotation: HP, design: D['pier5-container-market'] });       // on the quay beside the fireworks stand
+    PLACES.add(E, P('city-god-procession'), { position: [5.3, 2.5 + TZ], rotation: -HP, design: D['city-god-procession'] });               // setting out from the temple forecourt
+    PLACES.add(E, P('dadaocheng-fireworks'), { position: [-25.4, -13.6 + LZ], rotation: HP, design: D['dadaocheng-fireworks'] });          // on the quay, the river behind it
+    PLACES.add(E, P('tttifa-arts-festival'), { position: [-3.45, -10.4], rotation: HP, design: D['tttifa-arts-festival'] });          // the costume parade's route, between the café and the puppet museum
+    PLACES.add(E, P('film-twa-tiu-tiann-2014'), { position: [-3.45, -14.6], rotation: HP, design: D['film-twa-tiu-tiann-2014'] });    // on the street the film was named for
+    PLACES.add(E, P('solitary-gourmet-yongle'), { position: [3.45, -17.2 + MZ], rotation: -HP, design: D['solitary-gourmet-yongle'] });    // on the kerb by 永樂市場, where 五郎 ate
+    PLACES.add(E, P('pier5-container-market'), { position: [-25.4, -8.6 + LZ], rotation: HP, design: D['pier5-container-market'] });       // on the quay beside the fireworks stand
     eventProps();
     return OUT;
 
@@ -537,33 +539,33 @@
       const K = { red: std('#c4201a', 0.85), redP: std('#d8352a', 0.9), rope: std('#a3142b', 0.8), brass: std('#c9a13c', 0.3, 0.8), skin: std('#e9d2b0', 0.8), drum: std('#b3241a', 0.5), hide: std('#e9dcc0', 0.7),
         mat1: std('#2f7f9a', 0.95), mat2: std('#e9b53a', 0.95), cool: std('#f0eadd', 0.6), can: std('#d9d9d9', 0.3, 0.8), black: std('#151515', 0.5, 0.2), alu: std('#b9bec4', 0.3, 0.8) };
       // 迎城隍: the procession's drum on its cart, a gong, and the red paper of spent firecrackers all over the forecourt
-      { const g = free(5.3, 2.5, -HP), B = Bag(), R = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+      { const g = free(5.3, 2.5 + TZ, -HP), B = Bag(), R = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
         B.bx(M.timberD, -3.05, -2.25, 0.3, 0.42, 0.55, 1.35); [[-3.0, 0.6], [-2.3, 0.6], [-3.0, 1.3], [-2.3, 1.3]].forEach(([x, z]) => B.cyl(M.timberD, 0.03, 0.03, 0.3, x, 0, z, 6));
         B.put(K.drum, new T.CylinderGeometry(0.42, 0.42, 0.5, 20), -2.65, 0.95, 0.95, 0, 0, PI / 2); [-1, 1].forEach(k => B.put(K.hide, new T.CylinderGeometry(0.4, 0.4, 0.02, 20), -2.65 + k * 0.255, 0.95, 0.95, 0, 0, PI / 2));
         B.bx(M.timber, -3.05, -2.95, 0.42, 1.35, 0.9, 1.0); B.bx(M.timber, -2.35, -2.25, 0.42, 1.35, 0.9, 1.0);
         B.cyl(M.timberD, 0.02, 0.02, 1.5, -3.4, 0, 1.6, 6); B.cyl(M.timberD, 0.02, 0.02, 1.5, -1.9, 0, 1.6, 6); B.put(K.brass, new T.CylinderGeometry(0.32, 0.32, 0.04, 24), -2.65, 1.15, 1.62, 0, PI / 2); B.bx(M.timberD, -3.4, -1.9, 1.48, 1.52, 1.58, 1.62);
         for (let i = 0; i < 70; i++) { const x = -3.4 + R() * 6.4, z = -0.6 + R() * 2.6; B.put(i % 3 ? K.redP : K.red, new T.BoxGeometry(0.05 + R() * 0.06, 0.004, 0.03 + R() * 0.04), x, 0.01, z, R() * 3); }
-        B.build(g); BLOCKS.push([5.3 - 0.95, 2.5 - 2.65, 0.6]); }
+        B.build(g); BLOCKS.push([5.3 - 0.95, 2.5 - 2.65 + TZ, 0.6]); }
       // 月老: a queue of brass posts and red rope leading up to Him, and a tray of red-thread packets on a low table
-      { const g = free(7.0, 6.35, PI), B = Bag();
+      { const g = free(7.0, 6.35 + TZ, PI), B = Bag();
         [[-0.75, 1.5], [-0.75, 2.4], [-0.75, 3.3], [0.75, 1.5], [0.75, 2.4], [0.75, 3.3]].forEach(([x, z]) => { B.cyl(K.brass, 0.13, 0.15, 0.04, x, 0, z, 14); B.cyl(K.brass, 0.025, 0.025, 0.92, x, 0.04, z, 8); B.ball(K.brass, 0.05, x, 0.98, z); });
         [-0.75, 0.75].forEach(x => [[1.5, 2.4], [2.4, 3.3]].forEach(([a, b]) => { const mid = (a + b) / 2; B.put(K.rope, new T.CylinderGeometry(0.018, 0.018, 0.5, 6), x, 0.85, (a + mid) / 2, 0, -1.25 - 0.08); B.put(K.rope, new T.CylinderGeometry(0.018, 0.018, 0.5, 6), x, 0.85, (mid + b) / 2, 0, 1.25 + 0.08); }));
         B.bx(M.timberD, 1.05, 1.65, 0.0, 0.62, -0.3, 0.3); B.bx(M.cloth, 1.03, 1.67, 0.62, 0.66, -0.32, 0.32); for (let i = 0; i < 12; i++) B.bx(i % 2 ? K.red : M.paper, 1.1 + (i % 4) * 0.13, 1.1 + (i % 4) * 0.13 + 0.1, 0.66, 0.68 + (i % 3) * 0.01, -0.22 + ((i / 4) | 0) * 0.15, -0.12 + ((i / 4) | 0) * 0.15);
-        B.build(g); BLOCKS.push([7.0 - 1.35, 6.35, 0.45]); }
+        B.build(g); BLOCKS.push([7.0 - 1.35, 6.35 + TZ, 0.45]); }
       // 1920 變裝遊行: a face-in-hole board of two paraders in 1920s dress, for the photo everyone took
-      { const g = free(-3.45, -20.6, HP), w = 1.5, h = 1.95;
+      { const g = free(-3.45, -10.4, HP), w = 1.5, h = 1.95;
         const fm = canvasMat(w, h, (c, W, H) => faceHole(c, W, H), 0.25, 300, 'paper', 'tttifa-facehole'); fm.transparent = true; fm.alphaTest = 0.5; fm.side = T.DoubleSide;
         at(g, new T.Mesh(new T.PlaneGeometry(w, h), fm), -1.75, h / 2 + 0.05, 0.1); const B = Bag(); [-2.42, -1.08].forEach(x => { B.bx(M.timberD, x - 0.03, x + 0.03, 0, 1.9, 0.02, 0.08); B.bx(M.timberD, x - 0.03, x + 0.03, 0, 0.06, 0.08, -0.6); });
-        B.bx(M.timber, -2.4, -1.1, 0, 0.18, -0.2, -0.7); B.build(g); BLOCKS.push([-3.45, -20.6 + 1.75, 0.8]); }
+        B.bx(M.timber, -2.4, -1.1, 0, 0.18, -0.2, -0.7); B.build(g); BLOCKS.push([-3.45, -10.4 + 1.75, 0.8]); }
       // 電影《大稻埕》: a clapperboard leant on the billboard's foot, and a film camera on its tripod pointed at the street
-      { const g = free(-3.45, -1.75, HP), B = Bag();
+      { const g = free(-3.45, -14.6, HP), B = Bag();
         const slate = canvasMat(0.5, 0.42, (c, W, H) => clapper(c, W, H), 0.2, 600, 'lacquer', 'film-slate'); const sm = at(g, new T.Mesh(new T.BoxGeometry(0.5, 0.42, 0.02), [edgeMat, edgeMat, edgeMat, edgeMat, slate, edgeMat]), -1.2, 0.24, 0.5); sm.rotation.x = -0.25;
         const cx = 2.45, cz = 0.9; const tl = Math.atan(0.32 / 1.38); [0.3, 2.4, 4.5].forEach(a => B.put(K.black, new T.CylinderGeometry(0.015, 0.022, 1.42, 6), cx + Math.cos(a) * 0.16, 0.69, cz + Math.sin(a) * 0.16, 0, -tl * Math.sin(a), tl * Math.cos(a)));   // legs leaning in to the head
         B.bx(K.black, cx - 0.08, cx + 0.08, 1.36, 1.42, cz - 0.08, cz + 0.08); B.bx(K.black, cx - 0.16, cx + 0.16, 1.42, 1.74, cz - 0.3, cz + 0.22); B.put(K.alu, new T.CylinderGeometry(0.08, 0.1, 0.24, 14), cx, 1.56, cz + 0.34, 0, PI / 2);   // body and lens, toward the street
         [-0.16, 0.12].forEach(dz => B.put(K.black, new T.CylinderGeometry(0.19, 0.19, 0.06, 20), cx, 1.98, cz + dz, 0, 0, PI / 2)); B.bx(K.black, cx - 0.02, cx + 0.02, 1.74, 1.82, cz - 0.2, cz + 0.16);   // the two film reels on top
-        B.build(g); BLOCKS.push([-3.45 + 0.9, -1.75 - 2.45, 0.45]); }
+        B.build(g); BLOCKS.push([-3.45 + 0.9, -14.6 - 2.45, 0.45]); }
       // 情人節煙火: picnic mats and a cool box on the quay, where people wait for dark
-      { const g = free(-25.4, -13.6, HP), B = Bag();
+      { const g = free(-25.4, -13.6 + LZ, HP), B = Bag();
         B.put(K.mat1, new T.BoxGeometry(1.4, 0.01, 1.1), -0.9, 0.006, 2.3, 0.2); B.put(K.mat2, new T.BoxGeometry(1.3, 0.01, 1.0), 0.9, 0.006, 2.4, -0.15);
         for (let x = -1.55; x < -0.2; x += 0.2) B.put(M.white, new T.BoxGeometry(0.06, 0.012, 1.05), x, 0.008, 2.3 + (x + 0.9) * 0.2, 0.2);
         B.bx(K.cool, 0.4, 0.85, 0.0, 0.36, 2.0, 2.3); B.bx(M.tealC, 0.38, 0.87, 0.36, 0.42, 1.98, 2.32); [-0.5, -0.38, 1.1].forEach((x, i) => B.cyl(K.can, 0.03, 0.03, 0.11, x, 0.01, 2.2 + i * 0.1, 8));

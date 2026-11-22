@@ -17,7 +17,7 @@
 <script src="place-data.js"></script>
 <script src="design-kit.js"></script>
 <script src="places.js"></script>
-<script src="lm/loader.js" data-district="dadao" data-shared="kit-people" data-modules="yongle goods arcade people"></script>
+<script src="lm/loader.js" data-district="dadao" data-shared="kit-people kit-build" data-modules="yongle goods arcade people"></script>
 <script src="landmarks-dadao.js"></script>
 <script>
 // 大稻埕: 迪化街 at Lunar New Year (年貨大街), 2000s–2010s. A STREET, not a plaza: 9 m between the arcades,
@@ -25,10 +25,14 @@
 // side; further on, 永樂市場 stands back behind its stalls, and a lane on the west drops to the Tamsui wharf.
 // Only this block's layout lives here; light, sky, ground, builders, finishing chain and controls are in engine.js.
 const ZC = i => 29.6 - i * 4.8, FX = 5.3;                        // shophouse slot centres along the street; origins sit FX out, so fronts stand 9 m apart
-// 'L': a landmark built in landmarks-dadao.js stands in that slot (新芳春 2–3, 乾元 6, 屈臣氏 7–8, 波麗路 10 and its second shop 12, 偶戲館 11, 李臨秋 13 on the west; 義美 0, 天馬 3 on the east)
-const WEST = ['yang2', 'min1', 'L', 'L', 'yang2', 'min1', 'L', 'L', 'L', null, 'L', 'L', 'L', 'L', 'bar3', 'min1', 'yang2', 'min3'];   // null: the lane to the river
-const EAST = ['L', 'bar2', 'yang3', 'L', 'bar2', null, null, null, 'yang2', null, null, null, null, null, null, 'min3', 'bar2', 'yang3'];             // gaps: temple forecourt, market front, 慈聖宮's yard
-const AREAS = [[-4.0, 4.0, -39.4, 38.5], [4.0, 10.6, -5.4, 7.0], [4.0, 9.6, -29.4, -12.9], [-27.5, -4.0, -15.3, -11.9], [4.0, 8.2, -39.2, -31.4]];   // street, forecourt, market front, lane, 慈聖宮's yard: [minX, maxX, minZ, maxZ]
+// 'L': a landmark built in landmarks-dadao.js stands in that slot (屈臣氏 4–5, 偶戲館 6, 李臨秋 7, 新芳春 10–11, 波麗路 13 and its second shop 14 on the west, 林五湖 is the min1 house in 15; 義美 0, the tea house 3, 乾元 12 on the east)
+const WEST = ['yang2', 'min1', 'yang2', 'min1', 'L', 'L', 'L', 'L', 'bar3', 'min1', 'L', 'L', null, 'L', 'L', 'min1', 'yang2', 'min3'];   // null: the lane to the river (民生西路 in life)
+const EAST = ['L', 'bar2', 'yang3', 'L', 'bar2', null, null, null, null, null, null, null, 'L', null, null, 'min3', 'bar2', 'yang3'];             // gaps: market front (5–8), temple forecourt (9–11), 慈聖宮's yard (13–14)
+// True street order, south to north (CJ, 2026-11-22: 「那些弱點也一起修掉」; docs/places/dadao.json street_orientation_note): 永樂市場 (No. 21) comes first with 屈臣氏 (No. 34) across the road,
+// then 霞海城隍廟 (No. 61), then 乾元 (No. 71) a few doors on, then 民生西路 (the lane to the wharf) with 新芳春 and 波麗路 facing each other across it, then 林五湖 north of it. The market and the temple
+// were the other way round before: TZ, MZ and LZ are how far the temple's, the market's and the lane's things moved along z.
+const TZ = -19.2, MZ = 19.2, LZ = -14.4;
+const AREAS = [[-4.0, 4.0, -39.4, 38.5], [4.0, 10.6, -5.4 + TZ, 7.0 + TZ], [4.0, 9.6, -29.4 + MZ, -12.9 + MZ], [-27.5, -4.0, -15.3 + LZ, -11.9 + LZ], [4.0, 8.2, -39.2, -31.4]];   // street, forecourt, market front, lane, 慈聖宮's yard: [minX, maxX, minZ, maxZ]
 const BLOCKS = [];                                                 // things she walks round: [x, z, radius]
 // ── the lettering of this street's own boards, drawn on top of a DESIGN material (signTexture repaints when the painting lands) ──
 const DADAO_BOARDS = (() => {
@@ -89,7 +93,7 @@ const camQ = new URLSearchParams(location.search).get('cam');      // ?view=1&ca
 ENGINE.create({
   title: '大稻埕 · 迪化街年貨大街', subtitle: 'Dihua Street at Lunar New Year, 2000–2019', loading: 'Hanging the lanterns…',
   sunDir: [-24, 30, -46], shadowCenter: [0, 0, -2], start: { x: 0.4, z: 29.5, heading: Math.PI },
-  views: [camQ ? camQ.split(',').map(Number) : [0.9, 1.6, 48, -0.2, 5.6, 10], [1.8, 2.0, 25.6, -7, 5.0, 16.5], [0.4, 1.7, 11.2, 10.5, 4.4, -1.4], [3.7, 2.2, 3.8, -6, 5.2, -5], [-3.0, 2.2, -23.5, 9, 5.5, -33], [1.6, 1.6, -13.3, -30, 2.6, -13.8]],   // archway · 新芳春茶行 · 霞海城隍廟 · 乾元 and 屈臣氏 · 戲苑 tower and 慈聖宮 · the lane to the water gate
+  views: [camQ ? camQ.split(',').map(Number) : [0.9, 1.6, 48, -0.2, 5.6, 10], [-1.8, 2.0, 14.5, 10.5, 6.5, -2.5], [-2.2, 1.9, -11.6, 11, 4.6, -19.6], [3.4, 2.2, 15.2, -6, 5.2, 7.2], [-3.0, 2.2, -19.5, 8, 5.2, -31], [1.6, 1.6, -27.7, -30, 2.6, -28.2]],   // archway · 永樂市場 · 霞海城隍廟 · 屈臣氏 · 乾元 and 慈聖宮 · the lane to the water gate
   ground: { puddles: 14, puddle: (rr) => [rr(-3.6, 3.6), rr(-33, 33), rr(0, 3)] },   // wet brick from wall to wall
   dust: { x: [-6, 12], y: [0.3, 8], z: [-36, 36] },
   clamp(p) {
@@ -125,18 +129,18 @@ ENGINE.create({
   const arch = dress(get(get(dadao, 'dadao-entrance'), 'portal').clone()); arch.position.set(0, 0, 34.4); scene.add(arch);
 
   // ── 霞海城隍廟 and its forecourt, opening off the east side halfway down ──
-  const templeM = place(dadao, 'temple', 14.0, 0.8, -Math.PI / 2);
+  const templeM = place(dadao, 'temple', 14.0, 0.8 + TZ, -Math.PI / 2);
   const paving = triMat({ color: '#a79c8c', tex: TEX.concrete, scale: 0.6, rough: 0.5 });
-  add(new T.BoxGeometry(7.2, 0.03, 14.4), paving, 8.1, 0.012, 0.8, false);
-  { const bronze = triMat({ color: '#6b5a3c', tex: TEX.metal, scale: 2, rough: 0.35, metal: 0.8 }), bx = 7.3, bz = 0.8;      // the incense burner, smoking
+  add(new T.BoxGeometry(7.2, 0.03, 14.4), paving, 8.1, 0.012, 0.8 + TZ, false);
+  { const bronze = triMat({ color: '#6b5a3c', tex: TEX.metal, scale: 2, rough: 0.35, metal: 0.8 }), bx = 7.3, bz = 0.8 + TZ;      // the incense burner, smoking
     add(new T.CylinderGeometry(0.62, 0.42, 0.62, 20), bronze, bx, 1.0, bz); add(new T.CylinderGeometry(0.7, 0.66, 0.1, 20), bronze, bx, 1.34, bz);
     [0, 2.1, 4.2].forEach(a => add(new T.CylinderGeometry(0.07, 0.05, 0.72, 8), bronze, bx + Math.cos(a) * 0.4, 0.36, bz + Math.sin(a) * 0.4));
     add(new T.CylinderGeometry(0.56, 0.56, 0.03, 20), GLOW(2.6, 0.9, 0.25), bx, 1.385, bz, false);
     for (let i = 0; i < 3; i++) steamSrc.push(new T.Vector3(bx + rr(-0.2, 0.2), 1.45, bz + rr(-0.2, 0.2))); BLOCKS.push([bx, bz, 1.1]); }
 
   // ── 永樂市場, standing back behind its own stalls ──
-  const yongleM = place(dadao, 'yongle', 10.9, -20.8, -Math.PI / 2, 0.85);
-  add(new T.BoxGeometry(6.2, 0.03, 19.2), paving, 7.6, 0.012, -20.8, false);
+  const yongleM = place(dadao, 'yongle', 10.9, -20.8 + MZ, -Math.PI / 2, 0.85);
+  add(new T.BoxGeometry(6.2, 0.03, 19.2), paving, 7.6, 0.012, -20.8 + MZ, false);
 
   // ── lanterns close overhead: a string across the street every two metres, zig-zagging ──
   const kindAt = (row, z) => row[Math.max(0, Math.min(17, Math.round((29.6 - z) / 4.8)))];
@@ -145,7 +149,7 @@ ENGINE.create({
     if (kind) return new T.Vector3(side * 4.45, kind === 'min1' ? 4.35 : 5.7 + (k % 3) * 0.45, z);
     if (side > 0 && z < -30.4) return new T.Vector3(9.3, 6.0 + (k % 2) * 0.3, z);   // 慈聖宮's roof
     if (side < 0) return null;                                    // the lane mouth: nothing to tie to
-    return z > -8 ? new T.Vector3(11.2, 6.3, z) : new T.Vector3(10.4, 7.0 + (k % 2) * 0.5, z);   // the temple's eave, or the market's front
+    return z < -11.2 ? new T.Vector3(11.2, 6.3, z) : new T.Vector3(10.4, 7.0 + (k % 2) * 0.5, z);   // the temple's eave, or the market's front
   };
   let k = 0; for (let z = 31; z > -51; z -= 1.9, k++) { const a = anchor(-1, z, k), b = anchor(1, z + (k % 2 ? 1.2 : -1.2), k + 1); if (a && b) lanternString(a, b, b.x > 5 ? 1.5 : 0.8); }
   E.buildLanterns();
@@ -165,7 +169,7 @@ ENGINE.create({
     [-2.6, 0, 2.6].forEach((x, i) => { const b = cloth(wishes[(j * 3 + i) % wishes.length], 0.78, 2.5); b.position.set(x + rr(-0.3, 0.3), 6.28, z); b.rotation.y = rr(-0.12, 0.12); scene.add(b); });
   });
 
-  [[7.0, 7.9, '國泰民安'], [9.4, 7.9, '風調雨順'], [7.0, -6.3, '合境平安'], [9.4, -6.3, '神恩廣被']].forEach(([x, z, t]) => { const b = cloth(t, 1.0, 3.5); b.position.set(x, 5.5, z); scene.add(b); });   // on the forecourt's side walls
+  [[7.0, 7.9, '國泰民安'], [9.4, 7.9, '風調雨順'], [7.0, -6.3, '合境平安'], [9.4, -6.3, '神恩廣被']].forEach(([x, z, t]) => { const b = cloth(t, 1.0, 3.5); b.position.set(x, 5.5, z + TZ); scene.add(b); });   // on the forecourt's side walls
 
   // ── dried-goods stalls spilling into the road, with baskets of goods and price cards; three cooked-food stalls that steam ──
   const stallM = get(dadao, 'stall'), wicker = triMat({ color: '#dcb986', tex: TEX.plaster, scale: 3, rough: 0.9 }), plank = triMat({ color: '#a67c52', tex: TEX.bark, scale: 2, rough: 0.85 });
@@ -187,17 +191,17 @@ ENGINE.create({
     card(...PRICES[pc % PRICES.length], x - side * 0.62, z + e * 2.4, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
     card(...PRICES[pc % PRICES.length], x - side * 0.6, z + e * 3.3, -side * Math.PI / 2 + rr(-0.25, 0.25)); pc++;
   };
-  [[-3.05, 27.4], [-3.05, -28.2]].forEach(([x, z]) => goods(x, z, -1));          // fewer than before: the landmark fronts keep their own goods under the arcade
+  [[-3.05, 27.4]].forEach(([x, z]) => goods(x, z, -1));          // the second west stall stood across 波麗路's second shop and took its clicks (checker 2026-11-22): gone          // fewer than before: the landmark fronts keep their own goods under the arcade
   [[3.05, -9.6]].forEach(([x, z]) => goods(x, z, 1));
-  [[8.3, -17.6], [8.3, -23.6]].forEach(([x, z]) => goods(x, z, 1));                 // the market's own row
-  [[-3.0, 9.8, Math.PI / 2, 8], [3.0, 25.0, -Math.PI / 2, 205], [-3.0, -38.5, Math.PI / 2, 135], [6.9, -32.0, Math.PI, 28]].forEach(([x, z, r, h]) => { stall(x, z, r, h); BLOCKS.push([x, z - 0.8, 1.35], [x, z + 0.8, 1.35], [x + Math.sign(-x) * 1.3, z, 0.8]); });
+  [[8.3, -17.6], [8.3, -23.6]].forEach(([x, z]) => goods(x, z + MZ, 1));                 // the market's own row
+  [[-3.0, 19.8, Math.PI / 2, 8], [3.0, 25.0, -Math.PI / 2, 205], [6.9, -32.0, Math.PI, 28]].forEach(([x, z, r, h]) => { stall(x, z, r, h); BLOCKS.push([x, z - 0.8, 1.35], [x, z + 0.8, 1.35], [x + Math.sign(-x) * 1.3, z, 0.8]); });
   // sacks, crates and boxes where the goods were unloaded; scooters and a bicycle against the piers
   const props = get(core, 'props'), pr = n => get(props, n), scooters = get(sq, 'sq-scooter'), planter = get(sq, 'sq-planter');
   [[-3.75, 12.2, 'crate'], [3.6, 10.4, 'crate'], [3.7, 9.7, 'boxes'], [3.6, 22.6, 'sack'], [3.5, -5.2, 'sack'], [-3.7, -9.4, 'crate'], [-3.4, -26.2, 'sack'], [3.7, -28.9, 'boxes'], [5.4, -29.6, 'crate']]
     .forEach(([x, z, n]) => { for (let j = 0; j < 2; j++) { const o = dress(pr(n).clone()); o.position.set(x + rr(-0.25, 0.25), 0, z + j * 0.55); o.rotation.y = rr(0, 6.28); o.scale.setScalar(rr(1.0, 1.35)); scene.add(o); } });
-  [[-3.8, 29.9, 1.2], [3.85, 22.0, -1.9], [-3.85, -27.0, 1.5], [3.85, -36.8, -1.4], [-3.8, -34.6, 1.8], [-1.7, 37.3, 0.3], [-2.4, 37.5, 0.1], [-3.2, 37.4, -0.2]].forEach(([x, z, ry], i) => { const sc = dress(scooters.children[i % 3].clone()); sc.position.set(x, 0, z); sc.rotation.y = ry; scene.add(sc); });
+  [[-3.8, 29.9, 1.2], [3.85, 22.0, -1.9], [-3.85, -24.9, 1.5], [3.85, -36.8, -1.4], [-3.8, -44.6, 1.8], [-1.7, 37.3, 0.3], [-2.4, 37.5, 0.1], [-3.2, 37.4, -0.2]].forEach(([x, z, ry], i) => { const sc = dress(scooters.children[i % 3].clone()); sc.position.set(x, 0, z); sc.rotation.y = ry; scene.add(sc); });
   { const b = dress(pr('bicycle').clone()); b.position.set(-3.9, 0, 23.4); b.rotation.y = 0.15; scene.add(b); }
-  [[4.9, 7.4, 1], [4.9, -5.8, 1], [10.6, 6.9, 1], [10.6, -5.2, 1], [5.0, -11.7, 0], [5.0, -30.0, 0], [-4.9, -11.6, 1], [-4.9, -15.6, 1]].forEach(([x, z, kind]) => { const p = dress(planter.children[kind].clone()); p.position.set(x, 0, z); p.rotation.y = kind ? 0 : Math.PI / 2; scene.add(p); });
+  [[4.9, 7.4 + TZ, 1], [4.9, -5.8 + TZ, 1], [10.6, 6.9 + TZ, 1], [10.6, -5.2 + TZ, 1], [5.0, -11.7 + MZ, 0], [5.0, -30.0 + MZ, 0], [-4.9, -11.6 + LZ, 1], [-4.9, -15.6 + LZ, 1]].forEach(([x, z, kind]) => { const p = dress(planter.children[kind].clone()); p.position.set(x, 0, z); p.rotation.y = kind ? 0 : Math.PI / 2; scene.add(p); });
 
   // ── shop signs on the fronts: dried goods, herbs, cloth, tea ──
   const words = ['南北貨', '中藥行', '布莊', '茶行', '蔘藥行', '乾貨', '烏魚子', '燕窩', '糖果', '臘味', '金紙店', '竹器', '米行', '干貝', '紅棗', '蜜餞', '香菇', '魚翅', '漢方', '布行', '茶葉', '雜糧', '餅舖', '香舖'];
@@ -210,18 +214,18 @@ ENGINE.create({
     const m = new T.Mesh(new T.BoxGeometry(w, h, 0.09), [e, e, e, e, f, f]); m.position.set(x, y, z); m.rotation.y = ry; m.castShadow = true; scene.add(m); return m; };
   if (window.DESIGN) {
     twoSided(DESIGN.signTexture(E, 'redlacquer', 1024, 246, (g, W, H) => DADAO_BOARDS.gate(g, W, H), 'dadao-gate'), 5.2, 1.25, 0, 7.35, 35.16, 0, 0.42);
-    twoSided(DESIGN.signTexture(E, 'enamel', 1024, 284, (g, W, H) => DADAO_BOARDS.market(g, W, H), 'dadao-yongle'), 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, 0.35);
-  } else { nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a'); nameBoard([['永樂市場', 170, 0.42], ['YONGLE MARKET', 60, 0.8, 600]], 5.4, 1.5, 10.2, 5.6, -20.8, -Math.PI / 2, '#1f2a44', '#f1e7d2'); }
+    twoSided(DESIGN.signTexture(E, 'enamel', 1024, 284, (g, W, H) => DADAO_BOARDS.market(g, W, H), 'dadao-yongle'), 5.4, 1.5, 10.2, 5.6, -20.8 + MZ, -Math.PI / 2, 0.35);
+  } else { nameBoard([['年貨大街', 190, 0.52]], 5.2, 1.25, 0, 7.35, 35.16, 0, '#b3241a', '#f3d27a'); nameBoard([['永樂市場', 170, 0.42], ['YONGLE MARKET', 60, 0.8, 600]], 5.4, 1.5, 10.2, 5.6, -20.8 + MZ, -Math.PI / 2, '#1f2a44', '#f1e7d2'); }
 
   // ── one showcase per topic of this scene (the list is PHOTO_TOPICS, in photo-topics.js): topic key -> [x, z, facing, kind]. A click opens the topic's gallery ──
   PHOTOWALL.showcases(E, { section: 'dadao', topics: PHOTO_TOPICS.dadao, spots: {
     newyear: [5.9, 36.2, -Math.PI / 2 + 0.4, 'stand'],            // a market stand just outside the archway, on the east side, facing the way in
-    temple: [7.2, -4.6, 0, 'shrine'],                             // a small shrine wall with lanterns on the forecourt's south side, facing whoever walks up the street
-    fabric: [4.9, -17.7, -Math.PI / 2, 'shop'],                   // a shop front at the kerb of the market's own front
-    wharf: [-23, -10.5, Math.PI - 0.5, 'wall', { accent: '#1f2a44' }] } });   // a wall on the quay where the lane opens out, turned toward whoever comes down the lane
+    temple: [7.2, -4.6 + TZ, 0, 'shrine'],                             // a small shrine wall with lanterns on the forecourt's south side, facing whoever walks up the street
+    fabric: [4.9, -17.7 + MZ, -Math.PI / 2, 'shop'],                   // a shop front at the kerb of the market's own front
+    wharf: [-23, -10.5 + LZ, Math.PI - 0.5, 'wall', { accent: '#1f2a44' }] } });   // a wall on the quay where the lane opens out, turned toward whoever comes down the lane
 
   // ── the researched places and events: landmark buildings, their signs, and a clickable marker for every event ──
-  LANDMARKS_DADAO(E, { FX, sq, temple: templeM, yongle: yongleM, houses: HOUSES, BLOCKS, AREAS });
+  LANDMARKS_DADAO(E, { FX, sq, temple: templeM, yongle: yongleM, houses: HOUSES, BLOCKS, AREAS, TZ, MZ, LZ });
   PLACES.mount(E, { district: 'dadao' });
   if (window.LM_RUN) LM_RUN(E, 'dadao');   // the landmark modules in lm/, one file per builder
 
