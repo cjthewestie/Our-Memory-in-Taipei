@@ -137,7 +137,7 @@ function curtain(B, w, h, d, x, y0, z, bays, floors, go, ribMat, ro) { ro = ro |
     for (let i = 0; i <= bays; i += e) for (const k of [-1, 1]) B.box(ribMat, fw, h, p, x - w / 2 + i * bw, y0 + h / 2, z + k * (d / 2 + p / 2));
     for (let i = 0; i <= bd; i += e) for (const k of [-1, 1]) B.box(ribMat, p, h, fw, x + k * (w / 2 + p / 2), y0 + h / 2, z - d / 2 + i * dd); } }
 // a plain standing figure with no face: legs, coat, head, hair, arms given as [dx, dy, dz] reaches from the shoulder
-function person(B, x, y, z, o) { o = o || {}; const s = o.s || 1, top = o.top || M.cloth[0], leg = o.leg || M.dark, ry = o.ry || 0, c = Math.cos(ry), sn = Math.sin(ry), at = (lx, ly, lz) => [x + (lx * c + lz * sn) * s, y + ly * s, z + (-lx * sn + lz * c) * s];
+function person(B, x, y, z, o) { o = o || {}; if (window.PEOPLE) { (window.__lmPeople = window.__lmPeople || []).push({ g: B.g, x, y, z, ry: o.ry || 0, o }); return; }   /* the people kit (lm/kit-people.js) draws this figure instead: lm/xinyi-people.js reads the list */ const s = o.s || 1, top = o.top || M.cloth[0], leg = o.leg || M.dark, ry = o.ry || 0, c = Math.cos(ry), sn = Math.sin(ry), at = (lx, ly, lz) => [x + (lx * c + lz * sn) * s, y + ly * s, z + (-lx * sn + lz * c) * s];
   for (const k of [-1, 1]) B.rod(leg, at(k * 0.09, 0, 0), at(k * 0.09, 0.78, 0), 0.065 * s);
   B.rod(top, at(0, 0.74, 0), at(0, 1.36, 0), 0.17 * s); const h = at(0, 1.52, 0); B.sph(M.skin, 0.115 * s, h[0], h[1], h[2]); const hr = at(0, 1.57, -0.03); B.sph(o.hair || M.dark, 0.12 * s, hr[0], hr[1], hr[2], 1, 0.8, 1);
   const arms = o.arms || [[-0.1, -0.5, 0.05], [0.1, -0.5, 0.05]]; arms.forEach((a, i) => { const k = i ? 1 : -1; B.rod(top, at(k * 0.2, 1.3, 0), at(k * 0.2 + a[0], 1.3 + a[1], a[2]), 0.05 * s); }); }
