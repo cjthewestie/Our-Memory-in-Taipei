@@ -541,8 +541,8 @@
   const TEST_IMG = ['case-a.jpg', 'case-b.jpg', 'kids.jpg', 'army.jpg', 'denim.jpg', 'billboard.jpg', 'lailai.jpg', 'notice.jpg'];
   function listing(dir) {   // dir like 'posters/events/'. The parent's listing is read first, so a folder that does not exist yet costs no 404
     if (DIRS[dir]) return DIRS[dir]; const cut = dir.slice(0, -1).lastIndexOf('/'), parent = cut < 0 ? '' : dir.slice(0, cut + 1), name = dir.slice(parent.length);
-    const own = () => fetch(ART_BASE + dir, { cache: 'no-store' }).then(r => (r.ok ? r.text().then(t => (/<a href=/i.test(t) ? new Set([...t.matchAll(/href="([^"?#]+)"/g)].map(m => decodeURIComponent(m[1]))) : null)) : new Set())).catch(() => null);
-    return (DIRS[dir] = (dir ? listing(parent).then(set => (set && !set.has(name) ? new Set() : own())) : own()));   // null: no listing to read, so try the file itself
+    const own = () => fetch(ART_BASE + dir, { cache: 'no-store' }).then(r => (r.ok ? r.text().then(t => (/<a href=/i.test(t) ? new Set([...t.matchAll(/href="([^"?#]+)"/g)].map(m => decodeURIComponent(m[1]))) : null)) : (dir ? new Set() : null))).catch(() => null);   // a host with no folder listings (GitHub Pages) answers 404 at the root: that means unknown, not empty
+    return (DIRS[dir] = (dir ? listing(parent).then(set => (set === null ? null : !set.has(name) ? new Set() : own())) : own()));   // null: no listing to read, so try the file itself
   }
   function probe(rel, a) {
     const dir = rel.slice(0, rel.lastIndexOf('/') + 1), file = rel.slice(dir.length);
