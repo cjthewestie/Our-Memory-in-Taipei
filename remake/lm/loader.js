@@ -15,7 +15,7 @@
   list(me.dataset.shared).forEach(k => document.write('<script src="lm/' + k + '.js"><\/script>'));
   list(me.dataset.modules).forEach(m => document.write('<script src="lm/' + d + '-' + m + '.js"><\/script>'));
   window.LM_RUN = function (E, district) {
-    const keys = Object.keys(window.LM).filter(k => k.indexOf(district + '-') === 0).sort(), ran = [];
+    const late = k => /-people$/.test(k) ? 1 : 0, keys = Object.keys(window.LM).filter(k => k.indexOf(district + '-') === 0).sort((a, b) => late(a) - late(b) || (a < b ? -1 : 1)), ran = [];   // people last: they stand only where no other module has built
     keys.forEach(k => { try { window.LM[k](E); ran.push(k); } catch (err) { console.error('[lm] ' + k + ' failed: ' + (err && err.stack || err)); } });
     window.__lm = { district, ran };
     return ran;

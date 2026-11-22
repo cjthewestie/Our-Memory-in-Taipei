@@ -6,6 +6,7 @@
 //   const C = PEOPLE.crowd(E, { seed, palette: 'period' | 'modern' });
 //   C.add(x, z, ry, { pose, shirt, pants, hair, skin, s, kid, woman, skirt, shorts, long, hat, bag, pack, apron, stool, y });   // front is +z at ry 0
 //   C.queue(x, z, ry, n, gap, o)      // n people in line, the first at (x, z) facing ry
+//   C.drop(x, z, ry, o) (only on free ground) · C.stroll(n, [[x0, x1, z0, z1, axis]], o) · C.huddle(x, z, n)
 //   C.build()  ->  THREE.Group, already in the scene
 //   PEOPLE.POSES: stand, walk, walk2, eat, phone, photo, wave, sit, sitEat, sitDraw, carry, talk, reach, drink, pray, sweep
 //   PEOPLE.recorded(): the block figures a landmarks file handed over instead of building them (see person() there), in world space
@@ -56,6 +57,19 @@ function crowd(E, opt) {
   const C = { list, count: 0, rr, pick,
     add(x, z, ry, o) { list.push({ x, z, ry: ry || 0, o: o || {} }); return C; },
     queue(x, z, ry, n, gap, o) { for (let i = 0; i < n; i++) C.add(x - Math.sin(ry) * i * (gap || 0.75) + rr(-0.08, 0.08), z - Math.cos(ry) * i * (gap || 0.75) + rr(-0.08, 0.08), ry + rr(-0.25, 0.25), Object.assign({ pose: pick(['stand', 'phone', 'stand', 'carry', 'talk']) }, o || {})); return C; },
+    // free(x, z): not inside a showcase, marker or module footprint (PHOTOWALL.block) and not in an `avoid` circle [[x, z, r], ...]
+    free(x, z, m) { if ((opt.avoid || []).some(a => Math.hypot(a[0] - x, a[1] - z) < a[2])) return false; if (!window.PHOTOWALL || !PHOTOWALL.keepOut) return true; const q = { x, z }; PHOTOWALL.keepOut(q, m == null ? 0.6 : m); return Math.abs(q.x - x) < 1e-6 && Math.abs(q.z - z) < 1e-6; },
+    // drop: add only on free ground and not on top of someone already dropped
+    drop(x, z, ry, o, gap) { if (!C.free(x, z) || list.some(n => Math.hypot(n.x - x, n.z - z) < (gap || 0.85))) return false; C.add(x, z, ry, o); return true; },
+    // stroll(n, areas, o): n walkers scattered over rectangles [x0, x1, z0, z1]; o.axis 'z' | 'x' sets which way the street runs; some walk in pairs, some with a child
+    stroll(n, areas, o) { o = o || {}; const tot = areas.reduce((t, a) => t + (a[1] - a[0]) * (a[3] - a[2]), 0);
+      for (let i = 0, tries = 0; i < n && tries < n * 12; tries++) { let k = R() * tot, a = areas[0]; for (const b of areas) { k -= (b[1] - b[0]) * (b[3] - b[2]); if (k <= 0) { a = b; break; } }
+        const x = rr(a[0], a[1]), z = rr(a[2], a[3]), ax = a[4] || o.axis, ry = (ax === 'x' ? Math.PI / 2 : ax === 'z' ? 0 : rr(0, 6.283)) + (R() < 0.5 ? Math.PI : 0) + rr(-0.3, 0.3), w = R() < 0.5 ? 'walk' : 'walk2';
+        if (!C.drop(x, z, ry, Object.assign({ pose: w, bag: R() < 0.2, pack: R() < 0.15 }, o.each || {}))) continue; i++;
+        if (R() < (o.pairs == null ? 0.35 : o.pairs)) C.drop(x + Math.cos(ry) * 0.62, z - Math.sin(ry) * 0.62, ry + rr(-0.1, 0.1), Object.assign({ pose: w === 'walk' ? 'walk2' : 'walk', kid: R() < (o.kids == null ? 0.3 : o.kids) }, o.each || {}), 0.5); }
+      return C; },
+    // huddle(x, z, n): a small group facing each other
+    huddle(x, z, n, o) { for (let k = 0; k < n; k++) { const a = k / n * 6.283 + rr(-0.3, 0.3), px = x + Math.cos(a) * 0.62, pz = z + Math.sin(a) * 0.62; C.drop(px, pz, Math.atan2(x - px, z - pz), Object.assign({ pose: pick(['talk', 'stand', 'drink', 'phone', 'wave', 'stand']) }, o || {}), 0.5); } return C; },
     build() {
       const G = geos(), bins = {}, e = new T.Euler(), q = new T.Quaternion(), p = new T.Vector3(), sc = new T.Vector3(), one = new T.Vector3(1, 1, 1);
       Object.keys(G).forEach(k => bins[k] = []);
@@ -123,10 +137,13 @@ function crowd(E, opt) {
   return C;
 }
 // The landmarks files used to build block figures into their merged building meshes. When this kit is present their person() hands the
-// figure over instead: { g: the building's group, x, y, z, ry: in that group's frame, o: the old options }. recorded() turns them into world space.
+// figure over instead: { g: the building's group, x, y, z, ry (or m, a Matrix4): in that group's frame, o: the old options }. recorded() turns them into world space.
 function recorded() {
-  return (window.__lmPeople || []).map(r => { const g = r.g; g.updateMatrixWorld(true); const v = g.localToWorld(new T.Vector3(r.x, r.y || 0, r.z)); let ry = r.ry || 0, n = g; while (n) { ry += n.rotation.y; n = n.parent; }
-    return { x: v.x, y: v.y, z: v.z, ry, o: r.o || {}, name: g.name }; });
+  const m = new T.Matrix4(), l = new T.Matrix4(), p = new T.Vector3(), q = new T.Quaternion(), sc = new T.Vector3(), e = new T.Euler();
+  return (window.__lmPeople || []).map(r => { const g = r.g; g.updateWorldMatrix(true, false);
+    if (r.m) l.copy(r.m); else l.compose(p.set(r.x, r.y || 0, r.z), q.setFromEuler(e.set(0, r.ry || 0, 0)), sc.set(1, 1, 1));
+    m.multiplyMatrices(g.matrixWorld, l); const el = m.elements, s = Math.hypot(el[0], el[1], el[2]);
+    return { x: el[12], y: el[13], z: el[14], ry: Math.atan2(el[8], el[10]), s, o: r.o || {}, name: g.name }; });
 }
 window.PEOPLE = { crowd, POSES, PAL, recorded };
 })();
