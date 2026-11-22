@@ -1,2 +1,65 @@
-// lm/dadao-yongle.js: STUB, to be built by its owner agent (see docs/workflows/wave-2026-11-22.md).
-(window.LM = window.LM || {})['dadao-yongle'] = function (E) {};
+// lm/dadao-yongle.js: 永樂市場 as the working building it is. CJ, 2026-11-22: 「那些弱點也一起修掉」 (the block was the older model with a blank ground floor).
+// The real block (迪化街一段21號, measured: docs/places/dadao.json) stacks three trades: a wet market and cooked-food stalls on the ground floor, the cloth
+// market 永樂布業商場 on the second, tailors on the third, and 大稻埕戲苑 on the eighth and ninth. The model keeps its massing, brick band and name plate;
+// this module builds what its front lacked: a tiled arcade of seven piers with five open stalls under striped awnings (fish on ice, vegetables and
+// fruit, a pork stall with its hooks and block, a noodle and dumpling stall that steams, cut flowers), each with its own hung board; the middle bay as
+// the way in, with steps, a floor directory and the escalator's glow; six second-floor windows packed with bolts of cloth, lengths hung out over
+// the rail, and the cloth market's long board. Stall names are the trades (measured for the floors; 丸隆生魚行 is from memory, inferred).
+(window.LM = window.LM || {})['dadao-yongle'] = function (E) {
+  const L = window.LMK; if (!L) return;
+  const M = L.mats(E), K = L.kit('yongle-front'), F = L.FONTS, mk = E.scene.children.find(c => c.name === 'yongle'); if (!mk) return;
+  let sd = 1908; const R = () => (sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296, rr = (a, b) => a + (b - a) * R(), pick = a => a[Math.floor(R() * a.length)];
+  const TILE = M.tm('#8a4a36', E.TEX.brick, 2.4, 0.7), TILEL = M.tm('#d8cdb8', E.TEX.concrete, 1.5, 0.75), CLOTHS = ['#b3241a', '#e9c46a', '#1f4f7a', '#2f7d5a', '#e8a0b0', '#f1ece2', '#7a4f7f', '#e07a2a', '#3f8f8a', '#c9a23e', '#22262e', '#d8473a'].map(c => M.std(c, 0.85));
+  const G = 3.25, PX = [-6.25, -3.75, -1.25, 1.25, 3.75, 6.25, 8.75];
+  // the arcade: tiled piers with a pale base and cap, a beam over them, lit soffit
+  PX.forEach(x => { K.bx(x - 0.26, x + 0.26, 0, G, 0.02, 0.62, TILE); K.bx(x - 0.3, x + 0.3, 0, 0.5, 0, 0.66, TILEL); K.bx(x - 0.3, x + 0.3, G - 0.3, G, 0, 0.66, TILEL); });
+  K.bx(-6.55, 9.05, G, G + 0.34, 0, 0.7, TILEL); K.bx(-6.55, 9.05, G + 0.34, G + 0.42, -0.02, 0.76, M.concDk);
+  // behind each bay: the market's inside, painted (aisles of stalls under hanging lamps), so the open front has depth
+  const inside = seed => L.paint(2.0, 2.7, (g, W, H) => { let s = seed; const r = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#3a2a1c'); gr.addColorStop(0.5, '#7a5a34'); gr.addColorStop(1, '#2a2018'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#1c1611'; g.beginPath(); g.moveTo(W * 0.38, H); g.lineTo(W * 0.47, H * 0.45); g.lineTo(W * 0.53, H * 0.45); g.lineTo(W * 0.62, H); g.fill();
+    for (let i = 0; i < 5; i++) { const t = i / 5, y = H * (0.5 + t * 0.4), w = W * (0.1 + t * 0.26); [[W * 0.47 - w - t * W * 0.1, 1], [W * 0.53 + t * W * 0.1, -1]].forEach(([x]) => { g.fillStyle = ['#b3241a', '#e9c46a', '#2f7d5a', '#e07a2a', '#f1ece2'][Math.floor(r() * 5)]; g.fillRect(x, y, w, H * 0.035 * (1 + t)); g.fillStyle = '#5a4030'; g.fillRect(x, y + H * 0.035 * (1 + t), w, H * 0.05 * (1 + t)); }); }
+    for (let i = 0; i < 6; i++) { const t = i / 6, x = W * (0.5 + (i % 2 ? 1 : -1) * (0.06 + t * 0.3)), y = H * (0.36 - t * 0.2); g.fillStyle = '#ffe9b0'; g.shadowColor = '#ffd27a'; g.shadowBlur = 18; g.beginPath(); g.arc(x, y, W * (0.012 + t * 0.02), 0, 7); g.fill(); g.shadowBlur = 0; } }, { glow: 0.75, plane: true, px: 256 });
+  // a hung board for each stall: its own ground, brush lettering, a small picture of the trade
+  const boardOf = (text, sub, bg, fg, icon) => L.paint(2.0, 0.52, (g, W, H) => { g.fillStyle = bg; g.fillRect(0, 0, W, H); g.strokeStyle = fg; g.lineWidth = H * 0.04; g.strokeRect(H * 0.07, H * 0.07, W - H * 0.14, H - H * 0.14); g.fillStyle = fg; g.textBaseline = 'middle'; g.textAlign = 'center';
+    g.font = `700 ${H * 0.5}px ${F.WEI}`; g.fillText(text, W * 0.56, H * 0.42, W * 0.7); g.font = `600 ${H * 0.16}px ${F.HEI}`; g.fillText(sub, W * 0.56, H * 0.82, W * 0.7); g.save(); g.translate(H * 0.5, H * 0.5); g.lineWidth = H * 0.05; g.strokeStyle = fg; icon(g, H * 0.26); g.restore(); }, { glow: 0.55, depth: 0.06, px: 512 });
+  const ICON = { fish: (g, s) => { g.beginPath(); g.ellipse(-s * 0.1, 0, s * 0.8, s * 0.4, 0, 0, 7); g.moveTo(s * 0.7, 0); g.lineTo(s * 1.15, -s * 0.4); g.lineTo(s * 1.15, s * 0.4); g.closePath(); g.stroke(); }, leaf: (g, s) => { g.beginPath(); g.moveTo(0, s); g.quadraticCurveTo(-s * 1.1, 0, 0, -s); g.quadraticCurveTo(s * 1.1, 0, 0, s); g.moveTo(0, s); g.lineTo(0, -s * 0.6); g.stroke(); },
+    pig: (g, s) => { g.beginPath(); g.ellipse(0, 0, s * 0.9, s * 0.65, 0, 0, 7); g.stroke(); g.beginPath(); g.ellipse(0, s * 0.1, s * 0.32, s * 0.22, 0, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-s * 0.7, -s * 0.5); g.lineTo(-s * 0.8, -s); g.lineTo(-s * 0.35, -s * 0.6); g.moveTo(s * 0.7, -s * 0.5); g.lineTo(s * 0.8, -s); g.lineTo(s * 0.35, -s * 0.6); g.stroke(); },
+    bowl: (g, s) => { g.beginPath(); g.arc(0, 0, s * 0.9, 0, Math.PI); g.closePath(); g.stroke(); [-0.4, 0, 0.4].forEach(k => { g.beginPath(); g.moveTo(k * s, -s * 0.3); g.quadraticCurveTo(k * s + s * 0.2, -s * 0.65, k * s, -s); g.stroke(); }); }, flower: (g, s) => { for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(Math.cos(k * 1.047) * s * 0.55, Math.sin(k * 1.047) * s * 0.55, s * 0.36, 0, 7); g.stroke(); } } };
+  const STALLS = [['丸隆生魚行', 'SASHIMI · 鮮魚', '#0f3a5a', '#f3ecd9', 'fish', ['#1f4f9c', '#f1ece2']], ['蔬果', '當季青菜 · 水果', '#1f5a3a', '#fff3c4', 'leaf', ['#2f7d5a', '#f1ece2']], null, ['溫體黑豬肉', '現切 · 排骨 · 香腸', '#f3ecd9', '#a3221a', 'pig', ['#b3241a', '#f1ece2']], ['手工水餃 麵點', '現包現煮', '#b3241a', '#ffe9a8', 'bowl', ['#e07a2a', '#f1ece2']], ['鮮花', '拜拜用花 · 蘭花', '#f6e3ec', '#7a1c4a', 'flower', ['#e8a0b0', '#f1ece2']]];
+  STALLS.forEach((st, i) => { const xa = PX[i] + 0.26, xb = PX[i + 1] - 0.26, cx = (xa + xb) / 2; K.mesh(inside(11 + i * 7), cx, 1.4, 0.04);
+    K.bx(xa, xb, 2.86, 2.93, 0.2, 0.3, M.tube);
+    if (!st) return;
+    K.mesh(boardOf(st[0], st[1], st[2], st[3], ICON[st[4]]), cx, 2.52, 0.74); [-0.8, 0.8].forEach(d => K.rod(M.frame, [cx + d, 2.78, 0.74], [cx + d, G, 0.6], 0.01, 4));
+    for (let k = 0; k < 8; k++) K.box((xb - xa) / 8 + 0.004, 0.03, 1.25, M.std(st[5][k % 2], 0.85), xa + (k + 0.5) * (xb - xa) / 8, 2.98 - 0.22, 1.25, 0, 0.36);                      // the striped awning
+    K.rod(M.frame, [xa, 2.56, 1.84], [xb, 2.56, 1.84], 0.014, 5); [xa, xb].forEach(x => K.rod(M.frame, [x, 3.0, 0.66], [x, 2.56, 1.84], 0.012, 5));
+    K.bx(xa + 0.05, xb - 0.05, 0, 0.82, 0.72, 1.55, i === 0 ? M.tileW : M.tm('#b9b2a2', E.TEX.concrete, 2, 0.8)); K.bx(xa + 0.02, xb - 0.02, 0.82, 0.87, 0.68, 1.6, M.steel);
+    if (st[4] === 'fish') { K.bx(xa + 0.1, xb - 0.1, 0.87, 0.96, 0.75, 1.52, M.whiteP); for (let k = 0; k < 9; k++) { const x = xa + 0.3 + (k % 5) * 0.4, z = 0.95 + Math.floor(k / 5) * 0.34; K.sph(0.16, k % 3 ? M.chrome : M.std('#d98a7a', 0.4), x, 0.99, z, 0.3, 1.5, 0.55); K.box(0.1, 0.02, 0.12, M.chrome, x + 0.27, 0.99, z, 0.3); } K.box(0.5, 0.3, 0.02, M.pane, cx, 1.12, 1.56); }
+    if (st[4] === 'leaf') for (let k = 0; k < 10; k++) { const x = xa + 0.26 + (k % 5) * 0.42, z = 0.92 + Math.floor(k / 5) * 0.42, c = [M.green, M.orange, M.red, M.yellow, M.leafDk, M.tm('#7a4f7f', E.TEX.concrete, 2, 0.8)][k % 6]; K.box(0.38, 0.14, 0.34, M.wood, x, 0.94, z, 0, -0.18); for (let n = 0; n < 5; n++) K.sph(0.085, c, x - 0.1 + (n % 3) * 0.1, 1.04 + (n > 2 ? 0.07 : 0), z - 0.06 + (n % 2) * 0.12); }
+    if (st[4] === 'pig') { K.rod(M.chrome, [xa + 0.1, 2.3, 1.2], [xb - 0.1, 2.3, 1.2], 0.014, 5); for (let k = 0; k < 6; k++) { const x = xa + 0.3 + k * 0.33; K.rod(M.chrome, [x, 2.3, 1.2], [x, 2.12, 1.2], 0.006, 4); K.box(0.16, rr(0.4, 0.75), 0.07, k % 2 ? M.std('#c9544a', 0.6) : M.std('#e2a59a', 0.6), x, 1.8, 1.2, rr(-0.3, 0.3)); }
+      K.cyl(0.24, 0.24, 0.16, M.wood, cx - 0.5, 0.95, 1.1, 14); K.box(0.3, 0.02, 0.1, M.chrome, cx - 0.45, 1.04, 1.1, 0.5); for (let k = 0; k < 5; k++) K.box(0.26, 0.07, 0.18, M.std('#c9544a', 0.6), cx + 0.1 + (k % 3) * 0.3, 0.91 + (k > 2 ? 0.05 : 0), 0.95 + (k % 2) * 0.3, k); K.sph(0.08, M.neonR, cx, 2.25, 1.0, 1.3); }   // the red lamp every pork stall hangs over the meat
+    if (st[4] === 'bowl') { K.cyl(0.3, 0.3, 0.42, M.steel, cx - 0.5, 1.08, 1.1, 16); K.cyl(0.32, 0.32, 0.03, M.steel, cx - 0.5, 1.3, 1.1, 16); for (let k = 0; k < 3; k++) K.cyl(0.24, 0.24, 0.1, M.bamboo, cx + 0.35, 0.92 + k * 0.105, 1.05, 14); K.bx(cx + 0.7, cx + 1.0, 0.87, 0.9, 0.8, 1.4, M.wood); for (let k = 0; k < 12; k++) K.sph(0.035, M.whiteP, cx + 0.74 + (k % 3) * 0.1, 0.92, 0.86 + Math.floor(k / 3) * 0.14, 0.7);
+      K.g.userData.steam = [[cx - 0.5, 1.45, 1.1], [cx + 0.35, 1.35, 1.05]]; }
+    if (st[4] === 'flower') for (let k = 0; k < 8; k++) { const x = xa + 0.25 + (k % 4) * 0.52, z = 0.95 + Math.floor(k / 4) * 0.42; K.cyl(0.13, 0.1, 0.3, M.std(['#1f4f9c', '#2f7d5a', '#b3241a'][k % 3], 0.6), x, 1.02, z, 10); for (let n = 0; n < 6; n++) { K.rod(M.leafDk, [x, 1.17, z], [x + Math.cos(n) * 0.11, 1.5, z + Math.sin(n) * 0.11], 0.006, 3); K.sph(0.055, [M.red, M.yellow, M.pinkP, M.whiteP, M.orange, M.std('#b98cff', 0.7)][(n + k) % 6], x + Math.cos(n) * 0.11, 1.52, z + Math.sin(n) * 0.11); } }
+  });
+  // the way in: three steps, a brass rail, the floor directory, the escalator's lit side glimpsed inside
+  [0, 1, 2].forEach(k => K.bx(-0.98, 0.98, k * 0.14, (k + 1) * 0.14, 0.66 + (2 - k) * 0.3, 0.66 + (3 - k) * 0.3, M.granite)); K.bx(-0.98, 0.98, 0, 0.42, 0.05, 0.66, M.granite);
+  [-0.95, 0.95].forEach(x => { K.rod(M.brass, [x, 0.42, 0.6], [x, 1.32, 0.6], 0.018, 6); K.rod(M.brass, [x, 0.9, 1.5], [x, 1.32, 0.6], 0.018, 6); K.rod(M.brass, [x, 0, 1.5], [x, 0.9, 1.5], 0.018, 6); });
+  K.box(1.5, 0.5, 0.05, M.chrome, 0.1, 1.2, 0.3, 0, 0.6); K.box(1.5, 0.06, 0.06, M.rubber, 0.1, 1.48, 0.34, 0, 0.6);
+  K.mesh(L.paint(1.9, 0.62, (g, W, H) => { g.fillStyle = '#1f2a44'; g.fillRect(0, 0, W, H); g.fillStyle = '#f4f0e4'; g.textBaseline = 'middle'; g.textAlign = 'left'; [['8–9F', '大稻埕戲苑 Dadaocheng Theater'], ['3F', '布藝訂做 · 裁縫 Tailors'], ['2F', '永樂布業商場 Fabric Market'], ['1F', '傳統市場 · 小吃 Market & Food']].forEach(([a, b], i) => { g.font = `800 ${H * 0.15}px ${F.HEI}`; g.fillStyle = '#e9c46a'; g.fillText(a, W * 0.05, H * (0.16 + i * 0.23)); g.fillStyle = '#f4f0e4'; g.font = `600 ${H * 0.13}px ${F.HEI}`; g.fillText(b, W * 0.25, H * (0.16 + i * 0.23), W * 0.72); }); }, { glow: 0.7, depth: 0.05, px: 512 }), 0, 2.72, 0.74);
+  // the second floor: the cloth market. Six windows packed with bolts, lengths hung out over a rail, the long board above
+  const wy0 = 4.0, wy1 = 6.5;
+  [0, 1, 3, 4, 5].forEach(i => { const xa = PX[i] + 0.4, xb = PX[i + 1] - 0.4; K.bx(xa - 0.1, xb + 0.1, wy0 - 0.12, wy1 + 0.12, 0.02, 0.1, TILEL); K.bx(xa, xb, wy0, wy1, 0.09, 0.11, M.shopLit); K.bx(xa, xb, wy0, wy1, 0.3, 0.31, M.pane);
+    const n = 9; for (let k = 0; k < n; k++) { const w = (xb - xa) / n; K.box(w * 0.82, rr(1.5, 2.2), 0.14, pick(CLOTHS), xa + (k + 0.5) * w, wy0 + 1.0, 0.2, 0, 0, rr(-0.06, 0.06)); }
+    K.bx(xa, xb, wy1 - 0.02, wy1 + 0.04, 0.1, 0.34, M.frame); K.bx((xa + xb) / 2 - 0.02, (xa + xb) / 2 + 0.02, wy0, wy1, 0.3, 0.33, M.frame);
+    K.rod(M.chrome, [xa - 0.1, wy0 - 0.2, 0.62], [xb + 0.1, wy0 - 0.2, 0.62], 0.016, 5); [xa - 0.1, xb + 0.1].forEach(x => K.rod(M.chrome, [x, wy0 - 0.2, 0.1], [x, wy0 - 0.2, 0.62], 0.014, 5));
+    for (let k = 0; k < 3; k++) { const x = xa + 0.25 + k * (xb - xa - 0.5) / 2, c = pick(CLOTHS), len = rr(0.5, 0.75); K.box(0.42, len, 0.02, c, x, wy0 - 0.2 - len / 2, 0.64); K.box(0.42, 0.02, 0.1, c, x, wy0 - 0.19, 0.6); } });
+  K.mesh(L.paint(12.0, 0.6, (g, W, H) => { g.fillStyle = '#7a1c14'; g.fillRect(0, 0, W, H); g.strokeStyle = '#e9c46a'; g.lineWidth = H * 0.05; g.strokeRect(H * 0.1, H * 0.1, W - H * 0.2, H - H * 0.2); g.fillStyle = '#f3d27a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `700 ${H * 0.58}px ${F.WEI}`;
+    [...'永樂布業商場'].forEach((c, i) => g.fillText(c, W * (0.1 + i * 0.09), H * 0.53)); g.font = `600 ${H * 0.26}px ${F.HEI}`; g.fillText('2F  布市  ·  3F  訂做  ·  FABRIC MARKET', W * 0.79, H * 0.54, W * 0.36); }, { glow: 0.45, depth: 0.08, px: 2048 }), 2.3, 7.1, 0.14);
+  // in the yard: a hand truck of bolts on its way upstairs, and a tailor's dummy by the door
+  K.at(-2.9, 0, 2.6, 0.5); K.box(0.6, 0.04, 0.5, M.steelDk, 0, 0.16, 0); K.rod(M.steelDk, [-0.28, 0.16, -0.22], [-0.28, 1.25, -0.4], 0.016, 5); K.rod(M.steelDk, [0.28, 0.16, -0.22], [0.28, 1.25, -0.4], 0.016, 5); K.rod(M.steelDk, [-0.28, 1.25, -0.4], [0.28, 1.25, -0.4], 0.016, 5);
+  [-0.3, 0.3].forEach(x => K.cyl(0.11, 0.11, 0.05, M.rubber, x, 0.11, -0.2, 12, [0, 0, Math.PI / 2])); for (let k = 0; k < 6; k++) K.cyl(0.085, 0.085, 1.3, CLOTHS[(k * 5 + 1) % 12], -0.2 + (k % 3) * 0.2, 0.83, -0.1 + Math.floor(k / 3) * 0.2, 10, [0.08, 0, 0]); K.at();
+  K.cyl(0.2, 0.24, 0.04, M.woodDk, 1.75, 0.02, 1.9, 12); K.cyl(0.02, 0.02, 0.9, M.woodDk, 1.75, 0.47, 1.9, 6); K.sph(0.19, M.creamP, 1.75, 1.2, 1.9, 1.6, 0.95, 0.7); K.cyl(0.05, 0.07, 0.1, M.woodDk, 1.75, 1.56, 1.9, 8); K.box(0.4, 0.6, 0.03, CLOTHS[4], 1.75, 1.15, 2.0, 0, 0.1);
+  const g = K.done(10.6, mk.position.z, -Math.PI / 2);
+  (K.g.userData.steam || []).forEach(p => E.steamSrc && E.steamSrc.push(g.localToWorld(new E.T.Vector3(...p))));
+  L.retarget(E, 'yongle-market', g);
+};
