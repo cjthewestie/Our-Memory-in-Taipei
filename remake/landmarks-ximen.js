@@ -392,7 +392,7 @@ function tianhou() {
     K.sph(0.17, M.gold, cx, yR + 0.42, zm); K.cyl(0.03, 0.09, 0.3, M.gold, cx, yR + 0.2, zm, 8); };
   roof(0, 5.6, 12.0, 0.95, 0.8); [-1.6, 1.6].forEach(x => { K.sph(0.22, M.tileGreen, x, 13.75, -0.1, 1.4); K.sph(0.12, M.gold, x * 1.15, 14.0, -0.1); });                                // the roof and its two dragons, as blocks
   [-2.0, -1.2, -0.4, 0.4, 1.2, 2.0].forEach(x => lantern(K, x, 3.35, 0.8));                                                                                              // six red lanterns in a row over the door
-  [-2.75, 2.75].forEach(x => { K.bx(x - 0.3, x + 0.3, 0, 0.55, 0.75, 1.35, M.stone); K.box(0.36, 0.5, 0.5, M.stone, x, 0.8, 1.05, 0, -0.25); K.sph(0.2, M.stone, x, 1.2, 1.2); K.sph(0.09, M.stone, x - 0.0, 1.05, 1.36); });     // the stone lions, as blocks
+  if (!(window.LMK && window.LM && window.LM['ximen-lions'])) [-2.75, 2.75].forEach(x => { K.bx(x - 0.3, x + 0.3, 0, 0.55, 0.75, 1.35, M.stone); K.box(0.36, 0.5, 0.5, M.stone, x, 0.8, 1.05, 0, -0.25); K.sph(0.2, M.stone, x, 1.2, 1.2); K.sph(0.09, M.stone, x - 0.0, 1.05, 1.36); });     // the stone lions, as blocks: only when lm/ximen-lions.js (the carved pair) is not loaded
   K.cyl(0.42, 0.3, 0.5, M.gold, 0, 0.95, -0.7, 12); K.cyl(0.46, 0.46, 0.06, M.gold, 0, 1.22, -0.7, 12); [0, 2.1, 4.2].forEach(a => K.cyl(0.05, 0.04, 0.7, M.gold, Math.sin(a) * 0.28, 0.35, -0.7 + Math.cos(a) * 0.28, 6));
   [-0.42, 0.42].forEach(x => K.cyl(0.035, 0.035, 0.4, M.gold, x, 1.3, -0.7, 6));
   return K.done();
