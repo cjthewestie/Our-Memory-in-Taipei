@@ -236,7 +236,12 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   person(B, -2.2, 0.32, fz + 0.9, { s: 0.92, top: M.cloth[1], ry: PI * 0.1, arms: [[0.12, -0.3, 0.28], [-0.12, -0.3, 0.28]] }); B.box(M.cloth[5], 0.3, 0.03, 0.22, -2.2, 1.28, fz + 1.2, 0, 0.5);
   person(B, 2.6, 0.32, fz + 1.0, { s: 0.88, top: M.cloth[3], arms: [[0.14, -0.28, 0.26], [-0.02, -0.5, 0.05]] }); B.box(M.wood, 0.34, 0.4, 0.12, 2.95, 0.6, fz + 1.15);
   out.eslite = B.done(-17.5, 30.5, PI);
-  PLACES.add(E, P('eslite-xinyi'), { target: out.eslite, near: [-13.5, 18.4], radius: 6, plaque: { position: [-12.9, 1.7, 22.75], rotation: PI } }); }
+  // the door she can walk up to: glass leaves in a steel frame under the wooden canopy, long timber pulls, a lit transom, a mat
+  { const Dr = maker('eslite-door'), dx = -1.22, dz = fz + 0.36; Dr.box(M.steel, 0.08, 3.1, 0.14, dx - 1.15, 1.87, dz); Dr.box(M.steel, 0.08, 3.1, 0.14, dx + 1.15, 1.87, dz); Dr.box(M.steel, 2.38, 0.08, 0.14, dx, 3.42, dz); Dr.box(M.steel, 2.3, 0.06, 0.12, dx, 2.72, dz); Dr.box(M.steel, 0.05, 2.4, 0.1, dx, 1.52, dz);
+    Dr.box(M.warm, 2.2, 0.6, 0.04, dx, 3.07, dz - 0.03); for (const k of [-1, 1]) { Dr.add(plane(1.08, 2.36, M.pane), dx + k * 0.56, 1.5, dz + 0.02); Dr.box(M.woodD, 0.07, 1.3, 0.07, dx + k * 0.14, 1.45, dz + 0.1); Dr.box(M.steel, 0.03, 0.03, 0.1, dx + k * 0.14, 2.0, dz + 0.05); Dr.box(M.steel, 0.03, 0.03, 0.1, dx + k * 0.14, 0.9, dz + 0.05); }
+    Dr.box(M.dark, 2.0, 0.02, 0.9, dx, 0.33, dz + 0.6); Dr.add(label([['推 PUSH', 0.6, 0.52, 700]], 0.34, 0.1, { bg: '#22262c', fg: '#f6e7c4', glow: 0.5 }), dx + 0.56, 1.5, dz + 0.04);
+    out.esliteDoor = Dr.done(-17.5, 30.5, PI); }
+  PLACES.add(E, P('eslite-xinyi'), { target: [out.eslite, out.esliteDoor], near: [-16.3, 20.9], radius: 4.2, plaque: { position: [-14.7, 1.7, 22.75], rotation: PI } }); }
 
 // ══ 5. 市府轉運站, south-east of the gate: coach bays under a seven-storey store, the slim hotel tower above ══
 { const B = maker('bus-station'), W = 24, D = 15, H = 30, fz = D / 2;
@@ -257,7 +262,13 @@ const P = k => PLACES.item('xinyi', k), find = n => scene.children.find(c => c.n
   B.box(M.char, 12.4, 4, 11.4, 4, H + 80, -1.5); B.box(M.silver, 10, 1.2, 9, 4, H + 82.6, -1.5);
   B.add(chan([['W', 0.78, 0.48, HEI, '#ffffff', 300], ['TAIPEI', 0.14, 0.9, HEI, '#ffffff', 600, 0.5, 14]], 4.4, 4.4, { side: '#8a8f96', depth: 0.25, glow: 1.1 }), 4, H + 74.5, 4.4);   // the plain W letter high on the hotel (a letter, not the hotel's logo artwork)
   out.bus = B.done(18.5, 31, PI);
-  PLACES.add(E, P('city-hall-bus-station'), { target: out.bus, near: [13.5, 18.4], radius: 6, plaque: { position: [10.5, 1.7, 22.75], rotation: PI } }); }
+  // the door she can walk up to: the ticket hall's sliding glass doors in the fourth bay, the blue header the station's signs use, a departures board beside it
+  { const Dr = maker('bus-station-door'), dx = 8.62, dz = fz - 1.0; Dr.box(M.pale, 4.6, 5.0, 0.2, dx, 2.5, dz - 0.3); Dr.box(M.steel, 0.1, 3.0, 0.16, dx - 1.5, 1.5, dz); Dr.box(M.steel, 0.1, 3.0, 0.16, dx + 1.5, 1.5, dz); Dr.box(M.steel, 3.1, 0.1, 0.16, dx, 3.05, dz); Dr.box(M.char, 2.9, 3.0, 0.05, dx, 1.5, dz - 0.12);
+    for (const k of [-1, 1]) { Dr.add(plane(1.4, 2.9, M.pane), dx + k * 0.72, 1.5, dz + 0.02); Dr.box(M.steel, 0.04, 2.9, 0.06, dx + k * 0.03, 1.5, dz + 0.04); Dr.box(M.warm, 0.5, 0.04, 0.02, dx + k * 0.72, 1.2, dz + 0.04); }
+    Dr.add(label([['售票大廳 Ticket Hall', 0.46, 0.38, 800], ['國道客運 · 統一時代百貨 入口', 0.24, 0.78, 600]], 3.0, 0.62, { bg: '#164a80', fg: '#ffffff', glow: 0.9 }), dx, 3.5, dz + 0.1);
+    Dr.add(label([['往 桃園機場  1960  每 20 分', 0.2, 0.2, 700], ['往 基隆  2088  每 15 分', 0.2, 0.44, 700], ['往 宜蘭 羅東  1571  每 30 分', 0.2, 0.68, 700], ['往 新竹  1728  每 20 分', 0.2, 0.9, 700]], 1.3, 1.5, { bg: '#0d0f14', fg: '#ffb23a', glow: 1.0 }), dx - 2.25, 2.0, dz - 0.15);
+    out.busDoor = Dr.done(18.5, 31, PI); }
+  PLACES.add(E, P('city-hall-bus-station'), { target: [out.bus, out.busDoor], near: [9.9, 21.4], radius: 4.2, plaque: { position: [11.8, 1.7, 24.3], rotation: PI } }); }
 
 // ══ 6. 四四南村, at the west end of the tower's forecourt: two long single-storey rows and the lane between ══
 { const B = maker('village'), L = 20, Dp = 4.5, Hw = 2.7, paint = [M.teal, M.brick, M.teal, M.teal, M.brick];
