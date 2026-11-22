@@ -139,7 +139,7 @@ const TOUCH = (window.matchMedia && window.matchMedia('(pointer: coarse)').match
 { const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st); }
 const canvas = opts.canvas || el('canvas', 'c');
 el('div', 'hud').innerHTML = '<b></b><span></span>'; document.querySelector('#hud b').textContent = opts.title || ''; document.querySelector('#hud span').textContent = opts.subtitle || '';
-el('div', 'keys').textContent = TOUCH && !(window.matchMedia && window.matchMedia('(pointer: fine)').matches) ? 'Left thumb walks (push far to run) · right thumb looks' : 'W A S D walk · Shift run · H wave · drag to look · scroll to zoom · 1–6 viewpoints · 0 follow';
+el('div', 'keys').textContent = TOUCH && !(window.matchMedia && window.matchMedia('(pointer: fine)').matches) ? 'Left thumb runs (push lightly to walk) · right thumb looks' : 'W A S D run · Shift walk · H wave · drag to look · scroll to zoom · 1–6 viewpoints · 0 follow';
 const toastEl = el('div', 'toast'), loadEl = el('div', 'load'), stickEl = el('div', 'stick', '<i></i>'), knobEl = stickEl.firstChild;
 loadEl.textContent = opts.loading || 'Building the plaza…';
 
@@ -572,7 +572,7 @@ function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000; uTime.value = t; sky.material.uniforms.uTime.value = t;
   const sm = Math.hypot(stick.x, stick.y), sOn = sm > 0.18;                                 // the touch stick, with a small dead centre
   const f = Math.max(-1, Math.min(1, (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0) - (sOn ? stick.y : 0))), sd = Math.max(-1, Math.min(1, (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0) + (sOn ? stick.x : 0)));
-  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? (keys.shift || sm > 0.88 ? HERO.RUN : HERO.WALK) : 0;
+  const fy = mode === 'follow' ? camYaw : yaw, mx = -Math.sin(fy) * f + Math.cos(fy) * sd, mz = -Math.cos(fy) * f - Math.sin(fy) * sd, want = (f || sd) ? ((sOn ? sm < 0.45 : keys.shift) ? HERO.WALK : HERO.RUN) : 0;   // runs by default (CJ, 2026-11-22: 「人物預設用跑的」): Shift, or a light push of the thumb, walks
   let turnRate = 0;
   if (f || sd) { let d = Math.atan2(mx, mz) - heroHead; d = Math.atan2(Math.sin(d), Math.cos(d)); const step = Math.sign(d) * Math.min(Math.abs(d), 7.5 * dt); heroHead += step; turnRate = step / Math.max(dt, 1e-4); }
   heroSpeed += (want - heroSpeed) * Math.min(1, dt * (want > heroSpeed ? 5 : 9)); heroTurn += (turnRate - heroTurn) * Math.min(1, dt * 8);

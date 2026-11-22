@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>
+// The front page is the remade lantern square (CJ, 2026-11-22: "Yes, switch it"). A bare address goes there;
+// any query (?classic=1 for this older square, ?tour=1 and ?year= for the Guided tour) stays on this page.
+if (!location.search) location.replace('remake/square.html' + location.hash);
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">   <!-- cover: the street runs under the notch; the HUD keeps clear of it with env(safe-area-inset-*) -->
 <title>Our Memory in Taipei</title>
 <!-- link previews (LINE, Facebook, X, Slack, iMessage): every URL absolute; the card is asset/share/og.jpg, 1200x630 -->
